@@ -1,10 +1,12 @@
 package io.udash.web.guide.views.frontend
 
 import io.udash._
+import io.udash.auth.{UnauthenticatedException, UnauthorizedException}
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.css.CssView
 import io.udash.web.commons.components.{CodeBlock, ForceBootstrap}
 import io.udash.web.commons.styles.GlobalStyles
+import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.{Context, _}
@@ -30,6 +32,89 @@ class FrontendRoutingPresenter(url: Property[String]) extends Presenter[Frontend
 class FrontendRoutingView(url: Property[String]) extends View with CssView {
   import Context._
   import JsDom.all._
+  import com.avsystem.commons.SharedExtensions.universalOps
+
+  private val statesSource = {
+    import io.udash._
+
+    sealed abstract class RoutingState(
+      override val parentState: Option[RoutingState]
+    ) extends State {
+      override type HierarchyRoot = RoutingState
+    }
+
+    case object RootState extends RoutingState(None)
+    case class UsersListState(searchQuery: Option[String]) extends RoutingState(Some(RootState))
+    case class UserDetailsState(username: String) extends RoutingState(Some(RootState))
+    case object Dashboard extends RoutingState(Some(RootState))
+    case object ErrorState extends RoutingState(Some(RootState))
+  }.sourceCode
+
+  private val (registrySource, statesToViewSource, routingFailureSource) = {
+    sealed abstract class RoutingState(
+      override val parentState: Option[RoutingState]
+    ) extends State {
+      override type HierarchyRoot = RoutingState
+    }
+
+    case object RootState extends RoutingState(None)
+    case class UsersListState(searchQuery: Option[String]) extends RoutingState(Some(RootState))
+    case class UserDetailsState(username: String) extends RoutingState(Some(RootState))
+    case object Dashboard extends RoutingState(Some(RootState))
+    case object ErrorState extends RoutingState(Some(RootState))
+
+    val registrySource = {
+      import io.udash._
+
+      class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
+        def matchUrl(url: Url): RoutingState =
+          url2State.applyOrElse(
+            url.value.stripSuffix("/"),
+            (x: String) => ErrorState
+          )
+
+        def matchState(state: RoutingState): Url =
+          Url(state2Url.apply(state))
+
+        private val (url2State, state2Url) = bidirectional {
+          case "/users" => Dashboard
+          case "/users/search" => UsersListState(None)
+          case "/users/search" / query => UsersListState(Some(query))
+          case "/users/details" / username => UserDetailsState(username)
+        }
+      }
+    }.sourceCode
+
+    object DashboardViewFactory extends StaticViewFactory[ErrorState.type](() => null)
+    object UsersListViewFactory extends StaticViewFactory[ErrorState.type](() => null)
+    final class UserDetailsViewFactory(username: String) extends StaticViewFactory[ErrorState.type](() => null)
+
+    val statesToViewSource = {
+      class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
+        def matchStateToResolver(state: RoutingState): ViewFactory[_ <: RoutingState] =
+          state match {
+            // let's assume that these ViewFactory objects exist somewhere
+            case Dashboard => DashboardViewFactory
+            case UsersListState(query) => UsersListViewFactory
+            // let's assume that UserDetailsViewFactory
+            // is a case class with one String argument
+            case UserDetailsState(username) => new UserDetailsViewFactory(username)
+          }
+      }
+    }.sourceCode
+
+    val application: Application[RoutingState] = null
+
+    val routingFailureSource = {
+      application.onRoutingFailure {
+        case _: UnauthorizedException | _: UnauthenticatedException
+          if application.currentState != ErrorState =>
+          application.goTo(ErrorState)
+      }
+    }.sourceCode
+
+    (registrySource, statesToViewSource, routingFailureSource)
+  }
 
   override def getTemplate: Modifier = div(
     h2("Routing"),
@@ -82,45 +167,9 @@ class FrontendRoutingView(url: Property[String]) extends View with CssView {
       "A state can contain other ", i("State"), "s. ",
       "For example:"
     ),
-    CodeBlock(
-      """import io.udash._
-        |
-        |sealed abstract class RoutingState(
-        |  val parentState: Option[ContainerRoutingState]
-        |) extends State {
-        |  override type HierarchyRoot = RoutingState
-        |}
-        |sealed abstract class ContainerRoutingState(
-        |  parentState: Option[ContainerRoutingState]
-        |) extends RoutingState(parentState)
-        |
-        |case object RootState extends ContainerRoutingState(None)
-        |case class UsersListState(searchQuery: Option[String]) extends RoutingState(Some(RootState))
-        |case class UserDetailsState(username: String) extends RoutingState(Some(RootState))
-        |case object Dashboard extends RoutingState(Some(RootState))""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(statesSource),
     p(i("RoutingRegistry"), " is used to create a new application state on an URL change. For example:"),
-    CodeBlock(
-      """import io.udash._
-        |
-        |class RoutingRegistryDef extends RoutingRegistry[RoutingState] {
-        |  def matchUrl(url: Url): RoutingState =
-        |    url2State.applyOrElse(
-        |      url.value.stripSuffix("/"),
-        |      (x: String) => ErrorState
-        |    )
-        |
-        |  def matchState(state: RoutingState): Url =
-        |    Url(state2Url.apply(state))
-        |
-        |  private val (url2State, state2Url) = bidirectional {
-        |    case "/users" => Dashboard
-        |    case "/users/search" => UsersListState(None)
-        |    case "/users/search" / query => UsersListState(Some(query))
-        |    case "/users/details" / username => UserDetailsState(username)
-        |  }
-        |}""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(registrySource),
     p(
       "You can pass URL parts into the application state, just use the ", i("/"), " operator like in the example above. ",
       "For ", i("UsersListState"), " it is possible to keep some search query in the URL. ",
@@ -135,19 +184,7 @@ class FrontendRoutingView(url: Property[String]) extends View with CssView {
       "new presenter and view will be created and rendered. If the matching returns equal (value, not reference comparison) ",
       i("ViewFactory"), ", then the previously created presenter will be informed about the state changed through calling the ", i("handleState"), " method."
     ),
-    CodeBlock(
-      """class StatesToViewFactoryDef extends ViewFactoryRegistry[RoutingState] {
-        |  def matchStateToResolver(state: RoutingState): ViewFactory[_ <: RoutingState] =
-        |    state match {
-        |      // let's assume that these ViewFactory objects exist somewhere
-        |      case Dashboard => DashboardViewFactory
-        |      case UsersListState(query) => UsersListViewFactory
-        |      // let's assume that UserDetailsViewFactory
-        |      // is a case class with one String argument
-        |      case UserDetailsState(username) => UserDetailsViewFactory(username)
-        |    }
-        |}""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(statesToViewSource),
     p(
       "Notice that matching for ", i("UsersListState"), " always returns the same ", i("UsersListViewFactory"), " and ",
       "for ", i("UserDetailsState"), " always returns new ", i("UserDetailsViewFactory"), ""
@@ -201,13 +238,7 @@ class FrontendRoutingView(url: Property[String]) extends View with CssView {
       "a routing failure callback with the ", i("onRoutingFailure"), " method."
     ),
     p("Take a look at routing a failure handler from authorization utilities: "),
-    CodeBlock(
-      """application.onRoutingFailure {
-        |  case _: UnauthorizedException | _: UnauthenticatedException
-        |    if application.currentState != authFailedRedirectState =>
-        |    application.goTo(authFailedRedirectState)
-        |}""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(routingFailureSource),
     h2("What's next?"),
     p(
       "Take a look at the ", a(href := FrontendMVPState.url)("Model, View, Presenter & ViewFactory"), " chapter to ",

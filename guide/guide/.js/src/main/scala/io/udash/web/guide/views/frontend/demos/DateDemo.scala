@@ -32,17 +32,16 @@ object DateDemo extends AutoDemo {
     )
 
     input.render
-
     (input, input)
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, String) = {
     import io.udash.bootstrap.utils.BootstrapStyles._
     import io.udash.css.CssView._
     (div(id := "date-input-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
       form(containerFluid)(
         firstInput, br, secondInput
       )
-    ), source.linesIterator.take(source.linesIterator.size - 2))
+    ), source.dropFinalLine)
   }
 }

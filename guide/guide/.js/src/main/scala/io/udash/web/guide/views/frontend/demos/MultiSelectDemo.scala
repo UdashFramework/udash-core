@@ -20,10 +20,10 @@ object MultiSelectDemo extends AutoDemo {
 
     val favoriteFruits = SeqProperty(Apple, Banana)
     val favoriteFruitsStrings = favoriteFruits.bitransformElements(_.toString) {
-        case "Apple" => Apple
-        case "Orange" => Orange
-        case "Banana" => Banana
-      }
+      case "Apple" => Apple
+      case "Orange" => Orange
+      case "Banana" => Banana
+    }
 
     def multiSelect: UdashInputGroup = UdashInputGroup()(
       UdashInputGroup.prependText("Fruits:"),
@@ -36,18 +36,20 @@ object MultiSelectDemo extends AutoDemo {
     )
 
     multiSelect.render
-
     (multiSelect, multiSelect)
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, String) = {
     import io.udash.bootstrap.utils.BootstrapStyles._
     import io.udash.css.CssView._
-    (div(id := "multi-select-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
-      form(containerFluid)(
-        div(Grid.row)(firstMultiSelect),
-        div(Grid.row)(secondMultiSelect)
-      )
-    ), source.linesIterator.take(source.linesIterator.size - 2))
+    (
+      div(id := "multi-select-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
+        form(containerFluid)(
+          div(Grid.row)(firstMultiSelect),
+          div(Grid.row)(secondMultiSelect)
+        )
+      ),
+      source.dropFinalLine
+    )
   }
 }

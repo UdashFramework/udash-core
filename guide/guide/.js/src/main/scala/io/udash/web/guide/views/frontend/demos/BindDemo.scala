@@ -20,13 +20,12 @@ object BindDemo extends AutoDemo with CssView {
     p("Name: ", bind(name))
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, String) =
     (
       div(
         id := "bind-demo",
         GuideStyles.frame
       )(rendered),
-      source.linesIterator
+      source
     )
-  }
 }

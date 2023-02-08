@@ -54,7 +54,7 @@ object CodeBlock {
     ) { case _ => b(placeholder) }
     produceWithNested(data)((data, nested) =>
       if (data.isEmpty) ForceBootstrap(nested(progressBar)).render
-      else apply(data)(styles).render.setup(rendered => Prism.highlightAllUnder(rendered))
+      else apply(data, language)(styles).render.setup(rendered => Prism.highlightAllUnder(rendered))
     )
   }
 }

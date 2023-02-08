@@ -74,7 +74,7 @@ object ExampleStyles extends CssBase {
     borderTopColor(c"#4CAE4C")
   )
 
-  val swither: CssStyle = style(
+  val switcher: CssStyle = style(
     display.inlineBlock,
     borderWidth(1 px),
     borderStyle.solid,
@@ -83,7 +83,7 @@ object ExampleStyles extends CssBase {
     cursor.pointer,
     userSelect.none,
 
-    &.hover (
+    &.hover(
       textDecoration := none
     ),
 

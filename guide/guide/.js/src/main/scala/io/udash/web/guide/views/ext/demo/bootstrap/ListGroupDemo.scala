@@ -42,7 +42,6 @@ object ListGroupDemo extends AutoDemo with CssView {
     ).render
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    (rendered.setup(_.applyTags(GuideStyles.frame)), source.linesIterator)
-  }
+  override protected def demoWithSource(): (Modifier, String) =
+    (rendered.setup(_.applyTags(GuideStyles.frame)), source)
 }

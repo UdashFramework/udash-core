@@ -47,17 +47,19 @@ object TextInputDemo extends AutoDemo {
     )
 
     inputs.render
-
     (inputs, inputs)
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, String) = {
     import io.udash.bootstrap.utils.BootstrapStyles._
     import io.udash.css.CssView._
-    (div(id := "inputs-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
-      form(containerFluid)(
-        firstInputs, br, secondInputs
-      )
-    ), source.linesIterator.take(source.linesIterator.size - 2))
+    (
+      div(id := "inputs-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
+        form(containerFluid)(
+          firstInputs, br, secondInputs
+        )
+      ),
+      source.dropFinalLine
+    )
   }
 }

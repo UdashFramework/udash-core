@@ -139,7 +139,6 @@ object IntroFormDemo extends AutoDemo {
     view.getTemplate
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    (rendered, source.linesIterator)
-  }
+  override protected def demoWithSource(): (Modifier, String) =
+    (rendered, source)
 }

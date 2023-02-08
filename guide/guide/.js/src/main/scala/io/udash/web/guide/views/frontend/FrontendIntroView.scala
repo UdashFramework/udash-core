@@ -13,6 +13,7 @@ case object FrontendIntroViewFactory extends StaticViewFactory[FrontendIntroStat
 
 
 class FrontendIntroView extends View with CssView {
+
   import Context._
   import JsDom.all._
 
@@ -48,7 +49,7 @@ class FrontendIntroView extends View with CssView {
     ),
     p("All these features will make your life as a frontend developer pleasant."),
     p("To start development import Udash classes as follows:"),
-    CodeBlock("""import io.udash._""".stripMargin)(GuideStyles),
+    CodeBlock("import io.udash._")(GuideStyles),
     h4("Example"),
     p(
       "Take a look at this simple form with a validation. We will not discuss the implementation here, because ",

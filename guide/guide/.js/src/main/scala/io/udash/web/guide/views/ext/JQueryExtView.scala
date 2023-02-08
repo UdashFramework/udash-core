@@ -3,19 +3,31 @@ package io.udash.web.guide.views.ext
 import io.udash._
 import io.udash.web.commons.components.{CodeBlock, ForceBootstrap}
 import io.udash.web.guide._
+import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.{JQueryCallbacksDemo, JQueryEventsDemo}
 import io.udash.web.guide.views.{References, Versions}
-import scalatags.JsDom
 
 case object JQueryExtViewFactory extends StaticViewFactory[JQueryExtState.type](() => new JQueryExtView)
 
 
 class JQueryExtView extends View {
-  import JsDom.all._
+
+  import com.avsystem.commons.SharedExtensions.universalOps
+  import scalatags.JsDom.all._
 
   private val (jQueryEventsDemo, jQueryEventsSnippet) = JQueryEventsDemo.demoWithSnippet()
   private val (jQueryCallbacksDemo, jQueryCallbacksSnippet) = JQueryCallbacksDemo.demoWithSnippet()
+
+  private val operatorSource = {
+    import io.udash.wrappers.jquery._
+    import scalatags.JsDom.all._
+
+    val component = h1("Hello, jQuery!").render
+
+    val paragraphs = jQ("p")
+    val hello = jQ(component)
+  }.sourceCode
 
   override def getTemplate: Modifier = div(
     h1("Udash jQuery wrapper"),
@@ -25,19 +37,9 @@ class JQueryExtView extends View {
     ),
     h2("The first steps"),
     p("To start development with the jQuery wrapper add the following line in you frontend module dependencies: "),
-    CodeBlock(
-      s""""io.udash" %%% "udash-jquery" % "${Versions.udashJQueryVersion}"""".stripMargin
-    )(GuideStyles),
+    CodeBlock(s""""io.udash" %%% "udash-jquery" % "${Versions.udashJQueryVersion}"""")(GuideStyles),
     p("The wrapper provides a typed equivalent of the jQuery ", i("$()"), " operator: "),
-    CodeBlock(
-      s"""import io.udash.wrappers.jquery._
-         |import scalatags.JsDom.all._
-         |
-         |val component = h1("Hello, jQuery!").render
-         |
-         |val paragraphs = jQ("p")
-         |val hello = jQ(component)""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(operatorSource),
     p("Now you can use any jQuery method on these values: "),
     CodeBlock(
       s"""paragraphs.show(1500, EasingFunction.swing)

@@ -4,16 +4,67 @@ import io.udash._
 import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.views.{ClickableImageFactory, ImageFactoryPrefixSet}
+import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import io.udash.web.guide.{Context, _}
-import scalatags.JsDom
+import org.scalajs.dom.MouseEvent
 
 case object FrontendMVPViewFactory extends StaticViewFactory[FrontendMVPState.type](() => new FrontendMVPView)
 
 class FrontendMVPView extends View with CssView {
+
   import Context._
-  import JsDom.all._
+  import com.avsystem.commons.SharedExtensions.universalOps
+  import scalatags.JsDom.all._
+
+  private val presenterSource = {
+    trait SomeState extends State {
+      def initValue: Int
+    }
+    {
+      import io.udash._
+
+      class ExamplePresenter(model: Property[Int]) extends Presenter[SomeState] {
+        override def handleState(state: SomeState) =
+          model.set(state.initValue)
+
+        def incButtonClick(): Unit =
+          model.set(model.get + 1)
+
+        def decButtonClick(): Unit =
+          model.set(model.get - 1)
+      }
+    }.sourceCode
+  }
+
+  private val viewSource = {
+    trait ExamplePresenter {
+      def decButtonClick(): Unit
+      def incButtonClick(): Unit
+    }
+    {
+      import io.udash._
+      import scalatags.JsDom.all._
+
+      class ExampleView(model: Property[Int], presenter: ExamplePresenter)
+        extends ContainerView {
+
+        override def getTemplate: Modifier = div(
+          h1("Example view"),
+          p("This is example view with buttons..."),
+          h3("Model bind example"),
+          div(
+            button(onclick :+= { (_: MouseEvent) => presenter.decButtonClick(); true })("-"),
+            button(onclick :+= { (_: MouseEvent) => presenter.incButtonClick(); true })("+"),
+            bind(model)
+          ),
+          h3("Below you can find my child view!"),
+          childViewContainer // child view container provided by ContainerView
+        )
+      }
+    }.sourceCode
+  }
 
   override def getTemplate: Modifier = div(
     h2("Model, View, Presenter & ViewFactory"),
@@ -48,6 +99,7 @@ class FrontendMVPView extends View with CssView {
       "The Udash framework brings a powerful Properties mechanism, ",
       "which is used as Model in Udash-based applications. All you have to do is:"
     ),
+    //todo migrate to compiled snippet once HasModelPropertyCreator works locally
     CodeBlock(
       """import io.udash._
         |
@@ -70,47 +122,14 @@ class FrontendMVPView extends View with CssView {
       "When implementing a presenter, you should remember, that the ", i("handleState"), " method does not have to be called only on ",
       "view initialization. For example:"
     ),
-    CodeBlock(
-      """import io.udash._
-        |
-        |class ExamplePresenter(model: Property[Int]) extends Presenter[SomeState] {
-        |  override def handleState(state: SomeState) =
-        |    model.set(state.initValue)
-        |
-        |  def incButtonClick(): Unit =
-        |    model.set(model.get + 1)
-        |
-        |  def decButtonClick(): Unit =
-        |    model.set(model.get - 1)
-        |}""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(presenterSource),
     h3("View"),
     p(
       "The View implementation usually gets the Model and the Presenter as constructor arguments. They can be used ",
       "in the ", a(href := References.ScalatagsHomepage, target := "_blank")("Scalatags"), " template of a view as user interaction callbacks. ",
       "The Model can be bound to a template and will automatically update on the Model changes."
     ),
-    CodeBlock(
-      """import io.udash._
-        |import scalatags.JsDom.all._
-        |
-        |class ExampleView(model: Property[Int], presenter: ExamplePresenter)
-        |  extends ContainerView {
-        |
-        |  override def getTemplate: Modifier = div(
-        |    h1("Example view"),
-        |    p("This is example view with buttons..."),
-        |    h3("Model bind example"),
-        |    div(
-        |      button(onclick :+= (ev => presenter.decButtonClick(), true))("-"),
-        |      button(onclick :+= (ev => presenter.incButtonClick(), true))("+"),
-        |      bind(model)
-        |    ),
-        |    h3("Below you can find my child view!"),
-        |    childViewContainer // child view container provided by ContainerView
-        |  )
-        |}""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(viewSource),
     h2("What's next?"),
     p(
       "Take a look at the ", a(href := FrontendTemplatesState.url)("Scalatags & UdashCSS"), " chapter to ",

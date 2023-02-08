@@ -68,7 +68,7 @@ object DynamicRemoteTranslationsDemo extends AutoDemo {
     )
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, String) = {
     import io.udash.css.CssView._
     (
       div(
@@ -76,7 +76,7 @@ object DynamicRemoteTranslationsDemo extends AutoDemo {
         GuideStyles.frame,
         GuideStyles.useBootstrap
       )(rendered),
-      source.linesIterator
+      source
     )
   }
 }

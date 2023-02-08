@@ -4,17 +4,41 @@ import io.udash._
 import io.udash.css.CssView
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide._
+import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import scalatags.JsDom
 
 case object AuthorizationExtViewFactory extends StaticViewFactory[AuthorizationExtState.type](() => new AuthorizationExtView)
-
-
 
 class AuthorizationExtView extends View with CssView {
 
   import Context._
-  import JsDom.all._
+  import com.avsystem.commons.SharedExtensions.universalOps
+  import scalatags.JsDom.all._
+
+  private val permissionsSource = {
+    import io.udash.auth._
+
+    class Perm(override val id: PermissionId) extends Permission
+    case object P1 extends Perm(PermissionId("1"))
+    case object P2 extends Perm(PermissionId("2"))
+    case object P3 extends Perm(PermissionId("3"))
+
+    val c1: PermissionCombinator = P1.and(P2)
+    val c2: PermissionCombinator = P1.or(P3)
+    val c3: PermissionCombinator = PermissionCombinator.allOf(P1, P3)
+    val c4: PermissionCombinator = PermissionCombinator.anyOf(P1, P2, P3)
+  }.sourceCode
+
+  private val userSource = {
+    import io.udash.auth._
+
+    case class User(perms: Set[Permission]) extends UserCtx {
+      override def has(permission: Permission): Boolean =
+        perms.contains(permission)
+
+      override def isAuthenticated: Boolean = true
+    }
+  }.sourceCode
 
   override def getTemplate: Modifier = div(
     h1("Udash Authorization Utils"),
@@ -27,30 +51,9 @@ class AuthorizationExtView extends View with CssView {
       i("Permission"), " is an entity granting atomic access to a part of the system. Permissions may be combined into ",
       i("PermissionCombinator"), ", which describes more complex access requirements. For example:"
     ),
-    CodeBlock(
-      s"""import io.udash.auth._
-         |
-         |class Perm(override val id: PermissionId) extends Permission
-         |case object P1 extends Perm(PermissionId("1"))
-         |case object P2 extends Perm(PermissionId("2"))
-         |case object P3 extends Perm(PermissionId("3"))
-         |
-         |val c1: PermissionCombinator = P1.and(P2)
-         |val c2: PermissionCombinator = P1.or(P3)
-         |val c3: PermissionCombinator = PermissionCombinator.allOf(P1, P3)
-         |val c4: PermissionCombinator = PermissionCombinator.anyOf(P1, P2, P3)""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(permissionsSource),
     p(i("UserCtx"), " provides information about user's permissions. Take a look at an example implementation: "),
-    CodeBlock(
-      s"""import io.udash.auth._
-         |
-         |case class User(perms: Set[Permission]) extends UserCtx {
-         |  override def has(permission: Permission): Boolean =
-         |    perms.contains(permission)
-         |
-         |  override def isAuthenticated: Boolean = true
-         |}""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(userSource),
     p(
       "You can verify user against ", i("PermissionCombinator"), " using ", i(".check(ctx: userCtx)"),
       " method as follows:"
@@ -119,7 +122,7 @@ class AuthorizationExtView extends View with CssView {
          |import io.udash.rpc._
          |
          |class ExampleEndpoint(implicit ctx: UserCtx, ec: ExecutionContext)
-         |  extends ExampleRPC with AurhRequires {
+         |  extends ExampleRPC with AuthRequires {
          |
          |  def exampleCall(i: Int): Future[Int] = Future {
          |    require(P1.or(P2))

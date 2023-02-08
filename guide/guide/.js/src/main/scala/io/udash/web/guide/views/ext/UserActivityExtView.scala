@@ -4,12 +4,13 @@ import io.udash._
 import io.udash.logging.CrossLogging
 import io.udash.web.commons.components.{CodeBlock, ForceBootstrap}
 import io.udash.web.guide._
+import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.demos.activity.{Call, CallServerRPC}
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.{RpcLoggingDemo, UrlLoggingDemo}
 import io.udash.web.guide.views.rpc.demos.PingPongCallDemoComponent
-import scalatags.JsDom
 
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 class UserActivityExtPresenter(model: SeqProperty[Call]) extends Presenter[UserActivityExtState.type] with CrossLogging {
@@ -39,10 +40,21 @@ case object UserActivityExtViewFactory extends ViewFactory[UserActivityExtState.
 }
 
 class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPresenter) extends View {
-  import Context._
-  import JsDom.all._
 
-  val (urlLoggingDemo, urlLoggingSnippet) = UrlLoggingDemo.demoWithSnippet()
+  import Context._
+  import com.avsystem.commons.SharedExtensions.universalOps
+  import scalatags.JsDom.all._
+
+  private val (urlLoggingDemo, urlLoggingSnippet) = UrlLoggingDemo.demoWithSnippet()
+
+  private val pingPongServerSource = {
+    import io.udash.rpc.utils.Logged
+
+    trait PingPongServerRPC {
+      @Logged
+      def fPing(id: Int): Future[Int]
+    }
+  }.sourceCode
 
   override def getTemplate: Modifier = div(
     h1("Udash user activity monitoring"),
@@ -61,11 +73,11 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
     p("You can see this mechanism in action here in the guide. We've already provided the implementation: "),
     CodeBlock(
       s"""val application = new Application[RoutingState](
-          |  routingRegistry, viewFactoryRegistry, RootState
-          |) with UrlLogging[RoutingState] {
-          |  override protected def log(url: String, referrer: Option[String]): Unit =
-          |    UrlLoggingDemo.log(url, referrer)
-          |}""".stripMargin
+         |  routingRegistry, viewFactoryRegistry, RootState
+         |) with UrlLogging[RoutingState] {
+         |  override protected def log(url: String, referrer: Option[String]): Unit =
+         |    UrlLoggingDemo.log(url, referrer)
+         |}""".stripMargin
     )(GuideStyles),
     urlLoggingSnippet,
     p("to see it in action just enable logging below, switch to another chapter and come back here."), br,
@@ -84,15 +96,7 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
         |    println(s"$rpcName $methodName $args")
         |} """.stripMargin)(GuideStyles),
     p("The methods you want log calls on have to be annotated with ", i("@Logged"), ". For this example we reused the ping example from RPC guide introduction: "),
-    CodeBlock(
-      """import io.udash.rpc._
-        |import io.udash.rpc.utils.Logged
-        |
-        |@RPC
-        |trait PingPongServerRPC {
-        |  @Logged
-        |  def fPing(id: Int): Future[Int]
-        |}""".stripMargin)(GuideStyles),
+    AutoDemo.snippet(pingPongServerSource),
     ForceBootstrap(
       new PingPongCallDemoComponent,
       RpcLoggingDemo(model, () => presenter.reload())

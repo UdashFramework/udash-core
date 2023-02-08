@@ -48,6 +48,7 @@ class BootstrappingBackendView extends View with CssView {
         |  override def hello(name: String): Future[String] =
         |    Future.successful(s"Hello, $name!")
         |}""".stripMargin)(GuideStyles),
+    //todo remove https://github.com/UdashFramework/udash-core/issues/829
     p("To make usage of client RPC more friendly, it is recommended to create a wrapper object like the one below:"),
     CodeBlock(
       """import io.udash.rpc._
@@ -63,6 +64,7 @@ class BootstrappingBackendView extends View with CssView {
       "Application server creates Jetty server and configures content holders. ", i("resourceBase"), " is the directory containing ",
       i("index.html"), " and ", i("port"), " is the port for Jetty server to bind to."
     ),
+    //todo remove https://github.com/UdashFramework/udash-core/issues/830
     CodeBlock(
       """import io.udash.rpc._
         |import org.eclipse.jetty.server.Server

@@ -46,7 +46,6 @@ object FileInputDemo extends AutoDemo with CssView {
     )
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
-    (div(id := "file-input-demo", GuideStyles.frame, GuideStyles.useBootstrap)(rendered), source.linesIterator)
-  }
+  override protected def demoWithSource(): (Modifier, String) =
+    (div(id := "file-input-demo", GuideStyles.frame, GuideStyles.useBootstrap)(rendered), source)
 }

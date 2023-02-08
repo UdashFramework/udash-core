@@ -2,18 +2,127 @@ package io.udash.web.guide.views.frontend
 
 import io.udash._
 import io.udash.css.CssView
+import io.udash.properties.ModelPropertyCreator
 import io.udash.web.commons.components.CodeBlock
 import io.udash.web.commons.views.{ClickableImageFactory, ImageFactoryPrefixSet}
 import io.udash.web.guide._
+import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import scalatags.JsDom
 
 case object FrontendPropertiesViewFactory extends StaticViewFactory[FrontendPropertiesState.type](() => new FrontendPropertiesView)
 
 class FrontendPropertiesView extends View with CssView {
 
-  import JsDom.all._
+  import com.avsystem.commons.SharedExtensions.universalOps
   import io.udash.web.guide.Context._
+  import scalatags.JsDom.all._
+
+  private val listenSource = {
+    val username = Property.blank[String]
+
+    // Register value change listener
+    username.listen((name: String) =>
+      println(s"Username changed to: $name")
+    )
+
+    username.set("Udash")
+  }.sourceCode
+
+  private val listenStructureSource = {
+    val ints = SeqProperty.blank[Int]
+    ints.listen(_ => println("listen"))
+    ints.listenStructure(_ => println("listenStructure"))
+
+    ints.insert(0, 1, 2, 3) // fires both listeners
+    ints.elemProperties.head.set(5) // prints only "listen""""
+  }.sourceCode
+
+  private val transformSource = {
+    val csv = Property[String]("1,2,3,4,5")
+    val ints: ReadableSeqProperty[Int] =
+      csv.transformToSeq(_.split(",").map(_.toInt))
+    val floats: ReadableSeqProperty[Float] =
+      ints.transformElements(_ + 0.5f)
+  }.sourceCode
+
+  private val combineSource = {
+    val x = Property(5)
+    val y = Property(7)
+    val sum = x.combine(y)(_ + _)
+    println(sum.get) // prints: 12
+  }.sourceCode
+
+  private val combineElementsSource = {
+    def isOdd(i: Int) = i % 2 == 1
+    val s = SeqProperty(1, 2, 3, 4, 5)
+    val odds = Property(true)
+    val filtered = s
+      .combineElements(odds)((i, odds) => (i, isOdd(i) == odds))
+      .filter { case (_, keep) => keep }
+      .transformElements { case (i, _) => i }
+
+    println(s.get -> odds.get) // prints: Seq(1, 2, 3, 4, 5), true
+    println(filtered.get) // prints: Seq(1, 3, 5)
+
+    odds.set(false)
+    println(s.get -> odds.get) // prints: Seq(1, 2, 3, 4, 5), false
+    println(filtered.get) // prints: Seq(2, 4)
+
+    s.append(6)
+    println(s.get -> odds.get) // prints: Seq(1, 2, 3, 4, 5, 5), false
+    println(filtered.get) // prints: Seq(2, 4, 6)
+  }.sourceCode
+
+  private val filterSource = {
+    val numbers = SeqProperty[Int](1, 2, 3)
+    val evens = numbers.filter(_ % 2 == 0) // evens.get == Seq(2)
+    numbers.append(4, 5, 6) // evens.get == Seq(2, 4, 6)
+    //evens.append(4, 5, 6) <- ERROR: evens is only the readable property
+  }.sourceCode
+
+  private val zipSource = {
+    val numbers = SeqProperty[Int](1, 2, 3)
+    val strings = SeqProperty[String]("A", "B", "C", "D")
+    val z = numbers.zip(strings)((_, _)) //Seq((1,"A"), (2,"B"), (3,"C"))
+    val all = numbers.zipAll(strings)((_, _), Property(-1), Property("empty")) ///Seq((1,"A"), (2,"B"), (3,"C"), (-1, "D"))
+
+    numbers.append(7)
+    numbers.append(8)
+    //z.get == Seq((1,"A"), (2,"B"), (3,"C"), (7,"D"))
+    //all.get == Seq((1,"A"), (2,"B"), (3,"C"), (7,"D"), (8,"empty"))
+  }.sourceCode
+
+  private val zipWithIndexSource = {
+    val strings = SeqProperty[String]("A", "B", "C", "D")
+    val withIdx = strings.zipWithIndex //Seq(("A",0), ("B",1), ("C",2), ("D",3))
+
+    strings.append("Another")
+    // withIdx.get == Seq(("A",0), ("B",1), ("C",2), ("D",3), ("Another",4))
+
+    strings.prepend("First")
+    // withIdx.get == Seq(("First",0), ("A",1), ("B",2), ("C",3), ("D",4), ("Another",5))
+
+    strings.clear()
+    // withIdx.get == Seq()
+  }.sourceCode
+
+  private val immutablePropertiesSource = {
+    trait ComplexModelClass
+    object ComplexModelClass {
+      implicit val mpc: ModelPropertyCreator[ComplexModelClass] = null
+    }
+
+    {
+      def component(
+        i: ReadableProperty[Int],
+        model: ReadableModelProperty[ComplexModelClass],
+        seq: ReadableSeqProperty[String],
+      ): Modifier = ???
+
+      val complex: ComplexModelClass = ???
+      component(1.toProperty, complex.toModelProperty, Seq("a", "b", "c").toSeqProperty)
+    }.sourceCode
+  }
 
   override def getTemplate: Modifier = div(
     h2("Property - the Udash Data Model"),
@@ -22,17 +131,9 @@ class FrontendPropertiesView extends View with CssView {
       "The Properties system wraps your data model, in order to enable ",
       "convenient value change listening. Take a look at the example below:"
     ),
-    CodeBlock(
-      """val username = Property.blank[String]
-        |
-        |// Register value change listener
-        |username.listen((name: String) =>
-        |  println(s"Username changed to: $name")
-        |)
-        |
-        |username.set("Udash")""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(listenSource),
     p("That was the simple example. Now it is time for something more complex:"),
+    //todo migrate to compiled snippet once HasModelPropertyCreator works locally
     CodeBlock(
       """case class NumbersInRange(minimum: Int, maximum: Int, numbers: Seq[Int])
         |object NumbersInRange extends HasModelPropertyCreator[NumbersInRange]
@@ -107,10 +208,7 @@ class FrontendPropertiesView extends View with CssView {
         |  birthYear: Int
         |  friends: Seq[Person] // it'll be SeqProperty
         |)
-        |object Person {
-        |  implicit val modelPropertyCreator: ModelPropertyCreator[Person] =
-        |    ModelPropertyCreator.materialize[Person]
-        |}
+        |object Person extends HasModelPropertyCreator[Person]
         |
         |val person = ModelProperty(Person("John", 1987, Seq.empty))
         |person.subProp(_.birthYear).set(2001)""".stripMargin
@@ -208,14 +306,7 @@ class FrontendPropertiesView extends View with CssView {
       "SeqProperty has the ", i("listenStructure"), " method which allows you to listen on adding or removing elements ",
       "in this property, yet it will not fire on change inside children of a property. For example:"
     ),
-    CodeBlock(
-      """val ints = SeqProperty.blank[Int]
-        |ints.listen(_ => println("listen"))
-        |ints.listenStructure(_ => println("listenStructure"))
-        |
-        |ints.insert(0, Seq(1, 2, 3))           // fires both listeners
-        |ints.elemProperties.head.set(5)        // prints only "listen"""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(listenStructureSource),
     h3("Properties transformation"),
     p("You can also change the type of a property. Let's assume the ", i("User"), " model looks like below:"),
     CodeBlock(
@@ -243,84 +334,24 @@ class FrontendPropertiesView extends View with CssView {
       "It is possible to transform ", i("SeqProperty[A]"), " to ", i("SeqProperty[B]"), " and ",
       i("Property[A]"), " to ", i("SeqProperty[B]"), ". For example:"
     ),
-    CodeBlock(
-      """val csv = Property[String]("1,2,3,4,5")
-        |val ints: ReadableSeqProperty[Int] =
-        |  csv.transformToSeq(_.split(",").map(_.toInt).toSeq)
-        |val floats: ReadableSeqProperty[Float] =
-        |  ints.transform((i: Int) => i + 0.5f)""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(transformSource),
     h4("Properties combining"),
     p("You can combine two properties into a new one synchronised with both of them:"),
-    CodeBlock(
-      """val x = Property(5)
-        |val y = Property(7)
-        |val sum = x.combine(y)(_ + _)
-        |println(sum.get) // prints: 12""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(combineSource),
     p(i("SeqProperty"), " has specialized version of this method which combines every element of seq with the provided one."),
-    CodeBlock(
-      """def isOdd(i: Int) = i % 2 == 1
-        |val s = SeqProperty(1, 2, 3, 4, 5)
-        |val odds = Property(true)
-        |val filtered = s
-        |  .combine(odds)((i: Int, odds: Boolean) => (i, isOdd(i) == odds))
-        |  .filter((pair: (Int, Boolean)) => pair._2)
-        |  .transform((pair: (Int, Boolean)) => pair._1)
-        |
-        |println(s.get, odds.get) // prints: Seq(1, 2, 3, 4, 5), true
-        |println(filtered.get)    // prints: Seq(1, 3, 5)
-        |
-        |odds.set(false)
-        |println(s.get, odds.get) // prints: Seq(1, 2, 3, 4, 5), false
-        |println(filtered.get)    // prints: Seq(2, 4)
-        |
-        |s.append(6)
-        |println(s.get, odds.get) // prints: Seq(1, 2, 3, 4, 5, 5), false
-        |println(filtered.get)    // prints: Seq(2, 4, 6)""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(combineElementsSource),
     h4("SeqProperty filtering"),
     p(
       "You can filter SeqProperty if you need, however you will not be able to modify the filtered property. ",
       "A filtered property is synchronised with the original one."
     ),
-    CodeBlock(
-      """val numbers = SeqProperty[Int](1, 2, 3)
-        |val evens = numbers.filter(_ % 2 == 0) // evens.get == Seq(2)
-        |numbers.append(4, 5, 6) // evens.get == Seq(2, 4, 6)
-        |//evens.append(4, 5, 6) <- ERROR: evens is only the readable property""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(filterSource),
     h4("SeqProperty zip/zipAll"),
     p("It is possible to zip elements from two ", i("SeqProperties"), ". You have to pass a combiner, so you can combine the elements as you want."),
-    CodeBlock(
-      """val numbers = SeqProperty[Int](1, 2, 3)
-        |val strings = SeqProperty[String]("A", "B", "C", "D")
-        |val z = numbers.zip(strings)((_, _))
-        |//z.get == Seq((1,"A"), (2,"B"), (3,"C"))
-        |val all = numbers.zipAll(strings)((_, _), Property(-1), Property("empty"))
-        |//all.get == Seq((1,"A"), (2,"B"), (3,"C"), (-1, "D"))
-        |
-        |numbers.append(7)
-        |numbers.append(8)
-        |//z.get == Seq((1,"A"), (2,"B"), (3,"C"), (7,"D"))
-        |//all.get == Seq((1,"A"), (2,"B"), (3,"C"), (7,"D"), (8,"empty"))""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(zipSource),
     h4("SeqProperty zipWithIndex"),
     p("It is also very easy to create sequence of elements zipped with index."),
-    CodeBlock(
-      """val strings = SeqProperty[String]("A", "B", "C", "D")
-        |val withIdx = strings.zipWithIndex
-        |// withIdx.get == Seq(("A",0), ("B",1), ("C",2), ("D",3))
-        |
-        |strings.append("Another")
-        |// withIdx.get == Seq(("A",0), ("B",1), ("C",2), ("D",3), ("Another",4))
-        |
-        |strings.prepend("First")
-        |// withIdx.get == Seq(("First",0), ("A",1), ("B",2), ("C",3), ("D",4), ("Another",5))
-        |
-        |strings.clear()
-        |// withIdx.get == Seq()""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(zipWithIndexSource),
     h3("Immutable properties"),
     p(
       "GUI components may take numerous arguments defining their behaviour as the properties. ",
@@ -331,16 +362,7 @@ class FrontendPropertiesView extends View with CssView {
       "The ", i("import io.udash._"), " provides three extension methods: ",
       i("_.toProperty"), ", ", i("_.toModelProperty"), " and ", i("_.toSeqProperty"), "."
     ),
-    CodeBlock(
-      """def component(
-        |  i: ReadableProperty[Int],
-        |  model: ReadableModelProperty[ComplexModelClass]
-        |) = ???
-        |
-        |val number: Int = ???
-        |val complex: ComplexModelClass = ???
-        |component(number.toProperty, complex.toModelProperty)""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(immutablePropertiesSource),
     h2("What's next?"),
     p(
       "Take a look at ", a(href := FrontendBindingsState.url)("Template Data Binding"),

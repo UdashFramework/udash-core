@@ -29,8 +29,8 @@ object TextAreaDemo extends AutoDemo {
     )
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, String) = {
     import io.udash.css.CssView._
-    (div(id := "text-area-demo", GuideStyles.frame, GuideStyles.useBootstrap)(rendered), source.linesIterator)
+    (div(id := "text-area-demo", GuideStyles.frame, GuideStyles.useBootstrap)(rendered), source)
   }
 }

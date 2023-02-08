@@ -4,20 +4,53 @@ import io.udash._
 import io.udash.css.CssView
 import io.udash.web.commons.components.{CodeBlock, ForceBootstrap}
 import io.udash.web.guide._
+import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.ext.demo.{DynamicRemoteTranslationsDemo, FrontendTranslationsDemo, RemoteTranslationsDemo}
-import scalatags.JsDom
 
 case object I18NExtViewFactory extends StaticViewFactory[I18NExtState.type](() => new I18NExtView)
 
 final class I18NExtView extends View with CssView {
 
   import Context._
-  import JsDom.all._
+  import com.avsystem.commons.SharedExtensions.universalOps
+  import scalatags.JsDom.all._
 
   private val (frontendTranslationsDemo, frontendTranslationsSnippet) = FrontendTranslationsDemo.demoWithSnippet()
   private val (remoteTranslationsDemo, remoteTranslationsSnippet) = RemoteTranslationsDemo.demoWithSnippet()
   private val (dynamicTranslationsDemo, dynamicTranslationsSnippet) = DynamicRemoteTranslationsDemo.demoWithSnippet()
+
+  private val translationKeysSource = {
+    import io.udash.i18n._
+
+    object Translations {
+
+      import TranslationKey._
+
+      object Auth {
+        val loginLabel = key("auth.loginLabel")
+        val passwordLabel = key("auth.passwordLabel")
+
+        object Login {
+          val buttonLabel = key("auth.login.buttonLabel")
+          val retriesLeft = key1[Int]("auth.login.retriesLeft")
+          val retriesLeftOne = key("auth.login.retriesLeftOne")
+        }
+
+        object Register {
+          val buttonLabel = key("auth.register.buttonLabel")
+        }
+      }
+    }
+  }.sourceCode
+
+  private val serverRpcSource = {
+    import io.udash.i18n._
+
+    trait DemosServerRPC {
+      def translations(): RemoteTranslationRPC
+    }
+  }.sourceCode
 
   override def getTemplate: Modifier = div(
     h1("Udash i18n"),
@@ -28,28 +61,7 @@ final class I18NExtView extends View with CssView {
     ),
     h2("Translation keys"),
     p("If you want to use Udash translations support, you should define ", i("TranslationKeys"), "."),
-    CodeBlock(
-      s"""import io.udash.i18n._
-         |
-         |object Translations {
-         |  import TranslationKey._
-         |
-         |  object auth {
-         |    val loginLabel = key("auth.loginLabel")
-         |    val passwordLabel = key("auth.passwordLabel")
-         |
-         |    object login {
-         |      val buttonLabel = key("auth.login.buttonLabel")
-         |      val retriesLeft = key1[Int]("auth.login.retriesLeft")
-         |      val retriesLeftOne = key("auth.login.retriesLeftOne")
-         |    }
-         |
-         |    object register {
-         |      val buttonLabel = key("auth.register.buttonLabel")
-         |    }
-         |  }
-         |}""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(translationKeysSource),
     p(
       i("TranslationKey"), " knows the count and types of the arguments. In the above example, ",
       i("retriesLeft"), " key expects one integer as the argument."
@@ -90,14 +102,7 @@ final class I18NExtView extends View with CssView {
     ),
     h4("RemoteTranslationRPC implementation"),
     p("Let's start with ", i("RemoteTranslationRPC"), " implementation in the server application. Add the following method in your server RPC interface: "),
-    CodeBlock(
-      s"""import io.udash.i18n._
-         |
-          |@RPC
-         |trait DemosServerRPC {
-         |  def translations(): RemoteTranslationRPC
-         |}""".stripMargin
-    )(GuideStyles),
+    AutoDemo.snippet(serverRpcSource),
     p(
       "The Udash i18n plugin makes ", i("RemoteTranslationRPC"), " easier, because it provides ",
       i("TranslationRPCEndpoint"), " and ", i("ResourceBundlesTranslationTemplatesProvider"), " classes."
@@ -106,7 +111,7 @@ final class I18NExtView extends View with CssView {
       s"""import io.udash.i18n._
          |import java.{util => ju}
          |
-          |class TranslationServer extends TranslationRPCEndpoint(
+         |class TranslationServer extends TranslationRPCEndpoint(
          |  new ResourceBundlesTranslationTemplatesProvider(
          |    TranslationServer.langs
          |      .map(lang =>
@@ -117,7 +122,7 @@ final class I18NExtView extends View with CssView {
          |  )
          |)
          |
-          |object TranslationServer {
+         |object TranslationServer {
          |  val langs = Seq("en", "pl")
          |  val bundlesNames = Seq("demo_translations")
          |}""".stripMargin

@@ -43,14 +43,13 @@ object JQueryEventsDemo extends AutoDemo with CssView {
     content
   }.withSourceCode
 
-  override protected def demoWithSource(): (Modifier, Iterator[String]) = {
+  override protected def demoWithSource(): (Modifier, String) =
     (
       div(
         id := "jquery-events-demo",
         GuideStyles.frame,
         GuideStyles.useBootstrap
       )(rendered),
-      source.linesIterator
+      source
     )
-  }
 }
