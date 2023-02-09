@@ -24,7 +24,7 @@ object Dependencies {
   val circeDerivationVersion = "0.13.0-M5" // Tests only
   val monixVersion = "3.4.1" // Tests only
 
-  val sttpVersion = "3.8.10"
+  val sttpVersion = "3.8.11"
 
   val scalaLoggingVersion = "3.9.5"
 
