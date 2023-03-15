@@ -259,13 +259,13 @@ lazy val udash = project.in(file("."))
   )
 
 //for simplifying Travis build matrix and project dependencies
-lazy val jvmLibraries = Seq[ProjectReference](macros, utils.jvm, core, rpc, rest, `rest-jetty`, i18n, auth, css)
+lazy val jvmLibraries = Seq[ProjectReference](utils.jvm, core.jvm, rpc.jvm, rest.jvm, `rest-jetty`, i18n.jvm, auth.jvm, css.jvm)
 lazy val `udash-jvm` = project.in(file(".jvm"))
   .aggregate(jvmLibraries: _*)
   .settings(aggregateProjectSettings)
 
 lazy val jsLibraries = Seq[ProjectReference](
-  macros, utils.js, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap4
+  utils.js, core.js, rpc.js, rest.js, i18n.js, auth.js, css.js, bootstrap4
 )
 lazy val `udash-js` = project.in(file(".js"))
   .aggregate(jsLibraries: _*)
@@ -283,76 +283,36 @@ lazy val utils = sharedProject(crossProject(JVMPlatform, JSPlatform))
   .jvmSettings(libraryDependencies ++= Dependencies.utilsJvmDeps.value)
   .jsSettings(libraryDependencies ++= Dependencies.utilsSjsDeps.value)
 
-lazy val core = jvmProject(project)
-  .dependsOn(utils.jvm % CompileAndTest)
-  .settings(
-    libraryDependencies ++= Dependencies.coreJvmDeps.value,
-  )
+lazy val core = sharedProject(crossProject(JVMPlatform, JSPlatform))
+  .dependsOn(utils % CompileAndTest)
+  .settings(libraryDependencies ++= Dependencies.coreCrossDeps.value)
 
-lazy val `core-js` = jsProjectFor(project, core)
-  .dependsOn(utils.js % CompileAndTest)
-  .settings(
-    testInBrowser,
-    libraryDependencies ++= Dependencies.coreSjsDeps.value,
-  )
+lazy val rpc = sharedProject(crossProject(JVMPlatform, JSPlatform))
+  .dependsOn(utils % CompileAndTest)
+  .settings(libraryDependencies ++= Dependencies.rpcCrossDeps.value)
+  .jvmSettings(libraryDependencies ++= Dependencies.rpcJvmDeps.value)
 
-lazy val rpc = jvmProject(project)
-  .dependsOn(utils.jvm % CompileAndTest)
-  .settings(
-    libraryDependencies ++= Dependencies.rpcJvmDeps.value,
-  )
-
-lazy val `rpc-js` = jsProjectFor(project, rpc)
-  .dependsOn(utils.js % CompileAndTest)
-  .settings(
-    libraryDependencies ++= Dependencies.rpcSjsDeps.value,
-    jsDependencies ++= Dependencies.rpcJsDeps.value,
-  )
-
-lazy val rest = jvmProject(project)
-  .dependsOn(utils.jvm % CompileAndTest)
-  .settings(
-    libraryDependencies ++= Dependencies.restJvmDeps.value,
-  )
-
-lazy val `rest-js` = jsProjectFor(project, rest)
-  .dependsOn(utils.js % CompileAndTest)
-  .settings(
-    libraryDependencies ++= Dependencies.restSjsDeps.value,
-  )
+lazy val rest = sharedProject(crossProject(JVMPlatform, JSPlatform))
+  .dependsOn(utils % CompileAndTest)
+  .jvmSettings(libraryDependencies ++= Dependencies.restJvmDeps.value)
+  .jsSettings(libraryDependencies ++= Dependencies.restSjsDeps.value)
 
 lazy val `rest-jetty` = jvmProject(project.in(file("rest/jetty")))
-  .dependsOn(rest % CompileAndTest)
+  .dependsOn(rest.jvm % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.restJettyDeps.value,
   )
 
-lazy val i18n = jvmProject(project)
-  .dependsOn(core % CompileAndTest, rpc % CompileAndTest)
+lazy val i18n = sharedProject(crossProject(JVMPlatform, JSPlatform)).dependsOn(core, rpc)
 
-lazy val `i18n-js` = jsProjectFor(project, i18n)
-  .dependsOn(`core-js` % CompileAndTest, `rpc-js` % CompileAndTest)
+lazy val auth = sharedProject(crossProject(JVMPlatform, JSPlatform)).dependsOn(core, rpc)
 
-lazy val auth = jvmProject(project)
-  .dependsOn(core % CompileAndTest, rpc)
-
-lazy val `auth-js` = jsProjectFor(project, auth)
-  .dependsOn(`core-js` % CompileAndTest, `rpc-js`)
-
-lazy val css = jvmProject(project)
-  .dependsOn(core % CompileAndTest)
-  .settings(
-    libraryDependencies ++= Dependencies.cssJvmDeps.value,
-  )
-
-lazy val `css-js` = jsProjectFor(project, css)
-  .dependsOn(`core-js` % CompileAndTest)
-  .settings(
-    libraryDependencies ++= Dependencies.cssSjsDeps.value,
-  )
+lazy val css = sharedProject(crossProject(JVMPlatform, JSPlatform))
+  .dependsOn(core)
+  .settings(libraryDependencies ++= Dependencies.cssCrossDeps.value)
 
 lazy val bootstrap4 = jsProject(project)
-  .dependsOn(`core-js` % CompileAndTest, `css-js`, `i18n-js` % Test)
+  .dependsOn(core.js % CompileAndTest, css.js, i18n.js % Test)
   .settings(
     testInBrowser,
     libraryDependencies ++= Dependencies.bootstrap4SjsDeps.value,

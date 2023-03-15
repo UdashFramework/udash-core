@@ -74,26 +74,20 @@ object Dependencies {
     "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
   ))
 
-  private val coreCrossDeps = Def.setting(Seq(
+  val coreCrossDeps = Def.setting(Seq(
     "com.lihaoyi" %%% "scalatags" % scalaTagsVersion
   ))
 
-  val coreJvmDeps = coreCrossDeps
-
-  val coreSjsDeps = coreCrossDeps
-
-  private val rpcCrossDeps = Def.setting(Seq(
+  val rpcCrossDeps = Def.setting(Seq(
     "com.lihaoyi" %%% "upickle" % upickleVersion % Test,
     "io.circe" %%% "circe-core" % circeVersion % Test,
     "io.circe" %%% "circe-parser" % circeVersion % Test,
   ))
 
-  val rpcJvmDeps = Def.setting(rpcCrossDeps.value ++ Seq(
+  val rpcJvmDeps = Def.setting(Seq(
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "org.atmosphere" % "atmosphere-runtime" % atmosphereVersion
   ))
-
-  val rpcSjsDeps = rpcCrossDeps
 
   val rpcJsDeps = Def.setting(Seq(
     "org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js"
@@ -122,14 +116,8 @@ object Dependencies {
     "org.eclipse.jetty" % "jetty-client" % jettyVersion
   ))
 
-  private val cssCrossDeps = Def.setting(Seq(
+  val cssCrossDeps = Def.setting(Seq(
     "com.github.japgolly.scalacss" %%% "core" % scalaCssVersion,
-  ))
-
-  val cssJvmDeps = cssCrossDeps
-
-  val cssSjsDeps = Def.setting(cssCrossDeps.value ++ Seq(
-    "com.lihaoyi" %%% "scalatags" % scalaTagsVersion,
   ))
 
   val bootstrap4SjsDeps = Def.setting(Seq(
