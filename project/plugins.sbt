@@ -12,4 +12,4 @@ addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
 
 // Deployment configuration
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.2.1")
-addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.17")
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.18")
