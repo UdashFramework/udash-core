@@ -157,20 +157,6 @@ def jsProject(proj: Project): Project =
     .enablePlugins(ScalaJSPlugin, JSDependenciesPlugin)
     .settings(commonJsSettings)
 
-def jsProjectFor(jsProj: Project, jvmProj: Project): Project =
-  jsProj.in(jvmProj.base / ".js")
-    .enablePlugins(ScalaJSPlugin, JSDependenciesPlugin)
-    .configure(p => if (forIdeaImport) p.dependsOn(jvmProj) else p)
-    .settings(
-      commonJsSettings,
-
-      moduleName := (jvmProj / moduleName).value,
-      sourceDirsSettings(_.getParentFile),
-
-      // workaround for some cross-compilation problems in IntelliJ
-      libraryDependencies ++= (if (forIdeaImport) (jvmProj / libraryDependencies).value else Seq.empty)
-    )
-
 def frontendExecutable(proj: Project)(
   staticsRoot: String,
   jsDeps: Def.Initialize[Seq[JSModuleID]],
@@ -258,10 +244,8 @@ lazy val udash = project.in(file("."))
     ideSkipProject := false,
   )
 
-//for simplifying Travis build matrix and project dependencies
-lazy val jvmLibraries = Seq[ProjectReference](utils.jvm, core.jvm, rpc.jvm, rest.jvm, `rest-jetty`, i18n.jvm, auth.jvm, css.jvm)
 lazy val `udash-jvm` = project.in(file(".jvm"))
-  .aggregate(jvmLibraries: _*)
+  .aggregate(utils.jvm, core.jvm, rpc.jvm, rest.jvm, `rest-jetty`, i18n.jvm, auth.jvm, css.jvm)
   .settings(aggregateProjectSettings)
 
 lazy val jsLibraries = Seq[ProjectReference](
@@ -291,6 +275,7 @@ lazy val rpc = sharedProject(crossProject(JVMPlatform, JSPlatform))
   .dependsOn(utils % CompileAndTest)
   .settings(libraryDependencies ++= Dependencies.rpcCrossDeps.value)
   .jvmSettings(libraryDependencies ++= Dependencies.rpcJvmDeps.value)
+  .jsSettings(jsDependencies ++= Dependencies.rpcJsDeps.value)
 
 lazy val rest = sharedProject(crossProject(JVMPlatform, JSPlatform))
   .dependsOn(utils % CompileAndTest)
@@ -341,7 +326,7 @@ val compileAndOptimizeStatics = taskKey[File](
 )
 
 lazy val guide = project.in(file("guide"))
-  .aggregate(`guide-shared`, `guide-shared-js`, `guide-backend`, `guide-commons`, `guide-homepage`,
+  .aggregate(`guide-shared`.jvm, `guide-shared`.js, `guide-backend`, `guide-commons`, `guide-homepage`,
     `guide-guide`, `guide-packager`, `guide-selenium`)
   .settings(
     aggregateProjectSettings,
@@ -349,24 +334,19 @@ lazy val guide = project.in(file("guide"))
   )
 
 lazy val `guide-shared` =
-  jvmProject(project.in(file("guide/shared")))
-    .dependsOn(jvmLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
+  sharedProject(crossProject(JVMPlatform, JSPlatform))
+    .dependsOn(utils, core, rpc, rest, i18n, auth, css)
+    .jvmConfigure(_.dependsOn(`rest-jetty`))
+    .jsConfigure(_.dependsOn(bootstrap4))
     .settings(
       noPublishSettings,
       crossScalaVersions := Seq(Dependencies.versionOfScala),
     )
-
-lazy val `guide-shared-js` =
-  jsProjectFor(project, `guide-shared`)
-    .dependsOn(jsLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
-    .settings(
-      noPublishSettings,
-      crossScalaVersions := Seq(Dependencies.versionOfScala),
-    )
+    .in(file("guide/shared"))
 
 lazy val `guide-backend` =
   jvmProject(project.in(file("guide/backend")))
-    .dependsOn(`guide-shared`)
+    .dependsOn(`guide-shared`.jvm)
     .settings(
       noPublishSettings,
       crossScalaVersions := Seq(Dependencies.versionOfScala),
@@ -377,7 +357,7 @@ lazy val `guide-backend` =
 lazy val `guide-commons` =
   jsProject(project.in(file("guide/commons")))
     .enablePlugins(SbtWeb)
-    .dependsOn(`guide-shared-js`)
+    .dependsOn(`guide-shared`.js)
     .settings(
       noPublishSettings,
       crossScalaVersions := Seq(Dependencies.versionOfScala),
