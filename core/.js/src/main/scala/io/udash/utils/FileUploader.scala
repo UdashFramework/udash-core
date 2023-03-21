@@ -1,5 +1,6 @@
 package io.udash.utils
 
+import com.avsystem.commons.OptArg
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
 import io.udash.properties.{Blank, HasModelPropertyCreator, PropertyCreator}
@@ -8,6 +9,7 @@ import org.scalajs.dom._
 import scala.scalajs.js
 
 class FileUploader(url: Url) {
+
   import FileUploader._
 
   /** Uploads files selected in provided `input`. */
@@ -17,16 +19,16 @@ class FileUploader(url: Url) {
       (0 until input.files.length).map(input.files.item)
     )
 
-  /** Uploads provided `file` in a field named `fieldName`. */
+  /** Uploads provided `file` in a field named `fieldName` with an optional auth token set in the Authorization header. */
   def uploadFile(
-    fieldName: String, file: File, extraData: Map[js.Any, js.Any] = Map.empty
+    fieldName: String, file: File, extraData: Map[js.Any, js.Any] = Map.empty, authToken: OptArg[String] = OptArg.Empty
   ): ReadableModelProperty[FileUploadModel] = {
-    upload(fieldName, Seq(file), extraData)
+    upload(fieldName, Seq(file), extraData = extraData, authToken = authToken)
   }
 
-  /** Uploads provided `files` in a field named `fieldName`. */
+  /** Uploads provided `files` in a field named `fieldName` with an optional auth token set in the Authorization header. */
   def upload(
-    fieldName: String, files: Seq[File], extraData: Map[js.Any, js.Any] = Map.empty
+    fieldName: String, files: Seq[File], extraData: Map[js.Any, js.Any] = Map.empty, authToken: OptArg[String] = OptArg.Empty
   ): ReadableModelProperty[FileUploadModel] = {
     val p = ModelProperty[FileUploadModel](
       new FileUploadModel(Seq.empty, FileUploadState.InProgress, 0, 0, None)
@@ -47,13 +49,12 @@ class FileUploader(url: Url) {
       }
     )
     xhr.addEventListener("load", (_: Event) => {
-        p.subProp(_.response).set(Some(new HttpResponse(xhr)))
-        p.subProp(_.state).set(xhr.status / 100 match {
-          case 2 => FileUploadState.Completed
-          case _ => FileUploadState.Failed
-        })
-      }
-    )
+      p.subProp(_.response).set(Some(new HttpResponse(xhr)))
+      p.subProp(_.state).set(xhr.status / 100 match {
+        case 2 => FileUploadState.Completed
+        case _ => FileUploadState.Failed
+      })
+    })
     xhr.addEventListener("error", (_: Event) =>
       p.subProp(_.state).set(FileUploadState.Failed)
     )
@@ -61,8 +62,8 @@ class FileUploader(url: Url) {
       p.subProp(_.state).set(FileUploadState.Cancelled)
     )
     xhr.open(method = "POST", url = url.value)
+    authToken.foreach(token => xhr.setRequestHeader("Authorization", token))
     xhr.send(data)
-
     p
   }
 }
