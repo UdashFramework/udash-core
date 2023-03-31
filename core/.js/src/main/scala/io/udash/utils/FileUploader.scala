@@ -1,6 +1,5 @@
 package io.udash.utils
 
-import com.avsystem.commons.OptArg
 import com.avsystem.commons.misc.AbstractCase
 import io.udash._
 import io.udash.properties.{Blank, HasModelPropertyCreator, PropertyCreator}
@@ -21,14 +20,13 @@ class FileUploader(url: Url) {
 
   /** Uploads provided `file` in a field named `fieldName` with an optional auth token set in the Authorization header. */
   def uploadFile(
-    fieldName: String, file: File, extraData: Map[js.Any, js.Any] = Map.empty, authToken: OptArg[String] = OptArg.Empty
-  ): ReadableModelProperty[FileUploadModel] = {
-    upload(fieldName, Seq(file), extraData = extraData, authToken = authToken)
-  }
+    fieldName: String, file: File, extraData: Map[js.Any, js.Any] = Map.empty, additionalRequestHeaders: Seq[RequestHeader] = Seq.empty
+  ): ReadableModelProperty[FileUploadModel] =
+    upload(fieldName, Seq(file), extraData = extraData, additionalRequestHeaders = additionalRequestHeaders)
 
   /** Uploads provided `files` in a field named `fieldName` with an optional auth token set in the Authorization header. */
   def upload(
-    fieldName: String, files: Seq[File], extraData: Map[js.Any, js.Any] = Map.empty, authToken: OptArg[String] = OptArg.Empty
+    fieldName: String, files: Seq[File], extraData: Map[js.Any, js.Any] = Map.empty, additionalRequestHeaders: Seq[RequestHeader] = Seq.empty
   ): ReadableModelProperty[FileUploadModel] = {
     val p = ModelProperty[FileUploadModel](
       new FileUploadModel(Seq.empty, FileUploadState.InProgress, 0, 0, None)
@@ -62,11 +60,13 @@ class FileUploader(url: Url) {
       p.subProp(_.state).set(FileUploadState.Cancelled)
     )
     xhr.open(method = "POST", url = url.value)
-    authToken.foreach(token => xhr.setRequestHeader("Authorization", token))
+    additionalRequestHeaders.foreach(reqHeader => xhr.setRequestHeader(reqHeader.name, reqHeader.value))
     xhr.send(data)
     p
   }
 }
+
+final class RequestHeader(val name: String, val value: String)
 
 object FileUploader {
   sealed trait FileUploadState extends AbstractCase
