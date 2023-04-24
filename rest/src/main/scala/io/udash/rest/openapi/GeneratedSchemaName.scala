@@ -17,7 +17,7 @@ import com.avsystem.commons.serialization.name
  * @param name the schema name or `Opt.Empty` for an unnamed (inline) schema
  */
 final case class GeneratedSchemaName[T](name: Opt[String])
-object GeneratedSchemaName {
+object GeneratedSchemaName extends GeneratedSchemaNameLowPrio {
   def apply[T](implicit sn: GeneratedSchemaName[T]): GeneratedSchemaName[T] = sn
   def of[T](implicit sn: GeneratedSchemaName[T]): Opt[String] = sn.name
 
@@ -26,7 +26,8 @@ object GeneratedSchemaName {
 
   implicit def annotSchemaName[T](implicit nameAnnot: AnnotationOf[name, T]): GeneratedSchemaName[T] =
     GeneratedSchemaName.some(nameAnnot.annot.name)
-
+}
+trait GeneratedSchemaNameLowPrio { this: GeneratedSchemaName.type =>
   implicit def classSchemaName[T: SimpleClassName]: GeneratedSchemaName[T] =
     GeneratedSchemaName.some(SimpleClassName.of[T])
 }
