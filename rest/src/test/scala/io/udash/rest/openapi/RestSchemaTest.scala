@@ -13,7 +13,7 @@ class Fuu[T](thing: T)
 
 object FullyQualifiedNames extends DefaultRestImplicits {
   implicit def fullyQualifiedSchemaName[T: ClassTag]: GeneratedSchemaName[T] =
-    GeneratedSchemaName.some(classTag[T].runtimeClass.getName.stripSuffix("$"))
+    GeneratedSchemaName.some(classTag[T].runtimeClass.getName.stripSuffix("$").replace('$', '.'))
 }
 
 trait Dependency
