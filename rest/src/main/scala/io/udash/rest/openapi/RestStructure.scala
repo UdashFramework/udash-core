@@ -28,11 +28,12 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   @positioned(positioned.here) final case class Union[T](
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
     @adtCaseMetadata @multi cases: List[Case[_]],
-    @composite info: GenUnionInfo[T]
+    @infer schemaName: GeneratedSchemaName[T],
+    @composite info: GenUnionInfo[T],
   ) extends RestStructure[T] {
 
     def standaloneSchema: RestSchema[T] =
-      RestSchema.create(createSchema, info.rawName)
+      RestSchema.create(createSchema, schemaName.name.toOptArg)
 
     private def createSchema(resolver: SchemaResolver): RefOr[Schema] = {
       val caseFieldOpt = info.flatten.map(_.caseFieldName)
@@ -75,16 +76,30 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
    */
   @positioned(positioned.here) final case class CustomCase[T](
     @checked @infer restSchema: RestSchema[T],
-    @composite info: GenCaseInfo[T]
+    @infer schemaName: GeneratedSchemaName[T],
+    @composite info: GenCaseInfo[T],
   ) extends Case[T] {
 
     def caseSchema(caseFieldName: Opt[String]): RestSchema[T] =
       caseFieldName.fold(restSchema) { cfn =>
         val caseFieldSchema = RefOr(Schema.enumOf(List(info.rawName)))
 
-        // creates new schema with additional discriminator field
+        // Creates new schema with additional discriminator field.
+        // Used only if case schema does not already contain the discriminator field.
+        //
+        // If the case schema is unnamed or has different name than specified by its `SchemaName`,
+        // it means that someone has manually overridden the schema name directly on `RestSchema` instance.
+        // We can take advantage of that situation and reuse the `SchemaName` for the name of the _tagged_
+        // case schema, i.e. the schema with added discriminator field.
+        // Otherwise we must generate another, unique schema name, which we do by prepending
+        // the original name with prefix "tagged".
+        //
         def schemaWithDiscriminatorField: RestSchema[T] = {
-          val taggedName = if (restSchema.name.contains(info.rawName)) s"tagged${info.rawName}" else info.rawName
+          val preferredTaggedSchemaName = schemaName.name.getOrElse(info.rawName)
+          val taggedName =
+            if (restSchema.name.contains(preferredTaggedSchemaName)) s"tagged$preferredTaggedSchemaName"
+            else preferredTaggedSchemaName
+
           restSchema.map({
             case RefOr.Value(caseSchema) => caseSchema.copy(
               properties = caseSchema.properties + (cfn -> caseFieldSchema),
@@ -113,9 +128,12 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
                 // When provided `restSchema` already contains the expected discriminator field just return it unchanged
                 restSchema
               case Opt.Empty =>
+                // If there's no discriminator field, we must manually add it and create a new case schema
                 schemaWithDiscriminatorField
             }
           case _ =>
+            // Case schema is a hardcoded, opaque reference to an external schema - generate new schema with the
+            // discriminator field.
             schemaWithDiscriminatorField
         }
       }
@@ -127,14 +145,15 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   @positioned(positioned.here) final case class Record[T](
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
     @adtParamMetadata @allowOptional @multi fields: List[Field[_]],
-    @composite info: GenCaseInfo[T]
+    @infer schemaName: GeneratedSchemaName[T],
+    @composite info: GenCaseInfo[T],
   ) extends RestStructure[T] with Case[T] {
 
     def standaloneSchema: RestSchema[T] =
-      RestSchema.create(createSchema(_, Opt.Empty), info.rawName)
+      RestSchema.create(createSchema(_, Opt.Empty), schemaName.name.toOptArg)
 
     def caseSchema(caseFieldName: Opt[String]): RestSchema[T] =
-      RestSchema.create(createSchema(_, caseFieldName), caseFieldName.map(_ => info.rawName).toOptArg)
+      RestSchema.create(createSchema(_, caseFieldName), caseFieldName.flatMap(_ => schemaName.name).toOptArg)
 
     private def createSchema(resolver: SchemaResolver, caseFieldName: Opt[String]): RefOr[Schema] =
       (fields, caseFieldName) match {
@@ -159,6 +178,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   @positioned(positioned.here) final case class Singleton[T](
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
     @infer @checked value: ValueOf[T],
+    @infer schemaName: GeneratedSchemaName[T],
     @composite info: GenCaseInfo[T]
   ) extends RestStructure[T] with Case[T] {
 
@@ -166,7 +186,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
       RestSchema.create(createSchema(_, Opt.Empty))
 
     def caseSchema(caseFieldName: Opt[String]): RestSchema[T] =
-      RestSchema.create(createSchema(_, caseFieldName), caseFieldName.map(_ => info.rawName).toOptArg)
+      RestSchema.create(createSchema(_, caseFieldName), caseFieldName.flatMap(_ => schemaName.name).toOptArg)
 
     def createSchema(resolver: SchemaResolver, caseFieldName: Opt[String]): RefOr[Schema] =
       RefOr(applyAdjusters(Schema(`type` = DataType.Object,

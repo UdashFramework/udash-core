@@ -14,6 +14,14 @@ trait CodecWithStructure[T] {
   def structure: RestStructure[T]
 }
 
+abstract class AbstractRestDataCompanion[Implicits, T](implicits: Implicits)(implicit
+  instances: MacroInstances[Implicits, CodecWithStructure[T]]
+) {
+  implicit lazy val codec: GenCodec[T] = instances(implicits, this).codec
+  implicit lazy val restStructure: RestStructure[T] = instances(implicits, this).structure
+  implicit lazy val restSchema: RestSchema[T] = RestSchema.lazySchema(restStructure.standaloneSchema)
+}
+
 /**
   * Base class for companion objects of ADTs (case classes, objects, sealed hierarchies) which are used as
   * parameter or result types in REST API traits. Automatically provides instances of
@@ -27,11 +35,7 @@ trait CodecWithStructure[T] {
   */
 abstract class RestDataCompanion[T](implicit
   instances: MacroInstances[DefaultRestImplicits, CodecWithStructure[T]]
-) extends {
-  implicit lazy val codec: GenCodec[T] = instances(DefaultRestImplicits, this).codec
-  implicit lazy val restStructure: RestStructure[T] = instances(DefaultRestImplicits, this).structure
-  implicit lazy val restSchema: RestSchema[T] = RestSchema.lazySchema(restStructure.standaloneSchema)
-}
+) extends AbstractRestDataCompanion[DefaultRestImplicits, T](DefaultRestImplicits)
 
 /**
   * A version of [[RestDataCompanion]] which injects additional implicits into macro materialization.
@@ -40,11 +44,7 @@ abstract class RestDataCompanion[T](implicit
   */
 abstract class RestDataCompanionWithDeps[D, T](implicit
   deps: ValueOf[D], instances: MacroInstances[(DefaultRestImplicits, D), CodecWithStructure[T]]
-) extends {
-  implicit lazy val codec: GenCodec[T] = instances((DefaultRestImplicits, deps.value), this).codec
-  implicit lazy val restStructure: RestStructure[T] = instances((DefaultRestImplicits, deps.value), this).structure
-  implicit lazy val restSchema: RestSchema[T] = RestSchema.lazySchema(restStructure.standaloneSchema)
-}
+) extends AbstractRestDataCompanion[(DefaultRestImplicits, D), T]((DefaultRestImplicits, deps.value))
 
 /**
   * Base class for companion objects of wrappers over other data types (i.e. case classes with single field).
