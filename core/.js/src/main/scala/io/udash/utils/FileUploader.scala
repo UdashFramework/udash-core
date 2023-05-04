@@ -1,6 +1,6 @@
 package io.udash.utils
 
-import com.avsystem.commons.misc.AbstractCase
+import com.avsystem.commons.misc.{AbstractCase, CaseMethods}
 import io.udash._
 import io.udash.properties.{Blank, HasModelPropertyCreator, PropertyCreator}
 import org.scalajs.dom._
@@ -18,15 +18,15 @@ class FileUploader(url: Url) {
       (0 until input.files.length).map(input.files.item)
     )
 
-  /** Uploads provided `file` in a field named `fieldName` with an optional auth token set in the Authorization header. */
+  /** Uploads provided `file` in a field named `fieldName` with optional custom request headers. */
   def uploadFile(
-    fieldName: String, file: File, extraData: Map[js.Any, js.Any] = Map.empty, additionalRequestHeaders: Seq[RequestHeader] = Seq.empty
+    fieldName: String, file: File, extraData: Map[js.Any, js.Any] = Map.empty, additionalRequestHeaders: Map[RequestName, RequestValue] = Map.empty
   ): ReadableModelProperty[FileUploadModel] =
     upload(fieldName, Seq(file), extraData = extraData, additionalRequestHeaders = additionalRequestHeaders)
 
-  /** Uploads provided `files` in a field named `fieldName` with an optional auth token set in the Authorization header. */
+  /** Uploads provided `files` in a field named `fieldName` with optional custom request headers. */
   def upload(
-    fieldName: String, files: Seq[File], extraData: Map[js.Any, js.Any] = Map.empty, additionalRequestHeaders: Seq[RequestHeader] = Seq.empty
+    fieldName: String, files: Seq[File], extraData: Map[js.Any, js.Any] = Map.empty, additionalRequestHeaders: Map[RequestName, RequestValue] = Map.empty
   ): ReadableModelProperty[FileUploadModel] = {
     val p = ModelProperty[FileUploadModel](
       new FileUploadModel(Seq.empty, FileUploadState.InProgress, 0, 0, None)
@@ -60,13 +60,14 @@ class FileUploader(url: Url) {
       p.subProp(_.state).set(FileUploadState.Cancelled)
     )
     xhr.open(method = "POST", url = url.value)
-    additionalRequestHeaders.foreach(reqHeader => xhr.setRequestHeader(reqHeader.name, reqHeader.value))
+    additionalRequestHeaders.foreach { case (name, value) => xhr.setRequestHeader(name.name, value.value) }
     xhr.send(data)
     p
   }
 }
 
-final class RequestHeader(val name: String, val value: String)
+final case class RequestName(name: String) extends AnyVal with CaseMethods
+final case class RequestValue(value: String) extends AnyVal with CaseMethods
 
 object FileUploader {
   sealed trait FileUploadState extends AbstractCase
