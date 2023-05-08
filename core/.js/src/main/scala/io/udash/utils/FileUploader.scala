@@ -18,13 +18,13 @@ class FileUploader(url: Url) {
       (0 until input.files.length).map(input.files.item)
     )
 
-  /** Uploads provided `file` in a field named `fieldName` with optional custom request headers. */
+  /** Uploads provided `file` in a field named `fieldName` with optional additional request headers. */
   def uploadFile(
     fieldName: String, file: File, extraData: Map[js.Any, js.Any] = Map.empty, additionalRequestHeaders: Map[RequestName, RequestValue] = Map.empty
   ): ReadableModelProperty[FileUploadModel] =
     upload(fieldName, Seq(file), extraData = extraData, additionalRequestHeaders = additionalRequestHeaders)
 
-  /** Uploads provided `files` in a field named `fieldName` with optional custom request headers. */
+  /** Uploads provided `files` in a field named `fieldName` with optional additional request headers. */
   def upload(
     fieldName: String, files: Seq[File], extraData: Map[js.Any, js.Any] = Map.empty, additionalRequestHeaders: Map[RequestName, RequestValue] = Map.empty
   ): ReadableModelProperty[FileUploadModel] = {
