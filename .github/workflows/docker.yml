@@ -28,7 +28,7 @@ jobs:
           java-version: 11
       - name: Get version
         id: get_tag_name
-        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/v}
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
       - name: Build and push Docker image
         run: >
           sbt

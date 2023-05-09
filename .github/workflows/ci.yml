@@ -63,7 +63,7 @@ jobs:
           java-version: 11
       - name: Get version
         id: get_tag_name
-        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/v}
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
       - name: Import GPG key
         env:
           #exported via `gpg -a --export-secret-keys <key> | cat -e | sed 's/\$/\\n/g' | xclip -selection clipboard` and added to org secrets
