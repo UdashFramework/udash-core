@@ -14,7 +14,7 @@ import scala.util.Try
 
 trait UdashRpcBackendTest extends UdashSharedTest with Utils with Eventually {
 
-  override implicit val patienceConfig = PatienceConfig(scaled(Span(5000, Millis)), scaled(Span(100, Millis)))
+  override implicit val patienceConfig: PatienceConfig = PatienceConfig(scaled(Span(5000, Millis)), scaled(Span(100, Millis)))
 
   class BroadcasterMock extends DefaultBroadcaster {
     val broadcasts = MListBuffer[String]()

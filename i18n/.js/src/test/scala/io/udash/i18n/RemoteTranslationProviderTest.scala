@@ -9,7 +9,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 
 class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAndAfter {
-  implicit val lang = Lang("en")
+  implicit val lang: Lang = Lang("en")
 
   private def localStorage: Storage = dom.window.localStorage
 

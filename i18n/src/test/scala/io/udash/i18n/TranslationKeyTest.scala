@@ -11,9 +11,9 @@ class TranslationKeyTest extends UdashSharedTest {
 
   import Utils._
 
-  implicit val lang = Lang("en")
+  implicit val lang: Lang = Lang("en")
 
-  implicit val provider = new TranslationProvider {
+  implicit val provider: TranslationProvider = new TranslationProvider {
     override def translate(key: String, argv: Any*)(implicit lang: Lang): Future[Translated] = {
       val sb = new StringBuilder
       sb.append(key)
