@@ -12,7 +12,7 @@ import org.scalatest.wordspec.AsyncWordSpec
 trait AsyncUdashSharedTestBase extends AsyncWordSpec with Matchers with BeforeAndAfterAll with PatienceConfiguration {
   case class RetryingTimeout() extends Exception
 
-  override implicit val patienceConfig = PatienceConfig(scaled(Span(5000, Millis)), scaled(Span(100, Millis)))
+  override implicit val patienceConfig: PatienceConfig = PatienceConfig(scaled(Span(5000, Millis)), scaled(Span(100, Millis)))
 
   def retrying(code: => Any)(implicit patienceConfig: PatienceConfig, pos: Position): Future[Assertion]
 }

@@ -5,7 +5,7 @@ import io.udash.testing.UdashFrontendTest
 class LocalTranslationProviderTest extends UdashFrontendTest {
   import Utils._
 
-  implicit val lang = Lang("en")
+  implicit val lang: Lang = Lang("en")
 
   "LocalTranslationProvider" should {
     "provide translations without argument" in {

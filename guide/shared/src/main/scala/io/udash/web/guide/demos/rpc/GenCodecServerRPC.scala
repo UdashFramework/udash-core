@@ -23,7 +23,7 @@ object GenCodecServerRPC extends DefaultServerRpcCompanion[GenCodecServerRPC] {
   }
 
   object DemoClass {
-    implicit val DemoClassCodec = new GenCodec[DemoClass] {
+    implicit val demoClassCodec: GenCodec[DemoClass] = new GenCodec[DemoClass] {
       override def read(input: Input): DemoClass = {
         val list = input.readList()
         val i = list.nextElement().readSimple().readInt()
