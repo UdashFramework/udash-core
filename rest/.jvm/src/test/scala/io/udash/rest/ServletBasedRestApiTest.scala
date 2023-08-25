@@ -1,8 +1,9 @@
 package io.udash
 package rest
 
+import org.eclipse.jetty.ee8.servlet.{ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.servlet.{ServletHandler, ServletHolder}
+import org.eclipse.jetty.ee8.servlet.{ServletHandler, ServletHolder}
 
 import scala.concurrent.duration._
 
@@ -15,8 +16,8 @@ abstract class ServletBasedRestApiTest extends RestApiTest with UsesHttpServer {
   protected def setupServer(server: Server): Unit = {
     val servlet = new RestServlet(serverHandle, serverTimeout, maxPayloadSize)
     val holder = new ServletHolder(servlet)
-    val handler = new ServletHandler
-    handler.addServletWithMapping(holder, "/api/*")
+    val handler = new ServletContextHandler()
+    handler.addServlet(holder, "/api/*")
     server.setHandler(handler)
   }
 }

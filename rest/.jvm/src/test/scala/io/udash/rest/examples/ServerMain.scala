@@ -4,7 +4,7 @@ package rest.examples
 import io.udash.rest.RestServlet
 import monix.execution.Scheduler
 import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
+import org.eclipse.jetty.ee8.servlet.{ServletContextHandler, ServletHolder}
 
 import scala.concurrent.Future
 

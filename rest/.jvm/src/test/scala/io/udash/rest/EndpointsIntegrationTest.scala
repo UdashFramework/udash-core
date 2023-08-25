@@ -4,10 +4,10 @@ package rest
 import io.udash.rest.raw._
 import io.udash.testing.UdashSharedTest
 import monix.execution.Scheduler
+import org.eclipse.jetty.ee8.nested.SessionHandler
+import org.eclipse.jetty.ee8.servlet.{ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
-import org.eclipse.jetty.server.session.SessionHandler
-import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -23,15 +23,18 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
   val port = 44598
   val contextPrefix = "/rest_api"
   val baseUri = s"http://127.0.0.1:$port$contextPrefix"
-  val server = new Server(port)
-  val context = new ServletContextHandler()
-  context.setSessionHandler(new SessionHandler)
-  context.setGzipHandler(new GzipHandler)
 
-  private val servlet = io.udash.rest.RestServlet[TestServerRESTInterface](new TestServerRESTInterfaceImpl)
-  val holder = new ServletHolder(servlet)
+  val holder = new ServletHolder(io.udash.rest.RestServlet[TestServerRESTInterface](new TestServerRESTInterfaceImpl))
   holder.setAsyncSupported(true)
-  context.addServlet(holder, s"$contextPrefix/*")
+
+  val contextHandler = new ServletContextHandler()
+  contextHandler.setSessionHandler(new SessionHandler)
+  contextHandler.addServlet(holder, s"$contextPrefix/*")
+
+  val context = new GzipHandler()
+  context.setHandler(contextHandler)
+
+  val server = new Server(port)
   server.setHandler(context)
 
   def futureHandle(rawHandle: RawRest.HandleRequest): RestRequest => Future[RestResponse] =

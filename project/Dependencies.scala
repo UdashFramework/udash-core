@@ -114,6 +114,7 @@ object Dependencies {
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "org.eclipse.jetty" % "jetty-server" % jettyVersion % Test,
+    "org.eclipse.jetty.ee8" % "jetty-ee8-servlet" % jettyVersion % Test
   ))
 
   val restSjsDeps = restCrossDeps
@@ -162,7 +163,7 @@ object Dependencies {
 
     "org.eclipse.jetty" % "jetty-server" % jettyVersion,
     "org.eclipse.jetty" % "jetty-rewrite" % jettyVersion,
-    "org.eclipse.jetty.websocket" % "jetty-websocket-core-server" % jettyVersion,
+    "org.eclipse.jetty.ee8.websocket" % "jetty-ee8-websocket-javax-server" % jettyVersion,
 
     "com.typesafe" % "config" % typesafeConfigVersion,
 
