@@ -8,7 +8,7 @@ import io.udash.utils.URLEncoder
 import monix.eval.Task
 import org.eclipse.jetty.client.HttpClient
 import org.eclipse.jetty.client.api.Result
-import org.eclipse.jetty.client.util.{BufferingResponseListener, BytesContentProvider, StringContentProvider}
+import org.eclipse.jetty.client.util.{BufferingResponseListener, BytesRequestContent, StringRequestContent}
 import org.eclipse.jetty.http.{HttpHeader, MimeTypes}
 
 import java.net.HttpCookie
@@ -43,7 +43,7 @@ object JettyRestClient {
         case (name, PlainValue(value)) => httpReq.param(name, value)
       }
       request.parameters.headers.entries.foreach {
-        case (name, PlainValue(value)) => httpReq.header(name, value)
+        case (name, PlainValue(value)) => httpReq.headers(headers => headers.add(name, value))
       }
       request.parameters.cookies.entries.foreach {
         case (name, PlainValue(value)) => httpReq.cookie(new HttpCookie(
@@ -53,9 +53,9 @@ object JettyRestClient {
       request.body match {
         case HttpBody.Empty =>
         case tb: HttpBody.Textual =>
-          httpReq.content(new StringContentProvider(tb.contentType, tb.content, Charset.forName(tb.charset)))
+          httpReq.body(new StringRequestContent(tb.contentType, tb.content, Charset.forName(tb.charset)))
         case bb: HttpBody.Binary =>
-          httpReq.content(new BytesContentProvider(bb.contentType, bb.bytes))
+          httpReq.body(new BytesRequestContent(bb.contentType, bb.bytes))
       }
 
       timeout match {

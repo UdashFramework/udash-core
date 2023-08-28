@@ -1,8 +1,8 @@
-import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
-import org.scalajs.jsdependencies.sbtplugin.JSDependenciesPlugin.autoImport._
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport.*
+import org.scalajs.jsdependencies.sbtplugin.JSDependenciesPlugin.autoImport.*
 import org.scalajs.jsdependencies.sbtplugin.JSModuleID
+import sbt.*
 import sbt.Keys.scalaVersion
-import sbt._
 
 object Dependencies {
   val versionOfScala = "2.13.12" //update .github/workflows/ci.yml as well
@@ -28,7 +28,7 @@ object Dependencies {
 
   val scalaLoggingVersion = "3.9.5"
 
-  val jettyVersion = "9.4.51.v20230217"
+  val jettyVersion = "10.0.15"
   val typesafeConfigVersion = "1.4.2"
   val flexmarkVersion = "0.64.8"
   val logbackVersion = "1.3.11"
@@ -161,9 +161,8 @@ object Dependencies {
     "ch.qos.logback" % "logback-classic" % logbackVersion,
     "org.codehaus.janino" % "janino" % janinoVersion, //conditional processing in logback
 
-    "org.eclipse.jetty" % "jetty-server" % jettyVersion,
     "org.eclipse.jetty" % "jetty-rewrite" % jettyVersion,
-    "org.eclipse.jetty.websocket" % "websocket-server" % jettyVersion,
+    "org.eclipse.jetty.websocket" % "websocket-javax-server" % jettyVersion,
 
     "com.typesafe" % "config" % typesafeConfigVersion,
 
