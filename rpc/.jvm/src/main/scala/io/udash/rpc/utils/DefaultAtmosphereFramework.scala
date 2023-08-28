@@ -15,7 +15,6 @@ class DefaultAtmosphereFramework(
 ) extends AtmosphereFramework {
   addInitParameter(ApplicationConfig.WEBSOCKET_SUPPORT, "true")
   addInitParameter(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true")
-  addInitParameter(ApplicationConfig.PROPERTY_NATIVE_COMETSUPPORT, "true")
   addInitParameter(ApplicationConfig.DEFAULT_CONTENT_TYPE, "application/json")
   addInitParameter(ApplicationConfig.HEARTBEAT_INTERVAL_IN_SECONDS, "30")
   addInitParameter(ApplicationConfig.CLIENT_HEARTBEAT_INTERVAL_IN_SECONDS, "30")

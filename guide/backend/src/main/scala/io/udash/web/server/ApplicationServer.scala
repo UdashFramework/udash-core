@@ -14,6 +14,7 @@ import org.eclipse.jetty.server.handler.ContextHandlerCollection
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler, ServletHolder}
+import org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer
 
 class ApplicationServer(val port: Int, homepageResourceBase: String, guideResourceBase: String)(implicit scheduler: Scheduler) {
   private val server = new Server(port)
@@ -55,6 +56,8 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
     }
     ctx.addServlet(atmosphereHolder, "/atm/*")
 
+    JavaxWebSocketServletContainerInitializer.configure(ctx, null)
+
     val restHolder = new ServletHolder(
       RestServlet[MainServerREST](new ExposedRestInterfaces)
     )
@@ -85,7 +88,7 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
   private def createContextHandler(hosts: Array[String]): ServletContextHandler = {
     val context = new ServletContextHandler
     context.setSessionHandler(new SessionHandler)
-    context.setGzipHandler(new GzipHandler)
+    context.insertHandler(new GzipHandler)
     context.setVirtualHosts(hosts)
     context
   }
