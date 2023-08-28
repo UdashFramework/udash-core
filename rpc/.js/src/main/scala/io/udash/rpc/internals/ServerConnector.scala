@@ -10,7 +10,6 @@ import io.udash.wrappers.atmosphere._
 import org.scalajs.dom
 
 import scala.scalajs.js
-import scala.scalajs.js.JSON
 import scala.util.control.NonFatal
 
 trait ServerConnector {
@@ -43,16 +42,9 @@ abstract class AtmosphereServerConnector(
       if (websocketSupport)
         createRequestObject(
           Transport.WEBSOCKET, reconnectInterval,
-          onOpen = (_: AtmosphereResponse) => {
-            println("onopen")
-            ready(ConnectionStatus.Open)
-          },
-          onReopen = (_: AtmosphereResponse) => {
-            println("onereopen")
-            ready(ConnectionStatus.Open)
-          },
+          onOpen = (_: AtmosphereResponse) => ready(ConnectionStatus.Open),
+          onReopen = (_: AtmosphereResponse) => ready(ConnectionStatus.Open),
           onReconnect = (_: AtmosphereRequest, _: AtmosphereResponse) => {
-            println("onreconnect")
             if (onReconnectTimeoutHandler != 0) dom.window.clearTimeout(onReconnectTimeoutHandler)
             ready(ConnectionStatus.Closed)
             onReconnectTimeoutHandler = dom.window.setTimeout(() => {
@@ -60,19 +52,9 @@ abstract class AtmosphereServerConnector(
               onReconnectTimeoutHandler = 0
             }, reconnectInterval * 2)
           },
-          onError = (_: AtmosphereResponse) => {
-            println("onerror")
-            ready(ConnectionStatus.Closed)
-          },
-          onClose = (r: AtmosphereResponse) => {
-            JSON.stringify(r)
-            println("onclose " + JSON.stringify(r))
-            ready(ConnectionStatus.Closed)
-          },
-          onClientTimeout = (_: AtmosphereResponse) => {
-            println("onclienttimeout")
-            ready(ConnectionStatus.Closed)
-          }
+          onError = (_: AtmosphereResponse) => ready(ConnectionStatus.Closed),
+          onClose = (_: AtmosphereResponse) => ready(ConnectionStatus.Closed),
+          onClientTimeout = (_: AtmosphereResponse) => ready(ConnectionStatus.Closed)
         )
       else {
         isReady = ConnectionStatus.Open
@@ -132,7 +114,7 @@ abstract class AtmosphereServerConnector(
     AtmosphereRequest(
       url = serverUrl,
       contentType = "application/json",
-      logLevel = "debug",
+      logLevel = "info",
       transport = transport,
       fallbackTransport = transport,
       enableProtocol = true,
