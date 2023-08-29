@@ -2,7 +2,7 @@ package io.udash.web.server
 
 import io.udash.rest._
 import io.udash.rpc._
-import io.udash.rpc.utils.{CallLogging, DefaultAtmosphereFramework}
+import io.udash.rpc.utils.CallLogging
 import io.udash.web.guide.demos.activity.{Call, CallLogger}
 import io.udash.web.guide.demos.rest.MainServerREST
 import io.udash.web.guide.rest.ExposedRestInterfaces
@@ -12,7 +12,6 @@ import monix.execution.Scheduler
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.ContextHandlerCollection
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
-import org.eclipse.jetty.server.session.SessionHandler
 import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer
 
@@ -56,6 +55,7 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
     }
     ctx.addServlet(atmosphereHolder, "/atm/*")
 
+    //required for org.atmosphere.container.JSR356AsyncSupport
     JavaxWebSocketServletContainerInitializer.configure(ctx, null)
 
     val restHolder = new ServletHolder(
@@ -86,8 +86,7 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
   server.setHandler(rewriteHandler)
 
   private def createContextHandler(hosts: Array[String]): ServletContextHandler = {
-    val context = new ServletContextHandler
-    context.setSessionHandler(new SessionHandler)
+    val context = new ServletContextHandler(ServletContextHandler.SESSIONS)
     context.insertHandler(new GzipHandler)
     context.setVirtualHosts(hosts)
     context
