@@ -19,7 +19,7 @@ class BootstrappingBackendView extends View with CssView {
     p("This chapter covers:"),
     ul(GuideStyles.defaultList)(
       li("Implementation of the server-side RPC endpoint."),
-      li("Configuration of the ", a(href := JettyHomepage, target := "_blank")("Jetty"), " webserver to handle RPC and static files requests."),
+      li("Configuration of the ", a(href := JettyHomepage, target := "_blank")("Jetty"), " 10 webserver to handle RPC and static files requests."),
       li("Implementation of a simple system launcher.")
     ),
     p("The backend application is expected to serve static files like HTML, JS or images and handle RPC requests from client applications."),
@@ -75,17 +75,19 @@ class BootstrappingBackendView extends View with CssView {
         |
         |class ApplicationServer(val port: Int, resourceBase: String) {
         |  private val server = new Server(port)
-        |  private val contextHandler = new ServletContextHandler
+        |  private val contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS)
         |  private val appHolder = createAppHolder()
         |  private val atmosphereHolder = createAtmosphereHolder()
         |
-        |  contextHandler.setSessionHandler(new SessionHandler)
         |  contextHandler.getSessionHandler.addEventListener(
         |    new org.atmosphere.cpr.SessionSupport()
         |  )
         |  contextHandler.addServlet(atmosphereHolder, "/atm/*")
         |  contextHandler.addServlet(appHolder, "/*")
         |  server.setHandler(contextHandler)
+        |
+        |  //required for org.atmosphere.container.JSR356AsyncSupport
+        |  JavaxWebSocketServletContainerInitializer.configure(contextHandler, null)
         |
         |  def start(): Unit = server.start()
         |
