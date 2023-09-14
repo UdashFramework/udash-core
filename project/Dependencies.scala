@@ -42,7 +42,7 @@ object Dependencies {
   val bootstrap4DatepickerVersion = "5.39.0"
   val momentJsVersion = "2.29.4"
 
-  val seleniumVersion = "4.11.0"
+  val seleniumVersion = "4.12.1"
   val webDriverManagerVersion = "5.5.2"
   val scalaJsBenchmarkVersion = "0.10.0"
 
