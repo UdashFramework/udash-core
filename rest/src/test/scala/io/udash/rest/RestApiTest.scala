@@ -70,6 +70,10 @@ trait RestApiTestScenarios extends RestApiTest {
     testCall(_.prefix("p0", "h0", "q0").subget(0, 1, 2))
   }
 
+  test("transparent prefix GET") {
+    testCall(_.transparentPrefix.subget(0, 1, 2))
+  }
+
   test("custom response with headers") {
     testCall(_.customResponse("walue"))
   }
