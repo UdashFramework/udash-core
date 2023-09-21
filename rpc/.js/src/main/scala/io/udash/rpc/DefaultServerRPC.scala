@@ -20,7 +20,7 @@ class DefaultServerRPC[ServerRPCType: ServerRawRpc.AsRealRpc](
 object DefaultServerRPC {
   /** Creates [[io.udash.rpc.DefaultServerRPC]] for provided RPC interfaces. */
   def apply[ClientRPCType: ClientRawRpc.AsRawRpc, ServerRPCType: ServerRawRpc.AsRealRpc](
-    localRpc: ClientRPCType, serverUrl: String = "/atm/",
+    localRpc: ClientRPCType, serverUrl: String = "/atm",
     exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry,
     rpcFailureInterceptors: Seq[PartialFunction[Throwable, Any]] = Seq.empty,
     callTimeout: Duration = 30 seconds

@@ -26,7 +26,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
   val server = new Server(port)
   val context = new ServletContextHandler()
   context.setSessionHandler(new SessionHandler)
-  context.setGzipHandler(new GzipHandler)
+  context.insertHandler(new GzipHandler)
 
   private val servlet = io.udash.rest.RestServlet[TestServerRESTInterface](new TestServerRESTInterfaceImpl)
   val holder = new ServletHolder(servlet)
