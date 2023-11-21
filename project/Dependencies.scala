@@ -24,11 +24,11 @@ object Dependencies {
   val circeDerivationVersion = "0.13.0-M5" // Tests only
   val monixVersion = "3.4.1" // Tests only
 
-  val sttpVersion = "3.9.0"
+  val sttpVersion = "3.9.1"
 
   val scalaLoggingVersion = "3.9.5"
 
-  val jettyVersion = "10.0.17"
+  val jettyVersion = "10.0.18"
   val typesafeConfigVersion = "1.4.3"
   val flexmarkVersion = "0.64.8"
   val logbackVersion = "1.3.11"
@@ -43,7 +43,7 @@ object Dependencies {
   val momentJsVersion = "2.29.4"
 
   val seleniumVersion = "4.15.0"
-  val webDriverManagerVersion = "5.6.0"
+  val webDriverManagerVersion = "5.6.2"
   val scalaJsBenchmarkVersion = "0.10.0"
 
   val compilerPlugins = Def.setting(Seq(
