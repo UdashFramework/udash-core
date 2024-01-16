@@ -52,6 +52,16 @@ final case class OpenApiMetadata[T](
 ) {
   val httpMethods: List[OpenApiOperation[_]] = (gets: List[OpenApiOperation[_]]) ++ customBodyMethods ++ bodyMethods
 
+  // collect all tags
+  private lazy val openApiTags: List[Tag] = {
+    def createTags(method: OpenApiMethod[_]): List[Tag] =
+      method.groupAnnot.fold[List[Tag]](Nil) { group =>
+        List(method.tagAdjusters.foldLeft(Tag(group.groupName))({ case (tag, adjuster) => adjuster.adjustTag(tag) }))
+      }
+
+    prefixes.flatMap(prefix => createTags(prefix) ++ prefix.result.value.openApiTags) ++ httpMethods.flatMap(createTags)
+  }
+
   def operations(resolver: SchemaResolver): Iterator[PathOperation] =
     prefixes.iterator.flatMap(_.operations(resolver)) ++
       httpMethods.iterator.map(_.pathOperation(resolver))
@@ -79,7 +89,7 @@ final case class OpenApiMetadata[T](
         put = ops.getOpt(HttpMethod.PUT).toOptArg,
         post = ops.getOpt(HttpMethod.POST).toOptArg,
         patch = ops.getOpt(HttpMethod.PATCH).toOptArg,
-        delete = ops.getOpt(HttpMethod.DELETE).toOptArg
+        delete = ops.getOpt(HttpMethod.DELETE).toOptArg,
       )
       (path, RefOr(pathAdjustersMap(path).foldRight(pathItem)(_ adjustPathItem _)))
     }.intoMap[ITreeMap])
@@ -94,14 +104,15 @@ final case class OpenApiMetadata[T](
     externalDocs: OptArg[ExternalDocumentation] = OptArg.Empty
   ): OpenApi = {
     val registry = new SchemaRegistry(initial = components.schemas)
-    OpenApi(OpenApi.Version,
+    OpenApi(
+      OpenApi.Version,
       info,
       paths(registry),
       components = components.copy(schemas = registry.registeredSchemas),
       servers = servers,
       security = security,
-      tags = tags,
-      externalDocs = externalDocs
+      tags = openApiTags ++ tags,
+      externalDocs = externalDocs,
     )
   }
 }
@@ -119,7 +130,7 @@ final case class PathOperation(
   path: String,
   method: HttpMethod,
   operation: Operation,
-  pathAdjusters: List[PathItemAdjuster]
+  pathAdjusters: List[PathItemAdjuster],
 )
 
 sealed trait OpenApiMethod[T] extends TypedMetadata[T] {
@@ -128,6 +139,8 @@ sealed trait OpenApiMethod[T] extends TypedMetadata[T] {
   @multi @rpcParamMetadata @tagged[NonBodyTag] @allowOptional def parameters: List[OpenApiParameter[_]]
   @multi @reifyAnnot def operationAdjusters: List[OperationAdjuster]
   @multi @reifyAnnot def pathAdjusters: List[PathItemAdjuster]
+  @optional @reifyAnnot def groupAnnot: Opt[group]
+  @multi @reifyAnnot def tagAdjusters: List[TagAdjuster]
 
   val pathPattern: String = {
     val pathParts = methodTag.path :: parameters.flatMap {
@@ -145,8 +158,10 @@ final case class OpenApiPrefix[T](
   parameters: List[OpenApiParameter[_]],
   operationAdjusters: List[OperationAdjuster],
   pathAdjusters: List[PathItemAdjuster],
+  groupAnnot: Opt[group],
+  tagAdjusters: List[TagAdjuster],
   @optional @reifyAnnot operationIdPrefix: Opt[operationIdPrefix],
-  @infer @checked result: OpenApiMetadata.Lazy[T]
+  @infer @checked result: OpenApiMetadata.Lazy[T],
 ) extends OpenApiMethod[T] {
 
   def operations(resolver: SchemaResolver): Iterator[PathOperation] = {
@@ -188,8 +203,10 @@ final case class OpenApiGetOperation[T](
   methodTag: HttpMethodTag,
   operationAdjusters: List[OperationAdjuster],
   pathAdjusters: List[PathItemAdjuster],
+  groupAnnot: Opt[group],
+  tagAdjusters: List[TagAdjuster],
   parameters: List[OpenApiParameter[_]],
-  resultType: RestResultType[T]
+  resultType: RestResultType[T],
 ) extends OpenApiOperation[T] {
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] = Opt.Empty
 }
@@ -199,6 +216,8 @@ final case class OpenApiCustomBodyOperation[T](
   methodTag: HttpMethodTag,
   operationAdjusters: List[OperationAdjuster],
   pathAdjusters: List[PathItemAdjuster],
+  groupAnnot: Opt[group],
+  tagAdjusters: List[TagAdjuster],
   parameters: List[OpenApiParameter[_]],
   @encoded @rpcParamMetadata @tagged[Body] @unmatched(RawRest.MissingBodyParam) singleBody: OpenApiBody[_],
   resultType: RestResultType[T]
@@ -212,10 +231,12 @@ final case class OpenApiBodyOperation[T](
   methodTag: HttpMethodTag,
   operationAdjusters: List[OperationAdjuster],
   pathAdjusters: List[PathItemAdjuster],
+  groupAnnot: Opt[group],
+  tagAdjusters: List[TagAdjuster],
   parameters: List[OpenApiParameter[_]],
   @multi @rpcParamMetadata @tagged[Body] @allowOptional bodyFields: List[OpenApiBodyField[_]],
   @reifyAnnot bodyTypeTag: BodyTypeTag,
-  resultType: RestResultType[T]
+  resultType: RestResultType[T],
 ) extends OpenApiOperation[T] {
 
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] =
@@ -238,7 +259,7 @@ final case class OpenApiParamInfo[T](
   @optional @composite whenAbsentInfo: Opt[WhenAbsentInfo[T]],
   @isAnnotated[optionalParam] optional: Boolean,
   @reifyFlags flags: ParamFlags,
-  @infer restSchema: RestSchema[T]
+  @infer restSchema: RestSchema[T],
 ) extends TypedMetadata[T] {
   val whenAbsentValue: Opt[JsonValue] =
     if (optional) Opt.Empty
@@ -259,7 +280,7 @@ final case class OpenApiParamInfo[T](
 final case class OpenApiParameter[T](
   @reifyAnnot paramTag: NonBodyTag,
   @composite info: OpenApiParamInfo[T],
-  @multi @reifyAnnot adjusters: List[ParameterAdjuster]
+  @multi @reifyAnnot adjusters: List[ParameterAdjuster],
 ) extends TypedMetadata[T] {
 
   def parameter(resolver: SchemaResolver): RefOr[Parameter] = {
@@ -284,7 +305,7 @@ final case class OpenApiParameter[T](
 
 final case class OpenApiBodyField[T](
   @composite info: OpenApiParamInfo[T],
-  @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster]
+  @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
 ) extends TypedMetadata[T] {
   def schema(resolver: SchemaResolver): RefOr[Schema] =
     SchemaAdjuster.adjustRef(schemaAdjusters, info.schema(resolver, withDefaultValue = true))
@@ -292,7 +313,7 @@ final case class OpenApiBodyField[T](
 
 final case class OpenApiBody[T](
   @infer restRequestBody: RestRequestBody[T],
-  @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster]
+  @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
 ) extends TypedMetadata[T] {
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] = {
     def transformSchema(schema: RestSchema[_]): RestSchema[_] =

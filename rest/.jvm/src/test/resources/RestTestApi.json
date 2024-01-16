@@ -177,6 +177,9 @@
     },
     "/failingGet": {
       "get": {
+        "tags": [
+          "TrivialDescribedGroup"
+        ],
         "operationId": "failingGet",
         "responses": {
           "204": {
@@ -495,6 +498,9 @@
     "/prefix/{p0}/subget/{p1}": {
       "summary": "summary for prefix paths",
       "get": {
+        "tags": [
+          "Prefix"
+        ],
         "operationId": "prefix_subget",
         "parameters": [
           {
@@ -642,6 +648,9 @@
     },
     "/trivialGet": {
       "get": {
+        "tags": [
+          "TrivialGroup"
+        ],
         "operationId": "trivialGet",
         "responses": {
           "204": {
@@ -941,5 +950,18 @@
         ]
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "Prefix",
+      "description": "example API subgroup"
+    },
+    {
+      "name": "TrivialGroup"
+    },
+    {
+      "name": "TrivialDescribedGroup",
+      "description": "something"
+    }
+  ]
 }
