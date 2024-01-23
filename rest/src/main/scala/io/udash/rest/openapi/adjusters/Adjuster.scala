@@ -3,7 +3,7 @@ package rest.openapi
 package adjusters
 
 import com.avsystem.commons._
-import com.avsystem.commons.annotation.NotInheritedFromSealedTypes
+import com.avsystem.commons.annotation.{AnnotationAggregate, NotInheritedFromSealedTypes, defaultsToName}
 import com.avsystem.commons.meta.infer
 import com.avsystem.commons.rpc.AsRaw
 import io.udash.rest.raw._
@@ -46,8 +46,7 @@ object SchemaAdjuster {
 
 /**
   * Base trait for annotation which may adjust [[io.udash.rest.openapi.Parameter Parameter]] generated for path,
-  * query or header parameters
-  * of REST RPC methods.
+  * query or header parameters of REST RPC methods.
   */
 trait ParameterAdjuster extends Adjuster {
   def adjustParameter(parameter: Parameter): Parameter
@@ -122,6 +121,15 @@ trait SuccessfulResponseAdjuster extends OperationAdjuster {
   def adjustResponse(response: Response): Response
 }
 
+/**
+ * Base trait for annotation which may adjust [[io.udash.rest.openapi.Tag Tag]] generated for REST HTTP methods.
+ * Tag adjusters may also be specified on prefix methods - they will be added to all operations
+ * generated for the result of this prefix method.
+ */
+trait TagAdjuster extends StaticAnnotation {
+  def adjustTag(tag: Tag): Tag
+}
+
 /** Convenience implementation of [[io.udash.rest.openapi.adjusters.SchemaAdjuster SchemaAdjuster]] */
 class adjustSchema(f: Schema => Schema) extends SchemaAdjuster {
   def adjustSchema(value: Schema): Schema = f(value)
@@ -137,6 +145,10 @@ class adjustOperation(f: Operation => Operation) extends OperationAdjuster {
 /** Convenience implementation of [[io.udash.rest.openapi.adjusters.PathItemAdjuster PathItemAdjuster]] */
 class adjustPathItem(f: PathItem => PathItem) extends PathItemAdjuster {
   def adjustPathItem(value: PathItem): PathItem = f(value)
+}
+/** Convenience implementation of [[io.udash.rest.openapi.adjusters.TagAdjuster TagAdjuster]] */
+class adjustTag(f: Tag => Tag) extends TagAdjuster {
+  override def adjustTag(tag: Tag): Tag = f(tag)
 }
 
 /**
@@ -251,6 +263,33 @@ class operationId(operationId: OptArg[String] = OptArg.Empty) extends OperationA
 class tags(tags: String*) extends OperationAdjuster {
   def adjustOperation(operation: Operation): Operation =
     operation.copy(tags = operation.tags ++ tags)
+}
+
+/**
+ * Annotation which may be applied on HTTP REST method to add a single Open API [[io.udash.rest.openapi.Tag Tag]] for
+ * that method. Group can be also defined on prefix methods - it will be applied to all operations generated for the
+ * result of this prefix method.
+ *
+ * @param name OpenAPI tag name, defaults to method name
+ */
+class group(@defaultsToName name: String = null) extends tags(name.capitalize) {
+  def groupName: String = name.capitalize
+}
+
+/**
+ * Annotation which may be applied on HTTP REST method to specify description for
+ * [[io.udash.rest.openapi.Tag Tag]] defined in that method.
+ */
+class tagDescription(desc: String) extends TagAdjuster {
+  override def adjustTag(tag: Tag): Tag = tag.copy(description = desc)
+}
+
+/**
+ * Shortcut aggregating both [[group]] and [[tagDescription]]. Always uses default `group` name.
+ */
+class describedGroup(desc: String) extends AnnotationAggregate {
+  @group @tagDescription(desc)
+  final def aggregated: List[StaticAnnotation] = reifyAggregated
 }
 
 /**
