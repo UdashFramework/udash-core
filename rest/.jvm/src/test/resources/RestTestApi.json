@@ -267,6 +267,56 @@
         }
       }
     },
+    "/groupPrefix/subget/{p1}": {
+      "get": {
+        "tags": [
+          "GroupPrefix"
+        ],
+        "operationId": "groupPrefix_subget",
+        "parameters": [
+          {
+            "name": "p1",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "X-H1",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "q1",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/jsonFailingGet": {
       "get": {
         "operationId": "jsonFailingGet",
@@ -955,6 +1005,9 @@
     {
       "name": "Prefix",
       "description": "example API subgroup"
+    },
+    {
+      "name": "GroupPrefix"
     },
     {
       "name": "TrivialGroup"

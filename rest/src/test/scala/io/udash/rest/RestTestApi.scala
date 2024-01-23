@@ -131,6 +131,9 @@ trait RestTestApi {
     @Query @example("q0example") q0: String
   ): RestTestSubApi
 
+  @group
+  def groupPrefix: RestTestSubApi
+
   @Prefix("") def transparentPrefix: RestTestSubApi
 
   def complexParams(
@@ -172,6 +175,7 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
       Future.successful(s"$q1-$p1-$p2")
     def prefix(p0: String, h0: String, q0: String): RestTestSubApi =
       RestTestSubApi.impl(s"$p0-$h0-$q0")
+    def groupPrefix: RestTestSubApi = RestTestSubApi.impl("")
     def transparentPrefix: RestTestSubApi = RestTestSubApi.impl("")
     def complexParams(baseEntity: BaseEntity, flatBaseEntity: Opt[FlatBaseEntity]): Future[Unit] = Future.unit
     def complexParams(flatBaseEntity: FlatBaseEntity, baseEntity: Opt[BaseEntity]): Future[Unit] = Future.unit

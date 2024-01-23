@@ -54,12 +54,13 @@ final case class OpenApiMetadata[T](
 
   // collect all tags
   private lazy val openApiTags: List[Tag] = {
-    def createTags(method: OpenApiMethod[_]): List[Tag] =
-      method.groupAnnot.fold[List[Tag]](Nil) { group =>
-        List(method.tagAdjusters.foldLeft(Tag(group.groupName))({ case (tag, adjuster) => adjuster.adjustTag(tag) }))
+    def createTag(method: OpenApiMethod[_]): Opt[Tag] =
+      method.groupAnnot.map { group =>
+        method.tagAdjusters.foldLeft(Tag(group.groupName))({ case (tag, adjuster) => adjuster.adjustTag(tag) })
       }
 
-    prefixes.flatMap(prefix => createTags(prefix) ++ prefix.result.value.openApiTags) ++ httpMethods.flatMap(createTags)
+    (prefixes.iterator.flatMap(prefix => createTag(prefix).iterator ++ prefix.result.value.openApiTags.iterator) ++
+      httpMethods.iterator.flatMap(createTag)).toList
   }
 
   def operations(resolver: SchemaResolver): Iterator[PathOperation] =
