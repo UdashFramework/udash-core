@@ -14,7 +14,7 @@ object Dependencies {
   val scalaCssVersion = "1.0.0"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "2.13.2"
+  val avsCommonsVersion = "2.13.3"
 
   val atmosphereJSVersion = "3.1.3"
   val atmosphereVersion = "2.7.10"
@@ -22,7 +22,7 @@ object Dependencies {
   val upickleVersion = "3.1.4" // Tests only
   val circeVersion = "0.14.6" // Tests only
   val circeDerivationVersion = "0.13.0-M5" // Tests only
-  val monixVersion = "3.4.1" // Tests only
+  val monixVersion = "3.4.1" // udash-rest only
 
   val sttpVersion = "3.9.2"
 
@@ -37,7 +37,7 @@ object Dependencies {
   val svg4everybodyVersion = "2.1.9"
 
   val scalatestVersion = "3.2.17"
-  val scalaJsSecureRandomVersion = "1.0.0"
+  val scalaJsSecureRandomVersion = "1.0.0" // Tests only
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.39.0"
   val momentJsVersion = "2.29.4"
