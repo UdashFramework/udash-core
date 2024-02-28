@@ -7,7 +7,7 @@ addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.15.0")
 addSbtPlugin("org.scala-js" % "sbt-jsdependencies" % "1.0.2")
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.4")
 addSbtPlugin("org.jetbrains.scala" % "sbt-ide-settings" % "1.1.2")
-addSbtPlugin("com.github.sbt" % "sbt-less" % "1.5.0")
+addSbtPlugin("com.github.sbt" % "sbt-less" % "2.0.1")
 addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
 
 // Deployment configuration
