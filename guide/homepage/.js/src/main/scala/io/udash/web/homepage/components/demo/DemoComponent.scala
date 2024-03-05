@@ -36,8 +36,8 @@ final class DemoComponent(implicit application: Application[RoutingState]) exten
             )
           }.toSeq
         ),
-        produce(application.currentStateProperty) { state =>
-          state.opt.collect { case state: IndexState => code(state.codeDemo).setup(Prism.highlightAllUnder) }.getOrElse[Element](div().render)
+        produce(application.currentStateProperty) { currentState =>
+          currentState.opt.collect { case state: IndexState => code(state.codeDemo).setup(Prism.highlightAllUnder) }.getOrElse[Element](div().render)
         }
       )
     ).render
