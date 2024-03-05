@@ -74,20 +74,6 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
       deserialized3 should be(sealedException)
     }
 
-    //    "serialize and deserialize exception stacktrace" in {
-    //      val serialized = write[RpcResponse](exception)
-    //      val deserialized = read[RpcResponse](serialized)
-    //      deserialized.asInstanceOf[RpcResponseException].exception.getStackTrace should be(exception.exception.getStackTrace)
-    //
-    //      val serialized2 = write[RpcResponse](runtimeException)
-    //      val deserialized2 = read[RpcResponse](serialized2)
-    //      deserialized2.asInstanceOf[RpcResponseException].exception.getStackTrace should be(runtimeException.exception.getStackTrace)
-    //
-    //      val serialized3 = write[RpcResponse](sealedException)
-    //      val deserialized3 = read[RpcResponse](serialized3)
-    //      deserialized3.asInstanceOf[RpcResponseException].exception.getStackTrace should be(sealedException.exception.getStackTrace)
-    //    }
-
     "serialize and deserialize rpc failure msg" in {
       val serialized = write[RpcFailure](rpcFail)
       val deserialized = read[RpcFailure](serialized)

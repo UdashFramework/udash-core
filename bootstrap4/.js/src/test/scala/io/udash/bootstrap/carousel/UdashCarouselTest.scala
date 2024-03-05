@@ -134,9 +134,9 @@ class UdashCarouselTest extends AsyncUdashCoreFrontendTest {
       var changedEvent: CarouselEvent[UdashCarouselSlide, ReadableProperty[UdashCarouselSlide]] = null
       carousel.listen {
         case ev@CarouselEvent(_, _, _, false) =>
-          changeEvent = ev.asInstanceOf[CarouselEvent[UdashCarouselSlide, ReadableProperty[UdashCarouselSlide]]]
+          changeEvent = ev
         case ev@CarouselEvent(_, _, _, true) =>
-          changedEvent = ev.asInstanceOf[CarouselEvent[UdashCarouselSlide, ReadableProperty[UdashCarouselSlide]]]
+          changedEvent = ev
       }
       carousel.goTo(5)
       retrying(changeEvent shouldBe CarouselEvent(carousel, 5, CarouselEvent.Direction.Left, changed = false))
