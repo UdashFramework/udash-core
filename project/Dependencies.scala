@@ -1,4 +1,7 @@
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport.*
+import org.scalajs.jsdependencies.sbtplugin.JSDependenciesPlugin.autoImport.*
 import org.scalajs.jsdependencies.sbtplugin.JSModuleID
+import sbt.*
 import sbt.Keys.scalaVersion
 
 object Dependencies {
