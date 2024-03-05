@@ -247,7 +247,7 @@ final case class Schema(
   @td uniqueItems: Boolean = false,
 
   @td properties: Map[String, RefOr[Schema]] = Map.empty,
-  @td additionalProperties: AdditionalProperties = AdditionalProperties.Flag(true),
+  @td additionalProperties: AdditionalProperties = AdditionalProperties.Flag(value = true),
   @td maxProperties: OptArg[Int] = OptArg.Empty,
   @td minProperties: OptArg[Int] = OptArg.Empty,
   @td required: List[String] = Nil,
@@ -295,7 +295,7 @@ object Schema extends HasGenObjectCodec[Schema] {
   def enumMapOf(keys: List[String], value: RefOr[Schema]): Schema =
     Schema(`type` = DataType.Object,
       properties = keys.iterator.map(k => (k, value)).toMap,
-      additionalProperties = AdditionalProperties.Flag(false)
+      additionalProperties = AdditionalProperties.Flag(value = false)
     )
 
   def nullable(schema: RefOr[Schema]): Schema = schema match {

@@ -9,7 +9,7 @@ object UdashBootstrap {
   final val True: ReadableProperty[Boolean] = true.toProperty
   final val ColorSecondary: ReadableProperty[BootstrapStyles.Color] = BootstrapStyles.Color.Secondary.toProperty
   private final val NoneProperty = scala.None.toProperty
-  def None[A]: ReadableProperty[Option[A]] = NoneProperty.asInstanceOf[ReadableProperty[Option[A]]]
+  def None[A]: ReadableProperty[Option[A]] = NoneProperty
 
   /** Loads FontAwesome styles. */
   def loadFontAwesome(): Element =

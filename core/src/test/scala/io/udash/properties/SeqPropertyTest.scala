@@ -706,11 +706,11 @@ class SeqPropertyTest extends UdashCoreTest {
       filtered.listen(_ => ())
 
       val s = Seq(
-        D("A", false),
-        D("B", false),
-        D("C", false),
-        D("D", false),
-        D("E", false)
+        D("A", b = false),
+        D("B", b = false),
+        D("C", b = false),
+        D("D", b = false),
+        D("E", b = false),
       )
 
       ts.set(s)
