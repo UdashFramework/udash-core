@@ -275,7 +275,7 @@ final case class OpenApiParamInfo[T](
 
   @bincompat private[rest] def this(
     name: String, whenAbsentInfo: Opt[WhenAbsentInfo[T]], flags: ParamFlags, restSchema: RestSchema[T]
-  ) = this(name, whenAbsentInfo, false, flags, restSchema)
+  ) = this(name, whenAbsentInfo, optional = false, flags, restSchema)
 }
 
 final case class OpenApiParameter[T](

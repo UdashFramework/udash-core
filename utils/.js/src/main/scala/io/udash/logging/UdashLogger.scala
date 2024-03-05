@@ -1,12 +1,12 @@
 package io.udash.logging
 
+import org.scalajs.dom
 import org.scalajs.dom.Console
 
 import scala.scalajs.js
-import scala.scalajs.js.Dynamic.global
 
 class UdashLogger(clazz: Class[_]) extends CrossLogger {
-  private val console: Console = global.console.asInstanceOf[Console]
+  private val console: Console = dom.console
 
   private def printWithParams(method: (js.Any, Seq[js.Any]) => Unit)(message: String, params: Any*): Unit =
     method(message, params.map(_.asInstanceOf[js.Any]))

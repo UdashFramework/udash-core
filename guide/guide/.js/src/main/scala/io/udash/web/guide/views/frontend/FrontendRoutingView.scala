@@ -4,16 +4,15 @@ import io.udash._
 import io.udash.auth.{UnauthenticatedException, UnauthorizedException}
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.css.CssView
-import io.udash.web.commons.components.{CodeBlock, ForceBootstrap}
+import io.udash.utils.URLEncoder
+import io.udash.web.commons.components.ForceBootstrap
 import io.udash.web.commons.styles.GlobalStyles
+import io.udash.web.guide._
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
-import io.udash.web.guide.{Context, _}
 import org.scalajs.dom
 import scalatags.JsDom
-
-import scala.scalajs.js
 
 case object FrontendRoutingViewFactory extends ViewFactory[FrontendRoutingState] {
   override def create(): (View, Presenter[FrontendRoutingState]) = {
@@ -23,13 +22,16 @@ case object FrontendRoutingViewFactory extends ViewFactory[FrontendRoutingState]
 }
 
 class FrontendRoutingPresenter(url: Property[String]) extends Presenter[FrontendRoutingState] {
+
   import Context.applicationInstance
+
   override def handleState(state: FrontendRoutingState) = {
     url.set(applicationInstance.currentUrl.value)
   }
 }
 
 class FrontendRoutingView(url: Property[String]) extends View with CssView {
+
   import Context._
   import JsDom.all._
   import com.avsystem.commons.SharedExtensions.universalOps
@@ -219,14 +221,12 @@ class FrontendRoutingView(url: Property[String]) extends View with CssView {
           size = BootstrapStyles.SpacingSize.Normal
         ))(input(
           BootstrapStyles.Form.control, id := "url-demo-link-input", value := "",
-          placeholder := "Type something in this field and look at the URL...", onkeyup :+= ((event: dom.Event) => {
+          placeholder := "Type something in this field and look at the URL...", onkeyup :+= { (event: dom.Event) =>
             applicationInstance.goTo(FrontendRoutingState(
-              Some(js.Dynamic.global
-                .encodeURIComponent(event.target.asInstanceOf[dom.html.Input].value)
-                .asInstanceOf[String])
+              Some(URLEncoder.encode(event.target.asInstanceOf[dom.html.Input].value, spaceAsPlus = false))
             ))
             true
-          })
+          }
         )),
         p("This view was created with: ", span(id := "url-demo-link-init")(applicationInstance.currentUrl.value))
       )

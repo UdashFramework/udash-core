@@ -74,20 +74,6 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
       deserialized3 should be(sealedException)
     }
 
-    //    "serialize and deserialize exception stacktrace" in {
-    //      val serialized = write[RpcResponse](exception)
-    //      val deserialized = read[RpcResponse](serialized)
-    //      deserialized.asInstanceOf[RpcResponseException].exception.getStackTrace should be(exception.exception.getStackTrace)
-    //
-    //      val serialized2 = write[RpcResponse](runtimeException)
-    //      val deserialized2 = read[RpcResponse](serialized2)
-    //      deserialized2.asInstanceOf[RpcResponseException].exception.getStackTrace should be(runtimeException.exception.getStackTrace)
-    //
-    //      val serialized3 = write[RpcResponse](sealedException)
-    //      val deserialized3 = read[RpcResponse](serialized3)
-    //      deserialized3.asInstanceOf[RpcResponseException].exception.getStackTrace should be(sealedException.exception.getStackTrace)
-    //    }
-
     "serialize and deserialize rpc failure msg" in {
       val serialized = write[RpcFailure](rpcFail)
       val deserialized = read[RpcFailure](serialized)
@@ -120,7 +106,7 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
     }
 
     "serialize and deserialize simple case classes" in {
-      val test: TestCC = TestCC(5, 123L, 432, true, "bla", 'a' :: 'b' :: Nil)
+      val test: TestCC = TestCC(5, 123L, 432, b = true, "bla", 'a' :: 'b' :: Nil)
       val serialized = write[TestCC](test)
       val deserialized = read[TestCC](serialized)
 
@@ -128,8 +114,8 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
     }
 
     "serialize and deserialize nested case classes" in {
-      val test: TestCC = TestCC(5, 123L, 432, true, "bla", 'a' :: 'b' :: Nil)
-      val test2: TestCC = TestCC(-35, 1L, 432, true, "blsddf sdg  \"{,}[,]\"a", 'a' :: 'b' :: Nil)
+      val test: TestCC = TestCC(5, 123L, 432, b = true, "bla", 'a' :: 'b' :: Nil)
+      val test2: TestCC = TestCC(-35, 1L, 432, b = true, "blsddf sdg  \"{,}[,]\"a", 'a' :: 'b' :: Nil)
       val nested: NestedTestCC = NestedTestCC(-123, test, test2)
       val serialized = write(nested)
       val deserialized = read[NestedTestCC](serialized)

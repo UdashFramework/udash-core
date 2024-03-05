@@ -1,7 +1,4 @@
-import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport.*
-import org.scalajs.jsdependencies.sbtplugin.JSDependenciesPlugin.autoImport.*
 import org.scalajs.jsdependencies.sbtplugin.JSModuleID
-import sbt.*
 import sbt.Keys.scalaVersion
 
 object Dependencies {
@@ -14,7 +11,7 @@ object Dependencies {
   val scalaCssVersion = "1.0.0"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "2.13.3"
+  val avsCommonsVersion = "2.14.0"
 
   val atmosphereJSVersion = "3.1.3"
   val atmosphereVersion = "2.7.10"
