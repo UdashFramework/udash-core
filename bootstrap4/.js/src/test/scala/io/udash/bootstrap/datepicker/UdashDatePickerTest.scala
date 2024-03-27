@@ -1,18 +1,18 @@
 package io.udash.bootstrap
 package datepicker
 
-import java.{util => ju}
+import java.util as ju
 
-import com.avsystem.commons._
-import io.udash._
+import io.udash.*
 import io.udash.bootstrap.datepicker.UdashDatePickerTest.JQueryDatePickerExt
 import io.udash.bootstrap.form.UdashInputGroup
 import io.udash.bootstrap.utils.UdashIcons.FontAwesome
 import io.udash.i18n.{Bundle, BundleHash, Lang, LocalTranslationProvider, TranslationKey}
 import io.udash.testing.AsyncUdashCoreFrontendTest
-import io.udash.wrappers.jquery._
+import io.udash.wrappers.jquery.*
 import org.scalajs.dom
-import scalatags.JsDom.all._
+import scalatags.JsDom.all.*
+import com.avsystem.commons.SharedExtensions.*
 
 import scala.concurrent.Future
 import scala.scalajs.js

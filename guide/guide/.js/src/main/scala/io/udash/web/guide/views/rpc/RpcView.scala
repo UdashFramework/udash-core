@@ -1,9 +1,9 @@
 package io.udash.web.guide.views.rpc
 
-import io.udash._
-import io.udash.web.guide._
+import io.udash.*
+import io.udash.web.guide.*
 import io.udash.web.guide.views.ViewContainer
-
+import org.scalajs.dom.Element
 import scalatags.JsDom
 
 case object RpcViewFactory extends StaticViewFactory[RpcState.type](() => new RpcView)
@@ -11,7 +11,7 @@ case object RpcViewFactory extends StaticViewFactory[RpcState.type](() => new Rp
 class RpcView extends ViewContainer {
   import JsDom.all._
 
-  protected val child = div().render
+  override protected val child: Element = div().render
 
   override def getTemplate: Modifier = div(
     h1("RPC in Udash"),

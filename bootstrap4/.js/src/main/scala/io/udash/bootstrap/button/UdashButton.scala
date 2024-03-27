@@ -1,17 +1,18 @@
 package io.udash.bootstrap
 package button
 
+import io.udash.*
 import com.avsystem.commons.Opt
-import com.avsystem.commons.misc.{AbstractCase, AbstractNamedEnumCompanion, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx, NamedEnum, SealedEnumCompanion}
-import io.udash._
+import com.avsystem.commons.misc.AbstractCase
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.button.UdashButton.{ButtonClickEvent, ButtonTag, UdashButtonJQuery}
-import io.udash.bootstrap.utils._
+import io.udash.bootstrap.utils.*
 import io.udash.wrappers.jquery.{JQuery, jQ}
 import org.scalajs.dom
-import org.scalajs.dom._
+import org.scalajs.dom.*
 import scalatags.JsDom
-import scalatags.JsDom.all._
+import scalatags.JsDom.all.*
+import com.avsystem.commons.SharedExtensions.universalOps
 
 import scala.scalajs.js
 
@@ -41,7 +42,7 @@ final class UdashButton private(
   options: UdashButtonOptions
 )(content: Binding.NestedInterceptor => Modifier) extends UdashBootstrapComponent with Listenable {
 
-  import io.udash.css.CssView._
+  import io.udash.css.CssView.*
 
   override type EventType = ButtonClickEvent
 

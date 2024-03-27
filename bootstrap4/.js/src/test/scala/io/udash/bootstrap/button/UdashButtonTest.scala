@@ -1,10 +1,11 @@
 package io.udash.bootstrap.button
 
-import io.udash._
-import io.udash.bootstrap._
+import io.udash.*
+import io.udash.bootstrap.*
 import io.udash.bootstrap.utils.BootstrapStyles
 import io.udash.testing.UdashCoreFrontendTest
-import io.udash.wrappers.jquery._
+import io.udash.wrappers.jquery.*
+import com.avsystem.commons.SharedExtensions.*
 
 class UdashButtonTest extends UdashCoreFrontendTest {
 

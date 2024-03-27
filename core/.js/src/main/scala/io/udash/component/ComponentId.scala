@@ -6,8 +6,7 @@ import org.scalajs.dom.Element
 import scalatags.JsDom.GenericAttr
 import scalatags.JsDom.all._
 
-
-final case class ComponentId private(value: String) extends AbstractCase with Modifier {
+final case class ComponentId(value: String) extends AbstractCase with Modifier {
   override def applyTo(t: Element): Unit = {
     t.id = value
   }

@@ -61,7 +61,7 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
       onApplicationStarted(rootElement)
     }
     if (dom.document.readyState != DocumentReadyState.loading) onReady()
-    else dom.document.addEventListener("DOMContentLoaded", { _: Event => onReady() }, new EventListenerOptions {
+    else dom.document.addEventListener("DOMContentLoaded", { (_: Event) => onReady() }, new EventListenerOptions {
       once = true
       passive = true
     })
