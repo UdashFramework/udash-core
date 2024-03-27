@@ -235,8 +235,8 @@ sealed abstract class RestMethodMetadata[T] extends TypedMetadata[T] {
   def requestAdjusters: List[RequestAdjuster]
   def responseAdjusters: List[ResponseAdjuster]
 
-  val pathPattern: List[PathPatternElement] = methodPath.map(PathName) ++
-    parametersMetadata.pathParams.flatMap(pp => PathParam(pp) :: pp.pathSuffix.map(PathName))
+  val pathPattern: List[PathPatternElement] = methodPath.map(PathName.apply) ++
+    parametersMetadata.pathParams.flatMap(pp => PathParam(pp) :: pp.pathSuffix.map(PathName.apply))
 
   def applyPathParams(params: List[PlainValue]): List[PlainValue] = {
     def loop(params: List[PlainValue], pattern: List[PathPatternElement]): List[PlainValue] =

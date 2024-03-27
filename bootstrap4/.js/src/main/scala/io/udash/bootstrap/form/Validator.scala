@@ -30,7 +30,7 @@ object Invalid {
     Invalid(error +: errors)
 
   def apply(error: String, errors: String*): Invalid[ValidationError] =
-    this ((error +: errors).map(DefaultValidationError))
+    this ((error +: errors).map(DefaultValidationError.apply))
 }
 
 trait Validator[-ArgumentType] {

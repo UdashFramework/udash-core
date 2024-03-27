@@ -1,21 +1,21 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
-
 import io.udash.bootstrap.button.UdashButtonOptions
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
-import scalatags.JsDom.all._
+import org.scalajs.dom.Element
+import scalatags.JsDom.all.*
 
 object ButtonsDemo extends AutoDemo {
 
-  private val (rendered, source) = {
-    import io.udash._
-    import io.udash.bootstrap._
-    import BootstrapStyles._
+  private val (rendered: Element, source: String) = {
+    import io.udash.*
+    import io.udash.bootstrap.*
+    import io.udash.bootstrap.utils.BootstrapStyles.*
     import io.udash.bootstrap.button.UdashButton
     import io.udash.css.CssStyle
-    import io.udash.css.CssView._
-    import scalatags.JsDom.all._
+    import io.udash.css.CssView.*
+    import scalatags.JsDom.all.*
 
     import scala.util.Random
 
@@ -28,7 +28,7 @@ object ButtonsDemo extends AutoDemo {
       )
     }
 
-    val buttons = Color.values.map(color =>
+    val buttons: Seq[UdashButton] = Color.values.map(color =>
       UdashButton(
         options = UdashButtonOptions(
           color.opt,
@@ -78,7 +78,7 @@ object ButtonsDemo extends AutoDemo {
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, String) = {
-    import io.udash.css.CssView._
+    import io.udash.css.CssView.*
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
   }
 }

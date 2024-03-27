@@ -46,7 +46,7 @@ object UdashPopover extends TooltipUtils[UdashPopover] {
     new UdashPopover(tp)
   }
 
-  override protected val defaultPlacement = Placement.Right
+  override protected val defaultPlacement: StaticPlacement = Placement.Right
   override protected val defaultTemplate: String = {
     import io.udash.css.CssView._
     import scalatags.Text.all._

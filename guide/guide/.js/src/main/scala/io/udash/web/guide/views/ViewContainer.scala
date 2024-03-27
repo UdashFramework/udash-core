@@ -6,9 +6,6 @@ import org.scalajs.dom._
 
 import scala.scalajs.js
 
-/**
-  * Created by malchik on 2016-03-30.
-  */
 abstract class ViewContainer extends ContainerView {
   protected val child: Element
 

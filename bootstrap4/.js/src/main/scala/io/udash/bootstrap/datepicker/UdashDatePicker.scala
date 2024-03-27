@@ -1,16 +1,15 @@
 package io.udash.bootstrap
 package datepicker
 
-import java.{util => ju}
-
-import com.avsystem.commons.SharedExtensions._
+import java.util as ju
 import com.avsystem.commons.misc.{AbstractCase, AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
-import io.udash._
+import com.avsystem.commons.SharedExtensions.*
+import io.udash.*
 import io.udash.bootstrap.utils.UdashIcons.FontAwesome
 import io.udash.bootstrap.utils.{BootstrapStyles, BootstrapTags, UdashBootstrapComponent}
 import io.udash.css.{CssStyle, CssStyleName}
 import io.udash.logging.CrossLogging
-import io.udash.wrappers.jquery._
+import io.udash.wrappers.jquery.*
 import org.scalajs.dom.{Element, document}
 
 import scala.scalajs.js
@@ -24,9 +23,8 @@ final class UdashDatePicker private[datepicker](
   override val componentId: ComponentId
 ) extends UdashBootstrapComponent with Listenable with CrossLogging {
 
-  import UdashDatePicker._
-  import io.udash.css.CssView._
-  import scalatags.JsDom.all._
+  import UdashDatePicker.*
+  import scalatags.JsDom.all.*
 
   override type EventType = UdashDatePicker.DatePickerEvent
 

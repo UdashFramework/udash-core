@@ -1,9 +1,5 @@
 package io.udash.web.commons.styles.components
 
-/**
-  * Created by malchik on 2016-07-01.
-  */
-
 import io.udash.css.{CssBase, CssStyle}
 import io.udash.web.commons.styles.attributes.Attributes
 import io.udash.web.commons.styles.utils.{CommonStyleUtils, MediaQueries, StyleConstants}

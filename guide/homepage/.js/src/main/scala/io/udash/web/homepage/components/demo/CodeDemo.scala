@@ -10,7 +10,7 @@ trait CodeDemo {
 }
 
 object HelloDemo extends CodeDemo {
-  val (rendered, source) = {
+  val (rendered: Modifier, source) = {
     val name = Property.blank[String]
     div(
       TextInput(name)(),
@@ -20,7 +20,7 @@ object HelloDemo extends CodeDemo {
 }
 
 object SelectDemo extends CodeDemo {
-  val (rendered, source) = {
+  val (rendered: Modifier, source) = {
     import com.avsystem.commons.misc.AutoNamedEnum
 
     sealed trait Fruit extends AutoNamedEnum

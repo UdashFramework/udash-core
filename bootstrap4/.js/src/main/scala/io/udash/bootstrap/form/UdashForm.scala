@@ -40,7 +40,7 @@ final class UdashForm private(
 
   override val render: Form =
     form(formStyle)(
-      onsubmit :+= { _: Event => fire(new UdashForm.FormEvent(this, UdashForm.FormEvent.EventType.Submit)); true },
+      onsubmit :+= { (_: Event) => fire(new UdashForm.FormEvent(this, UdashForm.FormEvent.EventType.Submit)); true },
       content(new FormElementsFactory(nestedInterceptor, inputValidationTrigger, selectValidationTrigger, this))
     ).render
 }
@@ -792,7 +792,7 @@ final class FormElementsFactory(
           val validationResult = Property[Option[ValidationResult]](None)
           Seq(
             eventBasedModifiers(validationResult),
-            onblur :+= { _: Event =>
+            onblur :+= { (_: Event) =>
               startValidation(validationResult, triggerGroup = true)
               false
             }

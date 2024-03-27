@@ -1,17 +1,17 @@
 package io.udash.bootstrap
 package alert
 
-import io.udash._
+import io.udash.*
 import io.udash.bindings.modifiers.Binding
 import io.udash.bootstrap.button.{UdashButton, UdashButtonOptions}
 import io.udash.bootstrap.utils.{BootstrapStyles, BootstrapTags}
 import org.scalajs.dom.Element
-import scalatags.JsDom.all._
+import scalatags.JsDom.all.*
+import com.avsystem.commons.SharedExtensions.universalOps
 
 final class DismissibleUdashAlert private[alert](
   alertStyle: ReadableProperty[BootstrapStyles.Color], override val componentId: ComponentId
 )(content: Binding.NestedInterceptor => Modifier) extends UdashAlertBase(alertStyle, componentId) {
-  import io.udash.css.CssView._
 
   private val _dismissed = Property[Boolean](false)
 
