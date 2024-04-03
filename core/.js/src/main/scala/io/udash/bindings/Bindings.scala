@@ -375,9 +375,9 @@ object Bindings extends Bindings {
         val dyn: js.Dynamic = el.asInstanceOf[js.Dynamic]
         val existingCallbacks: js.Function1[T, Boolean] = dyn.selectDynamic(attr.name).asInstanceOf[js.Function1[T, Boolean]]
         if (existingCallbacks == null)
-          dyn.updateDynamic(attr.name) { e: T => if (callback(e) == true) e.preventDefault() }
+          dyn.updateDynamic(attr.name) { (e: T) => if (callback(e) == true) e.preventDefault() }
         else
-          dyn.updateDynamic(attr.name) { e: T =>
+          dyn.updateDynamic(attr.name) { (e: T) =>
             val preventDefault = callback(e)
             if (preventDefault == true) e.preventDefault()
             else existingCallbacks(e)

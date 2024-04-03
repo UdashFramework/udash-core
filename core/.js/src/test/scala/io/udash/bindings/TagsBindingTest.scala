@@ -626,7 +626,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       p.set(new Model.WithSubTrait {
         override def i = 5
-        override def subType = new Model.SubTrait {
+        override def subType: Model.SubTrait = new Model.SubTrait {
           override def i = 7
         }
       })
