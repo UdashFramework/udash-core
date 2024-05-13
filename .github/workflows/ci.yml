@@ -1,7 +1,7 @@
 name: CI
 
 env:
-  JAVA_OPTS: "-Dfile.encoding=UTF-8 -Xms1024M -Xmx3072M -Xss4M -XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI -XX:+UseJVMCICompiler"
+  JAVA_OPTS: "-Dfile.encoding=UTF-8 -Xms1024M -Xmx3072M -Xss4M"
 
 on:
   push:
