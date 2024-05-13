@@ -21,30 +21,17 @@ jobs:
         scala: [ 2.13.14 ]
         command: [ udash-jvm/test, udash-js/test, guide-selenium/test ]
     steps:
-      - uses: actions/checkout@v3
-      - name: Cache sbt
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.sbt
-            ~/.ivy2/cache
-            ~/.coursier/cache
-            ~/.cache/coursier
-          key: ${{ runner.os }}-sbt-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}-${{ hashFiles('project/Dependencies.scala') }}
-          restore-keys: ${{ runner.os }}-sbt-
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
-      - name: Cache npm
-        uses: actions/cache@v3
+          cache: sbt
+      - uses: actions/setup-node@v4
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node-
-      - uses: actions/setup-node@v3
-      - name: Install jsdom
-        run: npm install jsdom@15.2.1
+          cache: npm
+      - name: Install npm dependencies
+        run: npm install
       - name: Run tests
         run: sbt ++${{ matrix.scala }} ${{ matrix.command }}
 
@@ -55,12 +42,13 @@ jobs:
     needs: [ test ]
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
+          cache: sbt
       - name: Get version
         id: get_tag_name
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
