@@ -14,7 +14,7 @@ on:
 jobs:
   test:
     name: Run tests
-    runs-on: ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
+    runs-on: ubuntu-22.04 # https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2204-Readme.md
     strategy:
       fail-fast: false
       matrix:
@@ -40,7 +40,7 @@ jobs:
     # only run on tag push
     if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v'))
     needs: [ test ]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK
