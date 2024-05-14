@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "jsdom": "^24.0.0"
+  }
+}
