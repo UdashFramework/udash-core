@@ -5,7 +5,7 @@ import com.avsystem.commons.meta.MacroInstances
 import com.avsystem.commons.misc.ValueOf
 import com.avsystem.commons.rpc.{AsRaw, AsReal}
 import com.avsystem.commons.serialization.{GenCodec, TransparentWrapperCompanion, TransparentWrapping}
-import io.udash.rest.openapi.*
+import io.udash.rest.openapi._
 import io.udash.rest.openapi.RestStructure.NameAndAdjusters
 import io.udash.rest.raw.{HttpBody, JsonValue, PlainValue, RestResponse}
 
