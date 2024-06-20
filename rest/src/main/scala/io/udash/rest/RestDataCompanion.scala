@@ -4,9 +4,9 @@ package rest
 import com.avsystem.commons.meta.MacroInstances
 import com.avsystem.commons.misc.ValueOf
 import com.avsystem.commons.rpc.{AsRaw, AsReal}
-import com.avsystem.commons.serialization.{GenCodec, TransparentWrapperCompanion}
+import com.avsystem.commons.serialization.{GenCodec, TransparentWrapperCompanion, TransparentWrapping}
+import io.udash.rest.openapi.*
 import io.udash.rest.openapi.RestStructure.NameAndAdjusters
-import io.udash.rest.openapi._
 import io.udash.rest.raw.{HttpBody, JsonValue, PlainValue, RestResponse}
 
 trait CodecWithStructure[T] {
@@ -43,27 +43,18 @@ abstract class RestDataCompanion[T](implicit
   * It must be a singleton object type, i.e. `SomeObject.type`.
   */
 abstract class RestDataCompanionWithDeps[D, T](implicit
-  deps: ValueOf[D], instances: MacroInstances[(DefaultRestImplicits, D), CodecWithStructure[T]]
+  deps: ValueOf[D],
+  instances: MacroInstances[(DefaultRestImplicits, D), CodecWithStructure[T]],
 ) extends AbstractRestDataCompanion[(DefaultRestImplicits, D), T]((DefaultRestImplicits, deps.value))
 
 /**
-  * Base class for companion objects of wrappers over other data types (i.e. case classes with single field).
-  * This companion ensures instances of all the REST typeclasses (serialization, schema, etc.) for wrapping type
-  * assuming that these instances are available for the wrapped type.
-  *
-  * Using this base companion class makes the wrapper class effectively "transparent", i.e. as if it was annotated with
-  * [[com.avsystem.commons.serialization.transparent transparent]] annotation.
-  *
-  * @example
-  * {{{
-  *   case class UserId(id: String) extends AnyVal
-  *   object UserId extends RestDataWrapperCompanion[String, UserId]
-  * }}}
-  */
-abstract class RestDataWrapperCompanion[Wrapped, T](implicit
-  instances: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[T]]
-) extends TransparentWrapperCompanion[Wrapped, T] {
-  private def nameAndAdjusters: NameAndAdjusters[T] = instances(DefaultRestImplicits, this).apply()
+  * Base trait for companion objects of wrappers over other data types (i.e. case classes with single field).
+  * Ensures instances of all the REST typeclasses (serialization, schema, etc.) for wrapping type [[T]]
+  * assuming that these instances are available for the wrapped type [[Wrapped]].
+ */
+trait BaseRestDataWrapperCompanion[Wrapped, T] {
+  protected def nameAndAdjusters: NameAndAdjusters[T]
+  protected implicit def wrapping: TransparentWrapping[Wrapped, T]
 
   // These implicits must be specialized for every raw type (PlainValue, JsonValue, etc.) because
   // it lifts their priority. Unfortunately, controlling implicit priority is not pretty.
@@ -108,4 +99,25 @@ abstract class RestDataWrapperCompanion[Wrapped, T](implicit
   implicit def restResponses(implicit wrappedResponses: RestResponses[Wrapped]): RestResponses[T] =
     (resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]) =>
       wrappedResponses.responses(resolver, ws => schemaTransform(nameAndAdjusters.restSchema(ws)))
+}
+
+/**
+  * Default base class for companion objects of wrappers over other data types (i.e. case classes with single field)
+  * that uses default [[DefaultRestImplicits]] implicits.
+  *
+  * Using this base companion class makes the wrapper class effectively "transparent", i.e. as if it was annotated with
+  * [[com.avsystem.commons.serialization.transparent transparent]] annotation.
+  *
+  * @see [[BaseRestDataWrapperCompanion]]
+  * @example
+  * {{{
+  *   case class UserId(id: String) extends AnyVal
+  *   object UserId extends RestDataWrapperCompanion[String, UserId]
+  * }}}
+  */
+abstract class RestDataWrapperCompanion[Wrapped, T](implicit
+  instances: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[T]]
+) extends TransparentWrapperCompanion[Wrapped, T] with BaseRestDataWrapperCompanion[Wrapped, T] {
+  final override protected lazy val nameAndAdjusters: NameAndAdjusters[T] = instances(DefaultRestImplicits, this).apply()
+  final override protected implicit def wrapping: TransparentWrapping[Wrapped, T] = self
 }
