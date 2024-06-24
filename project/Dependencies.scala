@@ -143,7 +143,7 @@ object Dependencies {
   val bootstrap4JsDeps = Def.setting(Seq[JSModuleID](
     "org.webjars" % "bootstrap" % bootstrap4Version / bootstrap4Resource
       minified "js/bootstrap.bundle.min.js" dependsOn "jquery.js",
-    "org.webjars" % "momentjs" % s"$momentJsVersion" / momentResource minified s"$momentJsVersion/min/moment.min.js",
+    "org.webjars.npm" % "moment" % s"$momentJsVersion" / momentResource minified s"$momentJsVersion/min/moment.min.js",
     "org.webjars" % "tempusdominus-bootstrap-4" % bootstrap4DatepickerVersion / "js/tempusdominus-bootstrap-4.js"
       minified "js/tempusdominus-bootstrap-4.min.js" dependsOn(bootstrap4Resource, momentResource)
   ))
