@@ -48,13 +48,12 @@ abstract class RestDataCompanionWithDeps[D, T](implicit
 ) extends AbstractRestDataCompanion[(DefaultRestImplicits, D), T]((DefaultRestImplicits, deps.value))
 
 /**
-  * Base trait for companion objects of wrappers over other data types (i.e. case classes with single field).
+  * Base class for companion objects of wrappers over other data types (i.e. case classes with single field).
   * Ensures instances of all the REST typeclasses (serialization, schema, etc.) for wrapping type [[T]]
   * assuming that these instances are available for the wrapped type [[Wrapped]].
  */
-trait BaseRestDataWrapperCompanion[Wrapped, T] {
+abstract class BaseRestDataWrapperCompanion[Wrapped, T] extends TransparentWrapperCompanion[Wrapped, T] {
   protected def nameAndAdjusters: NameAndAdjusters[T]
-  protected implicit def wrapping: TransparentWrapping[Wrapped, T]
 
   // These implicits must be specialized for every raw type (PlainValue, JsonValue, etc.) because
   // it lifts their priority. Unfortunately, controlling implicit priority is not pretty.
@@ -117,7 +116,6 @@ trait BaseRestDataWrapperCompanion[Wrapped, T] {
   */
 abstract class RestDataWrapperCompanion[Wrapped, T](implicit
   instances: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[T]]
-) extends TransparentWrapperCompanion[Wrapped, T] with BaseRestDataWrapperCompanion[Wrapped, T] {
+) extends BaseRestDataWrapperCompanion[Wrapped, T] {
   final override protected lazy val nameAndAdjusters: NameAndAdjusters[T] = instances(DefaultRestImplicits, this).apply()
-  final override protected implicit def wrapping: TransparentWrapping[Wrapped, T] = self
 }
