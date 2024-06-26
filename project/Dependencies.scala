@@ -20,7 +20,7 @@ object Dependencies {
   val atmosphereVersion = "2.7.14"
 
   val upickleVersion = "3.3.1" // Tests only
-  val circeVersion = "0.14.7" // Tests only
+  val circeVersion = "0.14.8" // Tests only
   val circeDerivationVersion = "0.13.0-M5" // Tests only
   val monixVersion = "3.4.1" // udash-rest only
 
@@ -36,14 +36,14 @@ object Dependencies {
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
 
-  val scalatestVersion = "3.2.18"
+  val scalatestVersion = "3.2.19"
   val scalaJsSecureRandomVersion = "1.0.0" // Tests only
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.39.0"
   val momentJsVersion = "2.30.1"
 
   val seleniumVersion = "4.22.0"
-  val webDriverManagerVersion = "5.8.0"
+  val webDriverManagerVersion = "5.9.1"
   val scalaJsBenchmarkVersion = "0.10.0"
 
   val compilerPlugins = Def.setting(Seq(
