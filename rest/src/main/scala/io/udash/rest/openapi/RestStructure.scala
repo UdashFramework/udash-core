@@ -227,11 +227,12 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   final case class NameAndAdjusters[T](
     @reifyName sourceName: String,
     @optional @reifyAnnot annotName: Opt[name],
+    @optional @reifyAnnot annotSchemaName: Opt[schemaName],
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster]
   ) extends TypedMetadata[T] {
     def restSchema(wrappedSchema: RestSchema[_]): RestSchema[T] = RestSchema.create(
       r => SchemaAdjuster.adjustRef(schemaAdjusters, r.resolve(wrappedSchema)),
-      annotName.fold(sourceName)(_.name)
+      annotSchemaName.map(_.name).orElse(annotName.map(_.name)).getOrElse[String](sourceName),
     )
   }
   object NameAndAdjusters extends AdtMetadataCompanion[NameAndAdjusters]
