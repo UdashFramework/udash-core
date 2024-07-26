@@ -2,9 +2,10 @@ package io.udash
 package rest
 
 import com.avsystem.commons._
+import com.avsystem.commons.misc.{AbstractValueEnum, EnumCtx}
 import com.avsystem.commons.rpc.AsRawReal
 import com.avsystem.commons.serialization.json.JsonStringOutput
-import com.avsystem.commons.serialization.{GenCodec, HasPolyGenCodec, flatten, whenAbsent}
+import com.avsystem.commons.serialization.{GenCodec, HasPolyGenCodec, name, flatten, whenAbsent}
 import io.udash.rest.openapi.adjusters._
 import io.udash.rest.openapi.{Header => OASHeader, _}
 import io.udash.rest.raw._
@@ -17,6 +18,14 @@ import scala.concurrent.duration._
 case class RestEntityId(value: String) extends AnyVal
 object RestEntityId extends RestDataWrapperCompanion[String, RestEntityId]
 
+@name("RestEntityEnumCustom")
+@description("Example named enum")
+@example(RestEntityEnum.OptionOne)
+final class RestEntityEnum(implicit ctx: EnumCtx) extends AbstractValueEnum
+object RestEntityEnum extends RestValueEnumCompanion[RestEntityEnum] {
+  final val OptionOne, OptionTwo: Value = new RestEntityEnum
+}
+
 sealed trait BaseEntity
 object BaseEntity extends RestDataCompanion[BaseEntity]
 
@@ -28,7 +37,9 @@ object FlatBaseEntity extends RestDataCompanion[FlatBaseEntity]
 case class RestEntity(
   @description("entity id") id: RestEntityId,
   @whenAbsent("anonymous") name: String = whenAbsent.value,
-  @description("recursive optional subentity") subentity: OptArg[RestEntity] = OptArg.Empty
+  @description("recursive optional subentity") subentity: OptArg[RestEntity] = OptArg.Empty,
+  @whenAbsent(RestEntityEnum.OptionOne) enumField: RestEntityEnum = whenAbsent.value,
+  @whenAbsent(Map.empty[String, RestEntityEnum]) enumMap: Map[String, RestEntityEnum] = whenAbsent.value,
 ) extends FlatBaseEntity
 object RestEntity extends RestDataCompanion[RestEntity]
 
