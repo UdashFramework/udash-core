@@ -74,11 +74,11 @@ object FullyQualifiedHierarchy extends RestDataCompanionWithDeps[FullyQualifiedN
 @flatten("case")
 sealed trait CustomSchemaNameHierarchy
 object CustomSchemaNameHierarchy extends RestDataCompanion[CustomSchemaNameHierarchy] {
-  // annotation value should be used as schema name, but NOT as discriminator value
+  // annotation value should be used as schema name, but NOT as type discriminator value
   @schemaName("CustomSchemaName123")
   case class CustomSchemaName(str: String) extends CustomSchemaNameHierarchy
 
-  // annotation value should be used both as schema name and discriminator value
+  // annotation value should be used as both schema name and type discriminator value
   @name("CustomName123")
   case class CustomName(str: String) extends CustomSchemaNameHierarchy
 
