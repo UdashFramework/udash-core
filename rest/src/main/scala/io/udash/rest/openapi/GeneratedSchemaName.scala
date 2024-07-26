@@ -1,8 +1,19 @@
 package io.udash.rest.openapi
 
-import com.avsystem.commons.Opt
+import com.avsystem.commons.{Opt, StaticAnnotation}
+import com.avsystem.commons.annotation.NotInheritedFromSealedTypes
 import com.avsystem.commons.misc.{AnnotationOf, SimpleClassName}
 import com.avsystem.commons.serialization.name
+
+/**
+ * Can be used on case class or sealed hierarchy root to instruct OpenAPI schema derivation mechanism
+ * to use particular value as [[RestSchema]] name instead of just using class name.
+ *
+ * Takes precedence over [[com.avsystem.commons.serialization.name]], but unlike
+ * [[com.avsystem.commons.serialization.name]] does <b>NOT</b> change type discriminator value
+ * when the class is a part of a sealed hierarchy.
+ */
+class schemaName(val name: String) extends StaticAnnotation with NotInheritedFromSealedTypes
 
 /**
  * A metadata typeclass that you can use to control names of [[RestSchema]]s macro-materialized
@@ -52,10 +63,16 @@ object GeneratedSchemaName extends GeneratedSchemaNameLowPrio {
    */
   def some[T](name: String): GeneratedSchemaName[T] = GeneratedSchemaName(Opt(name))
 
-  implicit def annotSchemaName[T](implicit nameAnnot: AnnotationOf[name, T]): GeneratedSchemaName[T] =
+  implicit def annotSchemaName[T](implicit schemaNameAnnot: AnnotationOf[schemaName, T]): GeneratedSchemaName[T] =
+    GeneratedSchemaName.some(schemaNameAnnot.annot.name)
+}
+
+trait GeneratedSchemaNameLowPrio extends GeneratedSchemaNameLowestPrio { this: GeneratedSchemaName.type =>
+  implicit def annotName[T](implicit nameAnnot: AnnotationOf[name, T]): GeneratedSchemaName[T] =
     GeneratedSchemaName.some(nameAnnot.annot.name)
 }
-trait GeneratedSchemaNameLowPrio { this: GeneratedSchemaName.type =>
+
+trait GeneratedSchemaNameLowestPrio { this: GeneratedSchemaName.type =>
   implicit def classSchemaName[T: SimpleClassName]: GeneratedSchemaName[T] =
     GeneratedSchemaName.some(SimpleClassName.of[T])
 }
