@@ -11,7 +11,8 @@ import com.avsystem.commons.serialization.name
  *
  * Takes precedence over [[com.avsystem.commons.serialization.name]], but unlike
  * [[com.avsystem.commons.serialization.name]] does <b>NOT</b> change type discriminator value
- * when the class is a part of a sealed hierarchy.
+ * when the class is a part of a sealed hierarchy. This is useful to resolve schema name conflicts
+ * with other classes without changing serialized representation.
  */
 class schemaName(val name: String) extends StaticAnnotation with NotInheritedFromSealedTypes
 

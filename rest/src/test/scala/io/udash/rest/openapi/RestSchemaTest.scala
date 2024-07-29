@@ -82,8 +82,8 @@ object CustomSchemaNameHierarchy extends RestDataCompanion[CustomSchemaNameHiera
   @name("CustomName123")
   case class CustomName(str: String) extends CustomSchemaNameHierarchy
 
-  // @schemaName should "win" with @name as schema name
-  @schemaName("CustomSchemaNameBoth123") @name("CustomNameBoth123")
+  // @schemaName annotation should be used as schema name, @name annotation should be used only as type discriminator value
+  @schemaName("CustomSchemaNameBoth") @name("CustomNameBoth123")
   case class CustomNameBoth(str: String) extends CustomSchemaNameHierarchy
 }
 
@@ -388,7 +388,7 @@ class RestSchemaTest extends AnyFunSuite {
         |      "str"
         |    ]
         |  },
-        |  "CustomSchemaNameBoth123": {
+        |  "CustomSchemaNameBoth": {
         |    "type": "object",
         |    "properties": {
         |      "case": {
@@ -416,7 +416,7 @@ class RestSchemaTest extends AnyFunSuite {
         |        "$ref": "#/testSchemas/CustomName123"
         |      },
         |      {
-        |        "$ref": "#/testSchemas/CustomSchemaNameBoth123"
+        |        "$ref": "#/testSchemas/CustomSchemaNameBoth"
         |      }
         |    ],
         |    "discriminator": {
@@ -424,7 +424,7 @@ class RestSchemaTest extends AnyFunSuite {
         |      "mapping": {
         |        "CustomSchemaName": "#/testSchemas/CustomSchemaName123",
         |        "CustomName123": "#/testSchemas/CustomName123",
-        |        "CustomNameBoth123": "#/testSchemas/CustomSchemaNameBoth123"
+        |        "CustomNameBoth123": "#/testSchemas/CustomSchemaNameBoth"
         |      }
         |    }
         |  }
