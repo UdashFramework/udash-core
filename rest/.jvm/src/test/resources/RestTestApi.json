@@ -926,6 +926,14 @@
             ],
             "default": "OptionOne"
           },
+          "inlinedEnumField": {
+            "type": "string",
+            "enum": [
+              "Option1",
+              "Option2"
+            ],
+            "default": "Option1"
+          },
           "enumMap": {
             "type": "object",
             "additionalProperties": {
