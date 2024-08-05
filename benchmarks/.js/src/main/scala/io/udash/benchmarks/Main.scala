@@ -3,7 +3,6 @@ package io.udash.benchmarks
 import io.udash.benchmarks.css.CssStylesApply
 import io.udash.benchmarks.i18n.StaticTranslationBinding
 import io.udash.benchmarks.properties._
-import io.udash.benchmarks.serialization.SerializationBenchmarks
 import japgolly.scalajs.benchmark.engine.EngineOptions
 import japgolly.scalajs.benchmark.gui.BenchmarkGUI
 import org.scalajs.dom.document
@@ -22,8 +21,6 @@ object Main {
       StaticTranslationBinding.suite,
 
       CssStylesApply.suite,
-
-      SerializationBenchmarks.suite,
 
       PropertyParameters.suite
     )
