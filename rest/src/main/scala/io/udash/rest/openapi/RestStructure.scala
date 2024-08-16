@@ -179,7 +179,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
     @infer @checked value: ValueOf[T],
     @infer schemaName: GeneratedSchemaName[T],
-    @composite info: GenCaseInfo[T]
+    @composite info: GenCaseInfo[T],
   ) extends RestStructure[T] with Case[T] {
 
     def standaloneSchema: RestSchema[T] =
@@ -201,7 +201,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
     @infer restSchema: RestSchema[T],
     @optional @composite whenAbsentInfo: Opt[WhenAbsentInfo[T]],
     @optional @composite defaultValueInfo: Opt[DefaultValueInfo[T]],
-    @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster]
+    @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
   ) extends TypedMetadata[T] {
 
     val fallbackValue: Opt[JsonValue] =
@@ -218,7 +218,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
 
   final case class DefaultValueInfo[T](
     @reifyDefaultValue defaultValue: DefaultValue[T],
-    @infer("Cannot materialize default parameter value:\n") asJson: AsRaw[JsonValue, T]
+    @infer("Cannot materialize default parameter value:\n") asJson: AsRaw[JsonValue, T],
   ) extends TypedMetadata[T] {
     val fallbackValue: Opt[JsonValue] =
       Try(defaultValue.value).toOpt.map(asJson.asRaw)
@@ -227,11 +227,12 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   final case class NameAndAdjusters[T](
     @reifyName sourceName: String,
     @optional @reifyAnnot annotName: Opt[name],
-    @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster]
+    @optional @reifyAnnot annotSchemaName: Opt[schemaName],
+    @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
   ) extends TypedMetadata[T] {
     def restSchema(wrappedSchema: RestSchema[_]): RestSchema[T] = RestSchema.create(
       r => SchemaAdjuster.adjustRef(schemaAdjusters, r.resolve(wrappedSchema)),
-      annotName.fold(sourceName)(_.name)
+      annotSchemaName.map(_.name).orElse(annotName.map(_.name)).getOrElse[String](sourceName),
     )
   }
   object NameAndAdjusters extends AdtMetadataCompanion[NameAndAdjusters]

@@ -14,6 +14,7 @@ class OpenApiGenerationTest extends AnyFunSuite {
       servers = List(Server("http://localhost"))
     )
     val expected = Source.fromInputStream(getClass.getResourceAsStream("/RestTestApi.json")).getLines().mkString("\n")
-    assert(JsonStringOutput.writePretty(openapi) == expected)
+    val actual = JsonStringOutput.writePretty(openapi)
+    assert(actual == expected)
   }
 }

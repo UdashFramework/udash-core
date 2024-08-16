@@ -626,7 +626,7 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
 
       p.set(new Model.WithSubTrait {
         override def i = 5
-        override def subType = new Model.SubTrait {
+        override def subType: Model.SubTrait = new Model.SubTrait {
           override def i = 7
         }
       })
@@ -1686,11 +1686,11 @@ class TagsBindingTest extends UdashFrontendTest with Bindings { bindings: Bindin
       done.listenStructure(p => patches += p)
 
       todos.set(Seq(
-        Todo("A", false),
-        Todo("B", false),
-        Todo("C", false),
-        Todo("D", false),
-        Todo("E", false)
+        Todo("A", completed = false),
+        Todo("B", completed = false),
+        Todo("C", completed = false),
+        Todo("D", completed = false),
+        Todo("E", completed = false),
       ))
 
       patches.size should be(0)

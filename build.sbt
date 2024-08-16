@@ -71,6 +71,7 @@ val commonSettings = Seq(
     "-language:experimental.macros",
     "-Xfatal-warnings",
     "-Xlint:_,-missing-interpolator,-unused",
+    "-Xsource:3",
     "-Yrangepos",
     "-Ybackend-parallelism", "8",
     "-Ycache-plugin-class-loader:last-modified",
@@ -463,7 +464,7 @@ lazy val `guide-packager` =
 
       dockerExposedPorts += 8080, //should match ui.server.port
       dockerEnvVars += "DISABLE_FILE_LOGGING" -> "true",
-      dockerBaseImage := "eclipse-temurin:11-jdk-jammy",
+      dockerBaseImage := "eclipse-temurin:17-jdk-jammy",
       dockerUpdateLatest := true,
     )
 

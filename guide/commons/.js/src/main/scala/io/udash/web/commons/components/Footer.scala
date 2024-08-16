@@ -1,6 +1,7 @@
 package io.udash.web.commons.components
 
-import com.avsystem.commons._
+import com.avsystem.commons.Opt
+import io.udash.*
 import io.udash.css.CssStyle
 import io.udash.web.commons.config.ExternalUrls
 import io.udash.web.commons.styles.GlobalStyles
@@ -8,10 +9,11 @@ import io.udash.web.commons.styles.components.FooterStyles
 import io.udash.web.commons.views.Image
 import org.scalajs.dom.html.Element
 import scalatags.JsDom
-import scalatags.JsDom.all._
+import scalatags.JsDom.all.*
 
 object Footer {
-  import io.udash.css.CssView._
+
+  import io.udash.css.CssView.*
   private val styles = FooterStyles
 
   private def template(wrapperStyle: Opt[CssStyle]): JsDom.TypedTag[Element] = footer(styles.footer)(

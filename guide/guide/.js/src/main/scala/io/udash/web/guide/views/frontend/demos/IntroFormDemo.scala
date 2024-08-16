@@ -30,7 +30,7 @@ object IntroFormDemo extends AutoDemo {
     object IntroFormDemoState extends State {
       override type HierarchyRoot = IntroFormDemoState.type
 
-      override def parentState = None
+      override def parentState: None.type = None
     }
 
     /** Prepares model, view and presenter for demo view. */
@@ -73,7 +73,7 @@ object IntroFormDemo extends AutoDemo {
       private val between = model.subProp(_.between).bitransform(i2s)(s2i)
       private val maximum = model.subProp(_.maximum).bitransform(i2s)(s2i)
 
-      private val validation = model.transform { element: IntroFormDemoModel =>
+      private val validation = model.transform { (element: IntroFormDemoModel) =>
         val errors = mutable.ArrayBuffer[String]()
         if (element.minimum > element.maximum)
           errors += "Minimum is bigger than maximum!"
@@ -82,7 +82,7 @@ object IntroFormDemo extends AutoDemo {
         if (element.between > element.maximum)
           errors += "Maximum is smaller than your value!"
         if (errors.isEmpty) Valid
-        else Invalid(errors.map(DefaultValidationError).toSeq)
+        else Invalid(errors.map(DefaultValidationError.apply).toSeq)
       }
 
       // Button from Udash Bootstrap wrapper

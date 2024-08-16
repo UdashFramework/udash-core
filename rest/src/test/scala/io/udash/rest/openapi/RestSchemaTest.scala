@@ -71,6 +71,22 @@ object FullyQualifiedHierarchy extends RestDataCompanionWithDeps[FullyQualifiedN
   case object Baz extends FullyQualifiedHierarchy
 }
 
+@flatten("case")
+sealed trait CustomSchemaNameHierarchy
+object CustomSchemaNameHierarchy extends RestDataCompanion[CustomSchemaNameHierarchy] {
+  // annotation value should be used as schema name, but NOT as type discriminator value
+  @schemaName("CustomSchemaName123")
+  case class CustomSchemaName(str: String) extends CustomSchemaNameHierarchy
+
+  // annotation value should be used as both schema name and type discriminator value
+  @name("CustomName123")
+  case class CustomName(str: String) extends CustomSchemaNameHierarchy
+
+  // @schemaName annotation should be used as schema name, @name annotation should be used only as type discriminator value
+  @schemaName("CustomSchemaNameBoth") @name("CustomNameBoth123")
+  case class CustomNameBoth(str: String) extends CustomSchemaNameHierarchy
+}
+
 class RestSchemaTest extends AnyFunSuite {
   private def schemaStr[T](implicit schema: RestSchema[T]): String =
     printSchema(new InliningResolver().resolve(schema))
@@ -329,6 +345,88 @@ class RestSchemaTest extends AnyFunSuite {
         |        "$ref": "#/testSchemas/io.udash.rest.openapi.FullyQualifiedHierarchy.Bar"
         |      }
         |    ]
+        |  }
+        |}""".stripMargin)
+  }
+
+  test("Customized schema name") {
+    assert(allSchemasStr[CustomSchemaNameHierarchy] ==
+      """{
+        |  "CustomName123": {
+        |    "type": "object",
+        |    "properties": {
+        |      "case": {
+        |        "type": "string",
+        |        "enum": [
+        |          "CustomName123"
+        |        ]
+        |      },
+        |      "str": {
+        |        "type": "string"
+        |      }
+        |    },
+        |    "required": [
+        |      "case",
+        |      "str"
+        |    ]
+        |  },
+        |  "CustomSchemaName123": {
+        |    "type": "object",
+        |    "properties": {
+        |      "case": {
+        |        "type": "string",
+        |        "enum": [
+        |          "CustomSchemaName"
+        |        ]
+        |      },
+        |      "str": {
+        |        "type": "string"
+        |      }
+        |    },
+        |    "required": [
+        |      "case",
+        |      "str"
+        |    ]
+        |  },
+        |  "CustomSchemaNameBoth": {
+        |    "type": "object",
+        |    "properties": {
+        |      "case": {
+        |        "type": "string",
+        |        "enum": [
+        |          "CustomNameBoth123"
+        |        ]
+        |      },
+        |      "str": {
+        |        "type": "string"
+        |      }
+        |    },
+        |    "required": [
+        |      "case",
+        |      "str"
+        |    ]
+        |  },
+        |  "CustomSchemaNameHierarchy": {
+        |    "type": "object",
+        |    "oneOf": [
+        |      {
+        |        "$ref": "#/testSchemas/CustomSchemaName123"
+        |      },
+        |      {
+        |        "$ref": "#/testSchemas/CustomName123"
+        |      },
+        |      {
+        |        "$ref": "#/testSchemas/CustomSchemaNameBoth"
+        |      }
+        |    ],
+        |    "discriminator": {
+        |      "propertyName": "case",
+        |      "mapping": {
+        |        "CustomSchemaName": "#/testSchemas/CustomSchemaName123",
+        |        "CustomName123": "#/testSchemas/CustomName123",
+        |        "CustomNameBoth123": "#/testSchemas/CustomSchemaNameBoth"
+        |      }
+        |    }
         |  }
         |}""".stripMargin)
   }

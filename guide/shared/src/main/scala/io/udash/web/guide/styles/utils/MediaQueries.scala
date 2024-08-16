@@ -6,9 +6,6 @@ import scalacss.internal.DslBase.ToStyle
 
 import scala.language.postfixOps
 
-/**
-  * Created by malchik on 2016-03-30.
-  */
 object MediaQueries extends CssBase {
   import dsl._
 

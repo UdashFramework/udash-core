@@ -40,7 +40,7 @@ final class UdashForm private(
 
   override val render: Form =
     form(formStyle)(
-      onsubmit :+= { _: Event => fire(new UdashForm.FormEvent(this, UdashForm.FormEvent.EventType.Submit)); true },
+      onsubmit :+= { (_: Event) => fire(new UdashForm.FormEvent(this, UdashForm.FormEvent.EventType.Submit)); true },
       content(new FormElementsFactory(nestedInterceptor, inputValidationTrigger, selectValidationTrigger, this))
     ).render
 }
@@ -129,7 +129,7 @@ object UdashForm {
 }
 
 final class FormElementsFactory(
-  nestedInterceptor: Binding.NestedInterceptor,
+  factoryNestedInterceptor: Binding.NestedInterceptor,
   inputValidationTrigger: ValidationTrigger,
   selectValidationTrigger: ValidationTrigger,
   form: OptArg[UdashForm] = OptArg.Empty
@@ -139,7 +139,7 @@ final class FormElementsFactory(
 
   /** Use this method to bond the external binding's lifecycle with the lifecycle of the elements created via this factory. */
   def externalBinding[T <: Binding](binding: T): T = {
-    nestedInterceptor(binding)
+    factoryNestedInterceptor(binding)
     binding
   }
 
@@ -152,8 +152,8 @@ final class FormElementsFactory(
     content: Binding.NestedInterceptor => Modifier
   ): Modifier = {
     fieldset(
-      nestedInterceptor((scalatags.JsDom.attrs.disabled := "disabled").attrIf(disabled))
-    )(content(nestedInterceptor))
+      factoryNestedInterceptor((scalatags.JsDom.attrs.disabled := "disabled").attrIf(disabled))
+    )(content(factoryNestedInterceptor))
   }
 
   /** Provides input elements factory methods. */
@@ -251,8 +251,8 @@ final class FormElementsFactory(
         TextInput(property, debounce)(
           inputId,
           BootstrapStyles.Form.control,
-          inputModifier.map(_.apply(nestedInterceptor)),
-          validationModifier(property, validationTrigger, nestedInterceptor)(validator),
+          inputModifier.map(_.apply(factoryNestedInterceptor)),
+          validationModifier(property, validationTrigger, factoryNestedInterceptor)(validator),
           (BootstrapStyles.Form.size _).reactiveOptionApply(size)
         ), inputId
       ))
@@ -286,8 +286,8 @@ final class FormElementsFactory(
         PasswordInput(property, debounce)(
           inputId,
           BootstrapStyles.Form.control,
-          inputModifier.map(_.apply(nestedInterceptor)),
-          validationModifier(property, validationTrigger, nestedInterceptor)(validator),
+          inputModifier.map(_.apply(factoryNestedInterceptor)),
+          validationModifier(property, validationTrigger, factoryNestedInterceptor)(validator),
           (BootstrapStyles.Form.size _).reactiveOptionApply(size)
         ), inputId
       ))
@@ -321,8 +321,8 @@ final class FormElementsFactory(
         NumberInput(property.bitransform(_.toString)(_.toDouble), debounce)(
           inputId,
           BootstrapStyles.Form.control,
-          inputModifier.map(_.apply(nestedInterceptor)),
-          validationModifier(property, validationTrigger, nestedInterceptor)(validator),
+          inputModifier.map(_.apply(factoryNestedInterceptor)),
+          validationModifier(property, validationTrigger, factoryNestedInterceptor)(validator),
           (BootstrapStyles.Form.size _).reactiveOptionApply(size)
         ), inputId
       ))
@@ -360,8 +360,8 @@ final class FormElementsFactory(
           inputId,
           BootstrapStyles.Form.controlRange,
           BootstrapStyles.Form.customRange,
-          inputModifier.map(_.apply(nestedInterceptor)),
-          validationModifier(value, validationTrigger, nestedInterceptor)(validator)
+          inputModifier.map(_.apply(factoryNestedInterceptor)),
+          validationModifier(value, validationTrigger, factoryNestedInterceptor)(validator)
         ), inputId
       ))
     }
@@ -394,8 +394,8 @@ final class FormElementsFactory(
         TextArea(property, debounce)(
           inputId,
           BootstrapStyles.Form.control,
-          inputModifier.map(_.apply(nestedInterceptor)),
-          validationModifier(property, validationTrigger, nestedInterceptor)(validator),
+          inputModifier.map(_.apply(factoryNestedInterceptor)),
+          validationModifier(property, validationTrigger, factoryNestedInterceptor)(validator),
           (BootstrapStyles.Form.size _).reactiveOptionApply(size)
         ), inputId
       ))
@@ -491,9 +491,9 @@ final class FormElementsFactory(
           itemLabel,
           inputId,
           BootstrapStyles.Form.customSelect,
-          inputModifier.map(_.apply(nestedInterceptor)),
-          validationModifier(selectedItem, validationTrigger, nestedInterceptor)(validator),
-          nestedInterceptor((BootstrapStyles.Form.size _).reactiveOptionApply(size))
+          inputModifier.map(_.apply(factoryNestedInterceptor)),
+          validationModifier(selectedItem, validationTrigger, factoryNestedInterceptor)(validator),
+          factoryNestedInterceptor((BootstrapStyles.Form.size _).reactiveOptionApply(size))
         ), inputId
       ))
     }
@@ -529,9 +529,9 @@ final class FormElementsFactory(
           itemLabel,
           inputId,
           BootstrapStyles.Form.customSelect,
-          inputModifier.map(_.apply(nestedInterceptor)),
-          validationModifier(selectedItems, validationTrigger, nestedInterceptor)(validator),
-          nestedInterceptor((BootstrapStyles.Form.size _).reactiveOptionApply(size))
+          inputModifier.map(_.apply(factoryNestedInterceptor)),
+          validationModifier(selectedItems, validationTrigger, factoryNestedInterceptor)(validator),
+          factoryNestedInterceptor((BootstrapStyles.Form.size _).reactiveOptionApply(size))
         ), inputId
       ))
     }
@@ -792,7 +792,7 @@ final class FormElementsFactory(
           val validationResult = Property[Option[ValidationResult]](None)
           Seq(
             eventBasedModifiers(validationResult),
-            onblur :+= { _: Event =>
+            onblur :+= { (_: Event) =>
               startValidation(validationResult, triggerGroup = true)
               false
             }

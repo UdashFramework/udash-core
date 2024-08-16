@@ -1,13 +1,13 @@
 package io.udash.web.commons.views
 
-import com.avsystem.commons._
-import com.avsystem.commons.misc.AbstractCase
-import io.udash._
-import io.udash.bootstrap._
+import com.avsystem.commons.misc.{AbstractCase, Opt}
+import io.udash.*
+import io.udash.bootstrap.*
 import io.udash.bootstrap.alert.UdashAlert
 import io.udash.web.guide.markdown.{MarkdownPage, MarkdownPageRPC}
 import io.udash.web.guide.styles.MarkdownStyles
 import org.scalajs.dom
+import com.avsystem.commons.SharedExtensions.*
 
 import scala.util.{Failure, Success}
 
@@ -67,7 +67,7 @@ final class MarkdownView(model: ReadableModelProperty[MarkdownModel]) extends Vi
   import io.udash.css.CssView._
   import scalatags.JsDom.all._
 
-  override val getTemplate: Modifier = ISeq(
+  override val getTemplate: Modifier = Seq(
     produce(model.roSubProp(_.error)) { error =>
       error.opt.filter(_.nonEmpty).map(e =>
         div(cls := "bootstrap")(

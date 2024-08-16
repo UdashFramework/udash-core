@@ -1,10 +1,10 @@
 package io.udash
 package rest
 
-import monix.execution.Scheduler
 import com.avsystem.commons._
 import io.udash.rest.raw.RawRest
 import io.udash.rest.raw.RawRest.HandleRequest
+import monix.execution.Scheduler
 import org.scalactic.source.Position
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funsuite.AnyFunSuite
@@ -67,7 +67,11 @@ trait RestApiTestScenarios extends RestApiTest {
   }
 
   test("prefixed GET") {
-    testCall(_.prefix("", "h0", "q0").subget(0, 1, 2))
+    testCall(_.prefix("p0", "h0", "q0").subget(0, 1, 2))
+  }
+
+  test("transparent prefix GET") {
+    testCall(_.transparentPrefix.subget(0, 1, 2))
   }
 
   test("custom response with headers") {

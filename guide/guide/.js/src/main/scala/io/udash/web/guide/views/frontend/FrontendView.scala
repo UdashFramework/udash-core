@@ -1,9 +1,9 @@
 package io.udash.web.guide.views.frontend
 
-import io.udash._
+import io.udash.*
 import io.udash.web.guide.FrontendState
 import io.udash.web.guide.views.ViewContainer
-
+import org.scalajs.dom.Element
 import scalatags.JsDom
 
 case object FrontendViewFactory extends StaticViewFactory[FrontendState.type](() => new FrontendView)
@@ -12,7 +12,7 @@ case object FrontendViewFactory extends StaticViewFactory[FrontendState.type](()
 class FrontendView extends ViewContainer {
   import JsDom.all._
 
-  protected val child = div().render
+  override protected val child: Element = div().render
 
   override def getTemplate: Modifier = div(
     h1("Frontend"),

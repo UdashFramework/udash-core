@@ -1,8 +1,8 @@
 package io.udash.web.server
 
-import io.udash.rest._
-import io.udash.rpc._
-import io.udash.rpc.utils.{CallLogging, DefaultAtmosphereFramework}
+import io.udash.rest.*
+import io.udash.rpc.*
+import io.udash.rpc.utils.CallLogging
 import io.udash.web.guide.demos.activity.{Call, CallLogger}
 import io.udash.web.guide.demos.rest.MainServerREST
 import io.udash.web.guide.rest.ExposedRestInterfaces

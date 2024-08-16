@@ -131,7 +131,10 @@ src_managed/
 project/boot/
 project/plugins/project/
 
-# Scala-IDE specific
-.scala_dependencies
-.worksheet
+# Metals (VSCode)
+.bloop
+.metals
+.vscode
+metals.sbt
 
+node_modules/

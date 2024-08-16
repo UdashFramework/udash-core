@@ -5,7 +5,7 @@ import io.udash._
 import io.udash.properties.{Blank, HasModelPropertyCreator, PropertyCreator}
 import org.scalajs.dom._
 
-import scala.scalajs.js
+import scala.scalajs.js.|
 
 class FileUploader(url: Url) {
 
@@ -20,20 +20,26 @@ class FileUploader(url: Url) {
 
   /** Uploads provided `file` in a field named `fieldName` with optional additional request headers. */
   def uploadFile(
-    fieldName: String, file: File, extraData: Map[js.Any, js.Any] = Map.empty, additionalRequestHeaders: Map[RequestName, RequestValue] = Map.empty
+    fieldName: String, file: File, extraData: Map[String, String | Blob] = Map.empty, additionalRequestHeaders: Map[RequestName, RequestValue] = Map.empty
   ): ReadableModelProperty[FileUploadModel] =
     upload(fieldName, Seq(file), extraData = extraData, additionalRequestHeaders = additionalRequestHeaders)
 
   /** Uploads provided `files` in a field named `fieldName` with optional additional request headers. */
   def upload(
-    fieldName: String, files: Seq[File], extraData: Map[js.Any, js.Any] = Map.empty, additionalRequestHeaders: Map[RequestName, RequestValue] = Map.empty
+    fieldName: String, files: Seq[File], extraData: Map[String, String | Blob] = Map.empty, additionalRequestHeaders: Map[RequestName, RequestValue] = Map.empty
   ): ReadableModelProperty[FileUploadModel] = {
     val p = ModelProperty[FileUploadModel](
       new FileUploadModel(Seq.empty, FileUploadState.InProgress, 0, 0, None)
     )
     val data = new FormData()
 
-    extraData.foreach { case (key, value) => data.append(key, value) }
+    extraData.foreach {
+      case (key, value) =>
+        (value: Any) match {
+          case string: String => data.append(key, string)
+          case blob: Blob => data.append(key, blob)
+        }
+    }
     files.foreach(file => {
       data.append(fieldName, file)
       p.subSeq(_.files).append(file)

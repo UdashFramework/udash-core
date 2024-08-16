@@ -177,6 +177,9 @@
     },
     "/failingGet": {
       "get": {
+        "tags": [
+          "TrivialDescribedGroup"
+        ],
         "operationId": "failingGet",
         "responses": {
           "204": {
@@ -257,6 +260,56 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RestEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/groupPrefix/subget/{p1}": {
+      "get": {
+        "tags": [
+          "GroupPrefix"
+        ],
+        "operationId": "groupPrefix_subget",
+        "parameters": [
+          {
+            "name": "p1",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "X-H1",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "q1",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
                 }
               }
             }
@@ -495,6 +548,9 @@
     "/prefix/{p0}/subget/{p1}": {
       "summary": "summary for prefix paths",
       "get": {
+        "tags": [
+          "Prefix"
+        ],
         "operationId": "prefix_subget",
         "parameters": [
           {
@@ -642,6 +698,9 @@
     },
     "/trivialGet": {
       "get": {
+        "tags": [
+          "TrivialGroup"
+        ],
         "operationId": "trivialGet",
         "responses": {
           "204": {
@@ -858,11 +917,43 @@
               }
             ],
             "default": null
+          },
+          "enumField": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RestEntityEnumCustom"
+              }
+            ],
+            "default": "OptionOne"
+          },
+          "inlinedEnumField": {
+            "type": "string",
+            "enum": [
+              "Option1",
+              "Option2"
+            ],
+            "default": "Option1"
+          },
+          "enumMap": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RestEntityEnumCustom"
+            },
+            "default": {}
           }
         },
         "required": [
           "id"
         ]
+      },
+      "RestEntityEnumCustom": {
+        "type": "string",
+        "description": "Example named enum",
+        "enum": [
+          "OptionOne",
+          "OptionTwo"
+        ],
+        "example": "OptionOne"
       },
       "RestEntityId": {
         "type": "string",
@@ -941,5 +1032,21 @@
         ]
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "Prefix",
+      "description": "example API subgroup"
+    },
+    {
+      "name": "GroupPrefix"
+    },
+    {
+      "name": "TrivialGroup"
+    },
+    {
+      "name": "TrivialDescribedGroup",
+      "description": "something"
+    }
+  ]
 }

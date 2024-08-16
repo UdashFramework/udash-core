@@ -6,9 +6,6 @@ import scalacss.internal.Literal
 
 import scala.language.postfixOps
 
-/**
-  * Created by malchik on 2016-04-04.
-  */
 object FooterStyles extends CssBase {
   import dsl._
 

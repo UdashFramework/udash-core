@@ -7,9 +7,6 @@ import io.udash.web.guide.styles.utils.{GuideStyleUtils, MediaQueries}
 
 import scala.language.postfixOps
 
-/**
-  * Created by malchik on 2016-04-04.
-  */
 object HeaderStyles extends CssBase with HeaderButtonsStyles with HeaderNavStyles {
   import dsl._
 

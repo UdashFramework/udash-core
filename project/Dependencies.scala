@@ -1,49 +1,49 @@
-import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
-import org.scalajs.jsdependencies.sbtplugin.JSDependenciesPlugin.autoImport._
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport.*
+import org.scalajs.jsdependencies.sbtplugin.JSDependenciesPlugin.autoImport.*
 import org.scalajs.jsdependencies.sbtplugin.JSModuleID
+import sbt.*
 import sbt.Keys.scalaVersion
-import sbt._
 
 object Dependencies {
-  val versionOfScala = "2.13.11" //update .github/workflows/ci.yml as well
+  val versionOfScala = "2.13.14" //update .github/workflows/ci.yml as well
 
-  val jqueryWrapperVersion = "3.2.0"
+  val jqueryWrapperVersion = "3.3.0"
 
-  val scalaJsDomVersion = "2.6.0"
-  val scalaTagsVersion = "0.12.0"
+  val scalaJsDomVersion = "2.8.0"
+  val scalaTagsVersion = "0.13.1"
   val scalaCssVersion = "1.0.0"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "2.11.0"
+  val avsCommonsVersion = "2.18.0"
 
   val atmosphereJSVersion = "3.1.3"
-  val atmosphereVersion = "2.7.9"
+  val atmosphereVersion = "2.7.14"
 
-  val upickleVersion = "3.1.2" // Tests only
-  val circeVersion = "0.14.5" // Tests only
+  val upickleVersion = "4.0.0" // Tests only
+  val circeVersion = "0.14.9" // Tests only
   val circeDerivationVersion = "0.13.0-M5" // Tests only
-  val monixVersion = "3.4.1" // Tests only
+  val monixVersion = "3.4.1" // udash-rest only
 
-  val sttpVersion = "3.9.0"
+  val sttpVersion = "3.9.8"
 
   val scalaLoggingVersion = "3.9.5"
 
   val jettyVersion = "12.0.0"
-  val typesafeConfigVersion = "1.4.2"
+  val typesafeConfigVersion = "1.4.3"
   val flexmarkVersion = "0.64.8"
-  val logbackVersion = "1.3.11"
-  val janinoVersion = "3.1.10"
+  val logbackVersion = "1.3.14"
+  val janinoVersion = "3.1.12"
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
 
-  val scalatestVersion = "3.2.16"
-  val scalaJsSecureRandomVersion = "1.0.0"
+  val scalatestVersion = "3.2.19"
+  val scalaJsSecureRandomVersion = "1.0.0" // Tests only
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.39.0"
-  val momentJsVersion = "2.29.4"
+  val momentJsVersion = "2.30.1"
 
-  val seleniumVersion = "4.11.0"
-  val webDriverManagerVersion = "5.4.1"
+  val seleniumVersion = "4.23.1"
+  val webDriverManagerVersion = "5.9.2"
   val scalaJsBenchmarkVersion = "0.10.0"
 
   val compilerPlugins = Def.setting(Seq(
@@ -143,7 +143,7 @@ object Dependencies {
   val bootstrap4JsDeps = Def.setting(Seq[JSModuleID](
     "org.webjars" % "bootstrap" % bootstrap4Version / bootstrap4Resource
       minified "js/bootstrap.bundle.min.js" dependsOn "jquery.js",
-    "org.webjars" % "momentjs" % s"$momentJsVersion" / momentResource minified s"$momentJsVersion/min/moment.min.js",
+    "org.webjars.npm" % "moment" % s"$momentJsVersion" / momentResource minified s"$momentJsVersion/min/moment.min.js",
     "org.webjars" % "tempusdominus-bootstrap-4" % bootstrap4DatepickerVersion / "js/tempusdominus-bootstrap-4.js"
       minified "js/tempusdominus-bootstrap-4.min.js" dependsOn(bootstrap4Resource, momentResource)
   ))
@@ -161,7 +161,6 @@ object Dependencies {
     "ch.qos.logback" % "logback-classic" % logbackVersion,
     "org.codehaus.janino" % "janino" % janinoVersion, //conditional processing in logback
 
-    "org.eclipse.jetty" % "jetty-server" % jettyVersion,
     "org.eclipse.jetty" % "jetty-rewrite" % jettyVersion,
     "org.eclipse.jetty.ee8.websocket" % "jetty-ee8-websocket-javax-server" % jettyVersion,
 
