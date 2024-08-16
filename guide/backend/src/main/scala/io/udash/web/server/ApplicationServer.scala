@@ -17,6 +17,9 @@ import org.eclipse.jetty.rewrite.handler.{RewriteHandler, RewriteRegexRule}
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.ContextHandlerCollection
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
+import org.eclipse.jetty.util.resource.ResourceFactory
+
+import java.nio.file.Path
 
 class ApplicationServer(val port: Int, homepageResourceBase: String, guideResourceBase: String)(implicit scheduler: Scheduler) {
   private val server = new Server(port)
@@ -56,7 +59,7 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
     }
     contextHandler.addServlet(atmosphereHolder, "/atm/*")
 
-    //this is required for org.atmosphere.container.JSR356AsyncSupport to setup at all
+    //required for org.atmosphere.container.JSR356AsyncSupport
     JavaxWebSocketServletContainerInitializer.configure(contextHandler, null)
 
     contextHandler.addServlet(new ServletHolder(RestServlet[MainServerREST](new ExposedRestInterfaces)), "/rest_api/*")
@@ -73,7 +76,8 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
     val contextHandler = new ServletContextHandler
     contextHandler.setSessionHandler(new SessionHandler)
     contextHandler.setVirtualHosts(hosts)
-    contextHandler.addServlet(new ServletHolder(new DefaultServlet).setup(_.setInitParameter("baseResource", resourceBase)), "/*")
+    contextHandler.setBaseResource(ResourceFactory.of(contextHandler).newResource(Path.of(resourceBase)))
+    contextHandler.addServlet(new ServletHolder(new DefaultServlet), "/*")
     contextHandler
   }
 
