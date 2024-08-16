@@ -38,6 +38,7 @@ object Dependencies {
 
   val scalatestVersion = "3.2.19"
   val scalaJsSecureRandomVersion = "1.0.0" // Tests only
+  val slf4jVersion = "2.0.16" // Tests only
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.39.0"
   val momentJsVersion = "2.30.1"
@@ -52,6 +53,7 @@ object Dependencies {
 
   val commonTestDeps = Def.setting(Seq(
     "org.scalatest" %%% "scalatest" % scalatestVersion,
+    "org.slf4j" % "slf4j-simple" % slf4jVersion,
   ).map(_ % Test))
 
   val commonJsTestDeps = Def.setting(Seq(
@@ -157,7 +159,6 @@ object Dependencies {
   ))
 
   val backendDeps = Def.setting(Seq(
-    "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "ch.qos.logback" % "logback-classic" % logbackVersion,
     "org.codehaus.janino" % "janino" % janinoVersion, //conditional processing in logback
 
