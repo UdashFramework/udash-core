@@ -3,8 +3,8 @@ package rest.examples
 
 import io.udash.rest.RestServlet
 import monix.execution.Scheduler
+import org.eclipse.jetty.ee10.servlet.{ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 
 import scala.concurrent.Future
 
@@ -23,6 +23,7 @@ object ServerMain {
 
     val server = new Server(9090)
     val handler = new ServletContextHandler
+
     handler.addServlet(new ServletHolder(RestServlet[UserApi](new UserApiImpl)), "/*")
     server.setHandler(handler)
     server.start()

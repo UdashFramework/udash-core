@@ -4,7 +4,7 @@ package rest.openapi
 import com.avsystem.commons.OptArg
 import com.avsystem.commons.annotation.explicitGenerics
 import com.avsystem.commons.serialization.json.JsonStringOutput
-import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 object OpenApiServlet {
   @explicitGenerics def apply[RestApi: OpenApiMetadata](

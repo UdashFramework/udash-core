@@ -1,8 +1,8 @@
 package io.udash.rpc
 
-import javax.servlet.ServletConfig
-import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import org.atmosphere.cpr._
+import jakarta.servlet.ServletConfig
+import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
+import org.atmosphere.cpr.*
 
 /**
   * Servlet for RPC endpoint.

@@ -3,9 +3,8 @@ package io.udash.rpc.utils
 import com.typesafe.scalalogging.Logger
 import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, ExceptionCodecRegistry}
 import io.udash.rpc.{AtmosphereService, AtmosphereServiceConfig}
+import jakarta.servlet.ServletConfig
 import org.atmosphere.cpr.{ApplicationConfig, AtmosphereFramework}
-
-import javax.servlet.ServletConfig
 
 /** AtmosphereFramework with default configuration for Udash. */
 class DefaultAtmosphereFramework(

@@ -1,17 +1,16 @@
 package io.udash.rpc
 
-import java.util.UUID
-
-import com.avsystem.commons._
+import com.avsystem.commons.*
 import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
 import com.typesafe.scalalogging.{Logger, StrictLogging}
-import io.udash.rpc.internals._
+import io.udash.rpc.internals.*
 import io.udash.rpc.serialization.ExceptionCodecRegistry
-import javax.servlet.ServletInputStream
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.ServletInputStream
+import jakarta.servlet.http.HttpServletResponse
+import org.atmosphere.cpr.*
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT
-import org.atmosphere.cpr._
 
+import java.util.UUID
 import scala.concurrent.Future
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.util.{Failure, Success, Try}

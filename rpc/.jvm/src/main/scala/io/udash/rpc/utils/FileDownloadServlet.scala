@@ -1,8 +1,9 @@
 package io.udash.rpc.utils
 
+import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
+
 import java.io.File
 import java.nio.file.Files
-import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 /** Template of a servlet handling files download. */
 abstract class FileDownloadServlet extends HttpServlet {

@@ -13,11 +13,11 @@ object Dependencies {
   val scalaTagsVersion = "0.13.1"
   val scalaCssVersion = "1.0.0"
 
-  val servletVersion = "4.0.1"
+  val servletVersion = "6.0.0"
   val avsCommonsVersion = "2.17.0"
 
   val atmosphereJSVersion = "3.1.3"
-  val atmosphereVersion = "2.7.14"
+  val atmosphereVersion = "3.0.8"
 
   val upickleVersion = "4.0.0" // Tests only
   val circeVersion = "0.14.9" // Tests only
@@ -28,7 +28,7 @@ object Dependencies {
 
   val scalaLoggingVersion = "3.9.5"
 
-  val jettyVersion = "10.0.22"
+  val jettyVersion = "12.0.12"
   val typesafeConfigVersion = "1.4.3"
   val flexmarkVersion = "0.64.8"
   val logbackVersion = "1.3.14"
@@ -92,7 +92,7 @@ object Dependencies {
   ))
 
   val rpcJvmDeps = Def.setting(rpcCrossDeps.value ++ Seq(
-    "javax.servlet" % "javax.servlet-api" % servletVersion,
+    "jakarta.servlet" % "jakarta.servlet-api" % servletVersion,
     "org.atmosphere" % "atmosphere-runtime" % atmosphereVersion
   ))
 
@@ -113,10 +113,9 @@ object Dependencies {
   ))
 
   val restJvmDeps = Def.setting(restCrossDeps.value ++ Seq(
-    "javax.servlet" % "javax.servlet-api" % servletVersion,
+    "jakarta.servlet" % "jakarta.servlet-api" % servletVersion,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
-    "org.eclipse.jetty" % "jetty-server" % jettyVersion % Test,
-    "org.eclipse.jetty" % "jetty-servlet" % jettyVersion % Test
+    "org.eclipse.jetty.ee10" % "jetty-ee10-servlet" % jettyVersion % Test
   ))
 
   val restSjsDeps = restCrossDeps
@@ -163,7 +162,7 @@ object Dependencies {
     "org.codehaus.janino" % "janino" % janinoVersion, //conditional processing in logback
 
     "org.eclipse.jetty" % "jetty-rewrite" % jettyVersion,
-    "org.eclipse.jetty.websocket" % "websocket-javax-server" % jettyVersion,
+    "org.eclipse.jetty.ee10.websocket" % "jetty-ee10-websocket-jakarta-server" % jettyVersion,
 
     "com.typesafe" % "config" % typesafeConfigVersion,
 

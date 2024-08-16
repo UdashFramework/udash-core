@@ -1,21 +1,21 @@
 package io.udash
 package rest
 
-import com.avsystem.commons._
+import com.avsystem.commons.*
 import com.avsystem.commons.annotation.explicitGenerics
 import com.typesafe.scalalogging.LazyLogging
-import io.udash.rest.RestServlet._
-import io.udash.rest.raw._
+import io.udash.rest.RestServlet.*
+import io.udash.rest.raw.*
 import io.udash.utils.URLEncoder
+import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.{AsyncEvent, AsyncListener}
 import monix.eval.Task
 import monix.execution.Scheduler
 
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import javax.servlet.{AsyncEvent, AsyncListener}
 import scala.annotation.tailrec
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 object RestServlet {
   final val DefaultHandleTimeout = 30.seconds
@@ -49,7 +49,7 @@ class RestServlet(
   scheduler: Scheduler
 ) extends HttpServlet with LazyLogging {
 
-  import RestServlet._
+  import RestServlet.*
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val asyncContext = request.startAsync()
