@@ -1,13 +1,14 @@
 package io.udash
 package rest
 
-import io.udash.rest.raw._
+import io.udash.rest.raw.*
 import io.udash.testing.UdashSharedTest
 import monix.execution.Scheduler
 import org.eclipse.jetty.ee8.nested.SessionHandler
 import org.eclipse.jetty.ee8.servlet.{ServletContextHandler, ServletHolder}
-import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.http.UriCompliance
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
+import org.eclipse.jetty.server.{HttpConnectionFactory, Server}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -36,6 +37,8 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
 
   val server = new Server(port)
   server.setHandler(context)
+  // Unsafe URI compliance is required for testing purposes
+  server.getConnectors.head.getConnectionFactory(classOf[HttpConnectionFactory]).getHttpConfiguration.setUriCompliance(UriCompliance.UNSAFE)
 
   def futureHandle(rawHandle: RawRest.HandleRequest): RestRequest => Future[RestResponse] =
     rawHandle.andThen(FutureRestImplicits.futureFromTask.fromTask)
