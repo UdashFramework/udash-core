@@ -28,7 +28,8 @@ object Dependencies {
 
   val scalaLoggingVersion = "3.9.5"
 
-  val jettyVersion = "12.0.12"
+  //todo 12.0.8+ does not serve static resources properly
+  val jettyVersion = "12.0.7"
   val typesafeConfigVersion = "1.4.3"
   val flexmarkVersion = "0.64.8"
   val logbackVersion = "1.3.14"
