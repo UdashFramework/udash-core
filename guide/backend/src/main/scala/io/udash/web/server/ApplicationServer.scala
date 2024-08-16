@@ -1,5 +1,6 @@
 package io.udash.web.server
 
+import com.avsystem.commons.universalOps
 import io.udash.rest.*
 import io.udash.rpc.*
 import io.udash.rpc.utils.CallLogging
@@ -12,7 +13,7 @@ import monix.execution.Scheduler
 import org.eclipse.jetty.ee8.nested.SessionHandler
 import org.eclipse.jetty.ee8.servlet.{DefaultServlet, ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.ee8.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer
-import org.eclipse.jetty.rewrite.handler.RewriteHandler
+import org.eclipse.jetty.rewrite.handler.{RewriteHandler, RewriteRegexRule}
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.ContextHandlerCollection
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
@@ -20,26 +21,24 @@ import org.eclipse.jetty.server.handler.gzip.GzipHandler
 class ApplicationServer(val port: Int, homepageResourceBase: String, guideResourceBase: String)(implicit scheduler: Scheduler) {
   private val server = new Server(port)
 
-  def start(): Unit = {
+  def start(): Unit =
     server.start()
-  }
 
-  def stop(): Unit = {
+  def stop(): Unit =
     server.stop()
-  }
 
-  private val homepage = {
-    val contextHandler = createContextHandler(Array("udash.io", "www.udash.io", "udash.local", "127.0.0.1"))
-    contextHandler.addServlet(createStaticHandler(homepageResourceBase), "/*")
-    val context = new GzipHandler()
-    context.setHandler(contextHandler)
-    context
-  }
+  private val homepage =
+    new GzipHandler(createContextHandler(
+      hosts = Array("udash.io", "www.udash.io", "udash.local", "127.0.0.1"),
+      resourceBase = homepageResourceBase
+    ).get())
 
   private val guide = {
-    val contextHandler = createContextHandler(Array("guide.udash.io", "www.guide.udash.io", "guide.udash.local", "127.0.0.2", "localhost"))
+    val contextHandler = createContextHandler(
+      hosts = Array("guide.udash.io", "www.guide.udash.io", "guide.udash.local", "127.0.0.2", "localhost"),
+      resourceBase = guideResourceBase
+    )
     contextHandler.getSessionHandler.addEventListener(new org.atmosphere.cpr.SessionSupport())
-    contextHandler.addServlet(createStaticHandler(guideResourceBase), "/*")
 
     val atmosphereHolder = {
       val config = new DefaultAtmosphereServiceConfig[MainServerRPC](clientId => {
@@ -53,54 +52,29 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
       })
 
       val framework = new DefaultAtmosphereFramework(config, exceptionsRegistry = GuideExceptions.registry)
-      val atmosphereHolder = new ServletHolder(new RpcServlet(framework))
-      atmosphereHolder.setAsyncSupported(true)
-      atmosphereHolder
+      new ServletHolder(new RpcServlet(framework))
     }
     contextHandler.addServlet(atmosphereHolder, "/atm/*")
 
     //this is required for org.atmosphere.container.JSR356AsyncSupport to setup at all
     JavaxWebSocketServletContainerInitializer.configure(contextHandler, null)
 
-    val restHolder = new ServletHolder(
-      RestServlet[MainServerREST](new ExposedRestInterfaces)
-    )
-    restHolder.setAsyncSupported(true)
-    contextHandler.addServlet(restHolder, "/rest_api/*")
+    contextHandler.addServlet(new ServletHolder(RestServlet[MainServerREST](new ExposedRestInterfaces)), "/rest_api/*")
 
-    val handler = new GzipHandler()
-    handler.setHandler(contextHandler)
-    handler
+    new GzipHandler(contextHandler.get())
   }
 
-  private val contexts = new ContextHandlerCollection
-  contexts.setHandlers(homepage, guide)
+  server.setHandler(
+    new RewriteHandler(new ContextHandlerCollection().setup(_.setHandlers(homepage, guide)))
+      .setup(_.addRule(new RewriteRegexRule("^/(?!assets|scripts|styles|atm|rest_api)(.*/?)*$", "/")))
+  )
 
-  private val rewriteHandler = {
-    import org.eclipse.jetty.rewrite.handler.RewriteRegexRule
-    val rewrite = new RewriteHandler()
-
-    val spaRewrite = new RewriteRegexRule
-    spaRewrite.setRegex("^/(?!assets|scripts|styles|atm|rest_api)(.*/?)*$")
-    spaRewrite.setReplacement("/")
-    rewrite.addRule(spaRewrite)
-    rewrite.setHandler(contexts)
-    rewrite
-  }
-
-  server.setHandler(rewriteHandler)
-
-  private def createContextHandler(hosts: Array[String]): ServletContextHandler = {
+  private def createContextHandler(hosts: Array[String], resourceBase: String): ServletContextHandler = {
     val contextHandler = new ServletContextHandler
     contextHandler.setSessionHandler(new SessionHandler)
     contextHandler.setVirtualHosts(hosts)
+    contextHandler.addServlet(new ServletHolder(new DefaultServlet).setup(_.setInitParameter("baseResource", resourceBase)), "/*")
     contextHandler
   }
 
-  private def createStaticHandler(resourceBase: String): ServletHolder = {
-    val appHolder = new ServletHolder(new DefaultServlet)
-    appHolder.setAsyncSupported(true)
-    appHolder.setInitParameter("baseResource", resourceBase)
-    appHolder
-  }
 }
