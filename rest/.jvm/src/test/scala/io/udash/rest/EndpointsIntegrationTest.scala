@@ -6,9 +6,8 @@ import io.udash.testing.UdashSharedTest
 import monix.execution.Scheduler
 import org.eclipse.jetty.ee8.nested.SessionHandler
 import org.eclipse.jetty.ee8.servlet.{ServletContextHandler, ServletHolder}
-import org.eclipse.jetty.http.UriCompliance
+import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.gzip.GzipHandler
-import org.eclipse.jetty.server.{HttpConnectionFactory, Server}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -18,27 +17,22 @@ import sttp.client3.SttpClientException.ConnectException
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, Future}
 
-class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll with Eventually with ScalaFutures {
+class EndpointsIntegrationTest extends UdashSharedTest with UsesHttpServer with BeforeAndAfterAll with Eventually with ScalaFutures {
   implicit def scheduler: Scheduler = Scheduler.global
 
-  val port = 44598
-  val contextPrefix = "/rest_api"
-  val baseUri = s"http://127.0.0.1:$port$contextPrefix"
+  private val contextPrefix = "/rest_api"
+  private def baseUri = s"http://127.0.0.1:$port$contextPrefix"
 
-  val holder = new ServletHolder(io.udash.rest.RestServlet[TestServerRESTInterface](new TestServerRESTInterfaceImpl))
-  holder.setAsyncSupported(true)
+  override protected def setupServer(server: Server): Unit = {
+    val holder = new ServletHolder(io.udash.rest.RestServlet[TestServerRESTInterface](new TestServerRESTInterfaceImpl))
+    holder.setAsyncSupported(true)
 
-  val contextHandler = new ServletContextHandler()
-  contextHandler.setSessionHandler(new SessionHandler)
-  contextHandler.addServlet(holder, s"$contextPrefix/*")
+    val contextHandler = new ServletContextHandler()
+    contextHandler.setSessionHandler(new SessionHandler)
+    contextHandler.addServlet(holder, s"$contextPrefix/*")
 
-  val context = new GzipHandler()
-  context.setHandler(contextHandler)
-
-  val server = new Server(port)
-  server.setHandler(context)
-  // Unsafe URI compliance is required for testing purposes
-  server.getConnectors.head.getConnectionFactory(classOf[HttpConnectionFactory]).getHttpConfiguration.setUriCompliance(UriCompliance.UNSAFE)
+    server.setHandler(new GzipHandler(contextHandler.get()))
+  }
 
   def futureHandle(rawHandle: RawRest.HandleRequest): RestRequest => Future[RestResponse] =
     rawHandle.andThen(FutureRestImplicits.futureFromTask.fromTask)
@@ -61,22 +55,12 @@ class EndpointsIntegrationTest extends UdashSharedTest with BeforeAndAfterAll wi
 
   implicit val backend: SttpBackend[Future, Any] = SttpRestClient.defaultBackend()
 
-  val rawHandler = futureHandle(SttpRestClient.asHandleRequest[Future](baseUri))
-  val proxy: TestServerRESTInterface = SttpRestClient[TestServerRESTInterface, Future](baseUri)
-  val badRawHandler = futureHandle(SttpRestClient.asHandleRequest[Future](s"http://127.0.0.1:69$contextPrefix"))
+  def rawHandler = futureHandle(SttpRestClient.asHandleRequest[Future](baseUri))
+  def proxy: TestServerRESTInterface = SttpRestClient[TestServerRESTInterface, Future](baseUri)
+  def badRawHandler = futureHandle(SttpRestClient.asHandleRequest[Future](s"http://127.0.0.1:69$contextPrefix"))
 
   def await[T](f: Future[T]): T =
     Await.result(f, 3 seconds)
-
-  override protected def beforeAll(): Unit = {
-    super.beforeAll()
-    server.start()
-  }
-
-  override protected def afterAll(): Unit = {
-    super.afterAll()
-    server.stop()
-  }
 
   "REST endpoint" should {
     "work with Udash REST client (1)" in {
