@@ -76,7 +76,7 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
     val contextHandler = new ServletContextHandler
     contextHandler.setSessionHandler(new SessionHandler)
     contextHandler.setVirtualHosts(hosts)
-    contextHandler.setBaseResource(ResourceFactory.of(contextHandler).newResource(Path.of(resourceBase)))
+    contextHandler.setBaseResource(ResourceFactory.of(contextHandler).newResource(Path.of(resourceBase).toRealPath()))
     contextHandler.addServlet(new ServletHolder(new DefaultServlet), "/*")
     contextHandler
   }
