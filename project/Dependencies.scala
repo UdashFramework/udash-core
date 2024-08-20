@@ -28,7 +28,7 @@ object Dependencies {
 
   val scalaLoggingVersion = "3.9.5"
 
-  val jettyVersion = "10.0.22"
+  val jettyVersion = "12.0.12"
   val typesafeConfigVersion = "1.4.3"
   val flexmarkVersion = "0.64.8"
   val logbackVersion = "1.3.14"
@@ -114,7 +114,7 @@ object Dependencies {
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "org.eclipse.jetty" % "jetty-server" % jettyVersion % Test,
-    "org.eclipse.jetty" % "jetty-servlet" % jettyVersion % Test
+    "org.eclipse.jetty.ee8" % "jetty-ee8-servlet" % jettyVersion % Test
   ))
 
   val restSjsDeps = restCrossDeps
@@ -162,7 +162,7 @@ object Dependencies {
     "org.codehaus.janino" % "janino" % janinoVersion, //conditional processing in logback
 
     "org.eclipse.jetty" % "jetty-rewrite" % jettyVersion,
-    "org.eclipse.jetty.websocket" % "websocket-javax-server" % jettyVersion,
+    "org.eclipse.jetty.ee8.websocket" % "jetty-ee8-websocket-javax-server" % jettyVersion,
 
     "com.typesafe" % "config" % typesafeConfigVersion,
 
