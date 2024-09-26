@@ -5,7 +5,7 @@ import sbt.*
 import sbt.Keys.scalaVersion
 
 object Dependencies {
-  val versionOfScala = "2.13.14" //update .github/workflows/ci.yml as well
+  val versionOfScala = "2.13.15" //update .github/workflows/ci.yml as well
 
   val jqueryWrapperVersion = "3.3.0"
 
