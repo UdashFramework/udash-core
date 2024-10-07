@@ -108,7 +108,7 @@ trait RPCMethodsImpl extends RPCMethods {
     onFire("handleMore", List(Nil))
 
   override def doStuff(lol: Int, fuu: String)(cos: Option[Boolean]): Unit =
-    onFire("doStuff", List(List(lol, fuu), List(cos)))
+    onFire("doStuff", List(List[Any](lol, fuu), List(cos)))
 
   override def doStuff(num: Int): Unit =
     onFire("doStuffInt", List(List(num)))

@@ -5,7 +5,7 @@ import sbt.*
 import sbt.Keys.scalaVersion
 
 object Dependencies {
-  val versionOfScala = "2.13.14" //update .github/workflows/ci.yml as well
+  val versionOfScala = "2.13.15" //update .github/workflows/ci.yml as well
 
   val jqueryWrapperVersion = "3.3.0"
 
@@ -14,7 +14,7 @@ object Dependencies {
   val scalaCssVersion = "1.0.0"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "2.19.0"
+  val avsCommonsVersion = "2.20.0"
 
   val atmosphereJSVersion = "3.1.3"
   val atmosphereVersion = "2.7.14"
@@ -24,7 +24,7 @@ object Dependencies {
   val circeDerivationVersion = "0.13.0-M5" // Tests only
   val monixVersion = "3.4.1" // udash-rest only
 
-  val sttpVersion = "3.9.8"
+  val sttpVersion = "3.10.0"
 
   val scalaLoggingVersion = "3.9.5"
 
