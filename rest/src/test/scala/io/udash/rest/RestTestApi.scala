@@ -1,14 +1,14 @@
 package io.udash
 package rest
 
-import com.avsystem.commons._
+import com.avsystem.commons.*
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import com.avsystem.commons.rpc.AsRawReal
+import com.avsystem.commons.serialization.*
 import com.avsystem.commons.serialization.json.JsonStringOutput
-import com.avsystem.commons.serialization.{GenCodec, HasPolyGenCodec, flatten, name, whenAbsent}
-import io.udash.rest.openapi.adjusters._
-import io.udash.rest.openapi.{Header => OASHeader, _}
-import io.udash.rest.raw._
+import io.udash.rest.openapi.adjusters.*
+import io.udash.rest.openapi.{Header as OASHeader, *}
+import io.udash.rest.raw.*
 import monix.execution.{FutureUtils, Scheduler}
 
 import scala.concurrent.Future
