@@ -1,7 +1,6 @@
 package io.udash.web.guide.demos.frontend
 
 import io.udash.web.SeleniumTest
-import org.openqa.selenium.By
 
 class FrontendRoutingTest extends SeleniumTest {
   override protected final val url = "/frontend/routing"
@@ -51,7 +50,7 @@ class FrontendRoutingTest extends SeleniumTest {
         link.getText should be("/frontend/routing/pizza")
       }
 
-      input.getAttribute("value") should be("It should not disappear... Selenium")
+      input.getDomAttribute("value") should be("It should not disappear... Selenium")
     }
 
     "change URL basing on input without view redraw" in {
@@ -81,7 +80,7 @@ class FrontendRoutingTest extends SeleniumTest {
       }
 
       init.getText should be("/frontend/routing")
-      input.getAttribute("value") should be("It should not disappear... Selenium")
+      input.getDomAttribute("value") should be("It should not disappear... Selenium")
     }
   }
 }
