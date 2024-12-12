@@ -50,7 +50,7 @@ class FrontendRoutingTest extends SeleniumTest {
         link.getText should be("/frontend/routing/pizza")
       }
 
-      input.getDomAttribute("value") should be("It should not disappear... Selenium")
+      input.getDomProperty("value") should be("It should not disappear... Selenium")
     }
 
     "change URL basing on input without view redraw" in {
@@ -80,7 +80,7 @@ class FrontendRoutingTest extends SeleniumTest {
       }
 
       init.getText should be("/frontend/routing")
-      input.getDomAttribute("value") should be("It should not disappear... Selenium")
+      input.getDomProperty("value") should be("It should not disappear... Selenium")
     }
   }
 }

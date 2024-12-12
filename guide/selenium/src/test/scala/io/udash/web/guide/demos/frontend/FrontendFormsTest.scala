@@ -96,7 +96,7 @@ class FrontendFormsTest extends SeleniumTest {
           }) should be(true)
           radioButtons.findElements(new ByCssSelector(s"input")).asScala.forall(el => {
             val eq = el.getDomAttribute("selected") == radio.getDomAttribute("selected")
-            if (el.getDomAttribute("value").toInt == propertyIdx) eq else !eq
+            if (el.getDomProperty("value").toInt == propertyIdx) eq else !eq
           }) should be(true)
         }
       }
@@ -141,7 +141,7 @@ class FrontendFormsTest extends SeleniumTest {
         textArea.sendKeys(text)
         eventually {
           textAreaDemo.findElements(new ByTagName(s"textarea")).asScala.forall(el => {
-            el.getDomAttribute("value") == text
+            el.getDomProperty("value") == text
           }) should be(true)
         }
       }
@@ -160,7 +160,7 @@ class FrontendFormsTest extends SeleniumTest {
         input.sendKeys(text)
         eventually {
           inputsDemo.findElements(new ByCssSelector(s"input[type=$tpe]")).asScala.forall(el => {
-            el.getDomAttribute("value") == text
+            el.getDomProperty("value") == text
           }) should be(true)
         }
       }

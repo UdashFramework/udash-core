@@ -80,21 +80,21 @@ class FrontendIntroTest extends SeleniumTest {
       val between = demo.findElement(new ById("between"))
       val maximum = demo.findElement(new ById("maximum"))
 
-      var lastMinimum = minimum.getDomAttribute("value")
-      var lastBetween = between.getDomAttribute("value")
-      var lastMaximum = maximum.getDomAttribute("value")
+      var lastMinimum = minimum.getDomProperty("value")
+      var lastBetween = between.getDomProperty("value")
+      var lastMaximum = maximum.getDomProperty("value")
 
       for (_ <- 1 to 5) {
         randomizeButton.click()
         eventually {
-          (lastMinimum != minimum.getDomAttribute("value") ||
-            lastBetween != between.getDomAttribute("value") ||
-            lastMaximum != maximum.getDomAttribute("value")) should be(true)
+          (lastMinimum != minimum.getDomProperty("value") ||
+            lastBetween != between.getDomProperty("value") ||
+            lastMaximum != maximum.getDomProperty("value")) should be(true)
         }
 
-        lastMinimum = minimum.getDomAttribute("value")
-        lastBetween = between.getDomAttribute("value")
-        lastMaximum = maximum.getDomAttribute("value")
+        lastMinimum = minimum.getDomProperty("value")
+        lastBetween = between.getDomProperty("value")
+        lastMaximum = maximum.getDomProperty("value")
       }
     }
   }
