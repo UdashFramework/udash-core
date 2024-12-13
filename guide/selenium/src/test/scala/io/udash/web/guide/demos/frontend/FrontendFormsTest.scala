@@ -2,9 +2,7 @@ package io.udash.web.guide.demos.frontend
 
 import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.{ByClassName, ByCssSelector, ByTagName}
-import org.openqa.selenium.{By, Keys}
 
-import com.avsystem.commons._
 import scala.util.Random
 
 class FrontendFormsTest extends SeleniumTest {
@@ -19,12 +17,12 @@ class FrontendFormsTest extends SeleniumTest {
         val checkbox = checkboxes.findElement(new ByClassName(s"checkbox-demo-$propertyName"))
         checkbox.click()
         eventually {
-          checkboxes.findElements(new ByCssSelector(s"[data-bind=$propertyName]")).asScala.forall(el => {
-            el.getText == expect
-          }) should be(true)
-          checkboxes.findElements(new ByClassName(s"checkbox-demo-$propertyName")).asScala.forall(el => {
-            el.getAttribute("selected") == checkbox.getAttribute("selected")
-          }) should be(true)
+          forAll(checkboxes.findElements(new ByCssSelector(s"[data-bind=$propertyName]")))(el =>
+            el.getText shouldBe expect
+          )
+          forAll(checkboxes.findElements(new ByClassName(s"checkbox-demo-$propertyName")))(el =>
+            el.isSelected shouldBe checkbox.isSelected
+          )
         }
       }
 
@@ -45,13 +43,13 @@ class FrontendFormsTest extends SeleniumTest {
         val checkbox = checkButtons.findElement(new ByCssSelector(s"[data-label=$propertyName]")).findElement(new ByTagName("input"))
         checkbox.click()
         eventually {
-          checkButtons.findElements(new ByClassName("check-buttons-demo-fruits")).asScala.forall(el => {
+          forAll(checkButtons.findElements(new ByClassName("check-buttons-demo-fruits")))(el => {
             val contains = el.getText.contains(propertyName)
-            if (checkbox.getAttribute("selected") != null) contains else !contains
-          }) should be(true)
-          checkButtons.findElements(new ByCssSelector(s"[data-label=$propertyName]")).asScala.forall(el => {
-            el.findElement(new ByTagName("input")).getAttribute("selected") == checkbox.getAttribute("selected")
-          }) should be(true)
+            assert(if (checkbox.isSelected) contains else !contains)
+          })
+          forAll(checkButtons.findElements(new ByCssSelector(s"[data-label=$propertyName]")))(el =>
+            el.findElement(new ByTagName("input")).isSelected shouldBe checkbox.isSelected
+          )
         }
       }
 
@@ -68,13 +66,13 @@ class FrontendFormsTest extends SeleniumTest {
         val option = select.findElement(new ByCssSelector(s"[value='$propertyIdx']"))
         option.click()
         eventually {
-          multiSelect.findElements(new ByClassName("multi-select-demo-fruits")).asScala.forall(el => {
+          forAll(multiSelect.findElements(new ByClassName("multi-select-demo-fruits")))(el => {
             val contains = el.getText.contains(propertyName)
-            if (option.getAttribute("selected") != null) contains else !contains
-          }) should be(true)
-          multiSelect.findElements(new ByTagName("select")).asScala.forall(el => {
-            el.findElement(new ByCssSelector(s"[value='$propertyIdx']")).getAttribute("selected") == option.getAttribute("selected")
-          }) should be(true)
+            assert(if (option.isSelected) contains else !contains)
+          })
+          forAll(multiSelect.findElements(new ByTagName("select")))(el => {
+            el.findElement(new ByCssSelector(s"[value='$propertyIdx']")).isSelected shouldBe option.isSelected
+          })
         }
       }
 
@@ -92,13 +90,13 @@ class FrontendFormsTest extends SeleniumTest {
         val radio = radioButtons.findElement(new ByCssSelector(s"[data-label=$propertyName]")).findElement(new ByTagName("input"))
         driver.executeScript("arguments[0].click();", radio)
         eventually {
-          radioButtons.findElements(new ByClassName("radio-buttons-demo-fruits")).asScala.forall(el => {
-            el.getText == propertyName
-          }) should be(true)
-          radioButtons.findElements(new ByCssSelector(s"input")).asScala.forall(el => {
-            val eq = el.getAttribute("selected") == radio.getAttribute("selected")
-            if (el.getAttribute("value").toInt == propertyIdx) eq else !eq
-          }) should be(true)
+          forAll(radioButtons.findElements(new ByClassName("radio-buttons-demo-fruits")))(el =>
+            el.getText shouldBe propertyName
+          )
+          forAll(radioButtons.findElements(new ByCssSelector(s"input")))(el => {
+            val eq = el.isSelected == radio.isSelected
+            assert(if (el.getDomProperty("value").toInt == propertyIdx) eq else !eq)
+          })
         }
       }
 
@@ -117,12 +115,12 @@ class FrontendFormsTest extends SeleniumTest {
         val option = select.findElement(new ByCssSelector(s"[value='$propertyIdx']"))
         option.click()
         eventually {
-          selectDemo.findElements(new ByClassName("select-demo-fruits")).asScala.forall(el => {
-            el.getText == propertyName
-          }) should be(true)
-          selectDemo.findElements(new ByTagName(s"select")).asScala.forall(el => {
-            el.findElement(new ByCssSelector(s"[value='$propertyIdx']")).getAttribute("selected") == option.getAttribute("selected")
-          }) should be(true)
+          forAll(selectDemo.findElements(new ByClassName("select-demo-fruits")))(el => {
+            el.getText shouldBe propertyName
+          })
+          forAll(selectDemo.findElements(new ByTagName(s"select")))(el => {
+            el.findElement(new ByCssSelector(s"[value='$propertyIdx']")).isSelected shouldBe option.isSelected
+          })
         }
       }
 
@@ -141,9 +139,9 @@ class FrontendFormsTest extends SeleniumTest {
         textArea.clear()
         textArea.sendKeys(text)
         eventually {
-          textAreaDemo.findElements(new ByTagName(s"textarea")).asScala.forall(el => {
-            el.getAttribute("value") == text
-          }) should be(true)
+          forAll(textAreaDemo.findElements(new ByTagName(s"textarea")))(el => {
+            el.getDomProperty("value") shouldBe text
+          })
         }
       }
 
@@ -160,9 +158,9 @@ class FrontendFormsTest extends SeleniumTest {
         input.clear()
         input.sendKeys(text)
         eventually {
-          inputsDemo.findElements(new ByCssSelector(s"input[type=$tpe]")).asScala.forall(el => {
-            el.getAttribute("value") == text
-          }) should be(true)
+          forAll(inputsDemo.findElements(new ByCssSelector(s"input[type=$tpe]")))(el => {
+            el.getDomProperty("value") shouldBe text
+          })
         }
       }
 

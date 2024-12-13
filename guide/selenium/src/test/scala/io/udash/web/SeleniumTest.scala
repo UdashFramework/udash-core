@@ -1,14 +1,15 @@
 package io.udash.web
 
+import com.typesafe.scalalogging.StrictLogging
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxOptions}
 import org.openqa.selenium.remote.RemoteWebDriver
 import org.openqa.selenium.{By, Dimension, WebElement}
 import org.scalatest.concurrent.Eventually
-import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Inspectors}
 
 import java.time.Duration
 
@@ -41,13 +42,15 @@ private final class InternalServerConfig extends ServerConfig {
 
   override def createUrl(part: String): String = {
     require(part.startsWith("/"))
-    s"http://127.0.0.2:${server.port}$part"
+    s"http://localhost:${server.port}$part"
   }
 }
 
-abstract class SeleniumTest extends AnyWordSpec with Matchers with BeforeAndAfterAll with BeforeAndAfterEach with Eventually {
+abstract class SeleniumTest extends AnyWordSpec
+  with Matchers with BeforeAndAfterAll with BeforeAndAfterEach with Eventually with StrictLogging with Inspectors {
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(50, Millis)))
 
+  logger.info("Setting up WebDriver")
   private val driverManager = WebDriverManager.firefoxdriver()
   driverManager.config().setServerPort(0)
   driverManager.setup()
