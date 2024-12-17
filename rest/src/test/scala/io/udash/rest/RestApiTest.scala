@@ -15,15 +15,16 @@ import org.scalatest.funsuite.AnyFunSuite
 import scala.concurrent.duration.FiniteDuration
 
 abstract class RestApiTest extends AnyFunSuite with ScalaFutures {
-
   protected final val MaxConnections: Int = 1 // to timeout quickly
   protected final val Connections: Int = 10 // > MaxConnections
   protected final val CallTimeout: FiniteDuration = 300.millis // << idle timeout
 
   implicit def scheduler: Scheduler = Scheduler.global
 
+  private val impl: RestTestApi = RestTestApi.Impl
+
   final val serverHandle: RawRest.HandleRequest =
-    RawRest.asHandleRequest[RestTestApi](RestTestApi.Impl)
+    RawRest.asHandleRequest[RestTestApi](impl)
 
   def clientHandle: RawRest.HandleRequest
 
@@ -33,7 +34,7 @@ abstract class RestApiTest extends AnyFunSuite with ScalaFutures {
   def testCall[T](call: RestTestApi => Future[T])(implicit pos: Position): Unit =
     assert(
       call(proxy).wrapToTry.futureValue.map(mkDeep) ==
-        call(RestTestApi.Impl).catchFailures.wrapToTry.futureValue.map(mkDeep)
+        call(impl).catchFailures.wrapToTry.futureValue.map(mkDeep)
     )
 
   def mkDeep(value: Any): Any = value match {
@@ -41,8 +42,8 @@ abstract class RestApiTest extends AnyFunSuite with ScalaFutures {
     case _ => value
   }
 
-  def getNeverGetCounter(): Int = RestTestApi.Impl.neverGetCounter.get()
-  def resetNeverGetCounter(): Unit = RestTestApi.Impl.neverGetCounter.set(0)
+  def getNeverGetCounter(): Int = impl.neverGetCounter.get()
+  def resetNeverGetCounter(): Unit = impl.neverGetCounter.set(0)
 }
 
 trait RestApiTestScenarios extends RestApiTest {
