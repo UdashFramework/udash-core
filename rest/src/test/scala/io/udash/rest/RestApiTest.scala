@@ -8,9 +8,9 @@ import io.udash.rest.raw.RawRest.HandleRequest
 import monix.eval.Task
 import monix.execution.Scheduler
 import org.scalactic.source.Position
-import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.time.{Millis, Seconds, Span}
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -21,7 +21,7 @@ abstract class RestApiTest extends AnyFunSuite with ScalaFutures {
 
   implicit def scheduler: Scheduler = Scheduler.global
 
-  private val impl: RestTestApi = RestTestApi.Impl
+  private val impl: RestTestApi = RestTestApi.impl()
 
   final val serverHandle: RawRest.HandleRequest =
     RawRest.asHandleRequest[RestTestApi](impl)
@@ -47,6 +47,8 @@ abstract class RestApiTest extends AnyFunSuite with ScalaFutures {
 }
 
 trait RestApiTestScenarios extends RestApiTest {
+  override implicit val patienceConfig: PatienceConfig = PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(50, Millis)))
+
   test("trivial GET") {
     testCall(_.trivialGet)
   }
@@ -110,7 +112,7 @@ trait RestApiTestScenarios extends RestApiTest {
       .traverse(List.range(0, Connections))(_ => Task.deferFuture(proxy.neverGet).timeout(CallTimeout).failed)
       .map(_ => assertResult(expected = Connections)(actual = getNeverGetCounter())) // neverGet should be called Connections times
       .runToFuture
-      .futureValue(Timeout(30.seconds))
+      .futureValue
   }
 
   test("close connection on monix task cancellation") {
@@ -124,7 +126,7 @@ trait RestApiTestScenarios extends RestApiTest {
       }
       .map(_ => assertResult(expected = Connections)(actual = getNeverGetCounter())) // neverGet should be called Connections times
       .runToFuture
-      .futureValue(Timeout(30.seconds))
+      .futureValue
   }
 }
 

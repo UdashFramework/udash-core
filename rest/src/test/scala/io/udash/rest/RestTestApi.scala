@@ -179,7 +179,7 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
 
   import Scheduler.Implicits.global
 
-  def Impl: RestTestApi = new RestTestApi {
+  def impl(): RestTestApi = new RestTestApi {
     def trivialGet: Future[Unit] = Future.unit
     def failingGet: Future[Unit] = Future.failed(HttpErrorException.plain(503, "nie"))
     def jsonFailingGet: Future[Unit] = Future.failed(HttpErrorException(503, HttpBody.json(JsonValue(JsonStringOutput.write(ErrorWrapper("nie"))))))

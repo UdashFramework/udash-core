@@ -5,7 +5,7 @@ import io.udash.rest.raw.HttpErrorException
 import io.udash.rest.raw.RawRest.HandleRequest
 import sttp.client3.SttpBackend
 
-import scala.concurrent.duration.*
+import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 trait SttpClientRestTest extends ServletBasedRestApiTest {
