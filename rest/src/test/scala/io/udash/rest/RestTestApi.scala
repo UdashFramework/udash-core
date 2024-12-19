@@ -9,7 +9,7 @@ import com.avsystem.commons.serialization.json.JsonStringOutput
 import io.udash.rest.openapi.adjusters.*
 import io.udash.rest.openapi.{Header as OASHeader, *}
 import io.udash.rest.raw.*
-import monix.execution.atomic.Atomic
+import monix.execution.atomic.{Atomic, AtomicInt}
 import monix.execution.{FutureUtils, Scheduler}
 
 import scala.concurrent.Future
@@ -95,7 +95,6 @@ case class ErrorWrapper[T](error: T)
 object ErrorWrapper extends HasPolyGenCodec[ErrorWrapper]
 
 trait RestTestApi {
-  final val neverGetCounter = Atomic(0)
 
   @GET @group("TrivialGroup") def trivialGet: Future[Unit]
   @GET @group("TrivialDescribedGroup") @tagDescription("something") def failingGet: Future[Unit]
@@ -179,13 +178,13 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
 
   import Scheduler.Implicits.global
 
-  def impl(): RestTestApi = new RestTestApi {
+  final class Impl extends RestTestApi {
     def trivialGet: Future[Unit] = Future.unit
     def failingGet: Future[Unit] = Future.failed(HttpErrorException.plain(503, "nie"))
     def jsonFailingGet: Future[Unit] = Future.failed(HttpErrorException(503, HttpBody.json(JsonValue(JsonStringOutput.write(ErrorWrapper("nie"))))))
     def moreFailingGet: Future[Unit] = throw HttpErrorException.plain(503, "nie")
     def neverGet: Future[Unit] = {
-      neverGetCounter.transform(_ + 1)
+      counter.increment()
       Future.never
     }
     def wait(millis: Int): Future[String] = FutureUtils.delayedResult(millis.millis)(s"waited $millis ms")
@@ -209,6 +208,11 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     def wrappedBinaryEcho(bytes: Bytes): Future[Bytes] = Future.successful(bytes)
     def wrappedBody(id: RestEntityId): Future[RestEntityId] = Future.successful(id)
     def thirdPartyBody(dur: HasThirdParty): Future[HasThirdParty] = Future.successful(dur)
+
+    /** Counter for neverGet calls */
+    private val counter: AtomicInt = Atomic(0)
+    def counterValue(): Int = counter.get()
+    def resetCounter(): Unit = counter.set(0)
   }
 }
 

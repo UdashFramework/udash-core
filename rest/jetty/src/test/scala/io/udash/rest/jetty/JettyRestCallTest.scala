@@ -8,6 +8,7 @@ import org.eclipse.jetty.client.HttpClient
 final class JettyRestCallTest extends ServletBasedRestApiTest with RestApiTestScenarios {
   val client: HttpClient = new HttpClient() {
     setMaxConnectionsPerDestination(MaxConnections)
+    setIdleTimeout(IdleTimout.toMillis)
   }
 
   def clientHandle: HandleRequest =

@@ -8,20 +8,27 @@ import io.udash.rest.raw.RawRest.HandleRequest
 import monix.eval.Task
 import monix.execution.Scheduler
 import org.scalactic.source.Position
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.time.{Millis, Seconds, Span}
 
 import scala.concurrent.duration.FiniteDuration
 
-abstract class RestApiTest extends AnyFunSuite with ScalaFutures {
+abstract class RestApiTest extends AnyFunSuite with ScalaFutures with BeforeAndAfterEach {
+  implicit def scheduler: Scheduler = Scheduler.global
+
   protected final val MaxConnections: Int = 1 // to timeout quickly
   protected final val Connections: Int = 10 // > MaxConnections
   protected final val CallTimeout: FiniteDuration = 300.millis // << idle timeout
+  protected final val IdleTimout: FiniteDuration = CallTimeout * 100
 
-  implicit def scheduler: Scheduler = Scheduler.global
+  protected val impl: RestTestApi.Impl = new RestTestApi.Impl
 
-  private val impl: RestTestApi = RestTestApi.impl()
+  override protected def beforeEach(): Unit = {
+    super.beforeEach()
+    impl.resetCounter()
+  }
 
   final val serverHandle: RawRest.HandleRequest =
     RawRest.asHandleRequest[RestTestApi](impl)
@@ -41,9 +48,6 @@ abstract class RestApiTest extends AnyFunSuite with ScalaFutures {
     case arr: Array[_] => IArraySeq.empty[AnyRef] ++ arr.iterator.map(mkDeep)
     case _ => value
   }
-
-  def getNeverGetCounter(): Int = impl.neverGetCounter.get()
-  def resetNeverGetCounter(): Unit = impl.neverGetCounter.set(0)
 }
 
 trait RestApiTestScenarios extends RestApiTest {
@@ -107,24 +111,22 @@ trait RestApiTestScenarios extends RestApiTest {
   }
 
   test("close connection on monix task timeout") {
-    resetNeverGetCounter()
     Task
       .traverse(List.range(0, Connections))(_ => Task.deferFuture(proxy.neverGet).timeout(CallTimeout).failed)
-      .map(_ => assertResult(expected = Connections)(actual = getNeverGetCounter())) // neverGet should be called Connections times
+      .map(_ => assertResult(expected = Connections)(actual = impl.counterValue())) // neverGet should be called Connections times
       .runToFuture
       .futureValue
   }
 
   test("close connection on monix task cancellation") {
-    resetNeverGetCounter()
     Task
       .traverse(List.range(0, Connections)) { i =>
         val cancelable = Task.deferFuture(proxy.neverGet).runAsync(_ => ())
         Task.sleep(100.millis)
-          .restartUntil(_ => getNeverGetCounter() >= i)
+          .restartUntil(_ => impl.counterValue() >= i)
           .map(_ => cancelable.cancel())
       }
-      .map(_ => assertResult(expected = Connections)(actual = getNeverGetCounter())) // neverGet should be called Connections times
+      .map(_ => assertResult(expected = Connections)(actual = impl.counterValue())) // neverGet should be called Connections times
       .runToFuture
       .futureValue
   }
