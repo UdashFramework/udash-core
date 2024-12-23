@@ -1,13 +1,13 @@
 package io.udash.i18n
 
-import java.{util => ju}
-
 import io.udash.testing.UdashRpcBackendTest
+
+import java.util as ju
 
 class ResourceBundlesTranslationTemplatesProviderTest extends UdashRpcBackendTest {
   val testBundlesNames = Seq("test_translations", "test2_translations")
   val bundles = Seq("en", "pl")
-    .map(lang => Lang(lang) -> testBundlesNames.map(name => ju.ResourceBundle.getBundle(name, new ju.Locale(lang))))
+    .map(lang => Lang(lang) -> testBundlesNames.map(name => ju.ResourceBundle.getBundle(name, new ju.Locale.Builder().setLanguage(lang).build())))
     .toMap
 
   val provider = new ResourceBundlesTranslationTemplatesProvider(bundles)
@@ -39,7 +39,7 @@ class ResourceBundlesTranslationTemplatesProviderTest extends UdashRpcBackendTes
     }
 
     "throw an exception when mixed placeholders occurs" in {
-      val mixedProvider = new ResourceBundlesTranslationTemplatesProvider(Map(Lang("en") -> Seq(ju.ResourceBundle.getBundle("mixed", new ju.Locale("en")))))
+      val mixedProvider = new ResourceBundlesTranslationTemplatesProvider(Map(Lang("en") -> Seq(ju.ResourceBundle.getBundle("mixed", new ju.Locale.Builder().setLanguage("en").build()))))
       intercept[ResourceBundlesTranslationTemplatesProvider#IndexedAndUnindexedPlaceholdersMixed](
         mixedProvider.langHash(Lang("en")) should be(provider.langHash(Lang("en")))
       )
