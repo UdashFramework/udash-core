@@ -11,8 +11,11 @@ import scala.concurrent.duration.*
 import scala.concurrent.{Await, Future}
 
 trait SttpClientRestTest extends ServletBasedRestApiTest {
+  /**
+   * Similar to the defaultHttpClient, but with a connection timeout
+   * significantly exceeding the value of the CallTimeout
+   */
   implicit val backend: SttpBackend[Future, Any] = HttpClientFutureBackend.usingClient(
-    //like defaultHttpClient but with connection timeout >> CallTimeout
     HttpClient
       .newBuilder()
       .connectTimeout(JDuration.ofMillis(IdleTimout.toMillis))
