@@ -1,14 +1,15 @@
 package io.udash
 package rest
 
-import com.avsystem.commons._
+import com.avsystem.commons.*
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import com.avsystem.commons.rpc.AsRawReal
+import com.avsystem.commons.serialization.*
 import com.avsystem.commons.serialization.json.JsonStringOutput
-import com.avsystem.commons.serialization.{GenCodec, HasPolyGenCodec, flatten, name, whenAbsent}
-import io.udash.rest.openapi.adjusters._
-import io.udash.rest.openapi.{Header => OASHeader, _}
-import io.udash.rest.raw._
+import io.udash.rest.openapi.adjusters.*
+import io.udash.rest.openapi.{Header as OASHeader, *}
+import io.udash.rest.raw.*
+import monix.execution.atomic.{Atomic, AtomicInt}
 import monix.execution.{FutureUtils, Scheduler}
 
 import scala.concurrent.Future
@@ -94,6 +95,7 @@ case class ErrorWrapper[T](error: T)
 object ErrorWrapper extends HasPolyGenCodec[ErrorWrapper]
 
 trait RestTestApi {
+
   @GET @group("TrivialGroup") def trivialGet: Future[Unit]
   @GET @group("TrivialDescribedGroup") @tagDescription("something") def failingGet: Future[Unit]
   @GET def jsonFailingGet: Future[Unit]
@@ -176,12 +178,15 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
 
   import Scheduler.Implicits.global
 
-  val Impl: RestTestApi = new RestTestApi {
+  final class Impl extends RestTestApi {
     def trivialGet: Future[Unit] = Future.unit
     def failingGet: Future[Unit] = Future.failed(HttpErrorException.plain(503, "nie"))
     def jsonFailingGet: Future[Unit] = Future.failed(HttpErrorException(503, HttpBody.json(JsonValue(JsonStringOutput.write(ErrorWrapper("nie"))))))
     def moreFailingGet: Future[Unit] = throw HttpErrorException.plain(503, "nie")
-    def neverGet: Future[Unit] = Future.never
+    def neverGet: Future[Unit] = {
+      counter.increment()
+      Future.never
+    }
     def wait(millis: Int): Future[String] = FutureUtils.delayedResult(millis.millis)(s"waited $millis ms")
     def getEntity(id: RestEntityId): Future[RestEntity] = Future.successful(RestEntity(id, s"${id.value}-name"))
     def complexGet(p1: Int, p2: String, h1: Int, h2: String, q1: Int, q2: String, q3: Opt[Int], c1: Int, c2: String): Future[RestEntity] =
@@ -203,6 +208,11 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     def wrappedBinaryEcho(bytes: Bytes): Future[Bytes] = Future.successful(bytes)
     def wrappedBody(id: RestEntityId): Future[RestEntityId] = Future.successful(id)
     def thirdPartyBody(dur: HasThirdParty): Future[HasThirdParty] = Future.successful(dur)
+
+    /** Counter for neverGet calls */
+    private val counter: AtomicInt = Atomic(0)
+    def counterValue(): Int = counter.get()
+    def resetCounter(): Unit = counter.set(0)
   }
 }
 

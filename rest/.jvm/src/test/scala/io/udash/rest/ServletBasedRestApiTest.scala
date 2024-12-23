@@ -3,12 +3,11 @@ package rest
 
 import org.eclipse.jetty.ee8.servlet.{ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.ee8.servlet.{ServletHandler, ServletHolder}
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 abstract class ServletBasedRestApiTest extends RestApiTest with UsesHttpServer {
-  override implicit def patienceConfig: PatienceConfig = PatienceConfig(10.seconds)
+  override implicit val patienceConfig: PatienceConfig = PatienceConfig(10.seconds)
 
   def maxPayloadSize: Int = 1024 * 1024
   def serverTimeout: FiniteDuration = 10.seconds
