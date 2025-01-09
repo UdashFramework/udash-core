@@ -1,11 +1,11 @@
 package io.udash
 package rest
 
-import com.avsystem.commons._
+import com.avsystem.commons.*
 import com.avsystem.commons.annotation.explicitGenerics
 import com.typesafe.scalalogging.LazyLogging
-import io.udash.rest.RestServlet._
-import io.udash.rest.raw._
+import io.udash.rest.RestServlet.*
+import io.udash.rest.raw.*
 import io.udash.utils.URLEncoder
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import javax.servlet.{AsyncEvent, AsyncListener}
 import scala.annotation.tailrec
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 object RestServlet {
   final val DefaultHandleTimeout = 30.seconds
@@ -49,7 +49,7 @@ class RestServlet(
   scheduler: Scheduler
 ) extends HttpServlet with LazyLogging {
 
-  import RestServlet._
+  import RestServlet.*
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val asyncContext = request.startAsync()
@@ -117,6 +117,11 @@ class RestServlet(
   private def readBody(request: HttpServletRequest): HttpBody = {
     val contentLength = request.getContentLengthLong.opt.filter(_ != -1)
     contentLength.filter(_ > maxPayloadSize).foreach { length =>
+      // When we're responding immediately, with some headers and an empty body, and we're dropping the request body.
+      // Jetty sees that you won't stream the body, and marks the "read" end of the connection is needing to close.
+      // Once the response is written, Jetty closes the connection. Since there is data that hasn't been read in the kernel buffer,
+      // that will trigger sending a TCP RST.
+      request.getInputStream.skipNBytes(length)
       throw HttpErrorException.plain(413, s"Payload is larger than maximum $maxPayloadSize bytes ($length)")
     }
 
