@@ -19,6 +19,8 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
     assert(future.futureValue == response)
   }
 
+  // TODO streaming add streaming tests
+
   test("simple GET call") {
     val params = RestParameters(
       path = PlainValue.decodePath("/thingy"),

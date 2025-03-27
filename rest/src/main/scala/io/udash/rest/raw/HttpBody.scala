@@ -33,7 +33,10 @@ sealed trait HttpBody {
   final def readForm(defaultCharset: String = HttpBody.Utf8Charset): String =
     readText(HttpBody.FormType, defaultCharset)
 
-  final def readText(requiredMediaType: OptArg[String] = OptArg.Empty, defaultCharset: String = HttpBody.Utf8Charset): String = this match {
+  final def readText(
+    requiredMediaType: OptArg[String] = OptArg.Empty,
+    defaultCharset: String = HttpBody.Utf8Charset,
+  ): String = this match {
     case HttpBody.Empty =>
       throw new ReadFailure("Expected non-empty textual body")
     case ne: HttpBody.NonEmpty if requiredMediaType.forall(_ == ne.mediaType) =>

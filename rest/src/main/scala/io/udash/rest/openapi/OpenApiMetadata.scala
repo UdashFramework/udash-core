@@ -48,12 +48,12 @@ final case class OpenApiMetadata[T](
   @tagged[SomeBodyTag](whenUntagged = new JsonBody)
   @paramTag[RestParamTag](defaultTag = new Body)
   @unmatched(RawRest.NotValidHttpMethod)
-  bodyMethods: List[OpenApiBodyOperation[_]]
+  bodyMethods: List[OpenApiBodyOperation[_]],
 ) {
   val httpMethods: List[OpenApiOperation[_]] = (gets: List[OpenApiOperation[_]]) ++ customBodyMethods ++ bodyMethods
 
   // collect all tags
-  private lazy val openApiTags: List[Tag] = {
+  lazy val openApiTags: List[Tag] = {
     def createTag(method: OpenApiMethod[_]): Opt[Tag] =
       method.groupAnnot.map { group =>
         method.tagAdjusters.foldLeft(Tag(group.groupName))({ case (tag, adjuster) => adjuster.adjustTag(tag) })
@@ -102,7 +102,7 @@ final case class OpenApiMetadata[T](
     servers: List[Server] = Nil,
     security: List[SecurityRequirement] = Nil,
     tags: List[Tag] = Nil,
-    externalDocs: OptArg[ExternalDocumentation] = OptArg.Empty
+    externalDocs: OptArg[ExternalDocumentation] = OptArg.Empty,
   ): OpenApi = {
     val registry = new SchemaRegistry(initial = components.schemas)
     OpenApi(

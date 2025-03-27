@@ -14,9 +14,10 @@ abstract class ServletBasedRestApiTest extends RestApiTest with UsesHttpServer {
 
   protected def setupServer(server: Server): Unit = {
     val servlet = new RestServlet(serverHandle, serverTimeout, maxPayloadSize)
-    val holder = new ServletHolder(servlet)
+    val streamingServlet = new RestServlet(streamingServerHandle, serverTimeout, maxPayloadSize)
     val handler = new ServletContextHandler()
-    handler.addServlet(holder, "/api/*")
+    handler.addServlet(new ServletHolder(servlet), "/api/*")
+    handler.addServlet(new ServletHolder(streamingServlet), "/stream-api/*")
     server.setHandler(handler)
   }
 }

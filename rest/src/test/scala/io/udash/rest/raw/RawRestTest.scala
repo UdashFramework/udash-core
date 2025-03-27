@@ -153,6 +153,8 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
     assert(future.futureValue == response)
   }
 
+  // TODO streaming add streaming tests
+
   test("simple GET") {
     testRestCall(_.self.user(UserId("ID")),
       """-> GET /user?userId=ID

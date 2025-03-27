@@ -1,0 +1,126 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Streaming Test API",
+    "version": "0.1",
+    "description": "Some test REST API"
+  },
+  "paths": {
+    "/jsonStream": {
+      "get": {
+        "operationId": "jsonStream",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RestEntity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simpleStream": {
+      "get": {
+        "operationId": "simpleStream",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "RestEntity": {
+        "type": "object",
+        "description": "REST entity",
+        "properties": {
+          "id": {
+            "description": "entity id",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RestEntityId"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "default": "anonymous"
+          },
+          "subentity": {
+            "description": "recursive optional subentity",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RestEntity"
+              }
+            ],
+            "default": null
+          },
+          "enumField": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RestEntityEnumCustom"
+              }
+            ],
+            "default": "OptionOne"
+          },
+          "inlinedEnumField": {
+            "type": "string",
+            "enum": [
+              "Option1",
+              "Option2"
+            ],
+            "default": "Option1"
+          },
+          "enumMap": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RestEntityEnumCustom"
+            },
+            "default": {}
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "RestEntityEnumCustom": {
+        "type": "string",
+        "description": "Example named enum",
+        "enum": [
+          "OptionOne",
+          "OptionTwo"
+        ],
+        "example": "OptionOne"
+      },
+      "RestEntityId": {
+        "type": "string",
+        "description": "Entity identifier"
+      }
+    }
+  }
+}
