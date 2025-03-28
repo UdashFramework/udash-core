@@ -6,9 +6,27 @@
     "description": "Some test REST API"
   },
   "paths": {
-    "/emptyStream": {
-      "get": {
-        "operationId": "emptyStream",
+    "/errorStream": {
+      "post": {
+        "operationId": "errorStream",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "immediate": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "immediate"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Success",
@@ -17,8 +35,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "integer",
-                    "format": "int32"
+                    "$ref": "#/components/schemas/RestEntity"
                   }
                 }
               }
@@ -50,6 +67,18 @@
     "/simpleStream": {
       "get": {
         "operationId": "simpleStream",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
@@ -58,7 +87,8 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "type": "integer",
+                    "format": "int32"
                   }
                 }
               }

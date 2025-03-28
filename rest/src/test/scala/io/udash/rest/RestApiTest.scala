@@ -149,11 +149,11 @@ trait RestApiTestScenarios extends RestApiTest {
 trait StreamingRestApiTestScenarios extends RestApiTest {
 
   "empty GET stream" in {
-    testStream(_.emptyStream)
+    testStream(_.simpleStream(0))
   }
 
   "trivial GET stream" in {
-    testStream(_.simpleStream)
+    testStream(_.simpleStream(5))
   }
 
   "json GET stream" in {
