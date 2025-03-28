@@ -55,7 +55,7 @@ abstract class RestApiTest extends AsyncUdashSharedTest with BeforeAndAfterEach 
 
   def testStream[T](call: StreamingRestTestApi => Observable[T])(implicit pos: Position): Future[Assertion] =
     (call(streamingProxy).toListL.materialize, call(streamingImpl).toListL.materialize).mapN { (proxyResult, implResult) =>
-      assert(proxyResult.map(mkDeep) == implResult.map(mkDeep))
+      assert(proxyResult.map(_.map(mkDeep)) == implResult.map(_.map(mkDeep)))
     }.runToFuture
 
   def mkDeep(value: Any): Any = value match {
@@ -158,5 +158,18 @@ trait StreamingRestApiTestScenarios extends RestApiTest {
 
   "json GET stream" in {
     testStream(_.jsonStream)
+  }
+
+  "binary stream" in {
+    testStream(_.binaryStream())
+  }
+
+  "immediate stream error" in {
+    testStream(_.errorStream(immediate = true))
+  }
+
+  // TODO streaming - does not work on client side
+  "mid-stream error" ignore {
+    testStream(_.errorStream(immediate = false))
   }
 }

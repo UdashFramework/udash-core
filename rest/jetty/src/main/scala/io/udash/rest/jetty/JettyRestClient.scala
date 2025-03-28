@@ -8,10 +8,13 @@ import io.udash.rest.raw.*
 import io.udash.rest.util.Utils
 import io.udash.utils.URLEncoder
 import monix.eval.Task
-import monix.execution.Callback
-import monix.reactive.Observable
+import monix.execution.{Callback, Scheduler}
+import monix.reactive.OverflowStrategy.Unbounded
+import monix.reactive.{MulticastStrategy, Observable}
+import monix.reactive.subjects.{ConcurrentSubject, PublishToOneSubject}
 import org.eclipse.jetty.client.*
 import org.eclipse.jetty.http.{HttpCookie, HttpHeader, MimeTypes}
+import org.eclipse.jetty.io.Content
 
 import java.nio.charset.Charset
 import scala.concurrent.CancellationException
@@ -48,8 +51,12 @@ final class JettyRestClient(
 
     override def handleRequestStream(request: RestRequest): Task[StreamedRestResponse] =
       prepareRequest(baseUrl, timeout, request).flatMap { httpReq =>
-        Task.async { (callback: Callback[Throwable, StreamedRestResponse]) =>
-          val listener = new InputStreamResponseListener {
+        Task.async0 { (scheduler: Scheduler, callback: Callback[Throwable, StreamedRestResponse]) =>
+          val listener = new BufferingResponseListener(maxResponseLength) {
+            private var collectToBuffer: Boolean = true
+            private lazy val publishSubject = PublishToOneSubject[Array[Byte]]()
+            private lazy val rawContentSubject = ConcurrentSubject.from(publishSubject, Unbounded)(scheduler)
+
             override def onHeaders(response: Response): Unit = {
               super.onHeaders(response)
               // TODO streaming document content length behaviour
@@ -57,27 +64,22 @@ final class JettyRestClient(
               if (contentLength == -1) {
                 val contentTypeOpt = response.getHeaders.get(HttpHeader.CONTENT_TYPE).opt
                 val mediaTypeOpt = contentTypeOpt.map(MimeTypes.getContentTypeWithoutCharset)
-                val charsetOpt = contentTypeOpt.map(MimeTypes.getCharsetFromContentType)
-                // TODO streaming error handling client-side ???
                 val bodyOpt = mediaTypeOpt matchOpt {
                   case Opt(HttpBody.OctetStreamType) =>
-                    // TODO streaming configure chunk size ???
-                    StreamedBody.RawBinary(Observable.fromInputStream(Task.eval(getInputStream)))
+                    StreamedBody.RawBinary(content = rawContentSubject)
                   case Opt(HttpBody.JsonType) =>
-                    val charset = charsetOpt.getOrElse(HttpBody.Utf8Charset)
+                    val charset = contentTypeOpt.map(MimeTypes.getCharsetFromContentType).getOrElse(HttpBody.Utf8Charset)
                     // suboptimal - maybe "online" parsing is possible using Jackson / other lib without waiting for full content ?
-                    val elements: Observable[JsonValue] =
-                      Observable
-                        .fromTask(Utils.mergeArrays(Observable.fromInputStream(Task.eval(getInputStream))))
+                    StreamedBody.JsonList(
+                      elements = Observable
+                        .fromTask(Utils.mergeArrays(rawContentSubject))
                         .map(raw => new String(raw, charset))
                         .flatMap { jsonStr =>
                           val input = new JsonStringInput(new JsonReader(jsonStr))
                           Observable
                             .fromIterator(Task.eval(input.readList().iterator(_.asInstanceOf[JsonStringInput].readRawJson())))
                             .map(JsonValue(_))
-                        }
-                    StreamedBody.JsonList(
-                      elements = elements,
+                        },
                       charset = charset,
                     )
                 }
@@ -87,6 +89,7 @@ final class JettyRestClient(
                     callback(Failure(new Exception(s"Unsupported content type $contentTypeOpt")))
                   },
                   body => {
+                    this.collectToBuffer = false
                     val restResponse = StreamedRestResponse(
                       code = response.getStatus,
                       headers = parseHeaders(response),
@@ -99,42 +102,40 @@ final class JettyRestClient(
               }
             }
 
-            override def onComplete(result: Result): Unit = {
-              super.onComplete(result)
+            override def onContent(response: Response, chunk: Content.Chunk, demander: Runnable): Unit =
+              if (collectToBuffer)
+                super.onContent(response, chunk, demander)
+              else
+                if (chunk == Content.Chunk.EOF) {
+                  rawContentSubject.onComplete()
+                } else {
+                  val buf = chunk.getByteBuffer
+                  val arr = new Array[Byte](buf.remaining)
+                  buf.get(arr)
+                  publishSubject.subscription // wait for subscription
+                    .flatMapNow(_ => rawContentSubject.onNext(arr))
+                    .mapNow(_ => demander.run())
+                }
+
+            override def onComplete(result: Result): Unit =
               if (result.isSucceeded) {
                 val httpResp = result.getResponse
                 val contentLength = httpResp.getHeaders.getLongField(HttpHeader.CONTENT_LENGTH)
                 if (contentLength != -1) {
-                  val contentTypeOpt = httpResp.getHeaders.get(HttpHeader.CONTENT_TYPE).opt
-                  val charsetOpt = contentTypeOpt.map(MimeTypes.getCharsetFromContentType)
                   // TODO streaming client-side handle errors ?
-                  val rawBody = getInputStream.readAllBytes()
-                  val body = (contentTypeOpt, charsetOpt) match {
-                    case (Opt(contentType), Opt(charset)) =>
-                      StreamedBody.fromHttpBody(
-                        HttpBody.textual(
-                          content = new String(rawBody, charset),
-                          mediaType = MimeTypes.getContentTypeWithoutCharset(contentType),
-                          charset = charset,
-                        )
-                      )
-                    case (Opt(contentType), Opt.Empty) =>
-                      StreamedBody.fromHttpBody(HttpBody.binary(rawBody, contentType))
-                    case _ =>
-                      StreamedBody.Empty
-                  }
                   val restResponse = StreamedRestResponse(
                     code = httpResp.getStatus,
                     headers = parseHeaders(httpResp),
-                    body = body,
+                    body = StreamedBody.fromHttpBody(parseHttpBody(httpResp, this)),
                     batchSize = 1,
                   )
                   callback(Success(restResponse))
+                } else {
+                  rawContentSubject.onComplete()
                 }
               } else {
                 callback(Failure(result.getFailure))
               }
-            }
           }
           httpReq.send(listener)
         }.doOnCancel(Task(httpReq.abort(new CancellationException("Request cancelled"))))
@@ -193,17 +194,11 @@ final class JettyRestClient(
           override def onComplete(result: Result): Unit =
             if (result.isSucceeded) {
               val httpResp = result.getResponse
-              val contentTypeOpt = httpResp.getHeaders.get(HttpHeader.CONTENT_TYPE).opt
-              val charsetOpt = contentTypeOpt.map(MimeTypes.getCharsetFromContentType)
-              val body = (contentTypeOpt, charsetOpt) match {
-                case (Opt(contentType), Opt(charset)) =>
-                  HttpBody.textual(getContentAsString, MimeTypes.getContentTypeWithoutCharset(contentType), charset)
-                case (Opt(contentType), Opt.Empty) =>
-                  HttpBody.binary(getContent, contentType)
-                case _ =>
-                  HttpBody.Empty
-              }
-              val response = RestResponse(httpResp.getStatus, parseHeaders(httpResp), body)
+              val response = RestResponse(
+                code = httpResp.getStatus,
+                headers = parseHeaders(httpResp),
+                body = parseHttpBody(httpResp, this),
+              )
               callback(Success(response))
             } else {
               callback(Failure(result.getFailure))
@@ -211,6 +206,23 @@ final class JettyRestClient(
         })
       }
       .doOnCancel(Task(httpReq.abort(new CancellationException("Request cancelled"))))
+
+  private def parseHttpBody(httpResp: Response, listener: BufferingResponseListener): HttpBody = {
+    val contentTypeOpt = httpResp.getHeaders.get(HttpHeader.CONTENT_TYPE).opt
+    val charsetOpt = contentTypeOpt.map(MimeTypes.getCharsetFromContentType)
+    (contentTypeOpt, charsetOpt) match {
+      case (Opt(contentType), Opt(charset)) =>
+        HttpBody.textual(
+          content = listener.getContentAsString,
+          mediaType = MimeTypes.getContentTypeWithoutCharset(contentType),
+          charset = charset,
+        )
+      case (Opt(contentType), Opt.Empty) =>
+        HttpBody.binary(listener.getContent, contentType)
+      case _ =>
+        HttpBody.Empty
+    }
+  }
 
   private def parseHeaders(httpResp: Response): IMapping[PlainValue] =
     IMapping(httpResp.getHeaders.asScala.iterator.map(h => (h.getName, PlainValue(h.getValue))).toList)

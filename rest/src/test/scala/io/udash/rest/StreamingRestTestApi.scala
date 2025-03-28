@@ -5,12 +5,16 @@ import io.udash.rest.raw.HttpErrorException
 import monix.execution.Scheduler
 import monix.reactive.Observable
 
+import scala.concurrent.duration._
+
 trait StreamingRestTestApi {
   @GET def simpleStream(size: Int): Observable[Int]
 
   @GET def jsonStream: Observable[RestEntity]
 
-  @POST def errorStream(immediate: Boolean): Observable[RestEntity]
+  @POST def binaryStream(): Observable[Array[Byte]]
+
+  @POST def errorStream(@Query immediate: Boolean): Observable[RestEntity]
 }
 object StreamingRestTestApi extends DefaultRestApiCompanion[StreamingRestTestApi] {
 
@@ -26,6 +30,9 @@ object StreamingRestTestApi extends DefaultRestApiCompanion[StreamingRestTestApi
       RestEntity(RestEntityId("2"), "second"),
       RestEntity(RestEntityId("3"), "third")
     )
+
+    override def binaryStream(): Observable[Array[Byte]] =
+      Observable("abc".getBytes, "xyz".getBytes)
 
     override def errorStream(immediate: Boolean): Observable[RestEntity] =
       if (immediate)

@@ -6,27 +6,38 @@
     "description": "Some test REST API"
   },
   "paths": {
+    "/binaryStream": {
+      "post": {
+        "operationId": "binaryStream",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/errorStream": {
       "post": {
         "operationId": "errorStream",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "immediate": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "immediate"
-                ]
-              }
+        "parameters": [
+          {
+            "name": "immediate",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "boolean"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
