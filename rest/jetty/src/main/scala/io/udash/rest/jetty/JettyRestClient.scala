@@ -99,41 +99,40 @@ final class JettyRestClient(
               }
             }
 
-            override def onFailure(response: Response, failure: Throwable): Unit = {
-              super.onFailure(response, failure)
-              // TODO streaming error handling client-side ???
-            }
-
             override def onComplete(result: Result): Unit = {
               super.onComplete(result)
-              val httpResp = result.getResponse
-              val contentLength = httpResp.getHeaders.getLongField(HttpHeader.CONTENT_LENGTH)
-              if (contentLength != -1) {
-                val contentTypeOpt = httpResp.getHeaders.get(HttpHeader.CONTENT_TYPE).opt
-                val charsetOpt = contentTypeOpt.map(MimeTypes.getCharsetFromContentType)
-                // TODO streaming client-side handle errors ?
-                val rawBody = getInputStream.readAllBytes()
-                val body = (contentTypeOpt, charsetOpt) match {
-                  case (Opt(contentType), Opt(charset)) =>
-                    StreamedBody.fromHttpBody(
-                      HttpBody.textual(
-                        content = new String(rawBody, charset),
-                        mediaType = MimeTypes.getContentTypeWithoutCharset(contentType),
-                        charset = charset,
+              if (result.isSucceeded) {
+                val httpResp = result.getResponse
+                val contentLength = httpResp.getHeaders.getLongField(HttpHeader.CONTENT_LENGTH)
+                if (contentLength != -1) {
+                  val contentTypeOpt = httpResp.getHeaders.get(HttpHeader.CONTENT_TYPE).opt
+                  val charsetOpt = contentTypeOpt.map(MimeTypes.getCharsetFromContentType)
+                  // TODO streaming client-side handle errors ?
+                  val rawBody = getInputStream.readAllBytes()
+                  val body = (contentTypeOpt, charsetOpt) match {
+                    case (Opt(contentType), Opt(charset)) =>
+                      StreamedBody.fromHttpBody(
+                        HttpBody.textual(
+                          content = new String(rawBody, charset),
+                          mediaType = MimeTypes.getContentTypeWithoutCharset(contentType),
+                          charset = charset,
+                        )
                       )
-                    )
-                  case (Opt(contentType), Opt.Empty) =>
-                    StreamedBody.fromHttpBody(HttpBody.binary(rawBody, contentType))
-                  case _ =>
-                    StreamedBody.Empty
+                    case (Opt(contentType), Opt.Empty) =>
+                      StreamedBody.fromHttpBody(HttpBody.binary(rawBody, contentType))
+                    case _ =>
+                      StreamedBody.Empty
+                  }
+                  val restResponse = StreamedRestResponse(
+                    code = httpResp.getStatus,
+                    headers = parseHeaders(httpResp),
+                    body = body,
+                    batchSize = 1,
+                  )
+                  callback(Success(restResponse))
                 }
-                val restResponse = StreamedRestResponse(
-                  code = httpResp.getStatus,
-                  headers = parseHeaders(httpResp),
-                  body = body,
-                  batchSize = 1,
-                )
-                callback(Success(restResponse))
+              } else {
+                callback(Failure(result.getFailure))
               }
             }
           }

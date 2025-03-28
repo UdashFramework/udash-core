@@ -6,6 +6,27 @@
     "description": "Some test REST API"
   },
   "paths": {
+    "/emptyStream": {
+      "get": {
+        "operationId": "emptyStream",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/jsonStream": {
       "get": {
         "operationId": "jsonStream",

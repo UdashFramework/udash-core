@@ -5,6 +5,8 @@ import monix.execution.Scheduler
 import monix.reactive.Observable
 
 trait StreamingRestTestApi {
+  @GET def emptyStream: Observable[Int]
+
   @GET def simpleStream: Observable[String]
 
   @GET def jsonStream: Observable[RestEntity]
@@ -14,6 +16,8 @@ object StreamingRestTestApi extends DefaultRestApiCompanion[StreamingRestTestApi
   import Scheduler.Implicits.global
 
   final class Impl extends StreamingRestTestApi {
+    override def emptyStream: Observable[Int] = Observable.empty
+
     override def simpleStream: Observable[String] = Observable("a", "b", "c")
 
     override def jsonStream: Observable[RestEntity] = Observable(

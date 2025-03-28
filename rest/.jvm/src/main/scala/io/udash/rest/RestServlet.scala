@@ -1,22 +1,22 @@
 package io.udash
 package rest
 
-import com.avsystem.commons._
+import com.avsystem.commons.*
 import com.avsystem.commons.annotation.explicitGenerics
 import com.typesafe.scalalogging.LazyLogging
-import io.udash.rest.RestServlet._
-import io.udash.rest.raw._
+import io.udash.rest.RestServlet.*
+import io.udash.rest.raw.*
 import io.udash.utils.URLEncoder
 import monix.eval.Task
 import monix.execution.Scheduler
-import monix.reactive.Consumer
+import monix.reactive.{Consumer, Observable}
 
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import javax.servlet.{AsyncEvent, AsyncListener}
 import scala.annotation.tailrec
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 object RestServlet {
   final val DefaultHandleTimeout = 30.seconds
@@ -124,20 +124,21 @@ class RestServlet(
       case jsonList: StreamedBody.JsonList =>
         // TODO streaming document no content length behaviour in relation to the client
         response.setContentType(jsonList.contentType)
-        response.getOutputStream.write("[".getBytes(jsonList.charset))
         jsonList.elements
           .bufferTumbling(stream.batchSize)
+          .switchIfEmpty(Observable(Seq.empty))
           .zipWithIndex
           .consumeWith(Consumer.foreach { case (batch, idx) =>
             val firstBatch = idx == 0
-            if (firstBatch)
+            if (firstBatch) {
+              response.getOutputStream.write("[".getBytes(jsonList.charset))
               batch.iterator.zipWithIndex.foreach { case (e, idx) =>
                 if (idx != 0) {
                   response.getOutputStream.write(",".getBytes(jsonList.charset))
                 }
                 response.getOutputStream.write(e.value.getBytes(jsonList.charset))
               }
-            else
+            } else
               batch.foreach { e =>
                 response.getOutputStream.write(",".getBytes(jsonList.charset))
                 response.getOutputStream.write(e.value.getBytes(jsonList.charset))
