@@ -141,7 +141,11 @@ trait RawRest {
   def asHandleRequestWithStreaming(metadata: RestMetadata[_]): HandleRequestWithStreaming =
     RawRest.resolveAndHandle(metadata)(handleResolvedWithStreaming)
 
-  // TODO doc for compatibility
+  /**
+   * Handles a resolved REST call and returns a standard RestResponse.
+   * This method is maintained for backward compatibility with non-streaming clients.
+   * It delegates to handleResolvedWithStreaming and converts any streaming response to a standard response.
+   */
   def handleResolved(request: RestRequest, resolved: ResolvedCall): Task[RestResponse] =
     StreamedRestResponse.fallbackToRestResponse(handleResolvedWithStreaming(request, resolved))
 

@@ -1,18 +1,17 @@
 package io.udash
 package rest.raw
 
-import com.avsystem.commons._
+import com.avsystem.commons.*
 import com.avsystem.commons.misc.ImplicitNotFound
 import com.avsystem.commons.rpc.{AsRaw, AsReal}
 import io.udash.rest.raw.RawRest.FromTask
-import io.udash.rest.raw.StreamedBody.castOrFail
 import io.udash.rest.util.Utils
 import monix.eval.{Task, TaskLike}
 import monix.reactive.Observable
 
 import scala.annotation.implicitNotFound
 
-/** TODO streaming doc */
+/** Base trait for REST response types, either standard or streaming. Contains common properties like status code and headers. */
 sealed trait AbstractRestResponse {
   def code: Int
   def headers: IMapping[PlainValue]
@@ -20,7 +19,7 @@ sealed trait AbstractRestResponse {
   final def isSuccess: Boolean = code >= 200 && code < 300
 }
 
-/** TODO streaming doc */
+/** Standard REST response containing a status code, headers, and a body. The body is loaded fully in memory as an HttpBody. */
 final case class RestResponse(
   code: Int,
   headers: IMapping[PlainValue],
@@ -112,7 +111,10 @@ trait RestResponseLowPrio { this: RestResponse.type =>
   ): ImplicitNotFound[AsRaw[RestResponse, T]] = ImplicitNotFound()
 }
 
-/** TODO streaming doc */
+/**
+ * Streaming REST response containing a status code, headers, and a streamed body.
+ * Unlike standard RestResponse, the body content can be delivered incrementally through a reactive stream.
+ */
 final case class StreamedRestResponse(
   code: Int,
   headers: IMapping[PlainValue],
@@ -129,7 +131,10 @@ final case class StreamedRestResponse(
 
 object StreamedRestResponse extends StreamedRestResponseLowPrio {
 
-  /** TODO streaming doc */
+  /**
+   * Converts a StreamedRestResponse to a standard RestResponse by materializing streamed content.
+   * This is useful for compatibility with APIs that don't support streaming.
+   */
   def fallbackToRestResponse(response: StreamedRestResponse): Task[RestResponse] = {
     val httpBody: Task[HttpBody] = response.body match {
       case StreamedBody.Empty =>
@@ -152,7 +157,10 @@ object StreamedRestResponse extends StreamedRestResponseLowPrio {
     httpBody.map(RestResponse(response.code, response.headers, _))
   }
 
-  /** TODO doc */
+  /**
+   * Converts any AbstractRestResponse to a standard RestResponse by materializing streamed content if necessary.
+   * This is useful for compatibility with APIs that don't support streaming.
+   */
   def fallbackToRestResponse(response: Task[AbstractRestResponse]): Task[RestResponse] =
     response.flatMap {
       case restResponse: RestResponse => Task.now(restResponse)

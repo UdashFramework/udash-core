@@ -111,18 +111,20 @@ class RestServlet(
     stream: StreamedRestResponse,
     body: StreamedBody.NonEmpty,
   ): Task[Unit] = Task.defer {
+    // The Content-Length header is intentionally omitted for streams.
+    // This signals to the client that the response body size is not predetermined and will be streamed.
+    // Clients implementing the streaming part of the REST interface contract MUST be prepared
+    // to handle responses without Content-Length by reading data incrementally until the stream completes.
     body match {
       case single: StreamedBody.Single =>
         Task.eval(writeNonEmptyBody(response, single.body))
       case binary: StreamedBody.RawBinary =>
-        // TODO streaming document no content length behaviour in relation to the client
         response.setContentType(binary.contentType)
         binary.content.bufferTumbling(stream.batchSize).consumeWith(Consumer.foreach { batch =>
           batch.foreach(e => response.getOutputStream.write(e))
           response.getOutputStream.flush()
         })
       case jsonList: StreamedBody.JsonList =>
-        // TODO streaming document no content length behaviour in relation to the client
         response.setContentType(jsonList.contentType)
         jsonList.elements
           .bufferTumbling(stream.batchSize)

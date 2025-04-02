@@ -20,8 +20,18 @@ import java.nio.charset.Charset
 import scala.concurrent.CancellationException
 import scala.concurrent.duration.*
 
-/** TODO streaming doc */
-final class JettyRestClient(
+/**
+ * A REST client implementation based on the Eclipse Jetty HTTP client library.
+ * Supports both standard request/response interactions and handling of streamed responses.
+ *
+ * Streaming responses allow processing large amounts of data without buffering the entire
+ * response body in memory. This client activates streaming mode *only* when the server's
+ * response headers *do not* include a `Content-Length`.
+ *
+ * @param client The configured Jetty `HttpClient` instance.
+ * @param defaultMaxResponseLength Default maximum size (in bytes) for buffering non-streamed responses.
+ * @param defaultTimeout Default timeout for requests.
+ */final class JettyRestClient(
   client: HttpClient,
   defaultMaxResponseLength: Int = JettyRestClient.DefaultMaxResponseLength,
   defaultTimeout: Duration = JettyRestClient.DefaultTimeout,
@@ -37,7 +47,16 @@ final class JettyRestClient(
       asHandleRequestWithStreaming(baseUri, customMaxResponseLength, customTimeout)
     )
 
-  /** TODO streaming doc */
+  /**
+   * Creates a request handler with streaming support that can be used to make REST calls.
+   * The handler supports both regular responses and streaming responses, allowing for
+   * incremental processing of large payloads through Observable streams.
+   *
+   * @param baseUrl Base URL for the REST service
+   * @param customMaxResponseLength Optional maximum response length override for non-streamed responses
+   * @param customTimeout Optional timeout override
+   * @return A handler that can process REST requests with streaming capabilities
+   */
   def asHandleRequestWithStreaming(
     baseUrl: String,
     customMaxResponseLength: OptArg[Int] = OptArg.Empty,
@@ -59,7 +78,9 @@ final class JettyRestClient(
 
             override def onHeaders(response: Response): Unit = {
               super.onHeaders(response)
-              // TODO streaming document content length behaviour
+              // When Content-Length is not provided (-1), process the response as a stream
+              // since we can't determine the full size in advance. This enables handling
+              // chunked transfer encoding and streaming responses.
               val contentLength = response.getHeaders.getLongField(HttpHeader.CONTENT_LENGTH)
               if (contentLength == -1) {
                 val contentTypeOpt = response.getHeaders.get(HttpHeader.CONTENT_TYPE).opt
@@ -122,7 +143,8 @@ final class JettyRestClient(
                 val httpResp = result.getResponse
                 val contentLength = httpResp.getHeaders.getLongField(HttpHeader.CONTENT_LENGTH)
                 if (contentLength != -1) {
-                  // TODO streaming client-side handle errors ?
+                  // For responses with known content length, we handle them as regular (non-streamed) responses
+                  // Any errors will be propagated through the callback's Failure channel
                   val restResponse = StreamedRestResponse(
                     code = httpResp.getStatus,
                     headers = parseHeaders(httpResp),
@@ -142,7 +164,15 @@ final class JettyRestClient(
       }
   }
 
-  /** TODO streaming doc */
+  /**
+   * Creates a `RawRest.HandleRequest` which handles standard REST requests by buffering the entire response.
+   * This does *not* support streaming responses.
+   *
+   * @param baseUrl The base URL for the REST service.
+   * @param customMaxResponseLength Optional override for the maximum response length.
+   * @param customTimeout Optional override for the request timeout.
+   * @return A `RawRest.HandleRequest` that buffers responses.
+   */
   def asHandleRequest(
     baseUrl: String,
     customMaxResponseLength: OptArg[Int] = OptArg.Empty,

@@ -31,14 +31,22 @@ object StreamedBody extends StreamedBodyLowPrio {
     def contentType: String
   }
 
-  /** TODO streaming doc */
+  /**
+   * Represents a binary streamed response body.
+   * The content is delivered as a stream of byte arrays which can be processed incrementally.
+   * Useful for large binary files or content that is generated dynamically.
+   */
   final case class RawBinary(content: Observable[Array[Byte]]) extends NonEmpty {
     val contentType: String = HttpBody.OctetStreamType
 
     override def toString: String = super.toString
   }
 
-  /** TODO streaming doc */
+  /**
+   * Represents a streamed list of JSON values.
+   * Each element in the stream is a complete JSON value, allowing for incremental processing
+   * of potentially large collections without loading everything into memory at once.
+   */
   final case class JsonList(
     elements: Observable[JsonValue],
     charset: String = HttpBody.Utf8Charset,
@@ -48,7 +56,11 @@ object StreamedBody extends StreamedBodyLowPrio {
     override def toString: String = super.toString
   }
 
-  /** TODO streaming doc */
+  /**
+   * Represents a single non-empty HTTP body that will be delivered as a streaming response.
+   * Used when the content is already fully loaded but needs to be returned through a streaming API
+   * for consistency with other streaming operations.
+   */
   final case class Single(body: HttpBody.NonEmpty) extends NonEmpty {
     override def contentType: String = body.contentType
   }
