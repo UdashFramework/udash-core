@@ -5,17 +5,15 @@ package raw
 import com.avsystem.commons.*
 import com.avsystem.commons.annotation.AnnotationAggregate
 import com.avsystem.commons.serialization.{transientDefault, whenAbsent}
+import io.udash.rest.raw.StreamedBody.castOrFail
 import io.udash.rest.util.WithHeaders
 import monix.eval.Task
 import monix.execution.Scheduler
 import monix.reactive.Observable
 import org.scalactic.source.Position
-import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
-
-import scala.concurrent.duration.*
 
 case class UserId(id: String) extends AnyVal {
   override def toString: String = id
@@ -87,7 +85,6 @@ trait RootApi {
 }
 object RootApi extends DefaultRestApiCompanion[RootApi]
 class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
-  implicit override def patienceConfig: PatienceConfig = PatienceConfig(timeout = 5.seconds)
   implicit def scheduler: Scheduler = Scheduler.global
 
   def repr(body: HttpBody, inNewLine: Boolean = true): String = body match {
@@ -241,23 +238,6 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
     val future = serverHandle(request).runToFuture
     whenReady(future) { result =>
       result shouldBe response
-    }
-  }
-
-  def assertRawStreamingExchange(
-    request: RestRequest,
-    assertResponse: StreamedRestResponse => Future[Assertion]
-  )(implicit pos: Position): Unit = {
-    val futureResponse: Future[AbstractRestResponse] = serverHandleWithStreaming(request).runToFuture
-
-    val assertionFuture: Future[Assertion] = futureResponse.flatMap {
-      case stream: StreamedRestResponse =>
-        assertResponse(stream)
-      case resp: RestResponse =>
-        Future.successful(fail(s"Expected StreamedRestResponse but got RestResponse: $resp"))
-    }
-    whenReady(assertionFuture) { assertionResult =>
-      assertionResult
     }
   }
 
@@ -485,12 +465,12 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
         |01020304
         |""".stripMargin
 
-    val realResultFuture = real.self.streamBinary(inputBytes).toListL.runToFuture.map(_.map(_.toList))
-    val proxyResultFuture = realStreamingProxy.self.streamBinary(inputBytes).toListL.runToFuture.map(_.map(_.toList))
+    val realResultFuture = real.self.streamBinary(inputBytes).toListL.runToFuture
+    val proxyResultFuture = realStreamingProxy.self.streamBinary(inputBytes).toListL.runToFuture
 
     whenReady(realResultFuture) { realResult =>
       whenReady(proxyResultFuture) { proxyResult =>
-        proxyResult shouldBe realResult
+        proxyResult.map(_.toList) shouldBe realResult.map(_.toList)
         trafficLog shouldBe expectedTraffic
       }
     }
@@ -524,17 +504,15 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
       RestParameters(PlainValue.decodePath("streamNumbers"), query = Mapping(ISeq("count" -> PlainValue("4")))),
       HttpBody.Empty
     )
-
-    assertRawStreamingExchange(request, { response =>
-      response.code shouldBe 200
-      response.body match {
-        case StreamedBody.JsonList(elements, _) =>
-          elements.toListL.runToFuture.map { elementList =>
-            elementList.map(_.value) shouldBe List("1", "2", "3", "4")
-          }
-        case other =>
-          Future.successful(fail(s"Expected JsonList body, got $other"))
+    whenReady(serverHandleWithStreaming(request).runToFuture) {
+      case StreamedRestResponse(code, headers, body, batchSize) => {
+        code shouldBe 200
+        val elements = castOrFail[StreamedBody.JsonList](body).elements
+        whenReady(elements.toListL.runToFuture) { e =>
+          e shouldBe List(JsonValue("1"), JsonValue("2"), JsonValue("3"), JsonValue("4"))
+        }
       }
-    })
+      case _ => fail()
+    }
   }
 }
