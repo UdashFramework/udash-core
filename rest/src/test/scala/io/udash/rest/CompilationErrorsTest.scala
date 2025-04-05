@@ -17,6 +17,8 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
     def meth(par: Any): Future[Unit]
   }
 
+  // TODO streaming add streaming tests
+
   test("missing serializer for parameter") {
     val error = norm(typeErrorFor("object Api extends DefaultRestApiCompanion[MissingSerializerForParam]"))
     assert(error ==
@@ -41,7 +43,11 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
         |   Cannot serialize Any into RestResponse, because:
         |   Cannot serialize Any into HttpBody, because:
         |   Cannot serialize Any into JsonValue, because:
-        |   No GenCodec found for Any""".stripMargin)
+        |   No GenCodec found for Any
+        | * it cannot be translated into an HTTP stream method:
+        |   scala.concurrent.Future[Any] is not a valid result type because:
+        |   Cannot serialize Any into StreamedRestResponse, because:
+        |   Cannot serialize Any into io.udash.rest.raw.StreamedBody, appropriate AsRaw instance not found""".stripMargin)
   }
 
   trait BadResultType {
@@ -56,6 +62,8 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
         | * it cannot be translated into a prefix method:
         |   Unit is not a valid server REST API trait, does its companion extend DefaultRestApiCompanion, DefaultRestServerApiCompanion or other companion base?
         | * it cannot be translated into an HTTP method:
+        |   Unit is not a valid result type of HTTP REST method - it must be a Future
+        | * it cannot be translated into an HTTP stream method:
         |   Unit is not a valid result type of HTTP REST method - it must be a Future""".stripMargin)
   }
 
@@ -71,6 +79,8 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
         | * it cannot be translated into a prefix method:
         |   prefix methods cannot take @Body parameters
         | * it cannot be translated into an HTTP method:
+        |   CompilationErrorsTest.this.SubApi is not a valid result type of HTTP REST method - it must be a Future
+        | * it cannot be translated into an HTTP stream method:
         |   CompilationErrorsTest.this.SubApi is not a valid result type of HTTP REST method - it must be a Future""".stripMargin)
   }
 
@@ -84,7 +94,11 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
       """cannot translate between trait UnexpectedGETBodyParam and trait RawRest:
         |problem with method meth:
         | * it cannot be translated into an HTTP GET method:
-        |   GET methods cannot take @Body parameters""".stripMargin)
+        |   GET methods cannot take @Body parameters
+        | * it cannot be translated into an HTTP GET stream method:
+        |   scala.concurrent.Future[Unit] is not a valid result type because:
+        |   Cannot serialize Unit into StreamedRestResponse, because:
+        |   Cannot serialize Unit into io.udash.rest.raw.StreamedBody, appropriate AsRaw instance not found""".stripMargin)
   }
 
   trait MissingBodyParam {
@@ -97,7 +111,11 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
       """cannot translate between trait MissingBodyParam and trait RawRest:
         |problem with method meth:
         | * it cannot be translated into an HTTP method with custom body:
-        |   expected exactly one @Body parameter but none was found""".stripMargin)
+        |   expected exactly one @Body parameter but none was found
+        | * it cannot be translated into an HTTP stream method with custom body:
+        |   scala.concurrent.Future[Unit] is not a valid result type because:
+        |   Cannot serialize Unit into StreamedRestResponse, because:
+        |   Cannot serialize Unit into io.udash.rest.raw.StreamedBody, appropriate AsRaw instance not found""".stripMargin)
   }
 
   trait MultipleBodyParams {
@@ -110,6 +128,10 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
       """cannot translate between trait MultipleBodyParams and trait RawRest:
         |problem with method meth:
         | * it cannot be translated into an HTTP method with custom body:
-        |   expected exactly one @Body parameter but more than one was found""".stripMargin)
+        |   expected exactly one @Body parameter but more than one was found
+        | * it cannot be translated into an HTTP stream method with custom body:
+        |   scala.concurrent.Future[Unit] is not a valid result type because:
+        |   Cannot serialize Unit into StreamedRestResponse, because:
+        |   Cannot serialize Unit into io.udash.rest.raw.StreamedBody, appropriate AsRaw instance not found""".stripMargin)
   }
 }

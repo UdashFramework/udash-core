@@ -150,4 +150,7 @@ abstract class RestServerOpenApiImplCompanion[Implicits, Real](protected val imp
 
   final def asHandleRequest(real: Real): RawRest.HandleRequest =
     RawRest.asHandleRequest(real)
+
+  final def asHandleRequestWithStreaming(real: Real): RawRest.HandleRequestWithStreaming =
+    RawRest.asHandleRequestWithStreaming(real)
 }

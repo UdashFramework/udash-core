@@ -1,8 +1,7 @@
 package io.udash
 package rest
 
-import io.udash.rest.raw.HttpErrorException
-import io.udash.rest.raw.RawRest.HandleRequest
+import io.udash.rest.raw.{HttpErrorException, RawRest}
 import sttp.client3.{HttpClientFutureBackend, SttpBackend}
 
 import java.net.http.HttpClient
@@ -23,7 +22,7 @@ trait SttpClientRestTest extends ServletBasedRestApiTest {
       .build()
   )
 
-  def clientHandle: HandleRequest =
+  def clientHandle: RawRest.HandleRequest =
     SttpRestClient.asHandleRequest[Future](s"$baseUrl/api")
 
   override protected def afterAll(): Unit = {

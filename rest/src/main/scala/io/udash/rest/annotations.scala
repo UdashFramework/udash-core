@@ -321,6 +321,14 @@ trait ResponseAdjuster extends RealSymAnnotation {
 }
 
 /**
+ * Base trait for annotations which may be applied on REST API methods (including prefix methods)
+ * in order to customize outgoing response on the server side.
+ */
+trait StreamedResponseAdjuster extends RealSymAnnotation {
+  def adjustResponse(response: StreamedRestResponse): StreamedRestResponse
+}
+
+/**
   * Convenience implementation of [[RequestAdjuster]].
   */
 class adjustRequest(f: RestRequest => RestRequest) extends RequestAdjuster {
@@ -335,6 +343,13 @@ class adjustResponse(f: RestResponse => RestResponse) extends ResponseAdjuster {
 }
 
 /**
+ * Convenience implementation of [[StreamedResponseAdjuster]].
+ */
+class adjustStreamedResponse(f: StreamedRestResponse => StreamedRestResponse) extends StreamedResponseAdjuster {
+  def adjustResponse(response: StreamedRestResponse): StreamedRestResponse = f(response)
+}
+
+/**
   * Annotation which may be applied on REST API methods (including prefix methods) in order to append additional
   * HTTP header to all outgoing requests generated for invocations of that method on the client side.
   */
@@ -346,6 +361,7 @@ class addRequestHeader(name: String, value: String) extends RequestAdjuster {
   * Annotation which may be applied on REST API methods (including prefix methods) in order to append additional
   * HTTP header to all outgoing responses generated for invocations of that method on the server side.
   */
-class addResponseHeader(name: String, value: String) extends ResponseAdjuster {
+class addResponseHeader(name: String, value: String) extends ResponseAdjuster with StreamedResponseAdjuster {
   def adjustResponse(response: RestResponse): RestResponse = response.header(name, value)
+  override def adjustResponse(response: StreamedRestResponse): StreamedRestResponse = response.header(name, value)
 }
