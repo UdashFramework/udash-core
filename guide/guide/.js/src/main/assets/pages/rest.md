@@ -3,7 +3,7 @@
 Udash framework contains an RPC based REST framework for defining REST services using plain Scala traits.
 It may be used for implementing both client and server side and works in both JVM and JS, as long as
 appropriate network layer is implemented. By default, Udash provides Java Servlet based server
-implementation and [sttp](https://github.com/softwaremill/sttp) based client implementation 
+implementation and [sttp](https://github.com/softwaremill/sttp) based client implementation
 (which works in both JVM and JS).
 
 Udash REST is a module completely independent of other parts of Udash.
@@ -18,30 +18,30 @@ into your dependencies (e.g. UI related modules).
 
 Udash REST:
 
-* Provides automatic translation of **plain Scala traits** into REST endpoints
-  * Lets you cover your web endpoint with nice, typesafe, well organized, IDE-friendly language-level interface.
-  * Forms a type safety layer between the client and the server
-* Gives you a set of annotations for adjusting how the translation into an HTTP endpoint happens.
-* Statically validates your trait, emitting **detailed and readable compilation errors** in case anything is wrong.
-* Uses typeclass-based, boilerplate free, pluggable and extensible serialization. You can easily integrate your
+- Provides automatic translation of **plain Scala traits** into REST endpoints
+  - Lets you cover your web endpoint with nice, typesafe, well organized, IDE-friendly language-level interface.
+  - Forms a type safety layer between the client and the server
+- Gives you a set of annotations for adjusting how the translation into an HTTP endpoint happens.
+- Statically validates your trait, emitting **detailed and readable compilation errors** in case anything is wrong.
+- Uses typeclass-based, boilerplate free, pluggable and extensible serialization. You can easily integrate your
   favorite serialization library into it.
-* Uses pluggable and extensible effects for asynchronous IO. You can easily integrate your favorite async 
-  IO effect with it, be it `Future`, Monix `Task`, one of the `IO` monad implementations, etc. Blocking API is 
+- Uses pluggable and extensible effects for asynchronous IO. You can easily integrate your favorite async
+  IO effect with it, be it `Future`, Monix `Task`, one of the `IO` monad implementations, etc. Blocking API is
   also possible.
-* Is agnostic about being purely functional or not. You can use it with both programming styles.
-* Automatically generates **OpenAPI** documents for your APIs.
-* Has multiple ways of adjusting generated OpenAPI definition
-  * Provides a set of standard adjusting annotations, e.g. `@description`
-  * Lets you define your own adjusting annotations which may perform arbitrary modifications
-  * Gives you a nice, case class based representation of OpenAPI document which can be modified programmatically
-* Uses pluggable network layer. You can easily integrate it with your favorite HTTP client and server.
+- Is agnostic about being purely functional or not. You can use it with both programming styles.
+- Automatically generates **OpenAPI** documents for your APIs.
+- Has multiple ways of adjusting generated OpenAPI definition
+  - Provides a set of standard adjusting annotations, e.g. `@description`
+  - Lets you define your own adjusting annotations which may perform arbitrary modifications
+  - Gives you a nice, case class based representation of OpenAPI document which can be modified programmatically
+- Uses pluggable network layer. You can easily integrate it with your favorite HTTP client and server.
 
 ## Quickstart example
 
 ### Project setup
 
 First, make sure appropriate dependencies are configured for your project.
-Udash REST provides Servlet-based implementation for REST servers but a servlet must be run inside an HTTP server. 
+Udash REST provides Servlet-based implementation for REST servers but a servlet must be run inside an HTTP server.
 In this example we will use [Jetty](https://www.eclipse.org/jetty/) for that purpose.
 
 ```scala
@@ -99,7 +99,7 @@ object ServerMain {
   def main(args: Array[String]): Unit = {
     // translate UserApiImpl into a Servlet
     val userApiServlet = RestServlet[UserApi](new UserApiImpl)
-  
+
     // do all the Jetty related plumbing
     val server = new Server(9090)
     val handler = new ServletContextHandler
@@ -127,7 +127,7 @@ object ClientMain {
   def main(args: Array[String]): Unit = {
     // allocate an STTP backend
     implicit val sttpBackend: SttpBackend[Future, Any] = SttpRestClient.defaultBackend()
-    
+
     // obtain a "proxy" instance of UserApi
     val client: UserApi = SttpRestClient[UserApi]("http://localhost:9090/")
 
@@ -154,6 +154,7 @@ object ClientMain {
 If we look at HTTP traffic created by the previous example, that's what we'll see:
 
 Request:
+
 ```
 POST http://localhost:9090/createUser HTTP/1.1
 Accept-Encoding: gzip
@@ -166,6 +167,7 @@ Content-Length: 32
 ```
 
 Response:
+
 ```
 HTTP/1.1 200 OK
 Date: Wed, 18 Jul 2018 11:43:08 GMT
@@ -183,25 +185,25 @@ This approach is analogous to various well-established REST frameworks for other
 However, such frameworks are usually based on runtime reflection while in Scala it can be
 done using compile-time reflection through macros which offers several advantages:
 
-* platform independence - REST traits are understood by both ScalaJVM and ScalaJS
-* full type information - compile-time reflection is not limited by type erasure
-* type safety - compile-time reflection can perform thorough validation of REST traits and
+- platform independence - REST traits are understood by both ScalaJVM and ScalaJS
+- full type information - compile-time reflection is not limited by type erasure
+- type safety - compile-time reflection can perform thorough validation of REST traits and
   raise compilation errors in case anything is wrong
-* pluggable typeclass based serialization - for serialization of REST parameters and results,
+- pluggable typeclass based serialization - for serialization of REST parameters and results,
   typeclasses are used which also offers strong compile-time safety. If any of your parameters or
   method results cannot be serialized, a detailed compilation error will be raised.
-* significantly better annotation processing
+- significantly better annotation processing
 
 ### Companion objects
 
 In order for a trait to be understood as REST API, it must have a well defined companion object that contains
 appropriate implicits:
 
-* in order to expose REST API on a server, implicit instances of `RawRest.AsRawRpc` and `RestMetadata` for API trait are required.
-* in order to use REST API client, implicit instances of `RawRest.AsRealRpc` and `RestMetadata` for API trait are required.
-* when API trait is used by both client and server, `RawRest.AsRawRpc` and `RawRest.AsRealRpc` may be provided by a single
+- in order to expose REST API on a server, implicit instances of `RawRest.AsRawRpc` and `RestMetadata` for API trait are required.
+- in order to use REST API client, implicit instances of `RawRest.AsRealRpc` and `RestMetadata` for API trait are required.
+- when API trait is used by both client and server, `RawRest.AsRawRpc` and `RawRest.AsRealRpc` may be provided by a single
   combined instance of `RawRest.AsRawRealRpc` for API trait.
-* additionally, if you want to [generate OpenAPI documents](#generating-openapi-30-specifications) then you need an instance of `OpenApiMetadata`
+- additionally, if you want to [generate OpenAPI documents](#generating-openapi-30-specifications) then you need an instance of `OpenApiMetadata`
 
 Usually there is no need to declare these implicit instances manually because you can use one of the convenience
 base classes for REST API companion objects, e.g.
@@ -217,7 +219,7 @@ object MyApi extends DefaultRestApiCompanion[MyApi]
 materialize all the necessary typeclass instances mentioned earlier. The "`Default`" in its name means that
 `DefaultRestImplicits` is used as a provider of serialization-related implicits. This effectively plugs
 [`GenCodec`](https://github.com/AVSystem/scala-commons/blob/master/docs/GenCodec.md) as the default serialization
-library and `Future` as the default asynchronous effect for method results. 
+library and `Future` as the default asynchronous effect for method results.
 See [serialization](#serialization) for more details on customizing serialization.
 
 `DefaultRestApiCompanion` provides all the implicit instances necessary for both the client and server.
@@ -230,10 +232,10 @@ generated code and make compilation faster.
 On less frequent occasions you might be unable to use one of the companion base classes. This is usually necessary
 when macro materialization requires some additional implicits or when your API trait takes type parameters.
 The recommended way of dealing with this situation is to design your own version of base companion class specialized
-for your use case. For more details on how to do this, consult the Scaladoc of 
+for your use case. For more details on how to do this, consult the Scaladoc of
 [`MacroInstances`](https://github.com/AVSystem/scala-commons/blob/master/commons-core/src/main/scala/com/avsystem/commons/meta/MacroInstances.scala).
 
-Ultimately, you can resort to declaring all the implicit instances manually (however, they will still be implemented 
+Ultimately, you can resort to declaring all the implicit instances manually (however, they will still be implemented
 with a macro). For example:
 
 ```scala
@@ -274,7 +276,7 @@ object Address extends RestDataCompanion[Address]
 #### `RestDataWrapperCompanion`
 
 `RestDataWrapperCompanion` is a handy base companion class which you can use for data types which simply wrap
-another type. It will establish a relation between the wrapping and wrapped types so that all REST-related implicits 
+another type. It will establish a relation between the wrapping and wrapped types so that all REST-related implicits
 for the wrapping type are automatically derived from corresponding implicits for the wrapped type.
 
 ```scala
@@ -286,11 +288,11 @@ object UserId extends RestDataWrapperCompanion[String, UserId]
 
 REST framework relies on annotations for customization of REST API traits. All annotations are governed by
 the same [annotation processing](https://github.com/AVSystem/scala-commons/blob/master/docs/Annotations.md) rules
-and extensions, implemented by the underlying macro engine from 
+and extensions, implemented by the underlying macro engine from
 [AVSystem Commons](https://github.com/AVSystem/scala-commons) library.
 To use annotations more effectively and with less boilerplate, it is highly recommended to be familiar with these rules.
 
-The most important feature of annotation processing engine is an ability to create 
+The most important feature of annotation processing engine is an ability to create
 [`AnnotationAggregate`s](http://avsystem.github.io/scala-commons/api/com/avsystem/commons/annotation/AnnotationAggregate.html). An annotation aggregate is a user-defined annotation which effectively applies a bunch of other annotations.
 This is a primary mechanism of code reuse in the area of annotations. It lets you significantly reduce annotation
 related boilerplate.
@@ -300,26 +302,26 @@ related boilerplate.
 REST macro engine inspects an API trait and looks for all abstract methods. It then tries to translate every abstract
 method into an HTTP REST call.
 
-* By default (if not annotated explicitly) each method is interpreted as HTTP `POST`.
-* Method name is appended to the URL path. This can also be customized with annotations.
-* Every parameter is interpreted as part of the body - by default all the body parameters will be
+- By default (if not annotated explicitly) each method is interpreted as HTTP `POST`.
+- Method name is appended to the URL path. This can also be customized with annotations.
+- Every parameter is interpreted as part of the body - by default all the body parameters will be
   combined into a JSON object sent through HTTP body. If your method is annotated with [`@GET`](#get-methods)
   then it cannot send a body and method parameters are interpreted as query parameters rather than body fields.
-  You may also use other body formats by annotating your method as [`@FormBody`](#formbody) or 
+  You may also use other body formats by annotating your method as [`@FormBody`](#formbody) or
   [`@CustomBody`](#custombody).
-* Result type of each method is typically expected to be a `Future` wrapping some
+- Result type of each method is typically expected to be a `Future` wrapping some
   arbitrary response type. This response type will be serialized into HTTP response which
   by default uses JSON for response body and creates a `200 OK` response with `application/json`
   content type. If response type is `Unit` (method result type is `Future[Unit]`) then a `204 No Content`
   response with empty body is created when serializing and body is ignored when deseriarlizing.
-* Each method may also throw a `HttpErrorException` (or return failed `Future` with it). It will be
+- Each method may also throw a `HttpErrorException` (or return failed `Future` with it). It will be
   automatically translated into appropriate HTTP error response with given status code and
   plaintext message.
 
 For details on how exactly serialization works and how to customize it, see [serialization](#serialization).
-Note that if you don't want to use `Future`, this customization allows you to use other wrappers for method 
+Note that if you don't want to use `Future`, this customization allows you to use other wrappers for method
 result types. Through customized serialization it is also possible to signal HTTP errors without relying on
-`HttpErrorException` or generally on throwing exceptions. This way you can customize the framework for more purely 
+`HttpErrorException` or generally on throwing exceptions. This way you can customize the framework for more purely
 functional programming style.
 
 ### Choosing the HTTP method
@@ -415,7 +417,7 @@ as query parameters by default, so this annotation is necessary only for paramet
 `@Query` annotation also takes optional `name` parameter which may be specified to customize
 URL parameter name. If not specified, Scala parameter name is used.
 
-Values of query parameters are serialized into `PlainValue` objects. 
+Values of query parameters are serialized into `PlainValue` objects.
 See [serialization](#path-query-header-and-cookie-serialization) for more details.
 
 #### Header parameters
@@ -434,8 +436,8 @@ Scala parameter name is used.
 
 #### Body parameters
 
-Every parameter of an API trait method (except for `@GET`) is interpreted as a field of a JSON object sent as 
-HTTP body. Just like for path, query, header and cookie parameters, there is a `@Body` annotation which requests this 
+Every parameter of an API trait method (except for `@GET`) is interpreted as a field of a JSON object sent as
+HTTP body. Just like for path, query, header and cookie parameters, there is a `@Body` annotation which requests this
 explicitly. However, the only reason to use it explicitly is in order to customize the name of JSON field.
 
 Body parameters are serialized into `JsonValue` objects.
@@ -462,7 +464,7 @@ object User extends RestDataCompanion[User]
 
 #### Optional parameters
 
-Instead of `@Query`, `@Header`, `@Cookie` and `@Body`, you can also use `@OptQuery`, `@OptHeader`, `@OptCookie` 
+Instead of `@Query`, `@Header`, `@Cookie` and `@Body`, you can also use `@OptQuery`, `@OptHeader`, `@OptCookie`
 and `@OptBodyField` to make your parameters explicitly optional. The type of such a parameter must be wrapped into
 an `Option`, `Opt`, `OptArg` or similar option-like wrapper, i.e.
 
@@ -490,8 +492,8 @@ possible lack of this parameter while the actual type of that parameter (that ne
 
 Prefix methods are methods that return other REST API traits. They are useful for:
 
-* capturing common path or path/query/header/cookie parameters in a single prefix call
-* splitting your REST API into multiple smaller traits in order to organize it better
+- capturing common path or path/query/header/cookie parameters in a single prefix call
+- splitting your REST API into multiple smaller traits in order to organize it better
 
 Just like HTTP API methods (`GET`, `POST`, etc.), prefix methods have their own
 annotation that can be used explicitly when you want your trait method to be treated as
@@ -537,9 +539,9 @@ case classes used as parameter types or result types of REST methods.
 
 There are two ways to define default values:
 
-* Scala-level default value
+- Scala-level default value
 
-  You can simply use 
+  You can simply use
   [language level default parameter value](https://docs.scala-lang.org/tour/default-parameter-values.html)
   for your REST method parameters and case class parameters. They will be picked up during macro materialization and
   used as fallback values for missing parameters during deserialization. However, Scala-level default values cannot
@@ -547,15 +549,18 @@ There are two ways to define default values:
   by Scala compiler (obtaining such value requires an actual instance of API trait).
   Therefore, it's recommended to define default values using `@whenAbsent` annotation
 
-* Using `@whenAbsent` annotation
+- Using `@whenAbsent` annotation
 
   Instead of defining Scala-level default value, you can use `@whenAbsent` annotation:
+
   ```scala
   @GET def fetchUsers(@whenAbsent(".*") namePattern: String): List[User]
   ```
+
   This brings two advantages:
-  * The default value is for deserialization _only_ and does not affect programmer API, which is often desired.
-  * Value from `@whenAbsent` will be picked up by macro materialization of
+
+  - The default value is for deserialization _only_ and does not affect programmer API, which is often desired.
+  - Value from `@whenAbsent` will be picked up by macro materialization of
     [OpenAPI documents](#generating-openapi-30-specifications) and included as default value in OpenAPI
     [Schema Objects](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject)
 
@@ -584,7 +589,7 @@ every parameter value and every method result into appropriate raw values which 
 be easily sent through network. Serialization in REST framework is typeclass based,
 which is a typical, functional and typesafe approach to serialization in Scala.
 
-Examples of typeclass based serialization libraries include 
+Examples of typeclass based serialization libraries include
 [GenCodec](https://github.com/AVSystem/scala-commons/blob/master/docs/GenCodec.md)
 (which is the default serialization used by this REST framework), [circe](https://circe.github.io/circe/)
 (one of the most popular JSON libraries for Scala) or [µPickle](http://www.lihaoyi.com/upickle/).
@@ -595,11 +600,11 @@ Any of these solutions can be plugged into REST framework.
 Depending on the context where a type is used in a REST API trait, it will be serialized to a different
 _raw value_:
 
-* path/query/header parameters are serialized into `PlainValue`
-* body parameters are serialized into `JsonValue` (by default), `PlainValue` (for [`@FormBody`](#formbody) methods)
+- path/query/header parameters are serialized into `PlainValue`
+- body parameters are serialized into `JsonValue` (by default), `PlainValue` (for [`@FormBody`](#formbody) methods)
   or directly into `HttpBody` (for [`@CustomBody`](#custombody) methods).
-* Response types are serialized into `RestResponse`
-* Prefix result types (other REST API traits) are "serialized" into an instance of `RawRest`.
+- Response types are serialized into `RestResponse`
+- Prefix result types (other REST API traits) are "serialized" into an instance of `RawRest`.
 
 When a macro needs to serialize a value of some type (let's call it `Real`) to one of these raw types
 listed above (let's call it `Raw`) then it looks for an implicit instance of `AsRaw[Raw, Real]`.
@@ -608,16 +613,16 @@ Additionally, an implicit instance of `AsRawReal[Raw, Real]` can serve as both.
 
 These implicit instances may come from multiple sources:
 
-* implicit scope of the `Raw` type (e.g. its companion object)
-* implicit scope of the `Real` type (e.g. its companion object)
-* implicits plugged by REST API trait companion
+- implicit scope of the `Raw` type (e.g. its companion object)
+- implicit scope of the `Real` type (e.g. its companion object)
+- implicits plugged by REST API trait companion
   (e.g. `DefaultRestApiCompanion` plugs in `DefaultRestImplicits`)
-* imports
+- imports
 
 Of course, these implicits may also depend on other implicits which effectively means that
 you can use whatever typeclass-based serialization library you want.
 For example, you can define an instance of `AsRaw[JsonValue, Real]` which actually uses
-`Encoder[Real]` from [circe](https://circe.github.io/circe/). 
+`Encoder[Real]` from [circe](https://circe.github.io/circe/).
 See [Customizing serialization](#customizing-serialization) for more details.
 
 ### Serialization implicits summary
@@ -632,7 +637,7 @@ results on client side).
 ### Path, query, header and cookie serialization
 
 Path, query, header and cookie parameter values are serialized into `PlainValue` which is a simple `String` wrapper.
-This means that the macro engine looks for an instance of `AsRaw[PlainValue, T]` and/or `AsReal[PlainValue, T]` for 
+This means that the macro engine looks for an instance of `AsRaw[PlainValue, T]` and/or `AsReal[PlainValue, T]` for
 every parameter of type `T` (`AsRaw` for the client, `AsReal` for the server).
 
 There are no "global" implicits defined for `PlainValue`. They must be either imported, defined by each
@@ -651,9 +656,9 @@ URL-encoding is also applied to query and cookie parameter _names_, in both actu
 ### Body parameter serialization
 
 Body parameters are by default serialized into `JsonValue` which is also a simple wrapper class over `String`,
-but is importantly distinct from `PlainValue` because it must always contain a valid JSON string. 
+but is importantly distinct from `PlainValue` because it must always contain a valid JSON string.
 This is required because JSON body parameters are ultimately composed into a single
-JSON object sent as HTTP body. If a method is annotated with [`@FormBody`](#formbody), body parameters are 
+JSON object sent as HTTP body. If a method is annotated with [`@FormBody`](#formbody), body parameters are
 serialized into `PlainValue` and combined into an URL-encoded form.
 
 There are no "global" implicits defined for `JsonValue` - JSON serialization must be either imported,
@@ -676,11 +681,11 @@ serializable as `HttpBody`.
 ### Result serialization
 
 Result type of every REST API method is wrapped into `Try` (in case the method throws an exception)
-and translated into `Task[RestResponse]`. This means that the macro engine looks for an implicit instance of 
+and translated into `Task[RestResponse]`. This means that the macro engine looks for an implicit instance of
 `AsRaw[Task[RestResponse], Try[R]]` and `AsReal[Task[RestResponse], Try[R]]` for every HTTP method with result type `R`.
 
-* `Task` is `monix.eval.Task` and represents a repeatable, cancelable, asynchronous computation.
-* `RestResponse` itself is a simple class that aggregates HTTP status code, response headers and body.
+- `Task` is `monix.eval.Task` and represents a repeatable, cancelable, asynchronous computation.
+- `RestResponse` itself is a simple class that aggregates HTTP status code, response headers and body.
 
 `DefaultRestApiCompanion` and its friends introduce implicits which translate between `Task` and `Future`s.
 This effectively means that if your method returns `Future[R]` then it's enough if `R` is serializable as `RestResponse`.
@@ -736,13 +741,13 @@ level of control that you need.
 
 **WARNING**: Remember that if you generate [OpenAPI documents](#generating-openapi-30-specifications) for your
 REST API then you must also provide custom instance of one of the [OpenAPI typeclasses](#openapi-implicits-summary)
-so that OpenAPI document properly reflects your custom serialization format. 
+so that OpenAPI document properly reflects your custom serialization format.
 
-* If you have custom serialization to `JsonValue` or `PlainValue` then you should define custom 
+- If you have custom serialization to `JsonValue` or `PlainValue` then you should define custom
   [`RestSchema`](#restschema-typeclass) instance
-* If you have custom serialization to `HttpBody` then you should define custom 
+- If you have custom serialization to `HttpBody` then you should define custom
   [`RestMediaTypes`](#restmediatypes-typeclass) instance
-* If you have custom serialization to `RestResponse` then you should define custom
+- If you have custom serialization to `RestResponse` then you should define custom
   [`RestResponses`](#restresponses-typeclass) instance
 
 #### Providing serialization for third party type
@@ -782,7 +787,7 @@ Instead, it introduces a mechanism through which serialization implicits are inj
 not bound to any specific serialization library. At the same time it provides a concise method to inject
 serialization implicits that does not require importing them explicitly.
 
-An example usage of this mechanism is `DefaultRestApiCompanion` which injects 
+An example usage of this mechanism is `DefaultRestApiCompanion` which injects
 [`GenCodec`](https://github.com/AVSystem/scala-commons/blob/master/docs/GenCodec.md)-based
 serialization.
 
@@ -809,10 +814,10 @@ object CirceRestImplicits extends CirceRestImplicits
 ```
 
 Note that implicits are wrapped into `Fallback`. This is not strictly required, but it's recommended
-because these implicits ultimately will have to be imported into *lexical scope* during macro materialization.
-However, we don't want these implicits to have higher priority than implicits from the companion objects of some 
-concrete classes which need custom (*implicit scope*). Because of that, we wrap our implicits into
-`Fallback` which keeps them visible but without elevated priority. `Fallback` is then "unwrapped" by appropriate 
+because these implicits ultimately will have to be imported into _lexical scope_ during macro materialization.
+However, we don't want these implicits to have higher priority than implicits from the companion objects of some
+concrete classes which need custom (_implicit scope_). Because of that, we wrap our implicits into
+`Fallback` which keeps them visible but without elevated priority. `Fallback` is then "unwrapped" by appropriate
 implicits defined in `AsRaw` and `AsReal` companion objects.
 
 Now, in order to define a REST API trait that uses Circe-based serialization, you must appropriately
@@ -845,7 +850,7 @@ REST API, then along from custom serialization you must provide customized insta
 
 #### Adjusting client-side `Scheduler` used for `Future`-based methods
 
-`DefaultRestImplicits` contains a method that specifies the `monix.execution.Scheduler` 
+`DefaultRestImplicits` contains a method that specifies the `monix.execution.Scheduler`
 (extended version of `ExecutionContext`, usually wraps a thread pool) that is used for serialization and deserialization
 between `RestRequest`/`RestResponse` and representations of requests and responses native to the HTTP client being used.
 
@@ -864,7 +869,7 @@ object MyFutureBasedRestApi extends RestApiCompanion[CustomizedRestImplicits, My
 
 #### Supporting async effects other than `Task` and `Future`
 
-When using `DefaultRestApiCompanion` or one of its variations, every HTTP method in REST API trait must return 
+When using `DefaultRestApiCompanion` or one of its variations, every HTTP method in REST API trait must return
 its return wrapped into a Monix `Task` or `Future`. It is possible to use other asynchronous IO effects.
 
 In order to do that, you must provide some additional implicits which will make the macro engine
@@ -883,30 +888,31 @@ REST framework gives you a certain amount of guarantees about backwards compatib
 Here's a list of changes that you may safely do to your REST API traits without breaking clients
 that still use the old version:
 
-* Adding new REST methods, as long as paths are still the same and unambiguous.
-* Renaming REST methods, as long as old `path` is configured for them explicitly (e.g. `@GET("oldname") def newname(...)`)
-* Reordering parameters of your REST methods, except for `@Path` parameters which may be freely intermixed
+- Adding new REST methods, as long as paths are still the same and unambiguous.
+- Renaming REST methods, as long as old `path` is configured for them explicitly (e.g. `@GET("oldname") def newname(...)`)
+- Reordering parameters of your REST methods, except for `@Path` parameters which may be freely intermixed
   with other parameters but they must retain the same order relative to each other.
-* Splitting parameters into multiple parameter lists or making them `implicit`.
-* Extracting common path fragments or parameters into [prefix methods](#prefix-methods).
-* Renaming `@Path` parameters - their names are not used in REST requests 
+- Splitting parameters into multiple parameter lists or making them `implicit`.
+- Extracting common path fragments or parameters into [prefix methods](#prefix-methods).
+- Renaming `@Path` parameters - their names are not used in REST requests
   (they are used when generating OpenAPI though)
-* Renaming non-`@Path` parameters, as long as the previous name is explicitly configured by
+- Renaming non-`@Path` parameters, as long as the previous name is explicitly configured by
   `@Query`, `@Header`, `@Cookie` or `@Body` annotation.
-* Removing non-`@Path` parameters - even if the client sends them, the server will just ignore them.
-* Adding new non-`@Path` parameters, as long as default value is provided for them - either as
+- Removing non-`@Path` parameters - even if the client sends them, the server will just ignore them.
+- Adding new non-`@Path` parameters, as long as default value is provided for them - either as
   Scala-level default parameter value or by using `@whenAbsent` annotation. The server will simply
   use the default value if parameter is missing in incoming HTTP request.
-* Changing parameter or result types or their serialization - as long as serialized formats of new and old type
+- Changing parameter or result types or their serialization - as long as serialized formats of new and old type
   are compatible. This depends on on the serialization library you're using. If you're using `GenCodec`, consult
   [its documentation on retaining backwards compatibility](https://github.com/AVSystem/scala-commons/blob/master/docs/GenCodec.md#safely-introducing-changes-to-serialized-classes-retaining-backwards-compatibility).
-  
+
 Conversely, changes that would break your API include:
-* Renaming REST methods without explicitly configuring path
-* Renaming non-`@Path` parameters which don't have explicit name configured
-* Adding or removing `@Path` parameters
-* Adding non-`@Path` parameters without giving them default value
-* Changing order of `@Path` parameters
+
+- Renaming REST methods without explicitly configuring path
+- Renaming non-`@Path` parameters which don't have explicit name configured
+- Adding or removing `@Path` parameters
+- Adding non-`@Path` parameters without giving them default value
+- Changing order of `@Path` parameters
 
 ## Implementing backends
 
@@ -932,7 +938,7 @@ easily sent through network.
 `RestResponse` is, similarly, a simple representation of HTTP response. `RestResponse` is made of HTTP status
 code and HTTP body (`HttpBody`, which also contains media type).
 
-Monix `Task` is currently used as an "IO monad" implementation, i.e. a suspended, repeatable and cancellable 
+Monix `Task` is currently used as an "IO monad" implementation, i.e. a suspended, repeatable and cancellable
 asynchronous computation.
 
 In other words, `HandleRequest` is a function which translates a `RestRequest` into an unexecuted, asynchronous
@@ -940,12 +946,12 @@ computation which yields a `RestResponse` when run.
 
 ### Implementing a server
 
-An existing implementation of REST API trait can be easily turned into a `HandleRequest` 
+An existing implementation of REST API trait can be easily turned into a `HandleRequest`
 function using `RawRest.asHandleRequest`.
 
 Therefore, the only thing you need to do to expose your REST API trait as an actual web service it to turn
 `HandleRequest` function into a server. This is usually just a matter of translating native HTTP request into
-a `RestRequest`, passing them to `HandleRequest` function and translating resulting `RestResponse` to native 
+a `RestRequest`, passing them to `HandleRequest` function and translating resulting `RestResponse` to native
 HTTP response.
 
 See [`RestServlet`](../rest/.jvm/src/main/scala/io/udash/rest/RestServlet.scala)
@@ -962,6 +968,130 @@ to turn this native HTTP client into a `HandleRequest` function.
 
 See [`DefaultRestClient`](../rest/src/main/scala/io/udash/rest/DefaultRestClient.scala) for
 an example implementation.
+
+## Streaming Support
+
+Udash REST provides built-in support for streaming responses, allowing efficient transfer of large data sets without loading everything into memory at once.
+
+### Defining Streaming APIs
+
+To define a streaming API endpoint, simply return `Observable[T]` as your method result type:
+
+```scala
+import monix.reactive.Observable
+
+trait StreamingApi {
+  /** Returns a potentially large stream of data */
+  def streamItems(filter: String): Observable[Item]
+
+  /** Streams a file as binary data */
+  def downloadFile(id: String): Observable[Array[Byte]]
+}
+object StreamingApi extends DefaultRestApiCompanion[StreamingApi]
+```
+
+The framework will automatically recognize `Observable` return types and handle them appropriately.
+
+### Implementing Streaming on the Server
+
+On the server side, implement your streaming methods by returning Monix Observables:
+
+```scala
+import monix.reactive.Observable
+
+class StreamingApiImpl extends StreamingApi {
+  def streamItems(filter: String): Observable[Item] =
+    // Create an observable that emits items incrementally
+    Observable.fromIterator(Task(
+      database.queryItems(filter).iterator
+    ))
+
+  def downloadFile(id: String): Observable[Array[Byte]] =
+    // Stream file contents in chunks
+    Observable.fromIterator(Task(
+      FileReader.readChunks(getFile(id))
+    ))
+}
+```
+
+### Consuming Streams on the Client
+
+Clients consume streaming responses using the same API definition:
+
+```scala
+val client: StreamingApi = SttpRestClient[StreamingApi]("http://localhost:9090/")
+
+// Process items as they arrive
+client.streamItems("product")
+  .foreach(item => println(s"Received: ${item.name}"))(monixScheduler)
+
+// Process a file as it downloads
+client.downloadFile("report.pdf")
+  .bufferTumbling(1024)
+  .foreach(chunk => outputStream.write(chunk))(monixScheduler)
+```
+
+### How Streaming Works
+
+When a client makes a request to a streaming endpoint:
+
+1. The server does not specify a `Content-Length` header in the response
+2. The client detects the streaming nature of the response by the missing `Content-Length`
+3. Data is transferred incrementally in chunks as it becomes available
+4. The client processes each chunk as it arrives
+
+This approach allows processing of potentially unlimited amounts of data with minimal memory footprint on both the client and server.
+
+### Streaming Types
+
+Udash REST supports two main streaming content types:
+
+1. **JSON Lists** - A stream of JSON objects sent as a JSON array `[{...}, {...}, ...]`
+2. **Raw Binary** - A stream of binary data chunks, for files or other binary content
+
+### Implementation Details
+
+- Under the hood, streaming is implemented using Monix `Observable`
+- Binary streams are transmitted as raw byte arrays
+- JSON streams are automatically serialized/deserialized between JSON and your data types
+- The server can control batch size to optimize network usage versus memory consumption
+
+### Handling Large Response Collections
+
+When dealing with large collections, streaming is preferable to loading everything in memory:
+
+```scala
+// Without streaming - entire list is loaded in memory
+def getAllItems(): Future[List[Item]]
+
+// With streaming - items are processed incrementally
+def streamAllItems(): Observable[Item]
+```
+
+The streaming version allows processing data incrementally, which is crucial for very large datasets that might exceed available memory.
+
+## Error Handling with Streaming
+
+Streaming endpoints handle errors similarly to regular endpoints. When an error occurs during streaming:
+
+```scala
+// Server side
+def streamItems(filter: String): Observable[Item] =
+  if (filter.isEmpty)
+    Observable.raiseError(HttpErrorException.plain(400, "Filter cannot be empty"))
+  else
+    Observable.fromIterator(Task(database.queryItems(filter).iterator))
+
+// Client side
+client.streamItems("")
+  .onErrorHandle { error =>
+    println(s"Streaming error: $error")
+    Item.default // Provide fallback value
+  }
+  .foreach(processItem)(monixScheduler)
+```
+
+This allows graceful handling of errors that might occur during streaming operations.
 
 ## Generating OpenAPI 3.0 specifications
 
@@ -1063,10 +1193,7 @@ object User extends RestDataCompanion[User] // gives GenCodec + RestStructure + 
       "format": "int32"
     }
   },
-  "required": [
-    "id",
-    "birthYear"
-  ]
+  "required": ["id", "birthYear"]
 }
 ```
 
@@ -1148,10 +1275,10 @@ rather than inlined schema.
 
 `RestMediaType` is an auxiliary typeclass which serves as a basis for `RestResponses` and `RestRequestBody` typeclasses.
 It captures all the possible media types which may be used in a request or response body for given Scala type.
-Media types are represented using OpenAPI 
+Media types are represented using OpenAPI
 [Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#mediaTypeObject).
 
-By default, `RestMediaTypes` instance is derived from `RestSchema` instance and `application/json` is assumed as 
+By default, `RestMediaTypes` instance is derived from `RestSchema` instance and `application/json` is assumed as
 the only available media type.
 
 You **should** define `RestMediaTypes` manually for every type which has custom serialization to `HttpBody` defined
@@ -1170,16 +1297,16 @@ By default, if no specific `RestResponses` instance is provided, it is created b
 The resulting [Responses](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#responsesObject)
 will contain exactly one
 [Response](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#responseObject)
-for HTTP status code `200 OK` with 
+for HTTP status code `200 OK` with
 [Media Types](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#mediaTypeObject)
-inferred from `RestMediaTypes` instance. Also note that `RestMediaTypes` itself is by default derived from 
+inferred from `RestMediaTypes` instance. Also note that `RestMediaTypes` itself is by default derived from
 `RestSchema`
 
 You **should** define `RestResponses` manually for every type which has custom serialization
-to `RestResponse` defined (`AsRaw/AsReal[RestResponse, T]`). In general, you may want to define 
-it manually every time you want to describe responses for status codes other than `200 OK`. 
+to `RestResponse` defined (`AsRaw/AsReal[RestResponse, T]`). In general, you may want to define
+it manually every time you want to describe responses for status codes other than `200 OK`.
 
-Also remember that `Responses` object can be adjusted locally, for each method, using annotations - 
+Also remember that `Responses` object can be adjusted locally, for each method, using annotations -
 see [Adjusting operations](#adjusting-operations).
 
 ### `RestRequestBody` typeclass
@@ -1218,9 +1345,9 @@ Annotations extending `SchemaAdjuster` can arbitrarily transform a
 [Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject)
 and can be applied on:
 
-* data types with macro-generated `RestSchema`
-* case class fields of data types with macro generated `RestSchema`
-* `@Body` parameters of REST methods
+- data types with macro-generated `RestSchema`
+- case class fields of data types with macro generated `RestSchema`
+- `@Body` parameters of REST methods
 
 Schema adjusters do **NOT** work on path/header/query/cookie parameters and REST methods
 themselves. Instead use [parameter adjusters](#adjusting-parameters) and
@@ -1263,5 +1390,5 @@ it will apply to all Path Item Objects associated with result of this prefix met
 
 ### Limitations
 
-* Current representation of OpenAPI document does not support
-[specification extensions](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#specificationExtensions).
+- Current representation of OpenAPI document does not support
+  [specification extensions](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#specificationExtensions).
