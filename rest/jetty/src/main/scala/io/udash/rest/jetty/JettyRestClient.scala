@@ -100,7 +100,7 @@ import scala.concurrent.duration.*
                           Observable
                             .fromIterator(Task.eval(input.readList().iterator(_.asInstanceOf[JsonStringInput].readRawJson())))
                             .map(JsonValue(_))
-                        },
+                        }.onErrorFallbackTo(Observable.raiseError(HttpErrorException.Streaming)),
                       charset = charset,
                     )
                 }

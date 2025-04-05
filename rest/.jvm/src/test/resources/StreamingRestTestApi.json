@@ -24,6 +24,49 @@
         }
       }
     },
+    "/delayedStream": {
+      "get": {
+        "operationId": "delayedStream",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "delayMillis",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/errorStream": {
       "post": {
         "operationId": "errorStream",

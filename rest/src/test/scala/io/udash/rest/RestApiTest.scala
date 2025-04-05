@@ -4,7 +4,7 @@ package rest
 import cats.implicits.catsSyntaxTuple2Semigroupal
 import com.avsystem.commons.*
 import com.avsystem.commons.misc.ScalaDurationExtensions.durationIntOps
-import io.udash.rest.raw.RawRest
+import io.udash.rest.raw.{HttpErrorException, RawRest}
 import io.udash.testing.AsyncUdashSharedTest
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -13,6 +13,7 @@ import org.scalactic.source.Position
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{Assertion, BeforeAndAfterEach}
 
+import scala.concurrent.TimeoutException
 import scala.concurrent.duration.FiniteDuration
 
 abstract class RestApiTest extends AsyncUdashSharedTest with BeforeAndAfterEach {
@@ -28,7 +29,7 @@ abstract class RestApiTest extends AsyncUdashSharedTest with BeforeAndAfterEach 
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
-    impl.resetCounter()
+    impl.resetCounter() // Reset non-streaming counter
   }
 
   final val serverHandle: RawRest.HandleRequest =
@@ -168,8 +169,29 @@ trait StreamingRestApiTestScenarios extends RestApiTest {
     testStream(_.errorStream(immediate = true))
   }
 
-  // TODO streaming - does not work on client side
-  "mid-stream error" ignore {
+  "mid-stream error" in {
     testStream(_.errorStream(immediate = false))
+  }
+
+  "slow source stream" in {
+    testStream(_.delayedStream(size = 3, delayMillis = 100))
+  }
+
+  "client-side timeout on slow stream" in {
+    val streamTask = streamingProxy
+      .delayedStream(size = 10, delayMillis = 200)
+      .toListL
+
+    val timeoutTask = streamTask.timeout(500.millis).materialize
+
+    timeoutTask.runToFuture.map { result =>
+      assert(result.isFailure, "Stream should have failed due to timeout")
+      result match {
+        case Failure(ex) =>
+          assert(ex.isInstanceOf[TimeoutException], s"Expected TimeoutException, but got $ex")
+          succeed
+        case Success(_) => fail("Stream succeeded unexpectedly despite timeout")
+      }
+    }
   }
 }
