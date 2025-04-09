@@ -142,9 +142,9 @@ trait RawRest {
     RawRest.resolveAndHandle(metadata)(handleResolvedWithStreaming)
 
   /**
-   * Handles a resolved REST call and returns a standard RestResponse.
+   * Handles a resolved REST call and returns a standard [[RestResponse]].
    * This method is maintained for backward compatibility with non-streaming clients.
-   * It delegates to handleResolvedWithStreaming and converts any streaming response to a standard response.
+   * It delegates to [[handleResolvedWithStreaming]] and converts any streaming response to a standard response.
    */
   def handleResolved(request: RestRequest, resolved: ResolvedCall): Task[RestResponse] =
     StreamedRestResponse.fallbackToRestResponse(handleResolvedWithStreaming(request, resolved))
@@ -254,7 +254,7 @@ object RawRest extends RawRpcCompanion[RawRest] {
   @implicitNotFound(InvalidTraitMessage)
   implicit def rawRestAsRawNotFound[T]: ImplicitNotFound[AsRaw[RawRest, T]] = ImplicitNotFound()
 
-  // client side
+  // client side without response streaming support
   def fromHandleRequest[Real: AsRealRpc : RestMetadata](handle: HandleRequest): Real =
     RawRest.asReal(new DefaultRawRest(Nil, RestMetadata[Real], RestParameters.Empty, new RawRest.RestRequestHandler {
       override def handleRequest(request: RestRequest): Task[RestResponse] = handle(request)
@@ -266,7 +266,7 @@ object RawRest extends RawRpcCompanion[RawRest] {
   def fromHandleRequestWithStreaming[Real: AsRealRpc : RestMetadata](handleRequest: RawRest.RestRequestHandler): Real =
     RawRest.asReal(new DefaultRawRest(Nil, RestMetadata[Real], RestParameters.Empty, handleRequest))
 
-  // server side
+  // server side without response streaming support
   def asHandleRequest[Real: AsRawRpc : RestMetadata](real: Real): HandleRequest =
     RawRest.asRaw(real).asHandleRequest(RestMetadata[Real])
 

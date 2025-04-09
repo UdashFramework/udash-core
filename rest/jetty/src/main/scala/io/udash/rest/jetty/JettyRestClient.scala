@@ -9,8 +9,8 @@ import io.udash.rest.util.Utils
 import io.udash.utils.URLEncoder
 import monix.eval.Task
 import monix.execution.{Callback, Scheduler}
+import monix.reactive.Observable
 import monix.reactive.OverflowStrategy.Unbounded
-import monix.reactive.{MulticastStrategy, Observable}
 import monix.reactive.subjects.{ConcurrentSubject, PublishToOneSubject}
 import org.eclipse.jetty.client.*
 import org.eclipse.jetty.http.{HttpCookie, HttpHeader, MimeTypes}
@@ -31,7 +31,8 @@ import scala.concurrent.duration.*
  * @param client The configured Jetty `HttpClient` instance.
  * @param defaultMaxResponseLength Default maximum size (in bytes) for buffering non-streamed responses.
  * @param defaultTimeout Default timeout for requests.
- */final class JettyRestClient(
+ */
+final class JettyRestClient(
   client: HttpClient,
   defaultMaxResponseLength: Int = JettyRestClient.DefaultMaxResponseLength,
   defaultTimeout: Duration = JettyRestClient.DefaultTimeout,
@@ -115,7 +116,7 @@ import scala.concurrent.duration.*
                       code = response.getStatus,
                       headers = parseHeaders(response),
                       body = body,
-                      batchSize = 1,
+                      customBatchSize = Opt.Empty,
                     )
                     callback(Success(restResponse))
                   }
@@ -149,7 +150,7 @@ import scala.concurrent.duration.*
                     code = httpResp.getStatus,
                     headers = parseHeaders(httpResp),
                     body = StreamedBody.fromHttpBody(parseHttpBody(httpResp, this)),
-                    batchSize = 1,
+                    customBatchSize = Opt.Empty,
                   )
                   callback(Success(restResponse))
                 } else {
@@ -165,8 +166,8 @@ import scala.concurrent.duration.*
   }
 
   /**
-   * Creates a `RawRest.HandleRequest` which handles standard REST requests by buffering the entire response.
-   * This does *not* support streaming responses.
+   * Creates a [[RawRest.HandleRequest]] which handles standard REST requests by buffering the entire response.
+   * This does <b>not</b> support streaming responses.
    *
    * @param baseUrl The base URL for the REST service.
    * @param customMaxResponseLength Optional override for the maximum response length.

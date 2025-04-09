@@ -84,6 +84,7 @@ trait RootApi {
   @POST @CustomBody def echoHeaders(headers: Map[String, String]): Future[WithHeaders[Unit]]
 }
 object RootApi extends DefaultRestApiCompanion[RootApi]
+
 class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
   implicit def scheduler: Scheduler = Scheduler.global
 
@@ -206,7 +207,7 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
       serverHandleWithStreaming(request).flatMap {
         case stream: StreamedRestResponse => Task.now(stream)
         case resp: RestResponse =>
-          Task(StreamedRestResponse(resp.code, resp.headers, StreamedBody.fromHttpBody(resp.body), 1))
+          Task(StreamedRestResponse(resp.code, resp.headers, StreamedBody.fromHttpBody(resp.body)))
       }
   })
 
@@ -505,13 +506,12 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
       HttpBody.Empty
     )
     whenReady(serverHandleWithStreaming(request).runToFuture) {
-      case StreamedRestResponse(code, headers, body, batchSize) => {
+      case StreamedRestResponse(code, headers, body, batchSize) =>
         code shouldBe 200
         val elements = castOrFail[StreamedBody.JsonList](body).elements
         whenReady(elements.toListL.runToFuture) { e =>
           e shouldBe List(JsonValue("1"), JsonValue("2"), JsonValue("3"), JsonValue("4"))
         }
-      }
       case _ => fail()
     }
   }

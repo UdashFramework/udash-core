@@ -113,13 +113,13 @@ trait RestResponseLowPrio { this: RestResponse.type =>
 
 /**
  * Streaming REST response containing a status code, headers, and a streamed body.
- * Unlike standard RestResponse, the body content can be delivered incrementally through a reactive stream.
+ * Unlike standard [[RestResponse]], the body content can be delivered incrementally through a reactive stream.
  */
 final case class StreamedRestResponse(
   code: Int,
   headers: IMapping[PlainValue],
   body: StreamedBody,
-  batchSize: Int,
+  customBatchSize: Opt[Int] = Opt.Empty,
 ) extends AbstractRestResponse {
 
   def header(name: String, value: String): StreamedRestResponse =
@@ -132,7 +132,7 @@ final case class StreamedRestResponse(
 object StreamedRestResponse extends StreamedRestResponseLowPrio {
 
   /**
-   * Converts a StreamedRestResponse to a standard RestResponse by materializing streamed content.
+   * Converts a [[StreamedRestResponse]] to a standard [[RestResponse]] by materializing streamed content.
    * This is useful for compatibility with APIs that don't support streaming.
    */
   def fallbackToRestResponse(response: StreamedRestResponse): Task[RestResponse] = {
@@ -158,7 +158,7 @@ object StreamedRestResponse extends StreamedRestResponseLowPrio {
   }
 
   /**
-   * Converts any AbstractRestResponse to a standard RestResponse by materializing streamed content if necessary.
+   * Converts any [[AbstractRestResponse]] to a standard [[RestResponse]] by materializing streamed content if necessary.
    * This is useful for compatibility with APIs that don't support streaming.
    */
   def fallbackToRestResponse(response: Task[AbstractRestResponse]): Task[RestResponse] =
@@ -168,7 +168,7 @@ object StreamedRestResponse extends StreamedRestResponseLowPrio {
     }
 
   def fromHttpError(error: HttpErrorException): StreamedRestResponse =
-    StreamedRestResponse(error.code, IMapping.empty, StreamedBody.fromHttpBody(error.payload), 1)
+    StreamedRestResponse(error.code, IMapping.empty, StreamedBody.fromHttpBody(error.payload))
 
   class LazyOps(private val resp: () => StreamedRestResponse) extends AnyVal {
     def recoverHttpError: StreamedRestResponse = try resp() catch {

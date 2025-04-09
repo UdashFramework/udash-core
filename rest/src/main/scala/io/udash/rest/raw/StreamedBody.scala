@@ -21,7 +21,6 @@ sealed trait StreamedBody {
       code = defaultStatus,
       headers = IMapping.empty,
       body = this,
-      batchSize = 1,
     )
 }
 object StreamedBody extends StreamedBodyLowPrio {

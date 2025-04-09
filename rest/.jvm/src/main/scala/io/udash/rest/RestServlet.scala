@@ -22,6 +22,7 @@ object RestServlet {
   final val DefaultHandleTimeout = 30.seconds
   final val DefaultMaxPayloadSize = 16 * 1024 * 1024L // 16MB
   final val CookieHeader = "Cookie"
+  final val DefaultStreamingBatchSize = 1
   private final val BufferSize = 8192
 
   /**
@@ -31,21 +32,29 @@ object RestServlet {
    * @param handleTimeout  maximum time the servlet will wait for results returned by REST API implementation
    * @param maxPayloadSize maximum acceptable incoming payload size, in bytes;
    *                       if exceeded, `413 Payload Too Large` response will be sent back
+   * @param defaultStreamingBatchSize default batch size for [[StreamedRestResponse]]
    */
   @explicitGenerics def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
     apiImpl: RestApi,
     handleTimeout: FiniteDuration = DefaultHandleTimeout,
     maxPayloadSize: Long = DefaultMaxPayloadSize,
+    defaultStreamingBatchSize: Int = DefaultStreamingBatchSize,
   )(implicit
     scheduler: Scheduler
   ): RestServlet =
-    new RestServlet(RawRest.asHandleRequestWithStreaming[RestApi](apiImpl), handleTimeout, maxPayloadSize)
+    new RestServlet(
+      handleRequest = RawRest.asHandleRequestWithStreaming[RestApi](apiImpl),
+      handleTimeout = handleTimeout,
+      maxPayloadSize = maxPayloadSize,
+      defaultStreamingBatchSize = defaultStreamingBatchSize,
+    )
 }
 
 class RestServlet(
   handleRequest: RawRest.HandleRequestWithStreaming,
   handleTimeout: FiniteDuration = DefaultHandleTimeout,
   maxPayloadSize: Long = DefaultMaxPayloadSize,
+  defaultStreamingBatchSize: Int = DefaultStreamingBatchSize,
 )(implicit
   scheduler: Scheduler
 ) extends HttpServlet with LazyLogging {
@@ -120,14 +129,16 @@ class RestServlet(
         Task.eval(writeNonEmptyBody(response, single.body))
       case binary: StreamedBody.RawBinary =>
         response.setContentType(binary.contentType)
-        binary.content.bufferTumbling(stream.batchSize).consumeWith(Consumer.foreach { batch =>
-          batch.foreach(e => response.getOutputStream.write(e))
-          response.getOutputStream.flush()
-        })
+        binary.content
+          .bufferTumbling(stream.customBatchSize.getOrElse(defaultStreamingBatchSize))
+          .consumeWith(Consumer.foreach { batch =>
+            batch.foreach(e => response.getOutputStream.write(e))
+            response.getOutputStream.flush()
+          })
       case jsonList: StreamedBody.JsonList =>
         response.setContentType(jsonList.contentType)
         jsonList.elements
-          .bufferTumbling(stream.batchSize)
+          .bufferTumbling(stream.customBatchSize.getOrElse(defaultStreamingBatchSize))
           .switchIfEmpty(Observable(Seq.empty))
           .zipWithIndex
           .consumeWith(Consumer.foreach { case (batch, idx) =>

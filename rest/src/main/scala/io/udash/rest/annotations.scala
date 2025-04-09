@@ -1,11 +1,12 @@
 package io.udash
 package rest
 
+import com.avsystem.commons.Opt
 import com.avsystem.commons.annotation.{AnnotationAggregate, defaultsToName}
 import com.avsystem.commons.meta.RealSymAnnotation
-import com.avsystem.commons.rpc._
+import com.avsystem.commons.rpc.*
 import com.avsystem.commons.serialization.optionalParam
-import io.udash.rest.raw._
+import io.udash.rest.raw.*
 
 import scala.annotation.StaticAnnotation
 
@@ -362,6 +363,11 @@ class addRequestHeader(name: String, value: String) extends RequestAdjuster {
   * HTTP header to all outgoing responses generated for invocations of that method on the server side.
   */
 class addResponseHeader(name: String, value: String) extends ResponseAdjuster with StreamedResponseAdjuster {
-  def adjustResponse(response: RestResponse): RestResponse = response.header(name, value)
+  override def adjustResponse(response: RestResponse): RestResponse = response.header(name, value)
   override def adjustResponse(response: StreamedRestResponse): StreamedRestResponse = response.header(name, value)
+}
+
+class streamingResponseBatchSize(size: Int) extends StreamedResponseAdjuster {
+  override def adjustResponse(response: StreamedRestResponse): StreamedRestResponse =
+    response.copy(customBatchSize = Opt.some(size))
 }
