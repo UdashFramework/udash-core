@@ -28,7 +28,7 @@ object Dependencies {
 
   val scalaLoggingVersion = "3.9.5"
 
-  val jettyVersion = "12.0.18"
+  val jettyVersion = "12.0.19"
   val typesafeConfigVersion = "1.4.3"
   val flexmarkVersion = "0.64.8"
   val logbackVersion = "1.3.15"
@@ -42,7 +42,7 @@ object Dependencies {
   val bootstrap4DatepickerVersion = "5.39.0"
   val momentJsVersion = "2.30.1"
 
-  val seleniumVersion = "4.30.0"
+  val seleniumVersion = "4.31.0"
   val webDriverManagerVersion = "6.0.1"
   val scalaJsBenchmarkVersion = "0.10.0"
 
