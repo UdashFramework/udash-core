@@ -54,8 +54,18 @@ abstract class RestServerApiCompanion[Implicits, Real](protected val implicits: 
   implicit final lazy val restMetadata: RestMetadata[Real] = inst(implicits, this).metadata
   implicit final lazy val restAsRaw: RawRest.AsRawRpc[Real] = inst(implicits, this).asRaw
 
+
+  /**
+   * Maintained for backward compatibility with non-streaming clients.
+   * Converts the real API implementation into a request handler without streaming support.
+   */
   final def asHandleRequest(real: Real): RawRest.HandleRequest =
     RawRest.asHandleRequest(real)
+  /**
+   * Converts the real API implementation into a request handler with streaming capabilities.
+   */
+  final def asHandleRequestWithStreaming(real: Real): RawRest.HandleRequestWithStreaming =
+    RawRest.asHandleRequestWithStreaming(real)
 }
 
 /** @see [[io.udash.rest.RestApiCompanion RestApiCompanion]] */
@@ -68,6 +78,8 @@ abstract class RestServerOpenApiCompanion[Implicits, Real](protected val implici
 
   final def asHandleRequest(real: Real): RawRest.HandleRequest =
     RawRest.asHandleRequest(real)
+  final def asHandleRequestWithStreaming(real: Real): RawRest.HandleRequestWithStreaming =
+    RawRest.asHandleRequestWithStreaming(real)
 }
 
 /**
@@ -103,6 +115,8 @@ abstract class RestOpenApiCompanion[Implicits, Real](protected val implicits: Im
     RawRest.fromHandleRequest(handleRequest)
   final def asHandleRequest(real: Real): RawRest.HandleRequest =
     RawRest.asHandleRequest(real)
+  final def asHandleRequestWithStreaming(real: Real): RawRest.HandleRequestWithStreaming =
+    RawRest.asHandleRequestWithStreaming(real)
 }
 
 trait PolyRestApiFullInstances[T[_[_]]] {
@@ -136,6 +150,8 @@ abstract class RestServerApiImplCompanion[Implicits, Real](protected val implici
 
   final def asHandleRequest(real: Real): RawRest.HandleRequest =
     RawRest.asHandleRequest(real)
+  final def asHandleRequestWithStreaming(real: Real): RawRest.HandleRequestWithStreaming =
+    RawRest.asHandleRequestWithStreaming(real)
 }
 
 /**
@@ -150,7 +166,6 @@ abstract class RestServerOpenApiImplCompanion[Implicits, Real](protected val imp
 
   final def asHandleRequest(real: Real): RawRest.HandleRequest =
     RawRest.asHandleRequest(real)
-
   final def asHandleRequestWithStreaming(real: Real): RawRest.HandleRequestWithStreaming =
     RawRest.asHandleRequestWithStreaming(real)
 }

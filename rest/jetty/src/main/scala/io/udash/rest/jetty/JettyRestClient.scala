@@ -4,11 +4,13 @@ package rest.jetty
 import com.avsystem.commons.*
 import com.avsystem.commons.annotation.explicitGenerics
 import com.avsystem.commons.serialization.json.{JsonReader, JsonStringInput}
+import io.udash.rest.jetty.JettyRestClient.unsupportedContentTypeError
 import io.udash.rest.raw.*
+import io.udash.rest.raw.HttpErrorException.plain
 import io.udash.rest.util.Utils
 import io.udash.utils.URLEncoder
 import monix.eval.Task
-import monix.execution.{Callback, Scheduler}
+import monix.execution.{Ack, Callback, Scheduler}
 import monix.reactive.Observable
 import monix.reactive.OverflowStrategy.Unbounded
 import monix.reactive.subjects.{ConcurrentSubject, PublishToOneSubject}
@@ -28,9 +30,9 @@ import scala.concurrent.duration.*
  * response body in memory. This client activates streaming mode *only* when the server's
  * response headers *do not* include a `Content-Length`.
  *
- * @param client The configured Jetty `HttpClient` instance.
+ * @param client                   The configured Jetty `HttpClient` instance.
  * @param defaultMaxResponseLength Default maximum size (in bytes) for buffering non-streamed responses.
- * @param defaultTimeout Default timeout for requests.
+ * @param defaultTimeout           Default timeout for requests.
  */
 final class JettyRestClient(
   client: HttpClient,
@@ -53,9 +55,9 @@ final class JettyRestClient(
    * The handler supports both regular responses and streaming responses, allowing for
    * incremental processing of large payloads through Observable streams.
    *
-   * @param baseUrl Base URL for the REST service
+   * @param baseUrl                 Base URL for the REST service
    * @param customMaxResponseLength Optional maximum response length override for non-streamed responses
-   * @param customTimeout Optional timeout override
+   * @param customTimeout           Optional timeout override
    * @return A handler that can process REST requests with streaming capabilities
    */
   def asHandleRequestWithStreaming(
@@ -107,8 +109,7 @@ final class JettyRestClient(
                 }
                 bodyOpt.mapOr(
                   {
-                    // TODO streaming error handling client-side
-                    callback(Failure(new Exception(s"Unsupported content type $contentTypeOpt")))
+                    callback(Failure(unsupportedContentTypeError(contentTypeOpt)))
                   },
                   body => {
                     this.collectToBuffer = false
@@ -127,17 +128,19 @@ final class JettyRestClient(
             override def onContent(response: Response, chunk: Content.Chunk, demander: Runnable): Unit =
               if (collectToBuffer)
                 super.onContent(response, chunk, demander)
-              else
-                if (chunk == Content.Chunk.EOF) {
-                  rawContentSubject.onComplete()
-                } else {
-                  val buf = chunk.getByteBuffer
-                  val arr = new Array[Byte](buf.remaining)
-                  buf.get(arr)
-                  publishSubject.subscription // wait for subscription
-                    .flatMapNow(_ => rawContentSubject.onNext(arr))
-                    .mapNow(_ => demander.run())
+              else if (chunk == Content.Chunk.EOF) {
+                rawContentSubject.onComplete()
+              } else {
+                val buf = chunk.getByteBuffer
+                val arr = new Array[Byte](buf.remaining)
+                buf.get(arr)
+                publishSubject.subscription // wait for subscription
+                  .flatMapNow(_ => rawContentSubject.onNext(arr))
+                  .mapNow {
+                  case Ack.Continue => demander.run()
+                  case Ack.Stop     => ()
                 }
+              }
 
             override def onComplete(result: Result): Unit =
               if (result.isSucceeded) {
@@ -169,9 +172,9 @@ final class JettyRestClient(
    * Creates a [[RawRest.HandleRequest]] which handles standard REST requests by buffering the entire response.
    * This does <b>not</b> support streaming responses.
    *
-   * @param baseUrl The base URL for the REST service.
+   * @param baseUrl                 The base URL for the REST service.
    * @param customMaxResponseLength Optional override for the maximum response length.
-   * @param customTimeout Optional override for the request timeout.
+   * @param customTimeout           Optional override for the request timeout.
    * @return A `RawRest.HandleRequest` that buffers responses.
    */
   def asHandleRequest(
@@ -262,6 +265,10 @@ final class JettyRestClient(
 object JettyRestClient {
   final val DefaultMaxResponseLength = 2 * 1024 * 1024
   final val DefaultTimeout = 10.seconds
+  final val Streaming: HttpErrorException = plain(400, "HTTP stream failure")
+
+  def unsupportedContentTypeError(contentType: Opt[String]): HttpErrorException =
+    plain(400, s"Unsupported streaming Content-Type = ${contentType.getOrElse("null")}", new UnsupportedOperationException())
 
   @explicitGenerics
   def apply[RestApi: RawRest.AsRealRpc : RestMetadata](

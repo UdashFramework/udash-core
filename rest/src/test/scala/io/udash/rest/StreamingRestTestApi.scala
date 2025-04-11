@@ -2,10 +2,8 @@ package io.udash
 package rest
 
 import io.udash.rest.raw.HttpErrorException
-import monix.eval.Task
 import monix.reactive.Observable
 
-import java.util.concurrent.atomic.AtomicBoolean
 import scala.concurrent.duration.*
 
 trait StreamingRestTestApi {
@@ -42,8 +40,7 @@ object StreamingRestTestApi extends DefaultRestApiCompanion[StreamingRestTestApi
         Observable.fromIterable(Range(0, 3)).map { i =>
           if (i < 2) RestEntity(RestEntityId(i.toString), "first")
           else throw HttpErrorException.Streaming
-          }
-
+        }
 
     override def delayedStream(size: Int, delayMillis: Long): Observable[Int] = {
       Observable.fromIterable(Range(0, size))

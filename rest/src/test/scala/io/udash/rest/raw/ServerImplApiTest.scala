@@ -357,5 +357,15 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
       expectedCode = 200
     )
   }
+
+  test("streaming GET call to non-streaming endpoint") {
+    val params = RestParameters(
+      path = PlainValue.decodePath("/streamingNumbers"),
+      query = Mapping.create("count" -> PlainValue("5"))
+    )
+    val request = RestRequest(HttpMethod.GET, params, HttpBody.Empty)
+    val response = RestResponse(200, IMapping.empty, HttpBody.json(JsonValue("[1,2,3,4,5]")))
+    assertRawExchange(request, response)
+  }
 }
 
