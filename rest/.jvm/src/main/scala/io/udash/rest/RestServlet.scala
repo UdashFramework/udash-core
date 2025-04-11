@@ -1,26 +1,29 @@
 package io.udash
 package rest
 
-import com.avsystem.commons._
+import com.avsystem.commons.*
 import com.avsystem.commons.annotation.explicitGenerics
 import com.typesafe.scalalogging.LazyLogging
-import io.udash.rest.RestServlet._
-import io.udash.rest.raw._
+import io.udash.rest.RestServlet.*
+import io.udash.rest.raw.*
 import io.udash.utils.URLEncoder
 import monix.eval.Task
 import monix.execution.Scheduler
+import monix.reactive.{Consumer, Observable}
 
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import javax.servlet.{AsyncEvent, AsyncListener}
 import scala.annotation.tailrec
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 object RestServlet {
   final val DefaultHandleTimeout = 30.seconds
   final val DefaultMaxPayloadSize = 16 * 1024 * 1024L // 16MB
   final val CookieHeader = "Cookie"
+  final val DefaultStreamingBatchSize = 1
+  private final val BufferSize = 8192
 
   /**
    * Wraps an implementation of some REST API trait into a Java Servlet.
@@ -29,22 +32,29 @@ object RestServlet {
    * @param handleTimeout  maximum time the servlet will wait for results returned by REST API implementation
    * @param maxPayloadSize maximum acceptable incoming payload size, in bytes;
    *                       if exceeded, `413 Payload Too Large` response will be sent back
+   * @param defaultStreamingBatchSize default batch size for [[StreamedRestResponse]]
    */
   @explicitGenerics def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
     apiImpl: RestApi,
     handleTimeout: FiniteDuration = DefaultHandleTimeout,
-    maxPayloadSize: Long = DefaultMaxPayloadSize
+    maxPayloadSize: Long = DefaultMaxPayloadSize,
+    defaultStreamingBatchSize: Int = DefaultStreamingBatchSize,
   )(implicit
     scheduler: Scheduler
-  ): RestServlet = new RestServlet(RawRest.asHandleRequest[RestApi](apiImpl), handleTimeout, maxPayloadSize)
-
-  private final val BufferSize = 8192
+  ): RestServlet =
+    new RestServlet(
+      handleRequest = RawRest.asHandleRequestWithStreaming[RestApi](apiImpl),
+      handleTimeout = handleTimeout,
+      maxPayloadSize = maxPayloadSize,
+      defaultStreamingBatchSize = defaultStreamingBatchSize,
+    )
 }
 
 class RestServlet(
-  handleRequest: RawRest.HandleRequest,
+  handleRequest: RawRest.HandleRequestWithStreaming,
   handleTimeout: FiniteDuration = DefaultHandleTimeout,
-  maxPayloadSize: Long = DefaultMaxPayloadSize
+  maxPayloadSize: Long = DefaultMaxPayloadSize,
+  defaultStreamingBatchSize: Int = DefaultStreamingBatchSize,
 )(implicit
   scheduler: Scheduler
 ) extends HttpServlet with LazyLogging {
@@ -66,9 +76,12 @@ class RestServlet(
 
     // readRequest must execute in Jetty thread but we want exceptions to be handled uniformly, hence the Try
     val udashRequest = Try(readRequest(request))
-    val cancelable = Task.defer(handleRequest(udashRequest.get)).executeAsync.runAsync {
-      case Right(restResponse) =>
-        completeWith(writeResponse(response, restResponse))
+    val cancelable = Task.defer(handleRequest(udashRequest.get)).flatMap { rr =>
+      Task(setResponseHeaders(response, rr.code, rr.headers)) >>
+        writeResponseBody(response, rr)
+    }.executeAsync.runAsync {
+      case Right(_) =>
+        asyncContext.complete()
       case Left(e: HttpErrorException) =>
         completeWith(writeResponse(response, e.toResponse))
       case Left(e) =>
@@ -86,6 +99,97 @@ class RestServlet(
       def onError(event: AsyncEvent): Unit = ()
       def onStartAsync(event: AsyncEvent): Unit = ()
     })
+  }
+
+  private def setResponseHeaders(response: HttpServletResponse, code: Int, headers: IMapping[PlainValue]): Unit = {
+    response.setStatus(code)
+    headers.entries.foreach {
+      case (name, PlainValue(value)) => response.addHeader(name, value)
+    }
+  }
+
+  private def writeNonEmptyBody(response: HttpServletResponse, body: HttpBody.NonEmpty): Unit = {
+    val bytes = body.bytes
+    response.setContentType(body.contentType)
+    response.setContentLength(bytes.length)
+    response.getOutputStream.write(bytes)
+  }
+
+  private def writeNonEmptyStreamedBody(
+    response: HttpServletResponse,
+    stream: StreamedRestResponse,
+    body: StreamedBody.NonEmpty,
+  ): Task[Unit] = Task.defer {
+    // The Content-Length header is intentionally omitted for streams.
+    // This signals to the client that the response body size is not predetermined and will be streamed.
+    // Clients implementing the streaming part of the REST interface contract MUST be prepared
+    // to handle responses without Content-Length by reading data incrementally until the stream completes.
+    body match {
+      case single: StreamedBody.Single =>
+        Task.eval(writeNonEmptyBody(response, single.body))
+      case binary: StreamedBody.RawBinary =>
+        response.setContentType(binary.contentType)
+        binary.content
+          .bufferTumbling(stream.customBatchSize.getOrElse(defaultStreamingBatchSize))
+          .consumeWith(Consumer.foreach { batch =>
+            batch.foreach(e => response.getOutputStream.write(e))
+            response.getOutputStream.flush()
+          })
+      case jsonList: StreamedBody.JsonList =>
+        response.setContentType(jsonList.contentType)
+        jsonList.elements
+          .bufferTumbling(stream.customBatchSize.getOrElse(defaultStreamingBatchSize))
+          .switchIfEmpty(Observable(Seq.empty))
+          .zipWithIndex
+          .consumeWith(Consumer.foreach { case (batch, idx) =>
+            val firstBatch = idx == 0
+            if (firstBatch) {
+              response.getOutputStream.write("[".getBytes(jsonList.charset))
+              batch.iterator.zipWithIndex.foreach { case (e, idx) =>
+                if (idx != 0) {
+                  response.getOutputStream.write(",".getBytes(jsonList.charset))
+                }
+                response.getOutputStream.write(e.value.getBytes(jsonList.charset))
+              }
+            } else
+              batch.foreach { e =>
+                response.getOutputStream.write(",".getBytes(jsonList.charset))
+                response.getOutputStream.write(e.value.getBytes(jsonList.charset))
+              }
+            response.getOutputStream.flush()
+          })
+          .map(_ => response.getOutputStream.write("]".getBytes(jsonList.charset)))
+    }
+  }
+
+  private def writeResponseBody(response: HttpServletResponse, rr: AbstractRestResponse): Task[Unit] =
+    rr match {
+      case resp: RestResponse =>
+        resp.body match {
+          case HttpBody.Empty => Task.unit
+          case neBody: HttpBody.NonEmpty => Task(writeNonEmptyBody(response, neBody))
+        }
+      case stream: StreamedRestResponse =>
+        stream.body match {
+          case StreamedBody.Empty => Task.unit
+          case neBody: StreamedBody.NonEmpty => writeNonEmptyStreamedBody(response, stream, neBody)
+        }
+    }
+
+  private def writeResponse(response: HttpServletResponse, restResponse: RestResponse): Unit = {
+    setResponseHeaders(response, restResponse.code, restResponse.headers)
+    restResponse.body match {
+      case HttpBody.Empty  =>
+      case neBody: HttpBody.NonEmpty => writeNonEmptyBody(response, neBody)
+    }
+  }
+
+  private def writeFailure(response: HttpServletResponse, message: Opt[String]): Unit = {
+    response.setStatus(500)
+    message.foreach { msg =>
+      response.setContentType(s"text/plain;charset=utf-8")
+      response.getWriter.write(msg)
+    }
   }
 
   private def readParameters(request: HttpServletRequest): RestParameters = {
@@ -161,29 +265,5 @@ class RestServlet(
     val parameters = readParameters(request)
     val body = readBody(request)
     RestRequest(method, parameters, body)
-  }
-
-  private def writeResponse(response: HttpServletResponse, restResponse: RestResponse): Unit = {
-    response.setStatus(restResponse.code)
-    restResponse.headers.entries.foreach {
-      case (name, PlainValue(value)) => response.addHeader(name, value)
-    }
-    restResponse.body match {
-      case HttpBody.Empty =>
-      case neBody: HttpBody.NonEmpty =>
-        // TODO: can we improve performance by avoiding intermediate byte array for textual content?
-        val bytes = neBody.bytes
-        response.setContentType(neBody.contentType)
-        response.setContentLength(bytes.length)
-        response.getOutputStream.write(bytes)
-    }
-  }
-
-  private def writeFailure(response: HttpServletResponse, message: Opt[String]): Unit = {
-    response.setStatus(500)
-    message.foreach { msg =>
-      response.setContentType(s"text/plain;charset=utf-8")
-      response.getWriter.write(msg)
-    }
   }
 }

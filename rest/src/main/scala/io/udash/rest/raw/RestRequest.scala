@@ -2,9 +2,9 @@ package io.udash
 package rest
 package raw
 
-import com.avsystem.commons.meta._
+import com.avsystem.commons.meta.*
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
-import com.avsystem.commons.rpc._
+import com.avsystem.commons.rpc.*
 
 import scala.util.control.NoStackTrace
 
@@ -56,6 +56,7 @@ case class HttpErrorException(code: Int, payload: HttpBody = HttpBody.Empty, cau
 object HttpErrorException {
   def plain(code: Int, message: String, cause: Throwable = null): HttpErrorException =
     HttpErrorException(code, HttpBody.plain(message), cause)
+  val Streaming: HttpErrorException = plain(400, "HTTP stream failure")
 }
 
 final case class RestRequest(method: HttpMethod, parameters: RestParameters, body: HttpBody) {

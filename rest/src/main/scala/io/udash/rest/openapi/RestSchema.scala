@@ -2,10 +2,11 @@ package io.udash
 package rest.openapi
 
 import java.util.UUID
-import com.avsystem.commons._
+import com.avsystem.commons.*
 import com.avsystem.commons.misc.{ImplicitNotFound, NamedEnum, NamedEnumCompanion, Timestamp}
-import io.udash.rest.raw._
+import io.udash.rest.raw.*
 import monix.eval.TaskLike
+import monix.reactive.Observable
 
 import scala.annotation.implicitNotFound
 
@@ -180,9 +181,19 @@ object RestMediaTypes {
       Map(HttpBody.OctetStreamType -> MediaType(schema = schema))
     }
 
+  implicit val ByteArrayStreamMediaTypes: RestMediaTypes[Observable[Array[Byte]]] =
+    (resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]) => {
+      val schema = resolver.resolve(schemaTransform(RestSchema.plain(Schema.Binary)))
+      Map(HttpBody.OctetStreamType -> MediaType(schema = schema))
+    }
+
   implicit def fromSchema[T: RestSchema]: RestMediaTypes[T] =
     (resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]) =>
       Map(HttpBody.JsonType -> MediaType(schema = resolver.resolve(schemaTransform(RestSchema[T]))))
+
+  implicit def jsonStreamMediaTypes[T: RestSchema]: RestMediaTypes[Observable[T]] =
+    (resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]) =>
+      Map(HttpBody.JsonType -> MediaType(schema = RefOr(Schema.arrayOf(resolver.resolve(schemaTransform(RestSchema[T]))))))
 
   @implicitNotFound("RestMediaTypes instance for ${T} not found, because:\n#{forSchema}")
   implicit def notFound[T](implicit forSchema: ImplicitNotFound[RestSchema[T]]): ImplicitNotFound[RestMediaTypes[T]] =
@@ -250,6 +261,9 @@ final case class RestResultType[T](responses: SchemaResolver => Responses)
 object RestResultType {
   implicit def forAsyncEffect[F[_] : TaskLike, T: RestResponses]: RestResultType[F[T]] =
     RestResultType(RestResponses[T].responses(_, identity))
+
+  implicit def forObservable[T](implicit rr: RestResponses[Observable[T]]): RestResultType[Observable[T]] =
+    RestResultType(rr.responses(_, identity))
 
   @implicitNotFound("#{forResponseType}")
   implicit def notFound[T](
