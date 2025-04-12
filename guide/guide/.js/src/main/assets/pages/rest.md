@@ -703,7 +703,7 @@ derived from `GenCodec` instance.
 
 Ultimately, if you don't want to use `Future`s, you may replace it with some other asynchronous wrapper type,
 e.g. Monix Task or some IO monad.
-See [supporting result containers other than `Future`](#supporting-result-containers-other-than-future).
+See [supporting result containers other than `Future`](#supporting-result-containers-other-than-future), [streaming serialization workflow](#streaming-serialization-workflow).
 
 ### Customizing serialization
 
@@ -1042,35 +1042,55 @@ When a client makes a request to a streaming endpoint:
 
 This approach allows processing of potentially unlimited amounts of data with minimal memory footprint on both the client and server.
 
-### Streaming Types
+#### Streaming response types
 
-Udash REST supports two main streaming content types:
+Streaming endpoints return data through a `StreamedRestResponse` instead of a regular `RestResponse`. This special
+response type contains a `StreamedBody` which delivers content incrementally, rather than all at once.
 
-1. **JSON Lists** - A stream of JSON objects sent as a JSON array `[{...}, {...}, ...]`
-2. **Raw Binary** - A stream of binary data chunks, for files or other binary content
+The framework supports two primary types of streaming responses:
 
-### Implementation Details
+1. **JSON Lists** - For streaming regular objects (any type `T` with a valid `RestSchema`), the content is delivered
+   as a stream of JSON values with `application/json` content type. Each element in the `Observable` is serialized
+   to JSON individually, allowing the client to process items as they arrive.
 
-- Under the hood, streaming is implemented using Monix `Observable`
-- Binary streams are transmitted as raw byte arrays
-- JSON streams are automatically serialized/deserialized between JSON and your data types
-- The server can control batch size to optimize network usage versus memory consumption
+2. **Binary Streams** - For streaming binary data (`Observable[Array[Byte]]`), the content is delivered as a raw binary
+   stream with `application/octet-stream` content type. This is particularly useful for large file downloads or
+   real-time binary data processing.
 
-### Handling Large Response Collections
+#### Streaming serialization workflow
 
-When dealing with large collections, streaming is preferable to loading everything in memory:
+When a method returns an `Observable[T]`, the serialization flow is:
+
+1. Each element of type `T` is serialized using the appropriate `AsRaw[JsonValue, T]` instance
+2. These elements are delivered incrementally as part of a `StreamedBody.JsonList`
+3. The client can process the items as they arrive, without waiting for the entire stream to complete
+
+For binary data (`Observable[Array[Byte]]`), each byte array chunk is directly sent through a `StreamedBody.RawBinary`
+without additional transformation.
+
+#### Customizing streaming serialization
+
+Just as with regular responses, you can customize how streaming responses are serialized. For instance, you might want
+to provide a custom instance of `AsRaw[StreamedBody, Observable[T]]` for a specific type:
 
 ```scala
-// Without streaming - entire list is loaded in memory
-def getAllItems(): Future[List[Item]]
-
-// With streaming - items are processed incrementally
-def streamAllItems(): Observable[Item]
+// Custom serialization for streaming a specialized data type
+implicit def customStreamingFormat[T: CustomFormat]: AsRaw[StreamedBody, Observable[T]] =
+  obs => StreamedBody.JsonList(obs.map(customToJsonValue))
 ```
 
-The streaming version allows processing data incrementally, which is crucial for very large datasets that might exceed available memory.
+#### Compatibility with non-streaming clients
 
-## Error Handling with Streaming
+For backward compatibility with clients that don't support streaming, the framework provides automatic conversion from
+streaming responses to standard responses using `StreamedRestResponse.fallbackToRestResponse`. This materialization
+process collects all elements from the stream and combines them into a single response:
+
+- For JSON streams, elements are collected into a JSON array
+- For binary streams, byte arrays are concatenated
+
+However, this conversion loses the streaming benefits, so it's best used only when necessary.
+
+### Error Handling
 
 Streaming endpoints handle errors similarly to regular endpoints. When an error occurs during streaming:
 
@@ -1092,6 +1112,76 @@ client.streamItems("")
 ```
 
 This allows graceful handling of errors that might occur during streaming operations.
+
+### Advanced Streaming Patterns
+
+You can also use more advanced patterns for streaming responses:
+
+#### Task of Observable
+
+You can return a `Task` that resolves to an `Observable` when you need to perform some asynchronous work before starting the stream:
+
+```scala
+import monix.eval.Task
+import monix.reactive.Observable
+
+trait AdvancedStreamingApi {
+  /** Returns a Task that resolves to an Observable stream */
+  def streamWithInitialProcessing(id: String): Task[Observable[DataPoint]]
+}
+object AdvancedStreamingApi extends DefaultRestApiCompanion[AdvancedStreamingApi]
+```
+
+Implementation example:
+
+```scala
+class AdvancedStreamingApiImpl extends AdvancedStreamingApi {
+  def streamWithInitialProcessing(id: String): Task[Observable[DataPoint]] =
+    // First perform some async initialization work
+    Task.delay {
+      println(s"Starting stream for $id")
+      // Then return the actual stream
+      Observable.interval(1.second)
+        .map(i => DataPoint(id, i, System.currentTimeMillis()))
+    }
+}
+```
+
+#### Custom Streaming Types
+
+You can create custom types with streaming capabilities by defining appropriate serialization in their companion objects:
+
+```scala
+import monix.reactive.Observable
+
+// Custom wrapper around a stream of values
+case class DataStream[T](source: Observable[T], metadata: Map[String, String])
+
+object DataStream {
+  // Define how to serialize DataStream to StreamedBody
+  implicit def dataStreamAsRawReal[T](implicit jsonAsRaw: AsRaw[JsonValue, T]): AsRawReal[StreamedBody, DataStream[T]] =
+    AsRawReal.create(
+      // Serialization: DataStream -> StreamedBody
+      stream => StreamedBody.JsonList(stream.source.map(jsonAsRaw.asRaw)),
+      // Deserialization: StreamedBody -> DataStream
+      body => {
+        val elements = StreamedBody.castOrFail[StreamedBody.JsonList](body).elements
+        DataStream(elements.map(jsonAsReal.asReal), Map.empty)
+      }
+    )
+}
+
+trait CustomStreamingApi {
+  /** Returns a custom streaming type */
+  def getDataStream(query: String): DataStream[SearchResult]
+
+  /** Returns a Task that produces a custom streaming type */
+  def prepareAndStreamData(id: String): Task[DataStream[DataPoint]]
+}
+object CustomStreamingApi extends DefaultRestApiCompanion[CustomStreamingApi]
+```
+
+This approach allows you to include additional metadata or context with your streams while maintaining the streaming behavior.
 
 ## Generating OpenAPI 3.0 specifications
 
@@ -1388,7 +1478,88 @@ Because multiple REST HTTP methods may have the same path, adjusters are collect
 are applied on the associated Path Item Object. When path item adjuster is applied on a [prefix method](#prefix-methods),
 it will apply to all Path Item Objects associated with result of this prefix method.
 
+### OpenAPI for Streaming Endpoints
+
+When using Udash REST's streaming capabilities, OpenAPI specifications are automatically generated to reflect the streaming nature of the endpoints. This section describes how streaming responses are represented in OpenAPI documents.
+
+#### Streaming Response Schema
+
+Methods that return `Observable[T]` are automatically recognized as streaming endpoints. In the generated OpenAPI document, these endpoints are represented as arrays of the type `T`:
+
+```scala
+trait StreamingApi {
+  // This will be documented as an array of Item in OpenAPI
+  def streamItems(filter: String): Observable[Item]
+}
+```
+
+For a streaming endpoint returning `Observable[Item]`, the generated schema will represent this as an array of `Item` objects. The framework automatically wraps the element type in an array schema to indicate that multiple items may be delivered over time.
+
+#### Supported Streaming Formats
+
+The OpenAPI document correctly describes the available media types for streaming responses:
+
+1. **JSON Lists** - When streaming regular objects, they're represented as a JSON array in the schema.
+   This is reflected in the OpenAPI document with content type `application/json`.
+
+2. **Binary Streams** - When streaming `Array[Byte]` (binary data), the content type in the OpenAPI document
+   will be `application/octet-stream`.
+
+Example schema representation for a streaming endpoint:
+
+```json
+{
+  "paths": {
+    "/streamItems": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Item"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+#### Customizing OpenAPI for Streaming Endpoints
+
+You can use the same annotation-based customization mechanisms discussed earlier to modify the OpenAPI documentation for streaming endpoints:
+
+```scala
+trait StreamingApi {
+  @description("Streams items matching the filter criteria")
+  @adjustOperation(op => op.copy(
+    responses = op.responses.copy(
+      byStatusCode = op.responses.byStatusCode + (
+        200 -> RefOr(Response(
+          description = "A stream of matching items that may be processed incrementally",
+          content = op.responses.byStatusCode(200).value.content
+        ))
+      )
+    )
+  ))
+  def streamItems(filter: String): Observable[Item]
+
+  @description("Streams binary file data")
+  def downloadFile(id: String): Observable[Array[Byte]]
+}
+```
+
 ### Limitations
 
 - Current representation of OpenAPI document does not support
   [specification extensions](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#specificationExtensions).
+
+- While the OpenAPI specification doesn't have native support for true streaming semantics, Udash REST represents streaming endpoints as array responses. This is the most accurate representation within the constraints of the OpenAPI specification format. Consumers of your API should understand that these array responses may be delivered incrementally rather than all at once, especially for potentially large datasets.

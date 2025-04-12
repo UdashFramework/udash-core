@@ -19,7 +19,7 @@ sealed trait AbstractRestResponse {
   final def isSuccess: Boolean = code >= 200 && code < 300
 }
 
-/** Standard REST response containing a status code, headers, and a body. The body is loaded fully in memory as an HttpBody. */
+/** Standard REST response containing a status code, headers, and a body. The body is loaded fully in memory as an [[HttpBody]]. */
 final case class RestResponse(
   code: Int,
   headers: IMapping[PlainValue],
