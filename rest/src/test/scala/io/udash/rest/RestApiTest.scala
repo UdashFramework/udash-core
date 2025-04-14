@@ -4,7 +4,7 @@ package rest
 import cats.implicits.catsSyntaxTuple2Semigroupal
 import com.avsystem.commons.*
 import com.avsystem.commons.misc.ScalaDurationExtensions.durationIntOps
-import io.udash.rest.raw.{HttpErrorException, RawRest}
+import io.udash.rest.raw.RawRest
 import io.udash.testing.AsyncUdashSharedTest
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -194,4 +194,40 @@ trait StreamingRestApiTestScenarios extends RestApiTest {
       }
     }
   }
+
+  "streaming with non-streaming client" in {
+    val standardProxy = RawRest.fromHandleRequest[StreamingRestTestApi](clientHandle)
+    standardProxy.simpleStream(3).toListL.materialize.runToFuture.map {
+      case Failure(exception: UnsupportedOperationException) =>
+        assert(exception.getMessage == "Streaming unsupported by the client")
+      case Failure(otherException) =>
+        fail(s"Expected UnsupportedOperationException but got ${otherException.getClass.getName}: ${otherException.getMessage}")
+      case Success(_) =>
+        fail("Expected UnsupportedOperationException but operation succeeded")
+    }
+  }
+
+  "task of observable stream" in {
+    val testTask = for {
+      proxyResults <- streamingProxy.delayedStreamTask(3, 50).flatMap(_.toListL)
+      implResults <- streamingImpl.delayedStreamTask(3, 50).flatMap(_.toListL)
+    } yield {
+      assert(proxyResults.map(mkDeep) == implResults.map(mkDeep))
+    }
+    testTask.runToFuture
+  }
+
+  "custom stream task" in {
+    val testTask = for {
+      proxyResults <- streamingProxy.customStreamTask(3)
+      implResults <- streamingImpl.customStreamTask(3)
+      proxyObs <- proxyResults.source.toListL
+      implObs <- implResults.source.toListL
+    } yield {
+      assert(proxyResults.metadata == implResults.metadata)
+      assert(proxyObs == implObs)
+    }
+    testTask.runToFuture
+  }
+
 }

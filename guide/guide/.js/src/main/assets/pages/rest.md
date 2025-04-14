@@ -1172,9 +1172,6 @@ object DataStream {
 }
 
 trait CustomStreamingApi {
-  /** Returns a custom streaming type */
-  def getDataStream(query: String): DataStream[SearchResult]
-
   /** Returns a Task that produces a custom streaming type */
   def prepareAndStreamData(id: String): Task[DataStream[DataPoint]]
 }
