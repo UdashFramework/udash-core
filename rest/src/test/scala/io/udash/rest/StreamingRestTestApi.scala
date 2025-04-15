@@ -1,8 +1,7 @@
 package io.udash
 package rest
 
-import com.avsystem.commons.rpc.AsRawReal
-import com.avsystem.commons.serialization.json.JsonStringOutput
+import com.avsystem.commons.rpc.{AsRaw, AsRawReal, AsReal}
 import io.udash.rest.openapi.RestSchema
 import io.udash.rest.raw.{HttpErrorException, JsonValue, StreamedBody}
 import monix.eval.Task
@@ -10,17 +9,19 @@ import monix.reactive.Observable
 
 import scala.concurrent.duration.*
 
-case class DataStream(source: Observable[Int], metadata: Map[String, String])
+final case class DataStream(source: Observable[Int], metadata: Map[String, String])
 
-object DataStream {
-  implicit def schema: RestSchema[DataStream] = ???
+object DataStream extends GenCodecRestImplicits {
+  implicit def schema: RestSchema[DataStream] =
+    RestSchema.create(res => RestSchema.seqSchema[Seq, Int].createSchema(res), "DataStream")
+
   implicit def dataStreamAsRawReal: AsRawReal[StreamedBody, DataStream] =
     AsRawReal.create(
-      stream => StreamedBody.JsonList(stream.source.map(i => JsonValue(JsonStringOutput.write(i)))),
-      {
-        case StreamedBody.JsonList(e, c) => DataStream(e.map(_.value.toInt), Map.empty)
-        case _ => ???
-      }
+      stream => StreamedBody.JsonList(stream.source.map(AsRaw[JsonValue, Int].asRaw)),
+      rawBody => {
+        val list = StreamedBody.castOrFail[StreamedBody.JsonList](rawBody)
+        DataStream(list.elements.map(AsReal[JsonValue, Int].asReal), Map.empty)
+      },
     )
 }
 
@@ -36,8 +37,8 @@ trait StreamingRestTestApi {
   @GET def delayedStream(@Query size: Int, @Query delayMillis: Long): Observable[Int]
 
   @GET def delayedStreamTask(@Query size: Int, @Query delayMillis: Long): Task[Observable[Int]]
-  @GET def customStreamTask(@Query size: Int): Task[DataStream]
 
+  @GET def customStreamTask(@Query size: Int): Task[DataStream]
 }
 object StreamingRestTestApi extends DefaultRestApiCompanion[StreamingRestTestApi] {
 
@@ -64,11 +65,10 @@ object StreamingRestTestApi extends DefaultRestApiCompanion[StreamingRestTestApi
           else throw HttpErrorException.Streaming
         }
 
-    override def delayedStream(size: Int, delayMillis: Long): Observable[Int] = {
+    override def delayedStream(size: Int, delayMillis: Long): Observable[Int] =
       Observable.fromIterable(Range(0, size))
         .zip(Observable.intervalAtFixedRate(delayMillis.millis, delayMillis.millis))
         .map(_._1)
-    }
 
     override def delayedStreamTask(size: Int, delayMillis: Long): Task[Observable[Int]] =
       Task.delay(delayedStream(size, delayMillis))

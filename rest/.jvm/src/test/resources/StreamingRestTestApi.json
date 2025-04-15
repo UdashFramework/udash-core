@@ -24,9 +24,81 @@
         }
       }
     },
+    "/customStreamTask": {
+      "get": {
+        "operationId": "customStreamTask",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataStream"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/delayedStream": {
       "get": {
         "operationId": "delayedStream",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "delayMillis",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/delayedStreamTask": {
+      "get": {
+        "operationId": "delayedStreamTask",
         "parameters": [
           {
             "name": "size",
@@ -159,6 +231,13 @@
   ],
   "components": {
     "schemas": {
+      "DataStream": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
       "RestEntity": {
         "type": "object",
         "description": "REST entity",
