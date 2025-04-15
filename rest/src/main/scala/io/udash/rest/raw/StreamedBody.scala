@@ -98,12 +98,12 @@ trait StreamedBodyLowPrio { this: StreamedBody.type =>
   implicit def bodyJsonListAsReal[T](implicit jsonAsReal: AsReal[JsonValue, T]): AsReal[StreamedBody, Observable[T]] =
     v => StreamedBody.castOrFail[StreamedBody.JsonList](v).elements.map(jsonAsReal.asReal)
 
-  @implicitNotFound("Cannot deserialize ${T} from StreamedBody, because:\n#{forJson}")
+  @implicitNotFound("Cannot deserialize Observable[${T}] from StreamedBody, because:\n#{forJson}")
   implicit def asRealNotFound[T](
     implicit forJson: ImplicitNotFound[AsReal[JsonValue, T]]
   ): ImplicitNotFound[AsReal[StreamedBody, Observable[T]]] = ImplicitNotFound()
 
-  @implicitNotFound("Cannot serialize ${T} into StreamedBody, because:\n#{forJson}")
+  @implicitNotFound("Cannot serialize Observable[${T}] into StreamedBody, because:\n#{forJson}")
   implicit def asRawNotFound[T](
     implicit forJson: ImplicitNotFound[AsRaw[JsonValue, T]]
   ): ImplicitNotFound[AsRaw[StreamedBody, Observable[T]]] = ImplicitNotFound()

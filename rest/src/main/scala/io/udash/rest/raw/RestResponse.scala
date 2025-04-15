@@ -55,12 +55,14 @@ object RestResponse extends RestResponseLowPrio {
   }
 
   implicit def taskLikeFromResponseTask[F[_], T](
-    implicit fromTask: FromTask[F], fromResponse: AsReal[RestResponse, T]
+    implicit fromTask: FromTask[F],
+    fromResponse: AsReal[RestResponse, T],
   ): AsReal[Task[RestResponse], Try[F[T]]] =
     rawTask => Success(fromTask.fromTask(rawTask.map(fromResponse.asReal)))
 
   implicit def taskLikeToResponseTask[F[_], T](
-    implicit taskLike: TaskLike[F], asResponse: AsRaw[RestResponse, T]
+    implicit taskLike: TaskLike[F],
+    asResponse: AsRaw[RestResponse, T],
   ): AsRaw[Task[RestResponse], Try[F[T]]] =
     _.fold(Task.raiseError, ft => Task.from(ft).map(asResponse.asRaw)).recoverHttpError
 
@@ -70,13 +72,13 @@ object RestResponse extends RestResponseLowPrio {
   @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
   implicit def effAsyncAsRealNotFound[F[_], T](implicit
     fromAsync: TaskLike[F],
-    forResponseType: ImplicitNotFound[AsReal[RestResponse, T]]
+    forResponseType: ImplicitNotFound[AsReal[RestResponse, T]],
   ): ImplicitNotFound[AsReal[Task[RestResponse], Try[F[T]]]] = ImplicitNotFound()
 
   @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
   implicit def effAsyncAsRawNotFound[F[_], T](implicit
     toAsync: TaskLike[F],
-    forResponseType: ImplicitNotFound[AsRaw[RestResponse, T]]
+    forResponseType: ImplicitNotFound[AsRaw[RestResponse, T]],
   ): ImplicitNotFound[AsRaw[Task[RestResponse], Try[F[T]]]] = ImplicitNotFound()
 
   // following two implicits provide nice error messages when result type of HTTP method is totally wrong
@@ -185,12 +187,14 @@ object StreamedRestResponse extends StreamedRestResponseLowPrio {
   }
 
   implicit def taskLikeFromResponseTask[F[_], T](
-    implicit fromTask: FromTask[F], fromResponse: AsReal[StreamedRestResponse, T]
+    implicit fromTask: FromTask[F],
+    fromResponse: AsReal[StreamedRestResponse, T],
   ): AsReal[Task[StreamedRestResponse], Try[F[T]]] =
     rawTask => Success(fromTask.fromTask(rawTask.map(fromResponse.asReal)))
 
   implicit def taskLikeToResponseTask[F[_], T](
-    implicit taskLike: TaskLike[F], asResponse: AsRaw[StreamedRestResponse, T]
+    implicit taskLike: TaskLike[F],
+    asResponse: AsRaw[StreamedRestResponse, T],
   ): AsRaw[Task[StreamedRestResponse], Try[F[T]]] =
     _.fold(Task.raiseError, ft => Task.from(ft).map(asResponse.asRaw)).recoverHttpError
 
@@ -204,8 +208,8 @@ object StreamedRestResponse extends StreamedRestResponseLowPrio {
   ): AsRaw[Task[StreamedRestResponse], Try[Observable[T]]] =
     _.fold(Task.raiseError, ft => Task.eval(ft).map(asResponse.asRaw)).recoverHttpError
 
-  // following two implicits provide nice error messages when serialization is lacking for HTTP method result
-  // while the async wrapper is fine (e.g. Future)
+  // following implicits provide nice error messages when serialization is lacking for HTTP method result
+  // while the async wrapper is fine
 
   @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
   implicit def effAsyncAsRealNotFound[F[_], T](implicit
@@ -218,6 +222,16 @@ object StreamedRestResponse extends StreamedRestResponseLowPrio {
     toAsync: TaskLike[F],
     forResponseType: ImplicitNotFound[AsRaw[StreamedRestResponse, T]]
   ): ImplicitNotFound[AsRaw[Task[StreamedRestResponse], Try[F[T]]]] = ImplicitNotFound()
+
+  @implicitNotFound("Observable[${T}] is not a valid result type because:\n#{forResponseType}")
+  implicit def observableAsRealNotFound[T](implicit
+    forResponseType: ImplicitNotFound[AsReal[StreamedBody, Observable[T]]]
+  ): ImplicitNotFound[AsReal[Task[StreamedRestResponse], Try[Observable[T]]]] = ImplicitNotFound()
+
+  @implicitNotFound("Observable[${T}] is not a valid result type because:\n#{forResponseType}")
+  implicit def observableAsRawNotFound[T](implicit
+    forResponseType: ImplicitNotFound[AsRaw[StreamedBody, Observable[T]]]
+  ): ImplicitNotFound[AsRaw[Task[StreamedRestResponse], Try[Observable[T]]]] = ImplicitNotFound()
 
   // following two implicits provide nice error messages when result type of HTTP method is totally wrong
 

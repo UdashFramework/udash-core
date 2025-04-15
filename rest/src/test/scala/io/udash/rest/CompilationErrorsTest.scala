@@ -146,15 +146,10 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
       """cannot translate between trait MissingObservableSerializerForResult and trait RawRest:
         |problem with method streamMeth:
         | * it cannot be translated into an HTTP GET method:
-        |   monix.reactive.Observable[Any] is not a valid result type because:
-        |   Cannot serialize monix.reactive.Observable[Any] into RestResponse, because:
-        |   Cannot serialize monix.reactive.Observable[Any] into HttpBody, because:
-        |   Cannot serialize monix.reactive.Observable[Any] into JsonValue, because:
-        |   No GenCodec found for monix.reactive.Observable[Any]
+        |   monix.reactive.Observable[Any] is not a valid result type of HTTP REST method - it must be a Future
         | * it cannot be translated into an HTTP GET stream method:
-        |   monix.reactive.Observable[Any] is not a valid result type because:
-        |   Cannot serialize monix.reactive.Observable[Any] into StreamedRestResponse, because:
-        |   Cannot serialize Any into StreamedBody, because:
+        |   Observable[Any] is not a valid result type because:
+        |   Cannot serialize Observable[Any] into StreamedBody, because:
         |   Cannot serialize Any into JsonValue, because:
         |   No GenCodec found for Any""".stripMargin)
   }
@@ -177,7 +172,7 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
         | * it cannot be translated into an HTTP GET stream method:
         |   monix.eval.Task[monix.reactive.Observable[Any]] is not a valid result type because:
         |   Cannot serialize monix.reactive.Observable[Any] into StreamedRestResponse, because:
-        |   Cannot serialize Any into StreamedBody, because:
+        |   Cannot serialize Observable[Any] into StreamedBody, because:
         |   Cannot serialize Any into JsonValue, because:
         |   No GenCodec found for Any""".stripMargin)
   }
