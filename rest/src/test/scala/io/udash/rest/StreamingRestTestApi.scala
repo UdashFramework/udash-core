@@ -3,7 +3,7 @@ package rest
 
 import com.avsystem.commons.rpc.{AsRaw, AsRawReal, AsReal}
 import io.udash.rest.openapi.RestSchema
-import io.udash.rest.raw.{HttpErrorException, JsonValue, StreamedBody}
+import io.udash.rest.raw.*
 import monix.eval.Task
 import monix.reactive.Observable
 
@@ -15,12 +15,31 @@ object DataStream extends GenCodecRestImplicits {
   implicit def schema: RestSchema[DataStream] =
     RestSchema.create(res => RestSchema.seqSchema[Seq, Int].createSchema(res), "DataStream")
 
-  implicit def dataStreamAsRawReal: AsRawReal[StreamedBody, DataStream] =
+  implicit val dataStreamAsRawReal: AsRawReal[StreamedBody, DataStream] =
     AsRawReal.create(
       stream => StreamedBody.JsonList(stream.source.map(AsRaw[JsonValue, Int].asRaw)),
       rawBody => {
         val list = StreamedBody.castOrFail[StreamedBody.JsonList](rawBody)
         DataStream(list.elements.map(AsReal[JsonValue, Int].asReal), Map.empty)
+      },
+    )
+}
+
+final case class CustomStream(source: Observable[Int], code: Int)
+object CustomStream extends GenCodecRestImplicits {
+  implicit def schema: RestSchema[CustomStream] =
+    RestSchema.create(res => RestSchema.seqSchema[Seq, Int].createSchema(res), "CustomStream")
+
+  implicit val customStreamAsRawReal: AsRawReal[StreamedRestResponse, CustomStream] =
+    AsRawReal.create(
+      stream => StreamedRestResponse(
+        code = stream.code,
+        headers = IMapping.empty,
+        body = StreamedBody.JsonList(stream.source.map(AsRaw[JsonValue, Int].asRaw)),
+      ),
+      rawResponse => {
+        val list = StreamedBody.castOrFail[StreamedBody.JsonList](rawResponse.body)
+        CustomStream(list.elements.map(AsReal[JsonValue, Int].asReal), rawResponse.code)
       },
     )
 }
@@ -32,13 +51,16 @@ trait StreamingRestTestApi {
 
   @POST def binaryStream(): Observable[Array[Byte]]
 
+  @streamingResponseBatchSize(3)
   @POST def errorStream(@Query immediate: Boolean): Observable[RestEntity]
 
   @GET def delayedStream(@Query size: Int, @Query delayMillis: Long): Observable[Int]
 
-  @GET def delayedStreamTask(@Query size: Int, @Query delayMillis: Long): Task[Observable[Int]]
+  @GET def streamTask(@Query size: Int): Task[Observable[Int]]
 
   @GET def customStreamTask(@Query size: Int): Task[DataStream]
+
+  @GET def customStream(@Query size: Int): Task[CustomStream]
 }
 object StreamingRestTestApi extends DefaultRestApiCompanion[StreamingRestTestApi] {
 
@@ -62,7 +84,7 @@ object StreamingRestTestApi extends DefaultRestApiCompanion[StreamingRestTestApi
       else
         Observable.fromIterable(Range(0, 3)).map { i =>
           if (i < 2) RestEntity(RestEntityId(i.toString), "first")
-          else throw HttpErrorException.Streaming
+          else throw HttpErrorException.plain(400, "bad stream")
         }
 
     override def delayedStream(size: Int, delayMillis: Long): Observable[Int] =
@@ -70,13 +92,20 @@ object StreamingRestTestApi extends DefaultRestApiCompanion[StreamingRestTestApi
         .zip(Observable.intervalAtFixedRate(delayMillis.millis, delayMillis.millis))
         .map(_._1)
 
-    override def delayedStreamTask(size: Int, delayMillis: Long): Task[Observable[Int]] =
-      Task.delay(delayedStream(size, delayMillis))
+    override def streamTask(size: Int): Task[Observable[Int]] =
+      Task.eval(Observable.fromIterable(Range(0, size)))
 
     override def customStreamTask(size: Int): Task[DataStream] = Task {
       DataStream(
-        Observable.fromIterable(Range(0, size)),
-        Map.empty
+        source = Observable.fromIterable(Range(0, size)),
+        metadata = Map.empty
+      )
+    }
+
+    override def customStream(size: Int): Task[CustomStream] = Task {
+      CustomStream(
+        source = Observable.fromIterable(Range(0, size)),
+        code = 200,
       )
     }
   }

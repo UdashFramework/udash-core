@@ -56,7 +56,6 @@ case class HttpErrorException(code: Int, payload: HttpBody = HttpBody.Empty, cau
 object HttpErrorException {
   def plain(code: Int, message: String, cause: Throwable = null): HttpErrorException =
     HttpErrorException(code, HttpBody.plain(message), cause)
-  val Streaming: HttpErrorException = plain(400, "HTTP stream failure")
 }
 
 final case class RestRequest(method: HttpMethod, parameters: RestParameters, body: HttpBody) {

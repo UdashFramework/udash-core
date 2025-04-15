@@ -4,9 +4,7 @@ package rest.jetty
 import com.avsystem.commons.*
 import com.avsystem.commons.annotation.explicitGenerics
 import com.avsystem.commons.serialization.json.{JsonReader, JsonStringInput}
-import io.udash.rest.jetty.JettyRestClient.unsupportedContentTypeError
 import io.udash.rest.raw.*
-import io.udash.rest.raw.HttpErrorException.plain
 import io.udash.rest.util.Utils
 import io.udash.utils.URLEncoder
 import monix.eval.Task
@@ -103,13 +101,13 @@ final class JettyRestClient(
                           Observable
                             .fromIterator(Task.eval(input.readList().iterator(_.asInstanceOf[JsonStringInput].readRawJson())))
                             .map(JsonValue(_))
-                        }.onErrorFallbackTo(Observable.raiseError(HttpErrorException.Streaming)),
+                        }.onErrorFallbackTo(Observable.raiseError(JettyRestClient.Streaming)),
                       charset = charset,
                     )
                 }
                 bodyOpt.mapOr(
                   {
-                    callback(Failure(unsupportedContentTypeError(contentTypeOpt)))
+                    callback(Failure(JettyRestClient.unsupportedContentTypeError(contentTypeOpt)))
                   },
                   body => {
                     this.collectToBuffer = false
@@ -265,10 +263,14 @@ final class JettyRestClient(
 object JettyRestClient {
   final val DefaultMaxResponseLength = 2 * 1024 * 1024
   final val DefaultTimeout = 10.seconds
-  final val Streaming: HttpErrorException = plain(400, "HTTP stream failure")
+  final val Streaming = HttpErrorException.plain(400, "HTTP stream failure")
 
-  def unsupportedContentTypeError(contentType: Opt[String]): HttpErrorException =
-    plain(400, s"Unsupported streaming Content-Type = ${contentType.getOrElse("null")}", new UnsupportedOperationException())
+  private def unsupportedContentTypeError(contentType: Opt[String]): HttpErrorException =
+    HttpErrorException.plain(
+      code = 400,
+      message = s"Unsupported streaming Content-Type${contentType.mapOr("", c => s" = $c")}",
+      cause = new UnsupportedOperationException,
+    )
 
   @explicitGenerics
   def apply[RestApi: RawRest.AsRealRpc : RestMetadata](

@@ -368,4 +368,3 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
     assertRawExchange(request, response)
   }
 }
-

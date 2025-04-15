@@ -165,52 +165,10 @@ trait StreamingRestApiTestScenarios extends RestApiTest {
     testStream(_.binaryStream())
   }
 
-  "immediate stream error" in {
-    testStream(_.errorStream(immediate = true))
-  }
-
-  "mid-stream error" in {
-    testStream(_.errorStream(immediate = false))
-  }
-
-  "slow source stream" in {
-    testStream(_.delayedStream(size = 3, delayMillis = 100))
-  }
-
-  "client-side timeout on slow stream" in {
-    val streamTask = streamingProxy
-      .delayedStream(size = 10, delayMillis = 200)
-      .toListL
-
-    val timeoutTask = streamTask.timeout(500.millis).materialize
-
-    timeoutTask.runToFuture.map { result =>
-      assert(result.isFailure, "Stream should have failed due to timeout")
-      result match {
-        case Failure(ex) =>
-          assert(ex.isInstanceOf[TimeoutException], s"Expected TimeoutException, but got $ex")
-          succeed
-        case Success(_) => fail("Stream succeeded unexpectedly despite timeout")
-      }
-    }
-  }
-
-  "streaming with non-streaming client" in {
-    val standardProxy = RawRest.fromHandleRequest[StreamingRestTestApi](clientHandle)
-    standardProxy.simpleStream(3).toListL.materialize.runToFuture.map {
-      case Failure(exception: UnsupportedOperationException) =>
-        assert(exception.getMessage == "Streaming unsupported by the client")
-      case Failure(otherException) =>
-        fail(s"Expected UnsupportedOperationException but got ${otherException.getClass.getName}: ${otherException.getMessage}")
-      case Success(_) =>
-        fail("Expected UnsupportedOperationException but operation succeeded")
-    }
-  }
-
   "task of observable stream" in {
     val testTask = for {
-      proxyResults <- streamingProxy.delayedStreamTask(3, 50).flatMap(_.toListL)
-      implResults <- streamingImpl.delayedStreamTask(3, 50).flatMap(_.toListL)
+      proxyResults <- streamingProxy.streamTask(size = 3).flatMap(_.toListL)
+      implResults <- streamingImpl.streamTask(size = 3).flatMap(_.toListL)
     } yield {
       assert(proxyResults.map(mkDeep) == implResults.map(mkDeep))
     }
@@ -230,4 +188,59 @@ trait StreamingRestApiTestScenarios extends RestApiTest {
     testTask.runToFuture
   }
 
+  "custom stream" in {
+    val testTask = for {
+      proxyResults <- streamingProxy.customStream(3)
+      implResults <- streamingImpl.customStream(3)
+      proxyObs <- proxyResults.source.toListL
+      implObs <- implResults.source.toListL
+    } yield {
+      assert(proxyResults.code == implResults.code)
+      assert(proxyObs == implObs)
+    }
+    testTask.runToFuture
+  }
+
+  "immediate stream error" in {
+    testStream(_.errorStream(immediate = true))
+  }
+
+  "mid-stream error" in {
+    testStream(_.errorStream(immediate = false))
+  }
+
+  "slow source stream" in {
+    testStream(_.delayedStream(size = 3, delayMillis = 100))
+  }
+
+  "client-side timeout on slow stream" in {
+    val streamTask = streamingProxy
+      .delayedStream(size = 10, delayMillis = 200)
+      .toListL
+
+    val timeoutTask = streamTask.timeout(500.millis).materialize
+
+    timeoutTask.map { result =>
+      assert(result.isFailure, "Stream should have failed due to timeout")
+      result match {
+        case Failure(ex) =>
+          assert(ex.isInstanceOf[TimeoutException], s"Expected TimeoutException, but got $ex")
+          succeed
+        case Success(_) =>
+          fail("Stream succeeded unexpectedly despite timeout")
+      }
+    }.runToFuture
+  }
+
+  "streaming with non-streaming client" in {
+    val standardProxy = RawRest.fromHandleRequest[StreamingRestTestApi](clientHandle)
+    standardProxy.simpleStream(3).toListL.materialize.runToFuture.map {
+      case Failure(exception: UnsupportedOperationException) =>
+        assert(exception.getMessage == "Streaming unsupported by the client")
+      case Failure(otherException) =>
+        fail(s"Expected UnsupportedOperationException but got ${otherException.getClass.getName}: ${otherException.getMessage}")
+      case Success(_) =>
+        fail("Expected UnsupportedOperationException but operation succeeded")
+    }
+  }
 }

@@ -24,6 +24,35 @@
         }
       }
     },
+    "/customStream": {
+      "get": {
+        "operationId": "customStream",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomStream"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/customStreamTask": {
       "get": {
         "operationId": "customStreamTask",
@@ -56,49 +85,6 @@
     "/delayedStream": {
       "get": {
         "operationId": "delayedStream",
-        "parameters": [
-          {
-            "name": "size",
-            "in": "query",
-            "required": true,
-            "explode": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "delayMillis",
-            "in": "query",
-            "required": true,
-            "explode": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "integer",
-                    "format": "int32"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/delayedStreamTask": {
-      "get": {
-        "operationId": "delayedStreamTask",
         "parameters": [
           {
             "name": "size",
@@ -222,6 +208,39 @@
           }
         }
       }
+    },
+    "/streamTask": {
+      "get": {
+        "operationId": "streamTask",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "servers": [
@@ -231,6 +250,13 @@
   ],
   "components": {
     "schemas": {
+      "CustomStream": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
       "DataStream": {
         "type": "array",
         "items": {
