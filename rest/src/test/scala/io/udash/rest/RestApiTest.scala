@@ -146,14 +146,18 @@ trait RestApiTestScenarios extends RestApiTest {
   }
 }
 
-// TODO streaming MORE tests: cancellation, timeouts, errors, errors after sending a few elements, custom format, slow source observable
+// TODO streaming MORE tests: cancellation
 trait StreamingRestApiTestScenarios extends RestApiTest {
 
   "empty GET stream" in {
     testStream(_.simpleStream(0))
   }
 
-  "trivial GET stream" in {
+  "trivial GET stream - single batch" in {
+    testStream(_.simpleStream(1))
+  }
+
+  "trivial GET stream - multi batch" in {
     testStream(_.simpleStream(5))
   }
 

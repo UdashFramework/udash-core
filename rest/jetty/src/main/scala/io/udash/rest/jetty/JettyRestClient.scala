@@ -115,7 +115,6 @@ final class JettyRestClient(
                       code = response.getStatus,
                       headers = parseHeaders(response),
                       body = body,
-                      customBatchSize = Opt.Empty,
                     )
                     callback(Success(restResponse))
                   }
@@ -151,7 +150,6 @@ final class JettyRestClient(
                     code = httpResp.getStatus,
                     headers = parseHeaders(httpResp),
                     body = StreamedBody.fromHttpBody(parseHttpBody(httpResp, this)),
-                    customBatchSize = Opt.Empty,
                   )
                   callback(Success(restResponse))
                 } else {

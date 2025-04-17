@@ -367,7 +367,15 @@ class addResponseHeader(name: String, value: String) extends ResponseAdjuster wi
   override def adjustResponse(response: StreamedRestResponse): StreamedRestResponse = response.header(name, value)
 }
 
+/**
+ * Annotation which may be applied on REST API methods to change streaming batch size when [[StreamedBody.JsonList]]
+ * bodies are used. It has no effect when applied to other body types or non-streaming methods.
+ */
 class streamingResponseBatchSize(size: Int) extends StreamedResponseAdjuster {
   override def adjustResponse(response: StreamedRestResponse): StreamedRestResponse =
-    response.copy(customBatchSize = Opt.some(size))
+    response.body match {
+      case jsonList: StreamedBody.JsonList =>
+        response.copy(body = jsonList.copy(customBatchSize = Opt.some(size)))
+      case _ => response
+    }
 }

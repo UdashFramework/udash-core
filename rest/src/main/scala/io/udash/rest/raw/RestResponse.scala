@@ -121,7 +121,6 @@ final case class StreamedRestResponse(
   code: Int,
   headers: IMapping[PlainValue],
   body: StreamedBody,
-  customBatchSize: Opt[Int] = Opt.Empty,
 ) extends AbstractRestResponse {
 
   def header(name: String, value: String): StreamedRestResponse =

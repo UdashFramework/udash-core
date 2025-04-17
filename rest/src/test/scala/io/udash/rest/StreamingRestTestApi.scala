@@ -45,6 +45,7 @@ object CustomStream extends GenCodecRestImplicits {
 }
 
 trait StreamingRestTestApi {
+  @streamingResponseBatchSize(3)
   @GET def simpleStream(size: Int): Observable[Int]
 
   @GET def jsonStream: Observable[RestEntity]

@@ -122,7 +122,7 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
 
     val bodyReprTask: Task[String] = resp.body match {
       case StreamedBody.Empty => Task.now("")
-      case StreamedBody.JsonList(elements, charset) =>
+      case StreamedBody.JsonList(elements, charset, _) =>
         elements.toListL.map { list =>
           s" application/json;charset=$charset\n[${list.map(_.value).mkString(",")}]"
         }
@@ -506,7 +506,7 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
       HttpBody.Empty
     )
     whenReady(serverHandleWithStreaming(request).runToFuture) {
-      case StreamedRestResponse(code, headers, body, batchSize) =>
+      case StreamedRestResponse(code, headers, body) =>
         code shouldBe 200
         val elements = castOrFail[StreamedBody.JsonList](body).elements
         whenReady(elements.toListL.runToFuture) { e =>

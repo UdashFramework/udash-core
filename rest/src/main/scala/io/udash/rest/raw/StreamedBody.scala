@@ -2,7 +2,7 @@ package io.udash
 package rest.raw
 
 import com.avsystem.commons.annotation.explicitGenerics
-import com.avsystem.commons.misc.ImplicitNotFound
+import com.avsystem.commons.misc.{ImplicitNotFound, Opt}
 import com.avsystem.commons.rpc.{AsRaw, AsRawReal, AsReal}
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import monix.reactive.Observable
@@ -49,6 +49,7 @@ object StreamedBody extends StreamedBodyLowPrio {
   final case class JsonList(
     elements: Observable[JsonValue],
     charset: String = HttpBody.Utf8Charset,
+    customBatchSize: Opt[Int] = Opt.Empty,
   ) extends NonEmpty {
     val contentType: String = s"${HttpBody.JsonType};charset=$charset"
 

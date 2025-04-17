@@ -22,7 +22,7 @@ object RestServlet {
   final val DefaultHandleTimeout = 30.seconds
   final val DefaultMaxPayloadSize = 16 * 1024 * 1024L // 16MB
   final val CookieHeader = "Cookie"
-  final val DefaultStreamingBatchSize = 1
+  final val DefaultStreamingBatchSize = 100
   private final val BufferSize = 8192
 
   /**
@@ -32,7 +32,7 @@ object RestServlet {
    * @param handleTimeout  maximum time the servlet will wait for results returned by REST API implementation
    * @param maxPayloadSize maximum acceptable incoming payload size, in bytes;
    *                       if exceeded, `413 Payload Too Large` response will be sent back
-   * @param defaultStreamingBatchSize default batch size for [[StreamedRestResponse]]
+   * @param defaultStreamingBatchSize default batch when streaming [[StreamedBody.JsonList]]
    */
   @explicitGenerics def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
     apiImpl: RestApi,
@@ -130,15 +130,14 @@ class RestServlet(
       case binary: StreamedBody.RawBinary =>
         response.setContentType(binary.contentType)
         binary.content
-          .bufferTumbling(stream.customBatchSize.getOrElse(defaultStreamingBatchSize))
-          .consumeWith(Consumer.foreach { batch =>
-            batch.foreach(e => response.getOutputStream.write(e))
+          .consumeWith(Consumer.foreach { chunk =>
+            response.getOutputStream.write(chunk)
             response.getOutputStream.flush()
           })
       case jsonList: StreamedBody.JsonList =>
         response.setContentType(jsonList.contentType)
         jsonList.elements
-          .bufferTumbling(stream.customBatchSize.getOrElse(defaultStreamingBatchSize))
+          .bufferTumbling(jsonList.customBatchSize.getOrElse(defaultStreamingBatchSize))
           .switchIfEmpty(Observable(Seq.empty))
           .zipWithIndex
           .consumeWith(Consumer.foreach { case (batch, idx) =>
