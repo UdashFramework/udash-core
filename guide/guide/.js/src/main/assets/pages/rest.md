@@ -680,7 +680,7 @@ serializable as `HttpBody`.
 
 ### Result serialization
 
-Result type of every REST API method is wrapped into `Try` (in case the method throws an exception)
+Result type of every non-streaming REST API method is wrapped into `Try` (in case the method throws an exception)
 and translated into `Task[RestResponse]`. This means that the macro engine looks for an implicit instance of
 `AsRaw[Task[RestResponse], Try[R]]` and `AsReal[Task[RestResponse], Try[R]]` for every HTTP method with result type `R`.
 
@@ -703,7 +703,10 @@ derived from `GenCodec` instance.
 
 Ultimately, if you don't want to use `Future`s, you may replace it with some other asynchronous wrapper type,
 e.g. Monix Task or some IO monad.
-See [supporting result containers other than `Future`](#supporting-result-containers-other-than-future), [streaming serialization workflow](#streaming-serialization-workflow).
+See [supporting result containers other than `Future`](#supporting-result-containers-other-than-future).
+
+See [streaming serialization workflow](#streaming-serialization-workflow) for details on `monix.reactive.Observable` 
+support in streaming REST API methods.
 
 ### Customizing serialization
 
@@ -946,8 +949,8 @@ computation which yields a `RestResponse` when run.
 
 ### Implementing a server
 
-An existing implementation of REST API trait can be easily turned into a `HandleRequest`
-function using `RawRest.asHandleRequest`.
+An existing implementation of REST API trait can be easily turned into a function using 
+`RawRest.asHandleRequest` or `RawRest.asHandleRequestWithStreaming` (for server-side streaming support).
 
 Therefore, the only thing you need to do to expose your REST API trait as an actual web service it to turn
 `HandleRequest` function into a server. This is usually just a matter of translating native HTTP request into
@@ -961,7 +964,8 @@ for an example implementation.
 
 If you already have a `HandleRequest` function, you can easily turn it into an implementation of desired REST API trait
 using `RawRest.fromHandleRequest`. This implementation is a macro-generated proxy which translates actual
-method calls into invocations of provided `HandleRequest` function.
+method calls into invocations of provided `HandleRequest` function. Use `RawRest.fromHandleRequestWithStreaming` for
+client-side streaming support.
 
 Therefore, the only thing you need to to in order to wrap a native HTTP client into a REST API trait instance is
 to turn this native HTTP client into a `HandleRequest` function.
@@ -1195,7 +1199,7 @@ materialized by a macro. You can then use it to generate OpenAPI specification d
 import io.udash.rest._
 
 trait MyRestApi {
-  ...
+  // ...
 }
 object MyRestApi extends DefaultRestApiCompanion[MyRestApi]
 
@@ -1496,7 +1500,7 @@ For a streaming endpoint returning `Observable[Item]`, the generated schema will
 
 The OpenAPI document correctly describes the available media types for streaming responses:
 
-1. **JSON Lists** - When streaming regular objects, they're represented as a JSON array in the schema.
+1. **JSON Lists** - When streaming regular JSON objects, they're represented as a JSON array in the schema.
    This is reflected in the OpenAPI document with content type `application/json`.
 
 2. **Binary Streams** - When streaming `Array[Byte]` (binary data), the content type in the OpenAPI document
