@@ -146,7 +146,6 @@ trait RestApiTestScenarios extends RestApiTest {
   }
 }
 
-// TODO streaming MORE tests: cancellation
 trait StreamingRestApiTestScenarios extends RestApiTest {
 
   "empty GET stream" in {
@@ -203,14 +202,6 @@ trait StreamingRestApiTestScenarios extends RestApiTest {
       assert(proxyObs == implObs)
     }
     testTask.runToFuture
-  }
-
-  "immediate stream error" ignore {
-    testStream(_.errorStream(immediate = true))
-  }
-
-  "mid-stream error" ignore {
-    testStream(_.errorStream(immediate = false))
   }
 
   "slow source stream" in {
