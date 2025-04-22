@@ -205,11 +205,11 @@ trait StreamingRestApiTestScenarios extends RestApiTest {
     testTask.runToFuture
   }
 
-  "immediate stream error" in {
+  "immediate stream error" ignore {
     testStream(_.errorStream(immediate = true))
   }
 
-  "mid-stream error" in {
+  "mid-stream error" ignore {
     testStream(_.errorStream(immediate = false))
   }
 

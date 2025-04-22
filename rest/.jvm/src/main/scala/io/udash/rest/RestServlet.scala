@@ -28,10 +28,10 @@ object RestServlet {
   /**
    * Wraps an implementation of some REST API trait into a Java Servlet.
    *
-   * @param apiImpl        implementation of some REST API trait
-   * @param handleTimeout  maximum time the servlet will wait for results returned by REST API implementation
-   * @param maxPayloadSize maximum acceptable incoming payload size, in bytes;
-   *                       if exceeded, `413 Payload Too Large` response will be sent back
+   * @param apiImpl                   implementation of some REST API trait
+   * @param handleTimeout             maximum time the servlet will wait for results returned by REST API implementation
+   * @param maxPayloadSize            maximum acceptable incoming payload size, in bytes;
+   *                                  if exceeded, `413 Payload Too Large` response will be sent back
    * @param defaultStreamingBatchSize default batch when streaming [[StreamedBody.JsonList]]
    */
   @explicitGenerics def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
@@ -59,7 +59,7 @@ class RestServlet(
   scheduler: Scheduler
 ) extends HttpServlet with LazyLogging {
 
-  import RestServlet._
+  import RestServlet.*
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val asyncContext = request.startAsync()
@@ -159,6 +159,9 @@ class RestServlet(
           })
           .map(_ => response.getOutputStream.write("]".getBytes(jsonList.charset)))
     }
+  }.onErrorHandle { e =>
+    logger.error(e.getMessage)
+    response.getOutputStream.close()
   }
 
   private def writeResponseBody(response: HttpServletResponse, rr: AbstractRestResponse): Task[Unit] =
@@ -178,7 +181,7 @@ class RestServlet(
   private def writeResponse(response: HttpServletResponse, restResponse: RestResponse): Unit = {
     setResponseHeaders(response, restResponse.code, restResponse.headers)
     restResponse.body match {
-      case HttpBody.Empty  =>
+      case HttpBody.Empty =>
       case neBody: HttpBody.NonEmpty => writeNonEmptyBody(response, neBody)
     }
   }
