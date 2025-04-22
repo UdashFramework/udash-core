@@ -71,7 +71,10 @@ final class JettyRestClient(
 
     override def handleRequestStream(request: RestRequest): Task[StreamedRestResponse] =
       prepareRequest(baseUrl, timeout, request).flatMap { httpReq =>
-        Task.async0 { (scheduler: Scheduler, callback: Callback[Throwable, StreamedRestResponse]) =>
+        def cancelRequest: Task[Unit] =
+          Task(httpReq.abort(new CancellationException("Request cancelled")).discard)
+
+        Task.cancelable0 { (scheduler: Scheduler, callback: Callback[Throwable, StreamedRestResponse]) =>
           val listener = new BufferingResponseListener(maxResponseLength) {
             private var collectToBuffer: Boolean = true
             private lazy val publishSubject = PublishToOneSubject[Array[Byte]]()
@@ -88,7 +91,7 @@ final class JettyRestClient(
                 val mediaTypeOpt = contentTypeOpt.map(MimeTypes.getContentTypeWithoutCharset)
                 val bodyOpt = mediaTypeOpt matchOpt {
                   case Opt(HttpBody.OctetStreamType) =>
-                    StreamedBody.RawBinary(content = rawContentSubject)
+                    StreamedBody.RawBinary(content = rawContentSubject.doOnSubscriptionCancel(cancelRequest))
                   case Opt(HttpBody.JsonType) =>
                     val charset = contentTypeOpt.map(MimeTypes.getCharsetFromContentType).getOrElse(HttpBody.Utf8Charset)
                     // suboptimal - maybe "online" parsing is possible using Jackson / other lib without waiting for full content ?
@@ -101,7 +104,9 @@ final class JettyRestClient(
                           Observable
                             .fromIterator(Task.eval(input.readList().iterator(_.asInstanceOf[JsonStringInput].readRawJson())))
                             .map(JsonValue(_))
-                        }.onErrorFallbackTo(Observable.raiseError(JettyRestClient.Streaming)),
+                        }
+                        .doOnSubscriptionCancel(cancelRequest)
+                        .onErrorFallbackTo(Observable.raiseError(JettyRestClient.Streaming)),
                       charset = charset,
                     )
                 }
@@ -134,9 +139,9 @@ final class JettyRestClient(
                 publishSubject.subscription // wait for subscription
                   .flatMapNow(_ => rawContentSubject.onNext(arr))
                   .mapNow {
-                  case Ack.Continue => demander.run()
-                  case Ack.Stop     => ()
-                }
+                    case Ack.Continue => demander.run()
+                    case Ack.Stop     => ()
+                  }
               }
 
             override def onComplete(result: Result): Unit =
@@ -160,7 +165,9 @@ final class JettyRestClient(
               }
           }
           httpReq.send(listener)
-        }.doOnCancel(Task(httpReq.abort(new CancellationException("Request cancelled"))))
+
+          cancelRequest // see cats.effect#CancelToken
+        }
       }
   }
 
