@@ -117,7 +117,6 @@ class RestServlet(
 
   private def writeNonEmptyStreamedBody(
     response: HttpServletResponse,
-    stream: StreamedRestResponse,
     body: StreamedBody.NonEmpty,
   ): Task[Unit] = Task.defer {
     // The Content-Length header is intentionally omitted for streams.
@@ -160,7 +159,11 @@ class RestServlet(
           .map(_ => response.getOutputStream.write("]".getBytes(jsonList.charset)))
     }
   }.onErrorHandle { e =>
-    logger.error(e.getMessage)
+    // When an error occurs during streaming, we immediately close the connection rather than
+    // attempting to send an error response. This is intentional because:
+    // The client has likely already received and started processing partial data
+    // for structured formats (like JSON arrays), the stream is now in an invalid state
+    logger.error("Failure during streaming REST response", e)
     response.getOutputStream.close()
   }
 
@@ -174,7 +177,7 @@ class RestServlet(
       case stream: StreamedRestResponse =>
         stream.body match {
           case StreamedBody.Empty => Task.unit
-          case neBody: StreamedBody.NonEmpty => writeNonEmptyStreamedBody(response, stream, neBody)
+          case neBody: StreamedBody.NonEmpty => writeNonEmptyStreamedBody(response, neBody)
         }
     }
 

@@ -705,7 +705,7 @@ Ultimately, if you don't want to use `Future`s, you may replace it with some oth
 e.g. Monix Task or some IO monad.
 See [supporting result containers other than `Future`](#supporting-result-containers-other-than-future).
 
-See [streaming serialization workflow](#streaming-serialization-workflow) for details on `monix.reactive.Observable` 
+See [streaming serialization workflow](#streaming-serialization-workflow) for details on `monix.reactive.Observable`
 support in streaming REST API methods.
 
 ### Customizing serialization
@@ -949,7 +949,7 @@ computation which yields a `RestResponse` when run.
 
 ### Implementing a server
 
-An existing implementation of REST API trait can be easily turned into a function using 
+An existing implementation of REST API trait can be easily turned into a function using
 `RawRest.asHandleRequest` or `RawRest.asHandleRequestWithStreaming` (for server-side streaming support).
 
 Therefore, the only thing you need to do to expose your REST API trait as an actual web service it to turn
@@ -1096,7 +1096,7 @@ However, this conversion loses the streaming benefits, so it's best used only wh
 
 ### Error Handling
 
-Streaming endpoints handle errors similarly to regular endpoints. When an error occurs during streaming:
+Streaming endpoints handle errors similarly to regular endpoints.
 
 ```scala
 // Server side
@@ -1116,6 +1116,7 @@ client.streamItems("")
 ```
 
 This allows graceful handling of errors that might occur during streaming operations.
+When an error occurs during streaming from the server side, the HTTP connection is closed immediately. This means any in-progress streaming is cut off at the point of error.
 
 ### Advanced Streaming Patterns
 

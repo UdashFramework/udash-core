@@ -5,9 +5,9 @@ import com.avsystem.commons.meta.MacroInstances
 import com.avsystem.commons.misc.{AbstractValueEnumCompanion, ValueEnum, ValueOf}
 import com.avsystem.commons.rpc.{AsRaw, AsReal}
 import com.avsystem.commons.serialization.{GenCodec, TransparentWrapperCompanion}
-import io.udash.rest.openapi._
+import io.udash.rest.openapi.*
 import io.udash.rest.openapi.RestStructure.NameAndAdjusters
-import io.udash.rest.raw.{HttpBody, JsonValue, PlainValue, RestResponse}
+import io.udash.rest.raw.{HttpBody, JsonValue, PlainValue, RestResponse, StreamedBody, StreamedRestResponse}
 
 trait CodecWithStructure[T] {
   def codec: GenCodec[T]
@@ -92,6 +92,18 @@ abstract class RestDataWrapperCompanion[Wrapped, T](implicit
     AsRaw.fromTransparentWrapping
 
   implicit def responseAsReal(implicit wrappedAsRaw: AsReal[RestResponse, Wrapped]): AsReal[RestResponse, T] =
+    AsReal.fromTransparentWrapping
+
+  implicit def streamedBodyAsRaw(implicit wrappedAsRaw: AsRaw[StreamedBody, Wrapped]): AsRaw[StreamedBody, T] =
+    AsRaw.fromTransparentWrapping
+
+  implicit def streamedBodyAsReal(implicit wrappedAsRaw: AsReal[StreamedBody, Wrapped]): AsReal[StreamedBody, T] =
+    AsReal.fromTransparentWrapping
+
+  implicit def streamedResponseAsRaw(implicit wrappedAsRaw: AsRaw[StreamedRestResponse, Wrapped]): AsRaw[StreamedRestResponse, T] =
+    AsRaw.fromTransparentWrapping
+
+  implicit def streamedResponseAsReal(implicit wrappedAsRaw: AsReal[StreamedRestResponse, Wrapped]): AsReal[StreamedRestResponse, T] =
     AsReal.fromTransparentWrapping
 
   implicit def restSchema(implicit wrappedSchema: RestSchema[Wrapped]): RestSchema[T] =
