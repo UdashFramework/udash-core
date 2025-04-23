@@ -9,7 +9,7 @@ name := "udash"
 Global / excludeLintKeys ++= Set(ideOutputDirectory, ideSkipProject)
 
 inThisBuild(Seq(
-  version := "0.9.0-SNAPSHOT",
+  version := "0.18.0-SNAPSHOT",
   organization := "io.udash",
   resolvers += Resolver.defaultLocal,
 ))

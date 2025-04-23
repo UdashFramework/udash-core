@@ -3,15 +3,16 @@ package rest
 
 import com.avsystem.commons.*
 import com.avsystem.commons.annotation.explicitGenerics
-import com.typesafe.scalalogging.LazyLogging
+import com.typesafe.scalalogging.{LazyLogging, Logger as ScalaLogger}
 import io.udash.rest.RestServlet.*
 import io.udash.rest.raw.*
 import io.udash.utils.URLEncoder
 import monix.eval.Task
 import monix.execution.Scheduler
 import monix.reactive.{Consumer, Observable}
+import org.slf4j.{Logger, LoggerFactory}
 
-import java.io.ByteArrayOutputStream
+import java.io.{ByteArrayOutputStream, EOFException}
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import javax.servlet.{AsyncEvent, AsyncListener}
@@ -55,11 +56,15 @@ class RestServlet(
   handleTimeout: FiniteDuration = DefaultHandleTimeout,
   maxPayloadSize: Long = DefaultMaxPayloadSize,
   defaultStreamingBatchSize: Int = DefaultStreamingBatchSize,
+  customLogger: OptArg[Logger] = OptArg.Empty,
 )(implicit
   scheduler: Scheduler
 ) extends HttpServlet with LazyLogging {
 
   import RestServlet.*
+
+  override protected lazy val logger: ScalaLogger =
+    ScalaLogger(customLogger.getOrElse(LoggerFactory.getLogger(getClass.getName)))
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val asyncContext = request.startAsync()
@@ -76,25 +81,28 @@ class RestServlet(
 
     // readRequest must execute in Jetty thread but we want exceptions to be handled uniformly, hence the Try
     val udashRequest = Try(readRequest(request))
-    val cancelable = Task.defer(handleRequest(udashRequest.get)).flatMap { rr =>
-      Task(setResponseHeaders(response, rr.code, rr.headers)) >>
-        writeResponseBody(response, rr)
-    }.executeAsync.runAsync {
-      case Right(_) =>
-        asyncContext.complete()
-      case Left(e: HttpErrorException) =>
-        completeWith(writeResponse(response, e.toResponse))
-      case Left(e) =>
-        logger.error("Failed to handle REST request", e)
-        completeWith(writeFailure(response, e.getMessage.opt))
-    }
+    val cancelable =
+      (for {
+        restRequest <- Task.fromTry(udashRequest)
+        restResponse <- handleRequest(restRequest)
+        _ <- Task(setResponseHeaders(response, restResponse.code, restResponse.headers))
+        _ <- writeResponseBody(response, restResponse)
+      } yield ()).executeAsync.runAsync {
+        case Right(_) =>
+          asyncContext.complete()
+        case Left(e: HttpErrorException) =>
+          completeWith(writeResponse(response, e.toResponse))
+        case Left(e) =>
+          logger.error("Failed to handle REST request", e)
+          completeWith(writeFailure(response, e.getMessage.opt))
+      }
 
     asyncContext.setTimeout(handleTimeout.toMillis)
     asyncContext.addListener(new AsyncListener {
       def onComplete(event: AsyncEvent): Unit = ()
       def onTimeout(event: AsyncEvent): Unit = {
         cancelable.cancel()
-        completeWith(writeFailure(response, Opt(s"server operation timed out after $handleTimeout")))
+        completeWith(writeFailure(response, s"server operation timed out after $handleTimeout".opt))
       }
       def onError(event: AsyncEvent): Unit = ()
       def onStartAsync(event: AsyncEvent): Unit = ()
@@ -117,13 +125,13 @@ class RestServlet(
 
   private def writeNonEmptyStreamedBody(
     response: HttpServletResponse,
-    body: StreamedBody.NonEmpty,
+    responseBody: StreamedBody.NonEmpty,
   ): Task[Unit] = Task.defer {
     // The Content-Length header is intentionally omitted for streams.
     // This signals to the client that the response body size is not predetermined and will be streamed.
     // Clients implementing the streaming part of the REST interface contract MUST be prepared
     // to handle responses without Content-Length by reading data incrementally until the stream completes.
-    body match {
+    responseBody match {
       case single: StreamedBody.Single =>
         Task.eval(writeNonEmptyBody(response, single.body))
       case binary: StreamedBody.RawBinary =>
@@ -158,17 +166,23 @@ class RestServlet(
           })
           .map(_ => response.getOutputStream.write("]".getBytes(jsonList.charset)))
     }
-  }.onErrorHandle { e =>
-    // When an error occurs during streaming, we immediately close the connection rather than
-    // attempting to send an error response. This is intentional because:
-    // The client has likely already received and started processing partial data
-    // for structured formats (like JSON arrays), the stream is now in an invalid state
-    logger.error("Failure during streaming REST response", e)
-    response.getOutputStream.close()
+  }.onErrorHandle {
+    case _: EOFException =>
+      logger.warn("Request was cancelled by the client during streaming REST response")
+    case ex =>
+      // When an error occurs during streaming, we immediately close the connection rather than
+      // attempting to send an error response. This is intentional because:
+      // The client has likely already received and started processing partial data
+      // for structured formats (like JSON arrays), the stream is now in an invalid state
+      logger.error("Failure during streaming REST response", ex)
+      response.getOutputStream.close()
   }
 
-  private def writeResponseBody(response: HttpServletResponse, rr: AbstractRestResponse): Task[Unit] =
-    rr match {
+  private def writeResponseBody(
+    response: HttpServletResponse,
+    restResponse: AbstractRestResponse,
+  ): Task[Unit] =
+    restResponse match {
       case resp: RestResponse =>
         resp.body match {
           case HttpBody.Empty => Task.unit
