@@ -3,6 +3,7 @@ package rest
 package raw
 
 import com.avsystem.commons.*
+import com.avsystem.commons.annotation.bincompat
 import com.avsystem.commons.meta.*
 import com.avsystem.commons.rpc.*
 import io.udash.macros.RestMacros
@@ -292,6 +293,16 @@ final case class PrefixMetadata[T](
   @multi @reifyAnnot streamedResponseAdjusters: List[StreamedResponseAdjuster],
   @infer @checked result: RestMetadata.Lazy[T],
 ) extends RestMethodMetadata[T] {
+
+  @bincompat private[rest] def this(
+    name: String,
+    methodTag: Prefix,
+    parametersMetadata: RestParametersMetadata,
+    requestAdjusters: List[RequestAdjuster],
+    responseAdjusters: List[ResponseAdjuster],
+    result: RestMetadata.Lazy[T],
+  ) = this(name, methodTag, parametersMetadata, requestAdjusters, responseAdjusters, Nil, result)
+
   def methodPath: List[PlainValue] = PlainValue.decodePath(methodTag.path)
 }
 
@@ -307,6 +318,30 @@ final case class HttpMethodMetadata[T](
   @multi @reifyAnnot streamedResponseAdjusters: List[StreamedResponseAdjuster],
   @infer @checked responseType: HttpResponseType[T],
 ) extends RestMethodMetadata[T] {
+
+  @bincompat private[rest] def this(
+    name: String,
+    methodTag: HttpMethodTag,
+    bodyTypeTag: BodyTypeTag,
+    parametersMetadata: RestParametersMetadata,
+    bodyParams: List[ParamMetadata[_]],
+    formBody: Boolean,
+    requestAdjusters: List[RequestAdjuster],
+    responseAdjusters: List[ResponseAdjuster],
+    responseType: HttpResponseType[T],
+  ) = this(
+    name,
+    methodTag,
+    bodyTypeTag,
+    parametersMetadata,
+    bodyParams,
+    formBody,
+    requestAdjusters,
+    responseAdjusters,
+    Nil,
+    responseType
+  )
+
   val method: HttpMethod = methodTag.method
 
   val customBody: Boolean = bodyTypeTag match {

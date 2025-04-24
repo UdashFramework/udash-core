@@ -2,7 +2,7 @@ package io.udash
 package rest
 
 import com.avsystem.commons.*
-import com.avsystem.commons.annotation.explicitGenerics
+import com.avsystem.commons.annotation.{bincompat, explicitGenerics}
 import com.typesafe.scalalogging.{LazyLogging, Logger as ScalaLogger}
 import io.udash.rest.RestServlet.*
 import io.udash.rest.raw.*
@@ -49,6 +49,19 @@ object RestServlet {
       maxPayloadSize = maxPayloadSize,
       defaultStreamingBatchSize = defaultStreamingBatchSize,
     )
+
+  @bincompat private[rest] def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
+    apiImpl: RestApi,
+    handleTimeout: FiniteDuration ,
+    maxPayloadSize: Long,
+  )(implicit
+    scheduler: Scheduler
+  ): RestServlet = apply[RestApi](
+    apiImpl,
+    handleTimeout = handleTimeout,
+    maxPayloadSize = maxPayloadSize,
+    defaultStreamingBatchSize = DefaultStreamingBatchSize,
+  )
 }
 
 class RestServlet(
