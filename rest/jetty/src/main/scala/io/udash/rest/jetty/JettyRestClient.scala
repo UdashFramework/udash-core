@@ -89,11 +89,9 @@ final class JettyRestClient(
               if (contentLength == -1) {
                 val contentTypeOpt = response.getHeaders.get(HttpHeader.CONTENT_TYPE).opt
                 val mediaTypeOpt = contentTypeOpt.map(MimeTypes.getContentTypeWithoutCharset)
-                val bodyOpt = mediaTypeOpt matchOpt {
-                  case Opt(HttpBody.OctetStreamType) =>
-                    StreamedBody.RawBinary(content = rawContentSubject.doOnSubscriptionCancel(cancelRequest))
-                  case Opt(HttpBody.JsonType) =>
-                    val charset = contentTypeOpt.map(MimeTypes.getCharsetFromContentType).getOrElse(HttpBody.Utf8Charset)
+                val charsetOpt = contentTypeOpt.map(MimeTypes.getCharsetFromContentType)
+                val bodyOpt = (mediaTypeOpt, charsetOpt) matchOpt {
+                  case (Opt(HttpBody.JsonType), Opt(charset)) =>
                     // suboptimal - maybe "online" parsing is possible using Jackson / other lib without waiting for full content ?
                     StreamedBody.JsonList(
                       elements = Observable
@@ -108,6 +106,11 @@ final class JettyRestClient(
                         .doOnSubscriptionCancel(cancelRequest)
                         .onErrorFallbackTo(Observable.raiseError(JettyRestClient.Streaming)),
                       charset = charset,
+                    )
+                  case (Opt(mediaType), _) =>
+                    StreamedBody.binary(
+                      content = rawContentSubject.doOnSubscriptionCancel(cancelRequest),
+                      contentType = contentTypeOpt.getOrElse(mediaType),
                     )
                 }
                 bodyOpt.mapOr(

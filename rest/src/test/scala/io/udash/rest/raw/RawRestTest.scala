@@ -126,9 +126,9 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
         elements.toListL.map { list =>
           s" application/json;charset=$charset\n[${list.map(_.value).mkString(",")}]"
         }
-      case StreamedBody.RawBinary(content) =>
+      case StreamedBody.RawBinary(content, tpe) =>
         content.toListL.map { list =>
-          s" application/octet-stream\n${list.flatMap(_.iterator.map(b => f"$b%02X")).mkString}"
+          s" $tpe\n${list.flatMap(_.iterator.map(b => f"$b%02X")).mkString}"
         }
       case StreamedBody.Single(body) =>
         Task.now(repr(body, inNewLine = false))

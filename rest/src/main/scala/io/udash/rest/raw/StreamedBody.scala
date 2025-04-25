@@ -35,11 +35,10 @@ object StreamedBody extends StreamedBodyLowPrio {
    * The content is delivered as a stream of byte arrays which can be processed incrementally.
    * Useful for large binary files or content that is generated dynamically.
    */
-  final case class RawBinary(content: Observable[Array[Byte]]) extends NonEmpty {
-    val contentType: String = HttpBody.OctetStreamType
-
-    override def toString: String = super.toString
-  }
+  final case class RawBinary(
+    content: Observable[Array[Byte]],
+    override val contentType: String,
+  ) extends NonEmpty
 
   /**
    * Represents a streamed list of JSON values.
@@ -52,8 +51,6 @@ object StreamedBody extends StreamedBodyLowPrio {
     customBatchSize: Opt[Int] = Opt.Empty,
   ) extends NonEmpty {
     val contentType: String = s"${HttpBody.JsonType};charset=$charset"
-
-    override def toString: String = super.toString
   }
 
   /**
@@ -66,6 +63,12 @@ object StreamedBody extends StreamedBodyLowPrio {
   }
 
   def empty: StreamedBody = Empty
+
+  def binary(
+    content: Observable[Array[Byte]],
+    contentType: String = HttpBody.OctetStreamType,
+  ): StreamedBody =
+    RawBinary(content, contentType)
 
   def fromHttpBody(body: HttpBody): StreamedBody = body match {
     case HttpBody.Empty => StreamedBody.Empty
@@ -89,7 +92,7 @@ object StreamedBody extends StreamedBodyLowPrio {
 
   implicit val rawBinaryBodyForByteArray: AsRawReal[StreamedBody, Observable[Array[Byte]]] =
     AsRawReal.create(
-      bytes => RawBinary(bytes),
+      bytes => StreamedBody.binary(bytes),
       body => StreamedBody.castOrFail[RawBinary](body).content,
     )
 }
