@@ -61,6 +61,7 @@ object Context {
       markdownLink(RestState, "Serialization"),
       markdownLink(RestState, "API evolution"),
       markdownLink(RestState, "Implementing backends"),
+      markdownLink(RestState, "Streaming Support"),
       markdownLink(RestState, "Generating OpenAPI 3.0 specifications"),
     )),
     MenuContainer("Extensions", Seq(

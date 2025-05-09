@@ -2,9 +2,9 @@ package io.udash
 package rest
 package raw
 
-import com.avsystem.commons.meta._
+import com.avsystem.commons.meta.*
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
-import com.avsystem.commons.rpc._
+import com.avsystem.commons.rpc.*
 
 import scala.util.control.NoStackTrace
 
