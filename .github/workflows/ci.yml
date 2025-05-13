@@ -52,20 +52,10 @@ jobs:
       - name: Get version
         id: get_tag_name
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-      - name: Import GPG key
-        env:
-          #exported via `gpg -a --export-secret-keys <key> | cat -e | sed 's/\$/\\n/g' | xclip -selection clipboard` and added to org secrets
-          SONATYPE_GPG: ${{ secrets.SONATYPE_GPG }}
-        run: echo -e $SONATYPE_GPG | gpg --import -
       - name: Publish artifacts
         env:
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-        run: sbt 'set ThisBuild/version := "${{ steps.get_tag_name.outputs.VERSION }}"' +publishSigned
-      - name: Release Sonatype bundle
-        #https://github.com/xerial/sbt-sonatype#publishing-your-artifact
-        if: ${{ !endsWith(steps.get_tag_name.outputs.VERSION, 'SNAPSHOT') }}
-        env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-        run: sbt 'set ThisBuild/version := "${{ steps.get_tag_name.outputs.VERSION }}"' sonatypeBundleRelease
+        run: sbt ci-release
