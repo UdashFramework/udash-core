@@ -30,6 +30,7 @@ val deploymentConfiguration = Seq(
   pomIncludeRepository := { _ => false },
 
   publishTo := sonatypePublishToBundle.value,
+  sonatypeCredentialHost := Sonatype.sonatypeCentralHost,
 
   credentials in Global += Credentials(
     "Sonatype Nexus Repository Manager",
