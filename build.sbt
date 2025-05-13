@@ -12,6 +12,16 @@ inThisBuild(Seq(
   organization := "io.udash",
   resolvers += Resolver.defaultLocal,
   sonatypeCredentialHost := Sonatype.sonatypeCentralHost,
+  homepage := Some(url("https://udash.io")),
+  licenses := Seq(License.Apache2),
+  scmInfo := Some(ScmInfo(
+    browseUrl = url("https://github.com/UdashFramework/udash-core"),
+    connection = "scm:git:git@github.com:UdashFramework/udash-core.git",
+    devConnection = Some("scm:git:git@github.com:UdashFramework/udash-core.git"),
+  )),
+  developers := List(
+    Developer("ddworak", "Dawid Dworak", "d.dworak@avsystem.com", url("https://github.com/ddworak")),
+  ),
 ))
 
 val forIdeaImport = System.getProperty("idea.managed", "false").toBoolean && System.getProperty("idea.runid") == null
@@ -22,20 +32,6 @@ val browserCapabilities: Capabilities = {
   // requires gecko driver, see https://github.com/mozilla/geckodriver
   new FirefoxOptions().setHeadless(true).setLogLevel(FirefoxDriverLogLevel.WARN)
 }
-
-// Deployment configuration
-val deploymentConfiguration = Seq(
-  pomIncludeRepository := { _ => false },
-  licenses := Seq(License.Apache2),
-  scmInfo := Some(ScmInfo(
-    browseUrl = url("https://github.com/UdashFramework/udash-core"),
-    connection = "scm:git:git@github.com:UdashFramework/udash-core.git",
-    devConnection = Some("scm:git:git@github.com:UdashFramework/udash-core.git"),
-  )),
-  developers := List(
-    Developer("ddworak", "Dawid Dworak", "d.dworak@avsystem.com", url("https://github.com/ddworak")),
-  ),
-)
 
 val commonSettings = Seq(
   scalaVersion := Dependencies.versionOfScala,
@@ -66,7 +62,8 @@ val commonSettings = Seq(
   Test / ideOutputDirectory := Some(target.value.getParentFile / "out/test"),
   libraryDependencies ++= Dependencies.compilerPlugins.value,
   libraryDependencies ++= Dependencies.commonTestDeps.value,
-) ++ deploymentConfiguration
+  pomIncludeRepository := { _ => false },
+)
 
 val commonJsSettings = commonSettings ++ Seq(
   Test / scalaJSStage := FastOptStage,
