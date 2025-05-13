@@ -9,7 +9,6 @@ name := "udash"
 Global / excludeLintKeys ++= Set(ideOutputDirectory, ideSkipProject)
 
 inThisBuild(Seq(
-  version := "0.9.0-SNAPSHOT",
   organization := "io.udash",
   resolvers += Resolver.defaultLocal,
 ))
@@ -25,36 +24,17 @@ val browserCapabilities: Capabilities = {
 
 // Deployment configuration
 val deploymentConfiguration = Seq(
-  publishMavenStyle := true,
-  Test / publishArtifact := false,
   pomIncludeRepository := { _ => false },
-
-  publishTo := sonatypePublishToBundle.value,
   sonatypeCredentialHost := Sonatype.sonatypeCentralHost,
-
-  credentials in Global += Credentials(
-    "Sonatype Nexus Repository Manager",
-    "oss.sonatype.org",
-    sys.env.getOrElse("SONATYPE_USERNAME", ""),
-    sys.env.getOrElse("SONATYPE_PASSWORD", "")
-  ),
-
   licenses := Seq(License.Apache2),
-
-  pomExtra := {
-    <url>https://github.com/UdashFramework/udash-core</url>
-      <scm>
-        <url>git@github.com:UdashFramework/udash-core.git</url>
-        <connection>scm:git@github.com:UdashFramework/udash-core.git</connection>
-      </scm>
-      <developers>
-        <developer>
-          <id>avsystem</id>
-          <name>AVSystem</name>
-          <url>http://www.avsystem.com/</url>
-        </developer>
-      </developers>
-  }
+  scmInfo := Some(ScmInfo(
+    browseUrl = url("https://github.com/UdashFramework/udash-core"),
+    connection = "scm:git:git@github.com:UdashFramework/udash-core.git",
+    devConnection = Some("scm:git:git@github.com:UdashFramework/udash-core.git"),
+  )),
+  developers := List(
+    Developer("ddworak", "Dawid Dworak", "d.dworak@avsystem.com", url("https://github.com/ddworak")),
+  ),
 )
 
 val commonSettings = Seq(
