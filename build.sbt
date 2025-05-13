@@ -11,6 +11,7 @@ Global / excludeLintKeys ++= Set(ideOutputDirectory, ideSkipProject)
 inThisBuild(Seq(
   organization := "io.udash",
   resolvers += Resolver.defaultLocal,
+  sonatypeCredentialHost := Sonatype.sonatypeCentralHost,
 ))
 
 val forIdeaImport = System.getProperty("idea.managed", "false").toBoolean && System.getProperty("idea.runid") == null
@@ -25,7 +26,6 @@ val browserCapabilities: Capabilities = {
 // Deployment configuration
 val deploymentConfiguration = Seq(
   pomIncludeRepository := { _ => false },
-  sonatypeCredentialHost := Sonatype.sonatypeCentralHost,
   licenses := Seq(License.Apache2),
   scmInfo := Some(ScmInfo(
     browseUrl = url("https://github.com/UdashFramework/udash-core"),
