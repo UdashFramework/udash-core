@@ -11,14 +11,14 @@ import scala.concurrent.duration.Duration
 
 private object RestApi {
   trait RestTestApi {
-    @GET def simpleNumbers(size: Int): Task[List[Int]]
+    @GET def exampleEndpoint(size: Int): Task[List[RestExampleData]]
   }
 
   object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     final class Impl extends RestTestApi {
 
-      def simpleNumbers(size: Int): Task[List[Int]] =
-        Task.eval(Range(0, size).toList)
+      def exampleEndpoint(size: Int): Task[List[RestExampleData]] =
+        RestExampleData.generateRandomList(size)
     }
   }
 
@@ -30,7 +30,7 @@ private object RestApi {
 }
 
 
-@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@OutputTimeUnit(TimeUnit.SECONDS)
 @BenchmarkMode(Array(Mode.Throughput))
 @State(Scope.Thread)
 class RestApi {
@@ -38,21 +38,21 @@ class RestApi {
   private final val proxy = RestApi.creteApiProxy()
 
   @Benchmark
-  def smallNumbersArray(): Unit = {
+  def smallArray(): Unit = {
     waitEndpoint(10)
   }
 
   @Benchmark
-  def mediumNumbersArray(): Unit = {
+  def mediumArray(): Unit = {
     waitEndpoint(200)
   }
 
   @Benchmark
-  def hugeNumbersArray(): Unit = {
+  def hugeArray(): Unit = {
     waitEndpoint(5000)
   }
 
   private def waitEndpoint(samples: Int): Unit = {
-    Await.result(this.proxy.simpleNumbers(samples).runToFuture, Duration.apply(10, TimeUnit.SECONDS))
+    Await.result(this.proxy.exampleEndpoint(samples).runToFuture, Duration.apply(10, TimeUnit.SECONDS))
   }
 }

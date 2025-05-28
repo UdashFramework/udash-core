@@ -12,18 +12,31 @@ import scala.concurrent.duration.Duration
 
 private object StreamingRestApi {
   trait RestTestApi {
-    @GET def simpleNumbers(size: Int): Observable[Int]
-    @GET def simpleNumbersWithoutStreaming(size: Int): Task[List[Int]]
+    @GET def exampleEndpoint(size: Int): Observable[RestExampleData]
+
+    @streamingResponseBatchSize(10)
+    @GET def exampleEndpointBatch10(size: Int): Observable[RestExampleData]
+
+    @streamingResponseBatchSize(500)
+    @GET def exampleEndpointBatch500(size: Int): Observable[RestExampleData]
+
+    @GET def exampleEndpointWithoutStreaming(size: Int): Task[List[RestExampleData]]
   }
 
   object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     final class Impl extends RestTestApi {
 
-      def simpleNumbers(size: Int): Observable[Int] =
-        Observable.fromIterable(Range(0, size))
+      def exampleEndpoint(size: Int): Observable[RestExampleData] =
+        RestExampleData.generateRandomObservable(size)
 
-      def simpleNumbersWithoutStreaming(size: Int): Task[List[Int]] =
-        Task.eval(Range(0, size).toList)
+      def exampleEndpointBatch10(size: Int): Observable[RestExampleData] =
+        RestExampleData.generateRandomObservable(size)
+
+      def exampleEndpointBatch500(size: Int): Observable[RestExampleData] =
+        RestExampleData.generateRandomObservable(size)
+
+      def exampleEndpointWithoutStreaming(size: Int): Task[List[RestExampleData]] =
+        RestExampleData.generateRandomList(size)
     }
   }
 
@@ -51,41 +64,71 @@ class StreamingRestApi {
 
 
   @Benchmark
-  def smallNumbersArray(): Unit = {
+  def smallArray(): Unit = {
     waitStreamingEndpoint(10)
   }
 
   @Benchmark
-  def mediumNumbersArray(): Unit = {
+  def mediumArray(): Unit = {
     waitStreamingEndpoint(200)
   }
 
   @Benchmark
-  def hugeNumbersArray(): Unit = {
+  def hugeArray(): Unit = {
     waitStreamingEndpoint(5000)
   }
 
   @Benchmark
-  def smallNumbersArrayWithoutStreaming(): Unit = {
+  def smallArrayBatch10(): Unit = {
+    wait(this.proxy.exampleEndpointBatch10(10).toListL)
+  }
+
+  @Benchmark
+  def mediumArrayBatch10(): Unit = {
+    wait(this.proxy.exampleEndpointBatch10(200).toListL)
+  }
+
+  @Benchmark
+  def hugeArrayBatch10(): Unit = {
+    wait(this.proxy.exampleEndpointBatch10(5000).toListL)
+  }
+
+  @Benchmark
+  def smallArrayBatch500(): Unit = {
+    wait(this.proxy.exampleEndpointBatch500(10).toListL)
+  }
+
+  @Benchmark
+  def mediumArrayBatch500(): Unit = {
+    wait(this.proxy.exampleEndpointBatch500(200).toListL)
+  }
+
+  @Benchmark
+  def hugeArrayBatch500(): Unit = {
+    wait(this.proxy.exampleEndpointBatch500(5000).toListL)
+  }
+
+  @Benchmark
+  def smallArrayWithoutStreaming(): Unit = {
     waitEndpointWithoutStreaming(10)
   }
 
   @Benchmark
-  def mediumNumbersArrayWithoutStreaming(): Unit = {
+  def mediumArrayWithoutStreaming(): Unit = {
     waitEndpointWithoutStreaming(200)
   }
 
   @Benchmark
-  def hugeNumbersArrayWithoutStreaming(): Unit = {
+  def hugeArrayWithoutStreaming(): Unit = {
     waitEndpointWithoutStreaming(5000)
   }
 
   private def waitEndpointWithoutStreaming(samples: Int): Unit = {
-    wait(this.proxy.simpleNumbersWithoutStreaming(samples))
+    wait(this.proxy.exampleEndpointWithoutStreaming(samples))
   }
 
   private def waitStreamingEndpoint(samples: Int): Unit = {
-    wait(this.proxy.simpleNumbers(samples).toListL)
+    wait(this.proxy.exampleEndpoint(samples).toListL)
   }
 
   private def wait[T](task: Task[List[T]]): Unit = {
