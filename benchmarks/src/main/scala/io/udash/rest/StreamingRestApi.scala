@@ -1,5 +1,6 @@
 package io.udash.rest
 
+import io.udash.rest.RestExampleData.RestResponseSize
 import io.udash.rest.raw.{RawRest, RestRequest, RestResponse, StreamedRestResponse}
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -12,35 +13,41 @@ import scala.concurrent.duration.Duration
 
 private object StreamingRestApi {
   trait RestTestApi {
-    @GET def exampleEndpoint(size: Int): Observable[RestExampleData]
+    @GET def exampleEndpoint(size: RestResponseSize): Observable[RestExampleData]
 
     @streamingResponseBatchSize(10)
-    @GET def exampleEndpointBatch10(size: Int): Observable[RestExampleData]
+    @GET def exampleEndpointBatch10(size: RestResponseSize): Observable[RestExampleData]
 
     @streamingResponseBatchSize(500)
-    @GET def exampleEndpointBatch500(size: Int): Observable[RestExampleData]
+    @GET def exampleEndpointBatch500(size: RestResponseSize): Observable[RestExampleData]
 
-    @GET def exampleEndpointWithoutStreaming(size: Int): Task[List[RestExampleData]]
+    @GET def exampleEndpointWithoutStreaming(size: RestResponseSize): Task[List[RestExampleData]]
   }
 
   object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     final class Impl extends RestTestApi {
+      private var responses: Map[RestResponseSize, List[RestExampleData]] =
+        Map.empty
 
-      def exampleEndpoint(size: Int): Observable[RestExampleData] =
-        RestExampleData.generateRandomObservable(size)
+      def exampleEndpoint(size: RestResponseSize): Observable[RestExampleData] =
+        Observable.fromIterable(responses(size))
 
-      def exampleEndpointBatch10(size: Int): Observable[RestExampleData] =
-        RestExampleData.generateRandomObservable(size)
+      def exampleEndpointBatch10(size: RestResponseSize): Observable[RestExampleData] =
+        Observable.fromIterable(responses(size))
 
-      def exampleEndpointBatch500(size: Int): Observable[RestExampleData] =
-        RestExampleData.generateRandomObservable(size)
+      def exampleEndpointBatch500(size: RestResponseSize): Observable[RestExampleData] =
+        Observable.fromIterable(responses(size))
 
-      def exampleEndpointWithoutStreaming(size: Int): Task[List[RestExampleData]] =
-        RestExampleData.generateRandomList(size)
+      def exampleEndpointWithoutStreaming(size: RestResponseSize): Task[List[RestExampleData]] =
+        Task.eval(responses(size))
+
+      def generateResponses(): Unit = {
+        this.responses = RestResponseSize.values.map(size => size -> RestExampleData.generateRandomList(size)).toMap
+      }
     }
   }
 
-  private def creteApiProxy(): RestTestApi = {
+  private def creteApiProxy(): (RestTestApi.Impl, RestTestApi) = {
     val apiImpl = new RestTestApi.Impl()
     val streamingServerHandle = RawRest.asHandleRequestWithStreaming[RestTestApi](apiImpl)
     val streamingClientHandler = new RawRest.RestRequestHandler {
@@ -50,84 +57,88 @@ private object StreamingRestApi {
       override def handleRequestStream(request: RestRequest): Task[StreamedRestResponse] =
         streamingServerHandle(request).map(_.asInstanceOf[StreamedRestResponse])
     }
-    RawRest.fromHandleRequestWithStreaming[RestTestApi](streamingClientHandler)
+    (apiImpl, RawRest.fromHandleRequestWithStreaming[RestTestApi](streamingClientHandler))
   }
 }
 
 
-@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@OutputTimeUnit(TimeUnit.SECONDS)
 @BenchmarkMode(Array(Mode.Throughput))
 @State(Scope.Thread)
 class StreamingRestApi {
   implicit def scheduler: Scheduler = Scheduler.global
-  private final val proxy = StreamingRestApi.creteApiProxy()
+  private final val (impl, proxy) = StreamingRestApi.creteApiProxy()
 
+  @Setup(Level.Trial)
+  def setup(): Unit = {
+    this.impl.generateResponses()
+  }
 
   @Benchmark
   def smallArray(): Unit = {
-    waitStreamingEndpoint(10)
+    waitStreamingEndpoint(RestResponseSize.Small)
   }
 
   @Benchmark
   def mediumArray(): Unit = {
-    waitStreamingEndpoint(200)
+    waitStreamingEndpoint(RestResponseSize.Medium)
   }
 
   @Benchmark
   def hugeArray(): Unit = {
-    waitStreamingEndpoint(5000)
+    waitStreamingEndpoint(RestResponseSize.Huge)
   }
 
   @Benchmark
   def smallArrayBatch10(): Unit = {
-    wait(this.proxy.exampleEndpointBatch10(10).toListL)
+    wait(this.proxy.exampleEndpointBatch10(RestResponseSize.Small).toListL)
   }
 
   @Benchmark
   def mediumArrayBatch10(): Unit = {
-    wait(this.proxy.exampleEndpointBatch10(200).toListL)
+    wait(this.proxy.exampleEndpointBatch10(RestResponseSize.Medium).toListL)
   }
 
   @Benchmark
   def hugeArrayBatch10(): Unit = {
-    wait(this.proxy.exampleEndpointBatch10(5000).toListL)
+    wait(this.proxy.exampleEndpointBatch10(RestResponseSize.Huge).toListL)
   }
 
   @Benchmark
   def smallArrayBatch500(): Unit = {
-    wait(this.proxy.exampleEndpointBatch500(10).toListL)
+    wait(this.proxy.exampleEndpointBatch500(RestResponseSize.Small).toListL)
   }
 
   @Benchmark
   def mediumArrayBatch500(): Unit = {
-    wait(this.proxy.exampleEndpointBatch500(200).toListL)
+    wait(this.proxy.exampleEndpointBatch500(RestResponseSize.Medium).toListL)
   }
 
   @Benchmark
   def hugeArrayBatch500(): Unit = {
-    wait(this.proxy.exampleEndpointBatch500(5000).toListL)
+    wait(this.proxy.exampleEndpointBatch500(RestResponseSize.Huge).toListL)
   }
 
   @Benchmark
   def smallArrayWithoutStreaming(): Unit = {
-    waitEndpointWithoutStreaming(10)
+    waitEndpointWithoutStreaming(RestResponseSize.Small)
   }
 
   @Benchmark
   def mediumArrayWithoutStreaming(): Unit = {
-    waitEndpointWithoutStreaming(200)
+    waitEndpointWithoutStreaming(RestResponseSize.Medium)
   }
 
   @Benchmark
   def hugeArrayWithoutStreaming(): Unit = {
-    waitEndpointWithoutStreaming(5000)
+    waitEndpointWithoutStreaming(RestResponseSize.Huge)
   }
 
-  private def waitEndpointWithoutStreaming(samples: Int): Unit = {
+  private def waitEndpointWithoutStreaming(samples: RestResponseSize): Unit = {
     wait(this.proxy.exampleEndpointWithoutStreaming(samples))
   }
 
-  private def waitStreamingEndpoint(samples: Int): Unit = {
+  private def waitStreamingEndpoint(samples: RestResponseSize): Unit = {
     wait(this.proxy.exampleEndpoint(samples).toListL)
   }
 
