@@ -13,3 +13,4 @@ addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.11.1")
 // Deployment configuration
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.3.1")
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.12.2")
+addSbtPlugin("pl.project13.scala" % "sbt-jmh" % "0.4.7")
