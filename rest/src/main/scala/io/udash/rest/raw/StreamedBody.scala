@@ -50,7 +50,7 @@ object StreamedBody extends StreamedBodyLowPrio {
     charset: String = HttpBody.Utf8Charset,
     customBatchSize: Opt[Int] = Opt.Empty,
   ) extends NonEmpty {
-    val contentType: String = s"${HttpBody.JsonType};charset=$charset"
+    def contentType: String = s"${HttpBody.JsonType};charset=$charset"
   }
 
   /**
