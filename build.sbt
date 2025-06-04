@@ -11,7 +11,6 @@ Global / excludeLintKeys ++= Set(ideOutputDirectory, ideSkipProject)
 inThisBuild(Seq(
   organization := "io.udash",
   resolvers += Resolver.defaultLocal,
-  sonatypeCredentialHost := Sonatype.sonatypeCentralHost,
   homepage := Some(url("https://udash.io")),
   licenses := Seq(License.Apache2),
   scmInfo := Some(ScmInfo(
