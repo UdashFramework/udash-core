@@ -40,6 +40,7 @@ private object RestApi {
 @OutputTimeUnit(TimeUnit.SECONDS)
 @BenchmarkMode(Array(Mode.Throughput))
 @State(Scope.Thread)
+@Fork(1)
 class RestApi {
   implicit def scheduler: Scheduler = Scheduler.global
 

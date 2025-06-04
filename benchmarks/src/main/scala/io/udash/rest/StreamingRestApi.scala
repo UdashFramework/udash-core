@@ -65,6 +65,7 @@ private object StreamingRestApi {
 @OutputTimeUnit(TimeUnit.SECONDS)
 @BenchmarkMode(Array(Mode.Throughput))
 @State(Scope.Thread)
+@Fork(1)
 class StreamingRestApi {
   implicit def scheduler: Scheduler = Scheduler.global
   private final val (impl, proxy) = StreamingRestApi.creteApiProxy()
