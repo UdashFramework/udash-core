@@ -341,7 +341,7 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
           .map(bytes => new String(bytes))
           .toListL.runToFuture
 
-        chunksFuture.futureValue.mkString("") == "HelloWorld"
+        chunksFuture.futureValue.mkString("") == "HelloWorld" * 100
       }
     )
   }

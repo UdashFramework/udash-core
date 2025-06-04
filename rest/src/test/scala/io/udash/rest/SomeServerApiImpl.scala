@@ -18,7 +18,7 @@ final class SomeServerApiImpl {
 
   @GET
   def streamBinary(chunkSize: Int): Observable[Array[Byte]] = {
-    val content = "HelloWorld".getBytes
+    val content = ("HelloWorld" * 100).getBytes
     Observable.fromIterable(content.grouped(chunkSize).toSeq)
   }
 
