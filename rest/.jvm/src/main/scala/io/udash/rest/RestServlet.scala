@@ -150,17 +150,17 @@ class RestServlet(
       case binary: StreamedBody.RawBinary =>
         response.setContentType(binary.contentType)
         binary.content
-          .consumeWith(Consumer.foreach { chunk =>
+          .foreachL { chunk =>
             response.getOutputStream.write(chunk)
             response.getOutputStream.flush()
-          })
+          }
       case jsonList: StreamedBody.JsonList =>
         response.setContentType(jsonList.contentType)
         jsonList.elements
           .bufferTumbling(jsonList.customBatchSize.getOrElse(defaultStreamingBatchSize))
           .switchIfEmpty(Observable(Seq.empty))
           .zipWithIndex
-          .consumeWith(Consumer.foreach { case (batch, idx) =>
+          .foreachL { case (batch, idx) =>
             val firstBatch = idx == 0
             if (firstBatch) {
               response.getOutputStream.write("[".getBytes(jsonList.charset))
@@ -176,7 +176,7 @@ class RestServlet(
                 response.getOutputStream.write(e.value.getBytes(jsonList.charset))
               }
             response.getOutputStream.flush()
-          })
+          }
           .map(_ => response.getOutputStream.write("]".getBytes(jsonList.charset)))
     }
   }.onErrorHandle {
