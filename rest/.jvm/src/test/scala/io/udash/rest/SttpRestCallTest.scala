@@ -42,7 +42,7 @@ class SttpRestCallTest extends SttpClientRestTest with RestApiTestScenarios {
 }
 
 class ServletTimeoutTest extends SttpClientRestTest {
-  override def serverTimeout: FiniteDuration = 500.millis
+  override def serverTimeout: FiniteDuration = 300.millis
 
   "rest method timeout" in {
     proxy.neverGet
