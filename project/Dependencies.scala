@@ -14,21 +14,21 @@ object Dependencies {
   val scalaCssVersion = "1.0.0"
 
   val servletVersion = "4.0.1"
-  val avsCommonsVersion = "2.21.0"
+  val avsCommonsVersion = "2.22.0"
 
   val atmosphereJSVersion = "3.1.3"
   val atmosphereVersion = "2.7.15"
 
-  val upickleVersion = "4.1.0" // Tests only
-  val circeVersion = "0.14.10" // Tests only
+  val upickleVersion = "4.2.1" // Tests only
+  val circeVersion = "0.14.13" // Tests only
   val circeDerivationVersion = "0.13.0-M5" // Tests only
   val monixVersion = "3.4.1" // udash-rest only
 
-  val sttpVersion = "3.10.3"
+  val sttpVersion = "3.11.0"
 
   val scalaLoggingVersion = "3.9.5"
 
-  val jettyVersion = "12.0.16"
+  val jettyVersion = "12.0.22"
   val typesafeConfigVersion = "1.4.3"
   val flexmarkVersion = "0.64.8"
   val logbackVersion = "1.3.15"
@@ -43,8 +43,8 @@ object Dependencies {
   val bootstrap4DatepickerVersion = "5.39.0"
   val momentJsVersion = "2.30.1"
 
-  val seleniumVersion = "4.29.0"
-  val webDriverManagerVersion = "5.9.3"
+  val seleniumVersion = "4.33.0"
+  val webDriverManagerVersion = "6.1.0"
   val scalaJsBenchmarkVersion = "0.10.0"
 
   val compilerPlugins = Def.setting(Seq(

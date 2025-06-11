@@ -10,9 +10,18 @@ name := "udash"
 Global / excludeLintKeys ++= Set(ideOutputDirectory, ideSkipProject)
 
 inThisBuild(Seq(
-  version := "0.18.0-SNAPSHOT",
   organization := "io.udash",
   resolvers += Resolver.defaultLocal,
+  homepage := Some(url("https://udash.io")),
+  licenses := Seq(License.Apache2),
+  scmInfo := Some(ScmInfo(
+    browseUrl = url("https://github.com/UdashFramework/udash-core"),
+    connection = "scm:git:git@github.com:UdashFramework/udash-core.git",
+    devConnection = Some("scm:git:git@github.com:UdashFramework/udash-core.git"),
+  )),
+  developers := List(
+    Developer("ddworak", "Dawid Dworak", "d.dworak@avsystem.com", url("https://github.com/ddworak")),
+  ),
 ))
 
 val forIdeaImport = System.getProperty("idea.managed", "false").toBoolean && System.getProperty("idea.runid") == null
@@ -23,39 +32,6 @@ val browserCapabilities: Capabilities = {
   // requires gecko driver, see https://github.com/mozilla/geckodriver
   new FirefoxOptions().setHeadless(true).setLogLevel(FirefoxDriverLogLevel.WARN)
 }
-
-// Deployment configuration
-val deploymentConfiguration = Seq(
-  publishMavenStyle := true,
-  Test / publishArtifact := false,
-  pomIncludeRepository := { _ => false },
-
-  publishTo := sonatypePublishToBundle.value,
-
-  credentials in Global += Credentials(
-    "Sonatype Nexus Repository Manager",
-    "oss.sonatype.org",
-    sys.env.getOrElse("SONATYPE_USERNAME", ""),
-    sys.env.getOrElse("SONATYPE_PASSWORD", "")
-  ),
-
-  licenses := Seq(License.Apache2),
-
-  pomExtra := {
-    <url>https://github.com/UdashFramework/udash-core</url>
-      <scm>
-        <url>git@github.com:UdashFramework/udash-core.git</url>
-        <connection>scm:git@github.com:UdashFramework/udash-core.git</connection>
-      </scm>
-      <developers>
-        <developer>
-          <id>avsystem</id>
-          <name>AVSystem</name>
-          <url>http://www.avsystem.com/</url>
-        </developer>
-      </developers>
-  }
-)
 
 val commonSettings = Seq(
   scalaVersion := Dependencies.versionOfScala,
@@ -86,7 +62,8 @@ val commonSettings = Seq(
   Test / ideOutputDirectory := Some(target.value.getParentFile / "out/test"),
   libraryDependencies ++= Dependencies.compilerPlugins.value,
   libraryDependencies ++= Dependencies.commonTestDeps.value,
-) ++ deploymentConfiguration
+  pomIncludeRepository := { _ => false },
+)
 
 val commonJsSettings = commonSettings ++ Seq(
   Test / scalaJSStage := FastOptStage,
