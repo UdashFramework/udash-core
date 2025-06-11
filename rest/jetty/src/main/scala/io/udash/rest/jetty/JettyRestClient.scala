@@ -4,6 +4,7 @@ package rest.jetty
 import com.avsystem.commons.*
 import com.avsystem.commons.annotation.explicitGenerics
 import com.avsystem.commons.serialization.json.{JsonReader, JsonStringInput}
+import com.typesafe.scalalogging.LazyLogging
 import io.udash.rest.raw.*
 import io.udash.rest.util.Utils
 import io.udash.utils.URLEncoder
@@ -36,7 +37,7 @@ final class JettyRestClient(
   client: HttpClient,
   defaultMaxResponseLength: Int = JettyRestClient.DefaultMaxResponseLength,
   defaultTimeout: Duration = JettyRestClient.DefaultTimeout,
-) {
+) extends LazyLogging {
 
   @explicitGenerics
   def create[RestApi: RawRest.AsRealRpc : RestMetadata](
@@ -144,6 +145,11 @@ final class JettyRestClient(
                   .mapNow {
                     case Ack.Continue => demander.run()
                     case Ack.Stop     => ()
+                  }
+                  .onCompleteNow {
+                    case Failure(ex) =>
+                      logger.error("Unexpected error while processing streamed response chunk", ex)
+                    case Success(_) =>
                   }
               }
 
