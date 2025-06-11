@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-private object StreamingRestApi {
+private object StreamingRestApiBenchmark {
   trait RestTestApi {
     @GET def exampleEndpoint(size: RestResponseSize): Observable[RestExampleData]
     @GET def exampleEndpointBinary(size: RestResponseSize): Observable[Array[Byte]]
@@ -88,9 +88,9 @@ private object StreamingRestApi {
 @BenchmarkMode(Array(Mode.Throughput))
 @State(Scope.Thread)
 @Fork(1)
-class StreamingRestApi {
+class StreamingRestApiBenchmark {
   implicit def scheduler: Scheduler = Scheduler.global
-  private final val (impl, proxy) = StreamingRestApi.creteApiProxy()
+  private final val (impl, proxy) = StreamingRestApiBenchmark.creteApiProxy()
 
   @Setup(Level.Trial)
   def setup(): Unit = {

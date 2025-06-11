@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-private object RestApi {
+private object RestApiBenchmark {
   trait RestTestApi {
     @GET def exampleEndpoint(size: RestResponseSize): Task[List[RestExampleData]]
     @GET def exampleBinaryEndpoint(size: RestResponseSize): Task[List[Array[Byte]]]
@@ -36,7 +36,7 @@ private object RestApi {
     }
   }
 
-  private def creteApiProxy(): (RestTestApi.Impl, RestTestApi) = {
+  private def createApiProxy(): (RestTestApi.Impl, RestTestApi) = {
     val apiImpl = new RestTestApi.Impl()
     val handler = RawRest.asHandleRequest[RestTestApi](apiImpl)
     (apiImpl, RawRest.fromHandleRequest[RestTestApi](handler))
@@ -48,10 +48,10 @@ private object RestApi {
 @BenchmarkMode(Array(Mode.Throughput))
 @State(Scope.Thread)
 @Fork(1)
-class RestApi {
+class RestApiBenchmark {
   implicit def scheduler: Scheduler = Scheduler.global
 
-  private final val (impl, proxy) = RestApi.creteApiProxy()
+  private final val (impl, proxy) = RestApiBenchmark.createApiProxy()
 
   @Setup(Level.Trial)
   def setup(): Unit = {
