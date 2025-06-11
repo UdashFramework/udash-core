@@ -2,6 +2,8 @@ package io.udash
 package rest
 
 import io.udash.testing.CompilationErrorAssertions
+import monix.eval.Task
+import monix.reactive.Observable
 
 import scala.concurrent.Future
 import org.scalatest.funsuite.AnyFunSuite
@@ -41,7 +43,11 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
         |   Cannot serialize Any into RestResponse, because:
         |   Cannot serialize Any into HttpBody, because:
         |   Cannot serialize Any into JsonValue, because:
-        |   No GenCodec found for Any""".stripMargin)
+        |   No GenCodec found for Any
+        | * it cannot be translated into an HTTP stream method:
+        |   scala.concurrent.Future[Any] is not a valid result type because:
+        |   Cannot serialize Any into StreamedRestResponse, because:
+        |   Cannot serialize Any into io.udash.rest.raw.StreamedBody, appropriate AsRaw instance not found""".stripMargin)
   }
 
   trait BadResultType {
@@ -56,6 +62,8 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
         | * it cannot be translated into a prefix method:
         |   Unit is not a valid server REST API trait, does its companion extend DefaultRestApiCompanion, DefaultRestServerApiCompanion or other companion base?
         | * it cannot be translated into an HTTP method:
+        |   Unit is not a valid result type of HTTP REST method - it must be a Future
+        | * it cannot be translated into an HTTP stream method:
         |   Unit is not a valid result type of HTTP REST method - it must be a Future""".stripMargin)
   }
 
@@ -71,6 +79,8 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
         | * it cannot be translated into a prefix method:
         |   prefix methods cannot take @Body parameters
         | * it cannot be translated into an HTTP method:
+        |   CompilationErrorsTest.this.SubApi is not a valid result type of HTTP REST method - it must be a Future
+        | * it cannot be translated into an HTTP stream method:
         |   CompilationErrorsTest.this.SubApi is not a valid result type of HTTP REST method - it must be a Future""".stripMargin)
   }
 
@@ -84,7 +94,11 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
       """cannot translate between trait UnexpectedGETBodyParam and trait RawRest:
         |problem with method meth:
         | * it cannot be translated into an HTTP GET method:
-        |   GET methods cannot take @Body parameters""".stripMargin)
+        |   GET methods cannot take @Body parameters
+        | * it cannot be translated into an HTTP GET stream method:
+        |   scala.concurrent.Future[Unit] is not a valid result type because:
+        |   Cannot serialize Unit into StreamedRestResponse, because:
+        |   Cannot serialize Unit into io.udash.rest.raw.StreamedBody, appropriate AsRaw instance not found""".stripMargin)
   }
 
   trait MissingBodyParam {
@@ -97,7 +111,11 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
       """cannot translate between trait MissingBodyParam and trait RawRest:
         |problem with method meth:
         | * it cannot be translated into an HTTP method with custom body:
-        |   expected exactly one @Body parameter but none was found""".stripMargin)
+        |   expected exactly one @Body parameter but none was found
+        | * it cannot be translated into an HTTP stream method with custom body:
+        |   scala.concurrent.Future[Unit] is not a valid result type because:
+        |   Cannot serialize Unit into StreamedRestResponse, because:
+        |   Cannot serialize Unit into io.udash.rest.raw.StreamedBody, appropriate AsRaw instance not found""".stripMargin)
   }
 
   trait MultipleBodyParams {
@@ -110,6 +128,53 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
       """cannot translate between trait MultipleBodyParams and trait RawRest:
         |problem with method meth:
         | * it cannot be translated into an HTTP method with custom body:
-        |   expected exactly one @Body parameter but more than one was found""".stripMargin)
+        |   expected exactly one @Body parameter but more than one was found
+        | * it cannot be translated into an HTTP stream method with custom body:
+        |   scala.concurrent.Future[Unit] is not a valid result type because:
+        |   Cannot serialize Unit into StreamedRestResponse, because:
+        |   Cannot serialize Unit into io.udash.rest.raw.StreamedBody, appropriate AsRaw instance not found""".stripMargin)
   }
+
+
+  trait MissingObservableSerializerForResult {
+    @GET def streamMeth(): Observable[Any]
+  }
+
+  test("missing serializer for Observable result element") {
+    val error = norm(typeErrorFor("object Api extends DefaultRestServerApiImplCompanion[MissingObservableSerializerForResult]"))
+    assert(error ==
+      """cannot translate between trait MissingObservableSerializerForResult and trait RawRest:
+        |problem with method streamMeth:
+        | * it cannot be translated into an HTTP GET method:
+        |   monix.reactive.Observable[Any] is not a valid result type of HTTP REST method - it must be a Future
+        | * it cannot be translated into an HTTP GET stream method:
+        |   Observable[Any] is not a valid result type because:
+        |   Cannot serialize Observable[Any] into StreamedBody, because:
+        |   Cannot serialize Any into JsonValue, because:
+        |   No GenCodec found for Any""".stripMargin)
+  }
+
+  trait MissingTaskObservableSerializerForResult {
+    @GET def taskStreamMeth(): Task[Observable[Any]]
+  }
+
+  test("missing serializer for Task[Observable] result element") {
+    val error = norm(typeErrorFor("object Api extends DefaultRestApiCompanion[MissingTaskObservableSerializerForResult]"))
+    assert(error ==
+      """cannot translate between trait MissingTaskObservableSerializerForResult and trait RawRest:
+        |problem with method taskStreamMeth:
+        | * it cannot be translated into an HTTP GET method:
+        |   monix.eval.Task[monix.reactive.Observable[Any]] is not a valid result type because:
+        |   Cannot serialize monix.reactive.Observable[Any] into RestResponse, because:
+        |   Cannot serialize monix.reactive.Observable[Any] into HttpBody, because:
+        |   Cannot serialize monix.reactive.Observable[Any] into JsonValue, because:
+        |   No GenCodec found for monix.reactive.Observable[Any]
+        | * it cannot be translated into an HTTP GET stream method:
+        |   monix.eval.Task[monix.reactive.Observable[Any]] is not a valid result type because:
+        |   Cannot serialize monix.reactive.Observable[Any] into StreamedRestResponse, because:
+        |   Cannot serialize Observable[Any] into StreamedBody, because:
+        |   Cannot serialize Any into JsonValue, because:
+        |   No GenCodec found for Any""".stripMargin)
+  }
+
 }

@@ -2,15 +2,18 @@ package io.udash
 package rest
 package raw
 
-import com.avsystem.commons._
+import com.avsystem.commons.*
 import com.avsystem.commons.annotation.AnnotationAggregate
-import com.avsystem.commons.serialization.{StringWrapperCompanion, transientDefault, whenAbsent}
+import com.avsystem.commons.serialization.{transientDefault, whenAbsent}
+import io.udash.rest.raw.StreamedBody.castOrFail
 import io.udash.rest.util.WithHeaders
 import monix.eval.Task
 import monix.execution.Scheduler
+import monix.reactive.Observable
 import org.scalactic.source.Position
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 case class UserId(id: String) extends AnyVal {
   override def toString: String = id
@@ -62,6 +65,13 @@ trait UserApi {
   def adjusted: Future[Unit]
 
   @CustomBody def binaryEcho(bytes: Array[Byte]): Future[Array[Byte]]
+
+  @GET def streamNumbers(@Query("count") count: Int): Observable[Int]
+  @GET def streamStrings(@Query("count") count: Int, @Query("prefix") prefix: String): Observable[String]
+  @GET def streamUsers(@Query("count") count: Int): Observable[User]
+  @GET def streamEmpty: Observable[String]
+  @CustomBody def streamBinary(bytes: Array[Byte]): Observable[Array[Byte]]
+  @GET("streamError") def streamWithError(@Query("failAt") failAt: Int): Observable[String]
 }
 object UserApi extends DefaultRestApiCompanion[UserApi]
 
@@ -75,7 +85,7 @@ trait RootApi {
 }
 object RootApi extends DefaultRestApiCompanion[RootApi]
 
-class RawRestTest extends AnyFunSuite with ScalaFutures {
+class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
   implicit def scheduler: Scheduler = Scheduler.global
 
   def repr(body: HttpBody, inNewLine: Boolean = true): String = body match {
@@ -106,6 +116,29 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
     s"<- ${resp.code}$headersRepr${repr(resp.body, hasHeaders)}".trim
   }
 
+  def repr(resp: StreamedRestResponse): Task[String] = {
+    val headersRepr = resp.headers.iterator
+      .map({ case (n, v) => s"$n: ${v.value}" }).mkStringOrEmpty("\n", "\n", "\n")
+
+    val bodyReprTask: Task[String] = resp.body match {
+      case StreamedBody.Empty => Task.now("")
+      case StreamedBody.JsonList(elements, charset, _) =>
+        elements.toListL.map { list =>
+          s" application/json;charset=$charset\n[${list.map(_.value).mkString(",")}]"
+        }
+      case StreamedBody.RawBinary(content, tpe) =>
+        content.toListL.map { list =>
+          s" $tpe\n${list.flatMap(_.iterator.map(b => f"$b%02X")).mkString}"
+        }
+      case StreamedBody.Single(body) =>
+        Task.now(repr(body, inNewLine = false))
+    }
+
+    bodyReprTask.map { bodyRepr =>
+      s"<- ${resp.code}$headersRepr$bodyRepr".trim
+    }
+  }
+
   class RootApiImpl(id: Int, query: String) extends RootApi with UserApi {
     def self: UserApi = this
     def subApi(newId: Int, newQuery: String): UserApi = new RootApiImpl(newId, query + newQuery)
@@ -124,9 +157,21 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
     def requireNonBlank(param: NonBlankString): Future[Unit] = Future.unit
     def echoHeaders(headers: Map[String, String]): Future[WithHeaders[Unit]] =
       Future.successful(WithHeaders((), headers.toList))
+    def streamNumbers(count: Int): Observable[Int] =
+      Observable.fromIterable(1 to count)
+    def streamStrings(count: Int, prefix: String): Observable[String] =
+      Observable.fromIterable(1 to count).map(i => s"$prefix-$i")
+    def streamUsers(count: Int): Observable[User] =
+      Observable.fromIterable(1 to count).map(i => User(UserId(s"id-$i"), s"User $i"))
+    def streamEmpty: Observable[String] = Observable.empty
+    def streamBinary(bytes: Array[Byte]): Observable[Array[Byte]] =
+      Observable.fromIterable(bytes.grouped(2).toList)
+    def streamWithError(failAt: Int): Observable[String] =
+      Observable.fromIterable(1 to 10)
+        .map(i => if (i == failAt) throw HttpErrorException.plain(400, s"Error at $i") else s"item-$i")
   }
 
-  var trafficLog: String = _
+  @volatile var trafficLog: String = _
 
   val real: RootApi = new RootApiImpl(0, "")
   val serverHandle: RawRest.HandleRequest = request =>
@@ -136,21 +181,65 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
       }
     }
 
+  val serverHandleWithStreaming: RawRest.HandleRequestWithStreaming = request =>
+    RawRest.asHandleRequestWithStreaming(real).apply(request).flatMap { response =>
+      val logTask = response match {
+        case resp: RestResponse =>
+          Task.eval {
+            trafficLog = s"${repr(request)}\n${repr(resp)}\n"
+          }
+        case streamResp: StreamedRestResponse =>
+          repr(streamResp).map { responseRepr =>
+            trafficLog = s"${repr(request)}\n$responseRepr\n"
+          }
+      }
+      logTask.as(response)
+    }
+
+
   val realProxy: RootApi = RawRest.fromHandleRequest[RootApi](serverHandle)
 
+  val realStreamingProxy: RootApi = RawRest.fromHandleRequestWithStreaming[RootApi](new RawRest.RestRequestHandler {
+    def handleRequest(request: RestRequest): Task[RestResponse] =
+      serverHandle(request)
+
+    def handleRequestStream(request: RestRequest): Task[StreamedRestResponse] =
+      serverHandleWithStreaming(request).flatMap {
+        case stream: StreamedRestResponse => Task.now(stream)
+        case resp: RestResponse =>
+          Task(StreamedRestResponse(resp.code, resp.headers, StreamedBody.fromHttpBody(resp.body)))
+      }
+  })
+
   def testRestCall[T](call: RootApi => Future[T], expectedTraffic: String)(implicit pos: Position): Unit = {
-    assert(call(realProxy).wrapToTry.futureValue.map(mkDeep) == call(real).catchFailures.wrapToTry.futureValue.map(mkDeep))
-    assert(trafficLog == expectedTraffic)
+    val realResult = call(real).catchFailures.wrapToTry.futureValue.map(mkDeep)
+    val proxyResult = call(realProxy).wrapToTry.futureValue.map(mkDeep)
+    proxyResult shouldBe realResult
+    trafficLog shouldBe expectedTraffic
+  }
+
+  def testStreamingRestCall[T](call: RootApi => Observable[T], expectedTraffic: String)(implicit pos: Position): Unit = {
+    val realResultFuture = call(real).toListL.runToFuture.wrapToTry
+    val proxyResultFuture = call(realStreamingProxy).toListL.runToFuture.wrapToTry
+
+    whenReady(realResultFuture) { realResult =>
+      whenReady(proxyResultFuture) { proxyResult =>
+        proxyResult shouldBe realResult
+        trafficLog shouldBe expectedTraffic
+      }
+    }
   }
 
   def mkDeep(value: Any): Any = value match {
     case arr: Array[_] => IArraySeq.empty[AnyRef] ++ arr.iterator.map(mkDeep)
-    case _ => value
+    case v => v
   }
 
   def assertRawExchange(request: RestRequest, response: RestResponse)(implicit pos: Position): Unit = {
     val future = serverHandle(request).runToFuture
-    assert(future.futureValue == response)
+    whenReady(future) { result =>
+      result shouldBe response
+    }
   }
 
   test("simple GET") {
@@ -330,5 +419,100 @@ class RawRestTest extends AnyFunSuite with ScalaFutures {
     ), HttpBody.Empty)
     val response = RestResponse(400, IMapping.empty, HttpBody.plain("this stuff is blank"))
     assertRawExchange(request, response)
+  }
+
+  test("stream numbers") {
+    testStreamingRestCall(_.self.streamNumbers(5),
+      """-> GET /streamNumbers?count=5
+        |<- 200 application/json;charset=utf-8
+        |[1,2,3,4,5]
+        |""".stripMargin
+    )
+  }
+
+  test("stream strings with prefix") {
+    testStreamingRestCall(_.self.streamStrings(3, "test"),
+      """-> GET /streamStrings?count=3&prefix=test
+        |<- 200 application/json;charset=utf-8
+        |["test-1","test-2","test-3"]
+        |""".stripMargin
+    )
+  }
+
+  test("stream users") {
+    testStreamingRestCall(_.self.streamUsers(2),
+      """-> GET /streamUsers?count=2
+        |<- 200 application/json;charset=utf-8
+        |[{"id":"id-1","name":"User 1"},{"id":"id-2","name":"User 2"}]
+        |""".stripMargin
+    )
+  }
+
+  test("stream empty") {
+    testStreamingRestCall(_.self.streamEmpty,
+      """-> GET /streamEmpty
+        |<- 200 application/json;charset=utf-8
+        |[]
+        |""".stripMargin
+    )
+  }
+
+  test("stream binary") {
+    val inputBytes = Array[Byte](1, 2, 3, 4)
+    val expectedTraffic =
+      """-> POST /streamBinary application/octet-stream
+        |01020304
+        |<- 200 application/octet-stream
+        |01020304
+        |""".stripMargin
+
+    val realResultFuture = real.self.streamBinary(inputBytes).toListL.runToFuture
+    val proxyResultFuture = realStreamingProxy.self.streamBinary(inputBytes).toListL.runToFuture
+
+    whenReady(realResultFuture) { realResult =>
+      whenReady(proxyResultFuture) { proxyResult =>
+        proxyResult.map(_.toList) shouldBe realResult.map(_.toList)
+        trafficLog shouldBe expectedTraffic
+      }
+    }
+  }
+
+  test("stream with error") {
+    val futureResult = realStreamingProxy.self.streamWithError(3).toListL.runToFuture.wrapToTry
+
+    whenReady(futureResult) { resultTry =>
+      val exception = intercept[HttpErrorException] {
+        resultTry.get
+      }
+      exception.code shouldBe 400
+      exception.payload.textualContentOpt.get shouldBe "Error at 3"
+    }
+  }
+
+
+  test("streaming after prefix call") {
+    testStreamingRestCall(_.subApi(5, "test").streamNumbers(3),
+      """-> GET /subApi/5/streamNumbers?query=test&count=3
+        |<- 200 application/json;charset=utf-8
+        |[1,2,3]
+        |""".stripMargin
+    )
+  }
+
+  test("streaming response via raw exchange") {
+    val request = RestRequest(
+      HttpMethod.GET,
+      RestParameters(PlainValue.decodePath("streamNumbers"), query = Mapping(ISeq("count" -> PlainValue("4")))),
+      HttpBody.Empty
+    )
+    whenReady(serverHandleWithStreaming(request).runToFuture) {
+      case StreamedRestResponse(code, headers, body) =>
+        code shouldBe 200
+        val elements = castOrFail[StreamedBody.JsonList](body).elements
+        whenReady(elements.toListL.runToFuture) { e =>
+          e shouldBe List(JsonValue("1"), JsonValue("2"), JsonValue("3"), JsonValue("4"))
+        }
+      case _ => fail()
+    }
   }
 }

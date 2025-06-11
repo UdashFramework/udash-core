@@ -37,6 +37,7 @@ object Dependencies {
   val svg4everybodyVersion = "2.1.9"
 
   val scalatestVersion = "3.2.19"
+  val mockitoVersion = "1.17.37"
   val scalaJsSecureRandomVersion = "1.0.0" // Tests only
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.39.0"
@@ -114,7 +115,8 @@ object Dependencies {
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "org.eclipse.jetty" % "jetty-server" % jettyVersion % Test,
-    "org.eclipse.jetty.ee8" % "jetty-ee8-servlet" % jettyVersion % Test
+    "org.eclipse.jetty.ee8" % "jetty-ee8-servlet" % jettyVersion % Test,
+    "org.mockito" %% "mockito-scala-scalatest" % mockitoVersion % Test,
   ))
 
   val restSjsDeps = restCrossDeps

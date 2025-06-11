@@ -3,6 +3,7 @@ import org.openqa.selenium.firefox.{FirefoxDriverLogLevel, FirefoxOptions}
 import org.scalajs.jsdependencies.sbtplugin.JSModuleID
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
+import pl.project13.scala.sbt.JmhPlugin
 
 name := "udash"
 
@@ -461,3 +462,11 @@ lazy val `guide-selenium` =
         `guide-guide` / Compile / compileStatics,
       ).value
     )
+
+lazy val benchmarksJVM =   project.in(file("benchmarks"))
+  .enablePlugins(JmhPlugin)
+  .dependsOn(jvmLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
+  .settings(
+    commonSettings,
+    noPublishSettings,
+  )

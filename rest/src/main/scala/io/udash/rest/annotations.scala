@@ -1,11 +1,12 @@
 package io.udash
 package rest
 
+import com.avsystem.commons.Opt
 import com.avsystem.commons.annotation.{AnnotationAggregate, defaultsToName}
 import com.avsystem.commons.meta.RealSymAnnotation
-import com.avsystem.commons.rpc._
+import com.avsystem.commons.rpc.*
 import com.avsystem.commons.serialization.optionalParam
-import io.udash.rest.raw._
+import io.udash.rest.raw.*
 
 import scala.annotation.StaticAnnotation
 
@@ -321,6 +322,14 @@ trait ResponseAdjuster extends RealSymAnnotation {
 }
 
 /**
+ * Base trait for annotations which may be applied on REST API methods (including prefix methods)
+ * in order to customize outgoing response on the server side.
+ */
+trait StreamedResponseAdjuster extends RealSymAnnotation {
+  def adjustResponse(response: StreamedRestResponse): StreamedRestResponse
+}
+
+/**
   * Convenience implementation of [[RequestAdjuster]].
   */
 class adjustRequest(f: RestRequest => RestRequest) extends RequestAdjuster {
@@ -335,6 +344,13 @@ class adjustResponse(f: RestResponse => RestResponse) extends ResponseAdjuster {
 }
 
 /**
+ * Convenience implementation of [[StreamedResponseAdjuster]].
+ */
+class adjustStreamedResponse(f: StreamedRestResponse => StreamedRestResponse) extends StreamedResponseAdjuster {
+  def adjustResponse(response: StreamedRestResponse): StreamedRestResponse = f(response)
+}
+
+/**
   * Annotation which may be applied on REST API methods (including prefix methods) in order to append additional
   * HTTP header to all outgoing requests generated for invocations of that method on the client side.
   */
@@ -346,6 +362,20 @@ class addRequestHeader(name: String, value: String) extends RequestAdjuster {
   * Annotation which may be applied on REST API methods (including prefix methods) in order to append additional
   * HTTP header to all outgoing responses generated for invocations of that method on the server side.
   */
-class addResponseHeader(name: String, value: String) extends ResponseAdjuster {
-  def adjustResponse(response: RestResponse): RestResponse = response.header(name, value)
+class addResponseHeader(name: String, value: String) extends ResponseAdjuster with StreamedResponseAdjuster {
+  override def adjustResponse(response: RestResponse): RestResponse = response.header(name, value)
+  override def adjustResponse(response: StreamedRestResponse): StreamedRestResponse = response.header(name, value)
+}
+
+/**
+ * Annotation which may be applied on REST API methods to change streaming batch size when [[StreamedBody.JsonList]]
+ * bodies are used. It has no effect when applied to other body types or non-streaming methods.
+ */
+class streamingResponseBatchSize(size: Int) extends StreamedResponseAdjuster {
+  override def adjustResponse(response: StreamedRestResponse): StreamedRestResponse =
+    response.body match {
+      case jsonList: StreamedBody.JsonList =>
+        response.copy(body = jsonList.copy(customBatchSize = Opt.some(size)))
+      case _ => response
+    }
 }

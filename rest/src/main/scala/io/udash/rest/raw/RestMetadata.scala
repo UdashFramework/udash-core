@@ -2,12 +2,14 @@ package io.udash
 package rest
 package raw
 
-import com.avsystem.commons._
-import com.avsystem.commons.meta._
-import com.avsystem.commons.rpc._
+import com.avsystem.commons.*
+import com.avsystem.commons.annotation.bincompat
+import com.avsystem.commons.meta.*
+import com.avsystem.commons.rpc.*
 import io.udash.macros.RestMacros
 import io.udash.rest.raw.RestMetadata.ResolutionTrie
 import monix.eval.{Task, TaskLike}
+import monix.reactive.Observable
 
 import scala.annotation.implicitNotFound
 
@@ -37,7 +39,7 @@ final case class RestMetadata[T](
   @tagged[SomeBodyTag](whenUntagged = new JsonBody)
   @paramTag[RestParamTag](defaultTag = new Body)
   @unmatched(RawRest.NotValidHttpMethod)
-  @rpcMethodMetadata httpBodyMethods: List[HttpMethodMetadata[_]]
+  @rpcMethodMetadata httpBodyMethods: List[HttpMethodMetadata[_]],
 ) {
   val httpMethods: List[HttpMethodMetadata[_]] =
     httpGetMethods ++ httpBodyMethods
@@ -234,6 +236,7 @@ sealed abstract class RestMethodMetadata[T] extends TypedMetadata[T] {
   def parametersMetadata: RestParametersMetadata
   def requestAdjusters: List[RequestAdjuster]
   def responseAdjusters: List[ResponseAdjuster]
+  def streamedResponseAdjusters: List[StreamedResponseAdjuster]
 
   val pathPattern: List[PathPatternElement] = methodPath.map(PathName.apply) ++
     parametersMetadata.pathParams.flatMap(pp => PathParam(pp) :: pp.pathSuffix.map(PathName.apply))
@@ -269,6 +272,16 @@ sealed abstract class RestMethodMetadata[T] extends TypedMetadata[T] {
   def adjustResponse(asyncResponse: Task[RestResponse]): Task[RestResponse] =
     if (responseAdjusters.isEmpty) asyncResponse
     else asyncResponse.map(resp => responseAdjusters.foldRight(resp)(_ adjustResponse _))
+
+  def adjustResponseWithStreaming(asyncResponse: Task[AbstractRestResponse]): Task[AbstractRestResponse] =
+    asyncResponse.map {
+      case resp: RestResponse =>
+        if (responseAdjusters.isEmpty) resp
+        else responseAdjusters.foldRight(resp)(_ adjustResponse _)
+      case stream: StreamedRestResponse =>
+        if (streamedResponseAdjusters.isEmpty) stream
+        else streamedResponseAdjusters.foldRight(stream)(_ adjustResponse _)
+    }
 }
 
 final case class PrefixMetadata[T](
@@ -277,8 +290,19 @@ final case class PrefixMetadata[T](
   @composite parametersMetadata: RestParametersMetadata,
   @multi @reifyAnnot requestAdjusters: List[RequestAdjuster],
   @multi @reifyAnnot responseAdjusters: List[ResponseAdjuster],
-  @infer @checked result: RestMetadata.Lazy[T]
+  @multi @reifyAnnot streamedResponseAdjusters: List[StreamedResponseAdjuster],
+  @infer @checked result: RestMetadata.Lazy[T],
 ) extends RestMethodMetadata[T] {
+
+  @bincompat private[rest] def this(
+    name: String,
+    methodTag: Prefix,
+    parametersMetadata: RestParametersMetadata,
+    requestAdjusters: List[RequestAdjuster],
+    responseAdjusters: List[ResponseAdjuster],
+    result: RestMetadata.Lazy[T],
+  ) = this(name, methodTag, parametersMetadata, requestAdjusters, responseAdjusters, Nil, result)
+
   def methodPath: List[PlainValue] = PlainValue.decodePath(methodTag.path)
 }
 
@@ -291,14 +315,41 @@ final case class HttpMethodMetadata[T](
   @isAnnotated[FormBody] formBody: Boolean,
   @multi @reifyAnnot requestAdjusters: List[RequestAdjuster],
   @multi @reifyAnnot responseAdjusters: List[ResponseAdjuster],
-  @infer @checked responseType: HttpResponseType[T]
+  @multi @reifyAnnot streamedResponseAdjusters: List[StreamedResponseAdjuster],
+  @infer @checked responseType: HttpResponseType[T],
 ) extends RestMethodMetadata[T] {
+
+  @bincompat private[rest] def this(
+    name: String,
+    methodTag: HttpMethodTag,
+    bodyTypeTag: BodyTypeTag,
+    parametersMetadata: RestParametersMetadata,
+    bodyParams: List[ParamMetadata[_]],
+    formBody: Boolean,
+    requestAdjusters: List[RequestAdjuster],
+    responseAdjusters: List[ResponseAdjuster],
+    responseType: HttpResponseType[T],
+  ) = this(
+    name,
+    methodTag,
+    bodyTypeTag,
+    parametersMetadata,
+    bodyParams,
+    formBody,
+    requestAdjusters,
+    responseAdjusters,
+    Nil,
+    responseType
+  )
+
   val method: HttpMethod = methodTag.method
 
   val customBody: Boolean = bodyTypeTag match {
     case _: CustomBody => true
     case _ => false
   }
+
+  val streamedResponse: Boolean = responseType.streamed
 
   def singleBodyParam: Opt[ParamMetadata[_]] =
     if (customBody) bodyParams.headOpt else Opt.Empty
@@ -321,8 +372,16 @@ final case class HttpMethodMetadata[T](
  * See `MacroInstances` for more information on injection of implicits.
  */
 @implicitNotFound("${T} is not a valid result type of HTTP REST method")
-final case class HttpResponseType[T]()
-object HttpResponseType {
+final case class HttpResponseType[T](streamed: Boolean = false)
+object HttpResponseType extends HttpResponseTypeLowPrio {
+
+  implicit def observableResponseType[T]: HttpResponseType[Observable[T]] =
+    HttpResponseType(streamed = true)
+
+  implicit def streamedResponseType[F[_] : TaskLike, T](implicit asRaw: AsRaw[StreamedRestResponse, T]): HttpResponseType[F[T]] =
+    HttpResponseType(streamed = true)
+}
+trait HttpResponseTypeLowPrio { this: HttpResponseType.type =>
   implicit def asyncEffectResponseType[F[_] : TaskLike, T]: HttpResponseType[F[T]] =
     HttpResponseType()
 }
@@ -347,7 +406,7 @@ final case class ParamMetadata[T](
 
 final case class PathParamMetadata[T](
   @reifyName(useRawName = true) name: String,
-  @reifyAnnot pathAnnot: Path
+  @reifyAnnot pathAnnot: Path,
 ) extends TypedMetadata[T] {
   val pathSuffix: List[PlainValue] = PlainValue.decodePath(pathAnnot.pathSuffix)
 }

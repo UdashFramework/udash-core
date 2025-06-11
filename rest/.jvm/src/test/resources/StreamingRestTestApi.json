@@ -1,0 +1,336 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Streaming Test API",
+    "version": "0.1",
+    "description": "Some test REST API"
+  },
+  "paths": {
+    "/binaryStream": {
+      "post": {
+        "operationId": "binaryStream",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customStream": {
+      "get": {
+        "operationId": "customStream",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomStream"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customStreamTask": {
+      "get": {
+        "operationId": "customStreamTask",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataStream"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/delayedStream": {
+      "get": {
+        "operationId": "delayedStream",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "delayMillis",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/errorStream": {
+      "post": {
+        "operationId": "errorStream",
+        "parameters": [
+          {
+            "name": "immediate",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RestEntity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jsonStream": {
+      "get": {
+        "operationId": "jsonStream",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RestEntity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simpleStream": {
+      "get": {
+        "operationId": "simpleStream",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/streamTask": {
+      "get": {
+        "operationId": "streamTask",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "CustomStream": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "DataStream": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "RestEntity": {
+        "type": "object",
+        "description": "REST entity",
+        "properties": {
+          "id": {
+            "description": "entity id",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RestEntityId"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "default": "anonymous"
+          },
+          "subentity": {
+            "description": "recursive optional subentity",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RestEntity"
+              }
+            ],
+            "default": null
+          },
+          "enumField": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RestEntityEnumCustom"
+              }
+            ],
+            "default": "OptionOne"
+          },
+          "inlinedEnumField": {
+            "type": "string",
+            "enum": [
+              "Option1",
+              "Option2"
+            ],
+            "default": "Option1"
+          },
+          "enumMap": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RestEntityEnumCustom"
+            },
+            "default": {}
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "RestEntityEnumCustom": {
+        "type": "string",
+        "description": "Example named enum",
+        "enum": [
+          "OptionOne",
+          "OptionTwo"
+        ],
+        "example": "OptionOne"
+      },
+      "RestEntityId": {
+        "type": "string",
+        "description": "Entity identifier"
+      }
+    }
+  }
+}
