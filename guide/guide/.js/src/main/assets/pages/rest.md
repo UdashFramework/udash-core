@@ -1035,6 +1035,9 @@ client.downloadFile("report.pdf")
   .foreach(chunk => outputStream.write(chunk))(monixScheduler)
 ```
 
+Jetty client provided by the framework `JettyRestClient` supports streaming only for binary data. JSON list processing
+still requires receiving full payload. 
+
 ### How Streaming Works
 
 When a client makes a request to a streaming endpoint:
