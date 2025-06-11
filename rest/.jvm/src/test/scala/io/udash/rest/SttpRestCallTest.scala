@@ -48,7 +48,7 @@ class ServletTimeoutTest extends SttpClientRestTest {
     proxy.neverGet
       .failed
       .map { exception =>
-        assert(exception == HttpErrorException.plain(500, "server operation timed out after 500 milliseconds"))
+        assert(exception == HttpErrorException.plain(500, s"server operation timed out after $serverTimeout"))
       }
   }
 
