@@ -40,14 +40,14 @@ object RestResponse extends RestResponseLowPrio {
   def plain(status: Int, message: OptArg[String] = OptArg.Empty): RestResponse =
     RestResponse(status, IMapping.empty, HttpBody.plain(message))
 
-  class LazyOps(private val resp: () => RestResponse) extends AnyVal {
+  final class LazyOps(private val resp: () => RestResponse) extends AnyVal {
     def recoverHttpError: RestResponse = try resp() catch {
       case e: HttpErrorException => e.toResponse
     }
   }
   implicit def lazyOps(resp: => RestResponse): LazyOps = new LazyOps(() => resp)
 
-  implicit class TaskOps(private val asyncResp: Task[RestResponse]) extends AnyVal {
+  implicit final class TaskOps(private val asyncResp: Task[RestResponse]) extends AnyVal {
     def recoverHttpError: Task[RestResponse] =
       asyncResp.onErrorRecover {
         case e: HttpErrorException => e.toResponse
@@ -171,14 +171,14 @@ object StreamedRestResponse extends StreamedRestResponseLowPrio {
   def fromHttpError(error: HttpErrorException): StreamedRestResponse =
     StreamedRestResponse(error.code, IMapping.empty, StreamedBody.fromHttpBody(error.payload))
 
-  class LazyOps(private val resp: () => StreamedRestResponse) extends AnyVal {
+  final class LazyOps(private val resp: () => StreamedRestResponse) extends AnyVal {
     def recoverHttpError: StreamedRestResponse = try resp() catch {
       case e: HttpErrorException => StreamedRestResponse.fromHttpError(e)
     }
   }
   implicit def lazyOps(resp: => StreamedRestResponse): LazyOps = new LazyOps(() => resp)
 
-  implicit class TaskOps(private val asyncResp: Task[StreamedRestResponse]) extends AnyVal {
+  implicit final class TaskOps(private val asyncResp: Task[StreamedRestResponse]) extends AnyVal {
     def recoverHttpError: Task[StreamedRestResponse] =
       asyncResp.onErrorRecover {
         case e: HttpErrorException => StreamedRestResponse.fromHttpError(e)

@@ -12,12 +12,12 @@ trait UserApi {
 }
 object UserApi extends DefaultRestApiCompanion[UserApi]
 
-case class UserId(id: Long) extends AnyVal
+final case class UserId(id: Long) extends AnyVal
 object UserId extends RestDataWrapperCompanion[Long, UserId]
 
 @description("Representation of system user")
 @example(User(UserId(0), "Fred"))
-case class User(id: UserId, @description("User name") name: String)
+final case class User(id: UserId, @description("User name") name: String)
 object User extends RestDataCompanion[User]
 
 trait GroupApi

@@ -13,7 +13,7 @@ import io.udash.rest.raw.{HttpBody, IMapping, PlainValue, RestResponse}
  * If you want to include this information into OpenAPI definition for method that returns `WithHeaders`,
  * you may use [[io.udash.rest.adjustResponse adjustResponse]] on it.
  */
-case class WithHeaders[+T](value: T, headers: ISeq[(String, String)])
+final case class WithHeaders[+T](value: T, headers: ISeq[(String, String)])
 object WithHeaders {
   implicit def asResponse[T](implicit wrapped: AsRaw[HttpBody, T]): AsRaw[RestResponse, WithHeaders[T]] = {
     case WithHeaders(value, headers) =>

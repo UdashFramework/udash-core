@@ -1436,7 +1436,7 @@ class PropertyTest extends UdashCoreTest {
 }
 
 private object ReqModels {
-  case class Simple(i: Int, s: Simple)
+  final case class Simple(i: Int, s: Simple)
   object Simple extends HasModelPropertyCreator[Simple]
 
   trait ReqT {
@@ -1444,6 +1444,6 @@ private object ReqModels {
   }
   object ReqT extends HasModelPropertyCreator[ReqT]
 
-  case class SimpleSeq(i: Seq[SimpleSeq], s: SimpleSeq)
+  final case class SimpleSeq(i: Seq[SimpleSeq], s: SimpleSeq)
   object SimpleSeq extends HasModelPropertyCreator[SimpleSeq]
 }

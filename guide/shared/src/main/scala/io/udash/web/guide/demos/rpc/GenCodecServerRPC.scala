@@ -6,7 +6,7 @@ import io.udash.rpc._
 import scala.concurrent.Future
 
 object GenCodecServerRPC extends DefaultServerRpcCompanion[GenCodecServerRPC] {
-  case class DemoCaseClass(i: Int, s: String, intAsDouble: Double)
+  final case class DemoCaseClass(i: Int, s: String, intAsDouble: Double)
   object DemoCaseClass extends HasGenCodec[DemoCaseClass]
 
   sealed trait Fruit

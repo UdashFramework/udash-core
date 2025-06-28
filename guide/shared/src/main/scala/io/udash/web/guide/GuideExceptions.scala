@@ -6,8 +6,8 @@ import io.udash.i18n.TranslationKey0
 import io.udash.rpc.serialization.{DefaultExceptionCodecRegistry, ExceptionCodecRegistry}
 
 object GuideExceptions {
-  case class ExampleException(msg: String) extends Exception(msg)
-  case class TranslatableExampleException(trKey: TranslationKey0) extends Exception
+  final case class ExampleException(msg: String) extends Exception(msg)
+  final case class TranslatableExampleException(trKey: TranslationKey0) extends Exception
 
   val registry: ExceptionCodecRegistry = (new DefaultExceptionCodecRegistry).setup { registry =>
     registry.register(GenCodec.materialize[ExampleException])

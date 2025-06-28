@@ -20,7 +20,7 @@ trait Permission {
 
 object Permission {
   /** Single permission as a combinator resolved implicitly. */
-  implicit class Single(private val permission: Permission) extends AnyVal with PermissionCombinator {
+  implicit final class Single(private val permission: Permission) extends AnyVal with PermissionCombinator {
     override def check(ctx: UserCtx): Boolean =
       ctx.has(permission)
 

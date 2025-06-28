@@ -7,10 +7,10 @@ import io.udash.rpc.utils.Logged
 import scala.annotation.nowarn
 import scala.concurrent.Future
 
-case class Record(i: Int, fuu: String)
+final case class Record(i: Int, fuu: String)
 object Record extends HasGenCodec[Record]
 
-case class CustomRPCException(i: Int) extends Throwable
+final case class CustomRPCException(i: Int) extends Throwable
 object CustomRPCException extends HasGenCodec[CustomRPCException]
 
 trait RPCMethods {
@@ -47,7 +47,7 @@ trait InnerClientRPC {
 }
 object InnerClientRPC extends DefaultClientRpcCompanion[InnerClientRPC]
 
-case class External(x: Int)
+final case class External(x: Int)
 
 object ExternalTypeCodec {
   implicit val codec: GenCodec[External] = GenCodec.transformed[External, Int](_.x, External.apply)

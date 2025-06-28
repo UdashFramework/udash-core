@@ -308,7 +308,7 @@ object Schema extends HasGenObjectCodec[Schema] {
       Schema(allOf = List(ref), nullable = true)
   }
 
-  implicit class RefOrOps(private val refOrSchema: RefOr[Schema]) extends AnyVal {
+  implicit final class RefOrOps(private val refOrSchema: RefOr[Schema]) extends AnyVal {
     /**
       * Transforms a potential schema reference into an actual [[Schema]] by wrapping the reference into
       * `allOf` property of the new schema, e.g. `{"$$ref": "#/components/schemas/Entity"}` becomes

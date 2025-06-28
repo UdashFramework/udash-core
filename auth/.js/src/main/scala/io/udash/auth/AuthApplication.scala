@@ -3,7 +3,9 @@ package io.udash.auth
 import io.udash._
 
 object AuthApplication {
-  implicit class ApplicationAuthExt[HierarchyRoot >: Null <: GState[HierarchyRoot]](val application: Application[HierarchyRoot]) extends AnyVal {
+  implicit final class ApplicationAuthExt[HierarchyRoot >: Null <: GState[HierarchyRoot]](
+    val application: Application[HierarchyRoot]
+  ) extends AnyVal {
     /**
       * Adds the default listener of authorization failure in routing (redirects to provided state).
       *

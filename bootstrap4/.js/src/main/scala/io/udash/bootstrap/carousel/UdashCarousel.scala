@@ -254,7 +254,7 @@ object UdashCarousel {
     * @param keyboard Should the carousel react to keyboard events.
     * @param active   Should the animation be active.
     */
-  case class AnimationOptions(
+  final case class AnimationOptions(
     interval: Duration = 5 seconds, pause: PauseOption = PauseOption.Hover, wrap: Boolean = true,
     keyboard: Boolean = true, active: Boolean = true
   ) {
@@ -285,7 +285,7 @@ object UdashCarousel {
   * @param imgSrc  Slide image source url.
   * @param caption Slide caption content.
   */
-case class UdashCarouselSlide(imgSrc: Url)(caption: Modifier*) {
+final case class UdashCarouselSlide(imgSrc: Url)(caption: Modifier*) {
   import io.udash.css.CssView._
 
   lazy val render: Node = {

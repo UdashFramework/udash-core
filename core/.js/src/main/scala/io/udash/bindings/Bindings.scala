@@ -1,14 +1,15 @@
 package io.udash.bindings
 
-import com.avsystem.commons._
+import com.avsystem.commons.*
 import io.udash.bindings.Bindings.{AttrOps, AttrPairOps, HasCssName, PropertyOps}
-import io.udash.bindings.modifiers._
+import io.udash.bindings.modifiers.*
 import io.udash.properties.seq.ReadableSeqProperty
 import io.udash.properties.single.ReadableProperty
-import org.scalajs.dom._
+import org.scalajs.dom.*
 import scalatags.JsDom
 import scalatags.generic.{Attr, AttrPair, AttrValue, Modifier}
 
+import scala.annotation.nowarn
 import scala.scalajs.js
 
 trait Bindings {
@@ -28,6 +29,7 @@ trait Bindings {
 
   implicit def seqFromNode(el: Node): Seq[Node] = Seq(el)
   implicit def seqFromElement(el: Element): Seq[Element] = Seq(el)
+  @nowarn("msg=Implicit parameters")
   implicit def seqNodeFromOpt[T](el: Opt[T])(implicit ev: T => Modifier[Element]): Modifier[Element] =
     new JsDom.all.SeqNode(el.toSeq)
 

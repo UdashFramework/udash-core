@@ -6,6 +6,7 @@ import com.avsystem.commons.meta.*
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import com.avsystem.commons.rpc.*
 
+import scala.annotation.nowarn
 import scala.util.control.NoStackTrace
 
 /**
@@ -49,6 +50,7 @@ object RestParameters {
   final val Empty = RestParameters()
 }
 
+@nowarn("msg=Case classes should be marked as final")
 case class HttpErrorException(code: Int, payload: HttpBody = HttpBody.Empty, cause: Throwable = null)
   extends RuntimeException(s"HTTP ERROR $code${payload.textualContentOpt.fold("")(p => s": $p")}", cause) with NoStackTrace {
   def toResponse: RestResponse = RestResponse(code, IMapping.empty, payload)

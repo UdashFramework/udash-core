@@ -58,7 +58,7 @@ object PropertyErrorManualTest {
   trait B {
     def c: Seq[C]
   }
-  case class C(d: D)
+  final case class C(d: D)
   trait D {
     def errorField: ClassicClass
   }
