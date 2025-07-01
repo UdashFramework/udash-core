@@ -6,7 +6,6 @@ import com.avsystem.commons.meta.*
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import com.avsystem.commons.rpc.*
 
-import scala.annotation.nowarn
 import scala.util.control.NoStackTrace
 
 /**
@@ -24,14 +23,14 @@ final case class RestParameters(
   @multi @tagged[Path] path: List[PlainValue] = Nil,
   @multi @tagged[Header] @allowOptional headers: IMapping[PlainValue] = IMapping.empty,
   @multi @tagged[Query] @allowOptional query: Mapping[PlainValue] = Mapping.empty,
-  @multi @tagged[Cookie] @allowOptional cookies: Mapping[PlainValue] = Mapping.empty
+  @multi @tagged[Cookie] @allowOptional cookies: Mapping[PlainValue] = Mapping.empty,
 ) {
   def append(method: RestMethodMetadata[_], otherParameters: RestParameters): RestParameters =
     RestParameters(
       path ::: method.applyPathParams(otherParameters.path),
       headers ++ otherParameters.headers,
       query ++ otherParameters.query,
-      cookies ++ otherParameters.cookies
+      cookies ++ otherParameters.cookies,
     )
 
   def path(values: String*): RestParameters =
@@ -50,8 +49,7 @@ object RestParameters {
   final val Empty = RestParameters()
 }
 
-@nowarn("msg=Case classes should be marked as final")
-case class HttpErrorException(code: Int, payload: HttpBody = HttpBody.Empty, cause: Throwable = null)
+final case class HttpErrorException(code: Int, payload: HttpBody = HttpBody.Empty, cause: Throwable = null)
   extends RuntimeException(s"HTTP ERROR $code${payload.textualContentOpt.fold("")(p => s": $p")}", cause) with NoStackTrace {
   def toResponse: RestResponse = RestResponse(code, IMapping.empty, payload)
 }

@@ -5,7 +5,6 @@ import io.udash.rpc.*
 import io.udash.utils.{CallbacksHandler, Registration}
 import org.scalajs.dom
 
-import scala.annotation.nowarn
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
@@ -97,6 +96,5 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
 }
 
 object UsesServerRPC {
-  @nowarn("msg=Case classes should be marked as final")
-  case class CallTimeout(callTimeout: Duration) extends RuntimeException(s"Response missing after $callTimeout.")
+  final case class CallTimeout(callTimeout: Duration) extends RuntimeException(s"Response missing after $callTimeout.")
 }
