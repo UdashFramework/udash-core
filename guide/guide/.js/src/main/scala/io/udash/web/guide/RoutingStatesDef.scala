@@ -49,7 +49,7 @@ case object FrontendState extends ContainerRoutingState(Some(ContentState))
 
 case object FrontendIntroState extends RoutingState(Some(FrontendState))
 
-case class FrontendRoutingState(additionalArgument: Option[String]) extends RoutingState(Some(FrontendState))
+final case class FrontendRoutingState(additionalArgument: Option[String]) extends RoutingState(Some(FrontendState))
 
 case object FrontendMVPState extends RoutingState(Some(FrontendState))
 

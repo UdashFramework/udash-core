@@ -8,8 +8,8 @@ sealed abstract class TestState(val parentState: Option[ContainerTestState]) ext
 sealed abstract class ContainerTestState(parentState: Option[ContainerTestState]) extends TestState(parentState)
 sealed abstract class FinalTestState(parentState: Option[ContainerTestState]) extends TestState(parentState)
 
-case class RootState(sth: Option[Int]) extends ContainerTestState(None)
-case class ClassState(arg: String, arg2: Int) extends FinalTestState(Some(RootState(None)))
+final case class RootState(sth: Option[Int]) extends ContainerTestState(None)
+final case class ClassState(arg: String, arg2: Int) extends FinalTestState(Some(RootState(None)))
 case object ObjectState extends ContainerTestState(Some(RootState(None)))
 case object ThrowExceptionState extends ContainerTestState(Some(RootState(None)))
 case object NextObjectState extends FinalTestState(Some(ObjectState))

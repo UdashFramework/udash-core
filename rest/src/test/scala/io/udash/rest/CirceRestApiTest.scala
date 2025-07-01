@@ -79,10 +79,10 @@ abstract class HasCirceCustomizedCodec[T](
   implicit final lazy val decoder: Decoder[T] = instances((), this).decoder(nameTransform, useDefaults, discriminator)
 }
 
-case class CirceAddress(city: String, zip: String)
+final case class CirceAddress(city: String, zip: String)
 object CirceAddress extends HasCirceCustomizedCodec[CirceAddress](_.toUpperCase)
 
-case class CircePerson(id: Long, name: String, address: Option[CirceAddress] = None)
+final case class CircePerson(id: Long, name: String, address: Option[CirceAddress] = None)
 object CircePerson extends HasCirceCodec[CircePerson]
 
 abstract class CirceRestApiCompanion[T](

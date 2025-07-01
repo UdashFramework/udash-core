@@ -7,6 +7,7 @@ import org.scalatest.{Assertion, Succeeded}
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.scalajs.concurrent.JSExecutionContext
 import scala.scalajs.js.Date
+import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 
 trait AsyncUdashSharedTest extends AsyncUdashSharedTestBase {
@@ -23,7 +24,7 @@ trait AsyncUdashSharedTest extends AsyncUdashSharedTestBase {
             code
             p.complete(Success(Succeeded))
           } catch {
-            case ex: Throwable =>
+            case NonFatal(ex) =>
               lastEx = Some(ex)
               startTest()
           }

@@ -15,15 +15,15 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
-case class UserId(id: String) extends AnyVal {
+final case class UserId(id: String) extends AnyVal {
   override def toString: String = id
 }
 object UserId extends RestDataWrapperCompanion[String, UserId]
 
-case class User(id: UserId, name: String)
+final case class User(id: UserId, name: String)
 object User extends RestDataCompanion[User]
 
-case class NonBlankString(str: String) {
+final case class NonBlankString(str: String) {
   if (str.isBlank) {
     throw HttpErrorException(400, HttpBody.plain("this stuff is blank"))
   }

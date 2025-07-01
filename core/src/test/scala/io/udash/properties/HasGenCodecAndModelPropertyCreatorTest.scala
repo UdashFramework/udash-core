@@ -24,6 +24,6 @@ class HasGenCodecAndModelPropertyCreatorTest extends UdashCoreTest {
 }
 
 object HasGenCodecAndModelPropertyCreatorTest {
-  case class Entity(i: Int, s: String, e: Option[Entity])
+  final case class Entity(i: Int, s: String, e: Option[Entity])
   object Entity extends HasGenCodecAndModelPropertyCreator[Entity]
 }

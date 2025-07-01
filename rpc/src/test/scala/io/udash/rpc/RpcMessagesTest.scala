@@ -7,11 +7,11 @@ import io.udash.testing.UdashSharedTest
 
 import scala.util.Random
 
-private case class CustomException(error: String, counter: Int) extends Throwable
+private final case class CustomException(error: String, counter: Int) extends Throwable
 
 private sealed trait SealedExceptions extends Throwable
-private case class SealedExceptionsA(a: Int) extends SealedExceptions
-private case class SealedExceptionsB(b: Double) extends SealedExceptions
+private final case class SealedExceptionsA(a: Int) extends SealedExceptions
+private final case class SealedExceptionsB(b: Double) extends SealedExceptions
 
 trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
   val exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry

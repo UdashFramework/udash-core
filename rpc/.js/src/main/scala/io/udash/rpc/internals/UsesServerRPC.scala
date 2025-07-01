@@ -1,7 +1,7 @@
 package io.udash.rpc.internals
 
-import com.avsystem.commons.SharedExtensions._
-import io.udash.rpc._
+import com.avsystem.commons.SharedExtensions.*
+import io.udash.rpc.*
 import io.udash.utils.{CallbacksHandler, Registration}
 import org.scalajs.dom
 
@@ -96,5 +96,5 @@ private[rpc] trait UsesServerRPC[ServerRPCType] extends UsesRemoteRPC[ServerRPCT
 }
 
 object UsesServerRPC {
-  case class CallTimeout(callTimeout: Duration) extends RuntimeException(s"Response missing after $callTimeout.")
+  final case class CallTimeout(callTimeout: Duration) extends RuntimeException(s"Response missing after $callTimeout.")
 }

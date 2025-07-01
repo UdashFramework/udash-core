@@ -18,8 +18,8 @@ sealed trait MenuEntry {
   def name: String
 }
 
-case class MenuContainer(override val name: String, children: Seq[MenuLink]) extends MenuEntry
-case class MenuLink(override val name: String, state: RoutingState, fragment: OptArg[String] = OptArg.Empty) extends MenuEntry
+final case class MenuContainer(override val name: String, children: Seq[MenuLink]) extends MenuEntry
+final case class MenuLink(override val name: String, state: RoutingState, fragment: OptArg[String] = OptArg.Empty) extends MenuEntry
 
 class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
 

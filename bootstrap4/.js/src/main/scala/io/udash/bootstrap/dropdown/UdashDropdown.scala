@@ -133,13 +133,13 @@ object UdashDropdown {
   /** Default dropdown elements. */
   sealed trait DefaultDropdownItem extends AbstractCase
   object DefaultDropdownItem {
-    case class Text(text: String) extends DefaultDropdownItem
-    case class Link(title: String, url: Url) extends DefaultDropdownItem
-    case class Button(title: String, clickCallback: () => Any) extends DefaultDropdownItem
-    case class Header(title: String) extends DefaultDropdownItem
-    case class Disabled(item: DefaultDropdownItem) extends DefaultDropdownItem
-    case class Raw(element: Element) extends DefaultDropdownItem
-    case class Dynamic(factory: Binding.NestedInterceptor => Element) extends DefaultDropdownItem
+    final case class Text(text: String) extends DefaultDropdownItem
+    final case class Link(title: String, url: Url) extends DefaultDropdownItem
+    final case class Button(title: String, clickCallback: () => Any) extends DefaultDropdownItem
+    final case class Header(title: String) extends DefaultDropdownItem
+    final case class Disabled(item: DefaultDropdownItem) extends DefaultDropdownItem
+    final case class Raw(element: Element) extends DefaultDropdownItem
+    final case class Dynamic(factory: Binding.NestedInterceptor => Element) extends DefaultDropdownItem
     case object Divider extends DefaultDropdownItem
   }
 

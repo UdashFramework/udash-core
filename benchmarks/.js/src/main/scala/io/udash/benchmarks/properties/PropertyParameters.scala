@@ -6,7 +6,7 @@ import japgolly.scalajs.benchmark.gui._
 import scalatags.JsDom.all._
 
 object PropertyParameters {
-  case class Entity(i: Int, s: String, r: Entity)
+  final case class Entity(i: Int, s: String, r: Entity)
   object Entity extends HasModelPropertyCreator[Entity]
 
   private def listenProperty(p: ReadableProperty[String]) = {

@@ -16,10 +16,10 @@ import scala.concurrent.duration.DurationLong
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
 
-case class ExceptionsDemoModel(
+final case class ExceptionsDemoModel(
   exception: String,
   translatableException: TranslationKey0,
-  unknownException: String
+  unknownException: String,
 )
 object ExceptionsDemoModel extends HasModelPropertyCreator[ExceptionsDemoModel]
 

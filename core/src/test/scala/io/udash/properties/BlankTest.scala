@@ -33,7 +33,7 @@ class BlankTest extends UdashCoreTest {
 }
 
 object BlankTest {
-  case class Entity(i: Int, s: String)
+  final case class Entity(i: Int, s: String)
   object Entity extends HasModelPropertyCreator[Entity] {
     implicit val default: Blank[Entity] = Blank.Simple(Entity(5, "asd"))
   }

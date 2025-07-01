@@ -49,7 +49,7 @@ class descriptionKey(key: String, @infer i18n: I18N = infer.value)
   extends description(i18n.t(key))
 
 @descriptionKey("person.desc")
-case class Person(
+final case class Person(
   @descriptionKey("name.desc") name: String
 )
 object Person extends I18NRestDataCompanion[Person]

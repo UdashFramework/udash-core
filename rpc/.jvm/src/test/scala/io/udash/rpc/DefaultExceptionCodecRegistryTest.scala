@@ -6,11 +6,11 @@ import io.udash.testing.UdashSharedTest
 
 private sealed trait RootTrait extends Throwable
 private sealed trait SubTrait extends RootTrait
-private case class SubTraitImpl() extends SubTrait
+private final case class SubTraitImpl() extends SubTrait
 
 private sealed trait SealedHierarchy extends Throwable
-private case class SealedHierarchyA(a: Int) extends SealedHierarchy
-private case class SealedHierarchyB(b: Double) extends SealedHierarchy
+private final case class SealedHierarchyA(a: Int) extends SealedHierarchy
+private final case class SealedHierarchyB(b: Double) extends SealedHierarchy
 
 class DefaultExceptionCodecRegistryTest extends UdashSharedTest with Utils  {
   val exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry

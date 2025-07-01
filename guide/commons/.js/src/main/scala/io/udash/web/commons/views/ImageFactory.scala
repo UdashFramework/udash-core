@@ -40,4 +40,4 @@ object SVG {
   }
 }
 
-case class Size(width: Int, height: Int)
+final case class Size(width: Int, height: Int)

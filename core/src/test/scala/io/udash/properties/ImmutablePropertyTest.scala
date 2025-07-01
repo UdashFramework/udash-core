@@ -150,9 +150,9 @@ class ImmutablePropertyTest extends UdashCoreTest {
 }
 
 object ImmutablePropertyTest {
-  case class Nested(s: Nested)
+  final case class Nested(s: Nested)
   object Nested extends HasModelPropertyCreator[Nested]
 
-  case class ModelEntity(s: String, i: Seq[Int], v: Vector[Int], m: ModelEntity)
+  final case class ModelEntity(s: String, i: Seq[Int], v: Vector[Int], m: ModelEntity)
   object ModelEntity extends HasModelPropertyCreator[ModelEntity]
 }

@@ -7,7 +7,7 @@ import scalatags.generic.Modifier
 /**
   * Url wrapper - just for avoiding strings.
   */
-case class Url(value: String) extends AnyVal
+final case class Url(value: String) extends AnyVal
 object Url extends HasModelPropertyCreator[Url]
 
 /**

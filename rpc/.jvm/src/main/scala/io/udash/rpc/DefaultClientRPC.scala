@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext
   */
 sealed trait ClientRPCTarget
 case object AllClients extends ClientRPCTarget
-case class ClientId(id: String) extends ClientRPCTarget
+final case class ClientId(id: String) extends ClientRPCTarget
 
 abstract class ClientRPC[ClientRPCType](target: ClientRPCTarget)
   (implicit ec: ExecutionContext) extends UsesClientRPC[ClientRPCType] {

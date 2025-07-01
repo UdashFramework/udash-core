@@ -12,11 +12,11 @@ import io.udash.rpc.utils.Logged
 import scala.annotation.implicitNotFound
 import scala.concurrent.Future
 
-case class JsonStr(json: String) extends AnyVal
+final case class JsonStr(json: String) extends AnyVal
 object JsonStr {
   implicit val codec: GenCodec[JsonStr] = GenCodec.create(
     i => JsonStr(i.readCustom(RawJson).getOrElse(i.readSimple().readString())),
-    (o, v) => if (!o.writeCustom(RawJson, v.json)) o.writeSimple().writeString(v.json)
+    (o, v) => if (!o.writeCustom(RawJson, v.json)) o.writeSimple().writeString(v.json),
   )
 
   implicit def futureAsReal[T](implicit asReal: AsReal[JsonStr, T]): AsReal[Future[JsonStr], Future[T]] =
@@ -36,10 +36,10 @@ object JsonStr {
   ): ImplicitNotFound[AsRaw[Future[JsonStr], Future[T]]] = ImplicitNotFound()
 }
 
-case class RpcInvocation(@methodName rpcName: String, @multi args: List[JsonStr])
+final case class RpcInvocation(@methodName rpcName: String, @multi args: List[JsonStr])
 object RpcInvocation extends HasGenCodec[RpcInvocation]
 
-case class RpcFailure(remoteCause: String, remoteMessage: String)
+final case class RpcFailure(remoteCause: String, remoteMessage: String)
   extends Exception(s"$remoteCause: $remoteMessage")
 object RpcFailure extends HasGenCodec[RpcFailure]
 
@@ -56,12 +56,12 @@ sealed trait RpcRequest {
 object RpcRequest extends HasGenCodec[RpcRequest]
 
 /** [[RpcRequest]] which returns some value. */
-case class RpcCall(invocation: RpcInvocation, gettersChain: List[RpcInvocation], callId: String)
+final case class RpcCall(invocation: RpcInvocation, gettersChain: List[RpcInvocation], callId: String)
   extends RpcRequest
 object RpcCall extends HasGenCodec[RpcCall]
 
 /** [[RpcRequest]] which returns Unit. */
-case class RpcFire(invocation: RpcInvocation, gettersChain: List[RpcInvocation])
+final case class RpcFire(invocation: RpcInvocation, gettersChain: List[RpcInvocation])
   extends RpcRequest with RpcServerMessage
 object RpcFire extends HasGenCodec[RpcFire]
 
@@ -74,11 +74,11 @@ object RpcResponse {
 }
 
 /** Message containing response for [[RpcCall]]. */
-case class RpcResponseSuccess(response: JsonStr, callId: String) extends RpcResponse
+final case class RpcResponseSuccess(response: JsonStr, callId: String) extends RpcResponse
 /** Message reporting failure of [[RpcCall]]. */
-case class RpcResponseFailure(cause: String, errorMsg: String, callId: String) extends RpcResponse
+final case class RpcResponseFailure(cause: String, errorMsg: String, callId: String) extends RpcResponse
 /** Message reporting exception from [[RpcCall]]. */
-case class RpcResponseException(name: String, exception: Throwable, callId: String) extends RpcResponse
+final case class RpcResponseException(name: String, exception: Throwable, callId: String) extends RpcResponse
 object RpcResponseException {
   implicit def codec(implicit ecr: ExceptionCodecRegistry): GenCodec[RpcResponseException] =
     GenCodec.nullableObject(
@@ -139,20 +139,20 @@ object ServerRawRpc extends RawRpcCompanion[ServerRawRpc] {
 }
 
 @allowIncomplete
-case class ServerRpcMetadata[T](
+final case class ServerRpcMetadata[T](
   @reifyName name: String,
   @multi @rpcMethodMetadata getters: Map[String, GetterMethod[_]],
-  @multi @rpcMethodMetadata methods: Map[String, RpcMethod[_]]
+  @multi @rpcMethodMetadata methods: Map[String, RpcMethod[_]],
 )
 object ServerRpcMetadata extends RpcMetadataCompanion[ServerRpcMetadata]
 
 @allowIncomplete
-case class GetterMethod[T](
+final case class GetterMethod[T](
   @infer @checked resultMetadata: ServerRpcMetadata.Lazy[T]
 ) extends TypedMetadata[T]
 
 @allowIncomplete
-case class RpcMethod[T](
+final case class RpcMethod[T](
   @reifyName name: String,
   @isAnnotated[Logged] logged: Boolean,
 ) extends TypedMetadata[T]

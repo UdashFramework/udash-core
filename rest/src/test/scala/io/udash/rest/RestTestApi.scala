@@ -16,7 +16,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration.*
 
 @description("Entity identifier")
-case class RestEntityId(value: String) extends AnyVal
+final case class RestEntityId(value: String) extends AnyVal
 object RestEntityId extends RestDataWrapperCompanion[String, RestEntityId]
 
 @name("RestEntityEnumCustom")
@@ -42,7 +42,7 @@ object BaseEntity extends RestDataCompanion[BaseEntity]
 object FlatBaseEntity extends RestDataCompanion[FlatBaseEntity]
 
 @description("REST entity")
-case class RestEntity(
+final case class RestEntity(
   @description("entity id") id: RestEntityId,
   @whenAbsent("anonymous") name: String = whenAbsent.value,
   @description("recursive optional subentity") subentity: OptArg[RestEntity] = OptArg.Empty,
@@ -52,11 +52,11 @@ case class RestEntity(
 ) extends FlatBaseEntity
 object RestEntity extends RestDataCompanion[RestEntity]
 
-case class RestOtherEntity(fuu: Boolean, kek: List[String]) extends FlatBaseEntity
+final case class RestOtherEntity(fuu: Boolean, kek: List[String]) extends FlatBaseEntity
 
 case object SingletonEntity extends FlatBaseEntity
 
-case class CustomResp(value: String)
+final case class CustomResp(value: String)
 object CustomResp {
   implicit val asResponse: AsRawReal[RestResponse, CustomResp] = AsRawReal.create(
     cr => RestResponse(200, IMapping.create("X-Value" -> PlainValue(cr.value)), HttpBody.plain("Yes")),
@@ -77,10 +77,10 @@ object CustomResp {
 }
 
 @description("binary bytes")
-case class Bytes(bytes: Array[Byte]) extends AnyVal
+final case class Bytes(bytes: Array[Byte]) extends AnyVal
 object Bytes extends RestDataWrapperCompanion[Array[Byte], Bytes]
 
-case class ThirdParty(thing: Int)
+final case class ThirdParty(thing: Int)
 object ThirdPartyImplicits {
   implicit val thirdPartyCodec: GenCodec[ThirdParty] =
     GenCodec.materialize[ThirdParty]
@@ -88,10 +88,10 @@ object ThirdPartyImplicits {
     RestStructure.materialize[ThirdParty].standaloneSchema
 }
 
-case class HasThirdParty(dur: ThirdParty)
+final case class HasThirdParty(dur: ThirdParty)
 object HasThirdParty extends RestDataCompanionWithDeps[ThirdPartyImplicits.type, HasThirdParty]
 
-case class ErrorWrapper[T](error: T)
+final case class ErrorWrapper[T](error: T)
 object ErrorWrapper extends HasPolyGenCodec[ErrorWrapper]
 
 trait RestTestApi {

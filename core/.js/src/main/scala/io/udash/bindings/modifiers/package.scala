@@ -3,7 +3,7 @@ package io.udash.bindings
 import org.scalajs.dom.Node
 
 package object modifiers {
-  implicit class ElementExts(private val el: Node) extends AnyVal {
+  implicit final class ElementExts(private val el: Node) extends AnyVal {
     def replaceChildren(oldChildren: Seq[Node], newChildren: Seq[Node]): Unit = {
       if (oldChildren == null || oldChildren.isEmpty) newChildren.foreach(el.appendChild)
       else {

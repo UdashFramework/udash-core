@@ -7,7 +7,7 @@ import scalatags.JsDom.all._
 
 object IntroFormDemo extends AutoDemo {
 
-  case class IntroFormDemoModel(minimum: Int, between: Int, maximum: Int)
+  final case class IntroFormDemoModel(minimum: Int, between: Int, maximum: Int)
 
   object IntroFormDemoModel extends HasModelPropertyCreator[IntroFormDemoModel]
 

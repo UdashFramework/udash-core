@@ -23,7 +23,7 @@ object Dependency {
 }
 
 @description("kejs klass")
-case class KejsKlass(
+final case class KejsKlass(
   @name("integer") @customWa(42) int: Int,
   @description("serious dependency") dep: Dependency,
   @description("optional thing") @optionalParam opty: Opt[String] = Opt("defaultThatMustBeIgnored"),
@@ -32,13 +32,13 @@ case class KejsKlass(
 object KejsKlass extends RestDataCompanion[KejsKlass]
 
 @description("wrapped string")
-@transparent case class Wrap(str: String)
+@transparent final case class Wrap(str: String)
 object Wrap extends RestDataCompanion[Wrap]
 
-case class PlainGenericCC[+T](thing: T)
+final case class PlainGenericCC[+T](thing: T)
 object PlainGenericCC extends PolyRestDataCompanion[PlainGenericCC]
 
-case class GenCC[+T >: Null](@customWa[T](null) value: T)
+final case class GenCC[+T >: Null](@customWa[T](null) value: T)
 object GenCC extends RestDataCompanion[GenCC[String]]
 
 final class KeyEnum(implicit enumCtx: EnumCtx) extends AbstractValueEnum
@@ -48,7 +48,7 @@ object KeyEnum extends AbstractValueEnumCompanion[KeyEnum] {
 
 @flatten("tpe")
 sealed trait HierarchyRoot[+T]
-case class HierarchyCase[+T](value: T) extends HierarchyRoot[T]
+final case class HierarchyCase[+T](value: T) extends HierarchyRoot[T]
 object HierarchyCase {
   implicit val stringRestSchema: RestSchema[HierarchyCase[String]] =
     RestStructure.materialize[HierarchyCase[String]] match {
@@ -65,8 +65,8 @@ object HierarchyRoot {
 
 @flatten("case") sealed trait FullyQualifiedHierarchy
 object FullyQualifiedHierarchy extends RestDataCompanionWithDeps[FullyQualifiedNames.type, FullyQualifiedHierarchy] {
-  case class Foo(str: String) extends FullyQualifiedHierarchy
-  case class Bar(int: Int) extends FullyQualifiedHierarchy
+  final case class Foo(str: String) extends FullyQualifiedHierarchy
+  final case class Bar(int: Int) extends FullyQualifiedHierarchy
   object Bar extends RestDataCompanionWithDeps[FullyQualifiedNames.type, Bar]
   case object Baz extends FullyQualifiedHierarchy
 }
@@ -76,15 +76,15 @@ sealed trait CustomSchemaNameHierarchy
 object CustomSchemaNameHierarchy extends RestDataCompanion[CustomSchemaNameHierarchy] {
   // annotation value should be used as schema name, but NOT as type discriminator value
   @schemaName("CustomSchemaName123")
-  case class CustomSchemaName(str: String) extends CustomSchemaNameHierarchy
+  final case class CustomSchemaName(str: String) extends CustomSchemaNameHierarchy
 
   // annotation value should be used as both schema name and type discriminator value
   @name("CustomName123")
-  case class CustomName(str: String) extends CustomSchemaNameHierarchy
+  final case class CustomName(str: String) extends CustomSchemaNameHierarchy
 
   // @schemaName annotation should be used as schema name, @name annotation should be used only as type discriminator value
   @schemaName("CustomSchemaNameBoth") @name("CustomNameBoth123")
-  case class CustomNameBoth(str: String) extends CustomSchemaNameHierarchy
+  final case class CustomNameBoth(str: String) extends CustomSchemaNameHierarchy
 }
 
 class RestSchemaTest extends AnyFunSuite {
