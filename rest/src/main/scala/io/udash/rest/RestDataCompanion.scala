@@ -4,7 +4,7 @@ package rest
 import com.avsystem.commons.meta.MacroInstances
 import com.avsystem.commons.misc.{AbstractValueEnumCompanion, ValueEnum, ValueOf}
 import com.avsystem.commons.rpc.{AsRaw, AsReal}
-import com.avsystem.commons.serialization.{GenCodec, TransparentWrapperCompanion}
+import com.avsystem.commons.serialization.{GenCodec, TransparentWrapperCompanion, TransparentWrapping}
 import io.udash.rest.openapi.*
 import io.udash.rest.openapi.RestStructure.NameAndAdjusters
 import io.udash.rest.raw.{HttpBody, JsonValue, PlainValue, RestResponse, StreamedBody, StreamedRestResponse}
@@ -47,28 +47,18 @@ abstract class RestDataCompanionWithDeps[D, T](implicit
 ) extends AbstractRestDataCompanion[(DefaultRestImplicits, D), T]((DefaultRestImplicits, deps.value))
 
 /**
-  * Base class for companion objects of wrappers over other data types (i.e. case classes with single field).
-  * This companion ensures instances of all the REST typeclasses (serialization, schema, etc.) for wrapping type
-  * assuming that these instances are available for the wrapped type.
+  * These implicits must be specialized for every raw type (PlainValue, JsonValue, etc.) because
+  * it lifts their priority. Unfortunately, controlling implicit priority is not pretty.
+  * Also, it's probably good that we explicitly enable derivation only for REST-related raw types
+  * and not for all raw types - this avoids possible interference with other features using RPC.
   *
-  * Using this base companion class makes the wrapper class effectively "transparent", i.e. as if it was annotated with
-  * [[com.avsystem.commons.serialization.transparent transparent]] annotation.
-  *
-  * @example
-  * {{{
-  *   case class UserId(id: String) extends AnyVal
-  *   object UserId extends RestDataWrapperCompanion[String, UserId]
-  * }}}
+  * Seperated from [[RestDataWrapperCompanion]] to allow creating custom companion wrappers.
   */
-abstract class RestDataWrapperCompanion[Wrapped, T](implicit
-  instances: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[T]]
-) extends TransparentWrapperCompanion[Wrapped, T] {
-  private def nameAndAdjusters: NameAndAdjusters[T] = instances(DefaultRestImplicits, this).apply()
+trait RestDataWrapperImplicits[Wrapped, T] {
+  protected def nameAndAdjusters: NameAndAdjusters[T]
+  protected def wrapping: TransparentWrapping[Wrapped, T]
 
-  // These implicits must be specialized for every raw type (PlainValue, JsonValue, etc.) because
-  // it lifts their priority. Unfortunately, controlling implicit priority is not pretty.
-  // Also, it's probably good that we explicitly enable derivation only for REST-related raw types
-  // and not for all raw types - this avoids possible interference with other features using RPC.
+  private implicit def wrappingAsImplicit: TransparentWrapping[Wrapped, T] = wrapping
 
   implicit def plainAsRaw(implicit wrappedAsRaw: AsRaw[PlainValue, Wrapped]): AsRaw[PlainValue, T] =
     AsRaw.fromTransparentWrapping
@@ -120,6 +110,27 @@ abstract class RestDataWrapperCompanion[Wrapped, T](implicit
   implicit def restResponses(implicit wrappedResponses: RestResponses[Wrapped]): RestResponses[T] =
     (resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]) =>
       wrappedResponses.responses(resolver, ws => schemaTransform(nameAndAdjusters.restSchema(ws)))
+}
+
+/**
+  * Base class for companion objects of wrappers over other data types (i.e. case classes with single field).
+  * This companion ensures instances of all the REST typeclasses (serialization, schema, etc.) for wrapping type
+  * assuming that these instances are available for the wrapped type.
+  *
+  * Using this base companion class makes the wrapper class effectively "transparent", i.e. as if it was annotated with
+  * [[com.avsystem.commons.serialization.transparent transparent]] annotation.
+  *
+  * @example
+  * {{{
+  *   case class UserId(id: String) extends AnyVal
+  *   object UserId extends RestDataWrapperCompanion[String, UserId]
+  * }}}
+  */
+abstract class RestDataWrapperCompanion[Wrapped, T](implicit
+  instances: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[T]]
+) extends TransparentWrapperCompanion[Wrapped, T] with RestDataWrapperImplicits[Wrapped, T] {
+  override protected def nameAndAdjusters: NameAndAdjusters[T] = instances(DefaultRestImplicits, this).apply()
+  override protected def wrapping: TransparentWrapping[Wrapped, T] = this
 }
 
 /**
