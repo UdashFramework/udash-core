@@ -43,7 +43,8 @@ abstract class RestDataCompanion[T](implicit
   * It must be a singleton object type, i.e. `SomeObject.type`.
   */
 abstract class RestDataCompanionWithDeps[D, T](implicit
-  deps: ValueOf[D], instances: MacroInstances[(DefaultRestImplicits, D), CodecWithStructure[T]]
+  deps: ValueOf[D],
+  instances: MacroInstances[(DefaultRestImplicits, D), CodecWithStructure[T]],
 ) extends AbstractRestDataCompanion[(DefaultRestImplicits, D), T]((DefaultRestImplicits, deps.value))
 
 /**
