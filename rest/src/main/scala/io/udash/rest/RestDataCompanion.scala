@@ -130,8 +130,8 @@ trait RestDataWrapperImplicits[Wrapped, T] {
 abstract class RestDataWrapperCompanion[Wrapped, T](implicit
   instances: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[T]]
 ) extends TransparentWrapperCompanion[Wrapped, T] with RestDataWrapperImplicits[Wrapped, T] {
-  override protected def nameAndAdjusters: NameAndAdjusters[T] = instances(DefaultRestImplicits, this).apply()
-  override protected def wrapping: TransparentWrapping[Wrapped, T] = this
+  override protected final def nameAndAdjusters: NameAndAdjusters[T] = instances(DefaultRestImplicits, this).apply()
+  override protected final def wrapping: TransparentWrapping[Wrapped, T] = this
 }
 
 /**
