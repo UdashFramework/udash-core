@@ -28,7 +28,7 @@ object Dependencies {
 
   val scalaLoggingVersion = "3.9.5"
 
-  val jettyVersion = "12.0.23"
+  val jettyVersion = "12.1.0"
   val typesafeConfigVersion = "1.4.4"
   val flexmarkVersion = "0.64.8"
   val logbackVersion = "1.3.15"
@@ -98,8 +98,7 @@ object Dependencies {
   val rpcSjsDeps = rpcCrossDeps
 
   val rpcJsDeps = Def.setting(Seq(
-    "org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js"
-      minified s"$atmosphereJSVersion/atmosphere-min.js"
+    ("org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js").minified(s"$atmosphereJSVersion/atmosphere-min.js")
   ))
 
   private val restCrossDeps = Def.setting(Seq(
@@ -143,11 +142,9 @@ object Dependencies {
   private val bootstrap4Resource = "js/bootstrap.bundle.js"
 
   val bootstrap4JsDeps = Def.setting(Seq[JSModuleID](
-    "org.webjars" % "bootstrap" % bootstrap4Version / bootstrap4Resource
-      minified "js/bootstrap.bundle.min.js" dependsOn "jquery.js",
-    "org.webjars.npm" % "moment" % s"$momentJsVersion" / momentResource minified s"$momentJsVersion/min/moment.min.js",
-    "org.webjars" % "tempusdominus-bootstrap-4" % bootstrap4DatepickerVersion / "js/tempusdominus-bootstrap-4.js"
-      minified "js/tempusdominus-bootstrap-4.min.js" dependsOn(bootstrap4Resource, momentResource)
+    ("org.webjars" % "bootstrap" % bootstrap4Version / bootstrap4Resource).minified("js/bootstrap.bundle.min.js") dependsOn "jquery.js",
+    ("org.webjars.npm" % "moment" % momentJsVersion / momentResource).minified(s"$momentJsVersion/min/moment.min.js"),
+    ("org.webjars" % "tempusdominus-bootstrap-4" % bootstrap4DatepickerVersion / "js/tempusdominus-bootstrap-4.js").minified("js/tempusdominus-bootstrap-4.min.js") dependsOn(bootstrap4Resource, momentResource)
   ))
 
   val benchmarksSjsDeps = Def.setting(Seq(
