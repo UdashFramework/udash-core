@@ -26,7 +26,7 @@ object Dependencies {
 
   val sttpVersion = "3.11.0"
 
-  val scalaLoggingVersion = "3.9.5"
+  val scalaLoggingVersion = "3.9.6"
 
   val jettyVersion = "12.1.0"
   val typesafeConfigVersion = "1.4.4"
