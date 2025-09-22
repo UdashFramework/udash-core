@@ -162,6 +162,8 @@ object Dependencies {
 
     "org.eclipse.jetty" % "jetty-rewrite" % jettyVersion,
     "org.eclipse.jetty.ee8.websocket" % "jetty-ee8-websocket-javax-server" % jettyVersion,
+    "org.eclipse.jetty.compression" % "jetty-compression-server" % jettyVersion,
+    "org.eclipse.jetty.compression" % "jetty-compression-gzip" % jettyVersion,
 
     "com.typesafe" % "config" % typesafeConfigVersion,
 
