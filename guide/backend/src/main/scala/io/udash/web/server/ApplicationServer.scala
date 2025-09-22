@@ -10,13 +10,13 @@ import io.udash.web.guide.rest.ExposedRestInterfaces
 import io.udash.web.guide.rpc.ExposedRpcInterfaces
 import io.udash.web.guide.{GuideExceptions, MainServerRPC}
 import monix.execution.Scheduler
+import org.eclipse.jetty.compression.server.CompressionHandler
 import org.eclipse.jetty.ee8.nested.SessionHandler
 import org.eclipse.jetty.ee8.servlet.{DefaultServlet, ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.ee8.websocket.javax.server.config.JavaxWebSocketServletContainerInitializer
 import org.eclipse.jetty.rewrite.handler.{RewriteHandler, RewriteRegexRule}
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.ContextHandlerCollection
-import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.eclipse.jetty.util.resource.ResourceFactory
 
 import java.nio.file.Path
@@ -31,7 +31,7 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
     server.stop()
 
   private val homepage =
-    new GzipHandler(createContextHandler(
+    new CompressionHandler(createContextHandler(
       hosts = Array("udash.io", "www.udash.io", "udash.local", "127.0.0.1"),
       resourceBase = homepageResourceBase
     ).get())
@@ -64,7 +64,7 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
 
     contextHandler.addServlet(new ServletHolder(RestServlet[MainServerREST](new ExposedRestInterfaces)), "/rest_api/*")
 
-    new GzipHandler(contextHandler.get())
+    new CompressionHandler(contextHandler.get())
   }
 
   server.setHandler(

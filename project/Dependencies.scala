@@ -28,7 +28,7 @@ object Dependencies {
 
   val scalaLoggingVersion = "3.9.6"
 
-  val jettyVersion = "12.1.0"
+  val jettyVersion = "12.1.1"
   val typesafeConfigVersion = "1.4.5"
   val flexmarkVersion = "0.64.8"
   val logbackVersion = "1.3.15"
@@ -162,6 +162,8 @@ object Dependencies {
 
     "org.eclipse.jetty" % "jetty-rewrite" % jettyVersion,
     "org.eclipse.jetty.ee8.websocket" % "jetty-ee8-websocket-javax-server" % jettyVersion,
+    "org.eclipse.jetty.compression" % "jetty-compression-server" % jettyVersion,
+    "org.eclipse.jetty.compression" % "jetty-compression-gzip" % jettyVersion,
 
     "com.typesafe" % "config" % typesafeConfigVersion,
 

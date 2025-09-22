@@ -7,7 +7,6 @@ import monix.execution.Scheduler
 import org.eclipse.jetty.ee8.nested.SessionHandler
 import org.eclipse.jetty.ee8.servlet.{ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.server.handler.gzip.GzipHandler
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -31,7 +30,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with UsesHttpServer with 
     contextHandler.setSessionHandler(new SessionHandler)
     contextHandler.addServlet(holder, s"$contextPrefix/*")
 
-    server.setHandler(new GzipHandler(contextHandler.get()))
+    server.setHandler(contextHandler.get())
   }
 
   def futureHandle(rawHandle: RawRest.HandleRequest): RestRequest => Future[RestResponse] =
