@@ -19,17 +19,17 @@ object Dependencies {
   val atmosphereJSVersion = "3.1.3"
   val atmosphereVersion = "2.7.15"
 
-  val upickleVersion = "4.3.0" // Tests only
+  val upickleVersion = "4.3.2" // Tests only
   val circeVersion = "0.14.14" // Tests only
   val circeDerivationVersion = "0.13.0-M5" // Tests only
   val monixVersion = "3.4.1" // udash-rest only
 
   val sttpVersion = "3.11.0"
 
-  val scalaLoggingVersion = "3.9.5"
+  val scalaLoggingVersion = "3.9.6"
 
   val jettyVersion = "12.1.1"
-  val typesafeConfigVersion = "1.4.4"
+  val typesafeConfigVersion = "1.4.5"
   val flexmarkVersion = "0.64.8"
   val logbackVersion = "1.3.15"
   val janinoVersion = "3.1.12"
@@ -44,7 +44,7 @@ object Dependencies {
   val momentJsVersion = "2.30.1"
 
   val seleniumVersion = "4.35.0"
-  val webDriverManagerVersion = "6.3.1"
+  val webDriverManagerVersion = "6.3.2"
   val scalaJsBenchmarkVersion = "0.10.0"
 
   val compilerPlugins = Def.setting(Seq(
