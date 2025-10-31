@@ -31,7 +31,7 @@ object Dependencies {
   val jettyVersion = "12.1.2"
   val typesafeConfigVersion = "1.4.5"
   val flexmarkVersion = "0.64.8"
-  val logbackVersion = "1.3.15"
+  val logbackVersion = "1.3.16"
   val janinoVersion = "3.1.12"
   val fontAwesomeVersion = "5.10.1"
   val svg4everybodyVersion = "2.1.9"
