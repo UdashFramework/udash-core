@@ -19,13 +19,14 @@ jobs:
       fail-fast: false
       matrix:
         scala: [ 2.13.16 ]
+        java-version: [ 17, 21 ]
         command: [ udash-jvm/test, udash-js/test, guide-selenium/test ]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: ${{ matrix.java-version }}
           cache: sbt
       - uses: actions/setup-node@v4
         with:
