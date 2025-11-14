@@ -22,6 +22,29 @@ inThisBuild(Seq(
   developers := List(
     Developer("ddworak", "Dawid Dworak", "d.dworak@avsystem.com", url("https://github.com/ddworak")),
   ),
+  scalaVersion := Dependencies.versionOfScala,
+
+
+  githubWorkflowTargetTags ++= Seq("v*"),
+
+  githubWorkflowArtifactUpload := false,
+  githubWorkflowJavaVersions := Seq(JavaSpec.temurin("17"), JavaSpec.temurin("21"), JavaSpec.temurin("25")),
+  githubWorkflowBuildPreamble += WorkflowStep.Use(
+    UseRef.Public("actions", "setup-node", "v4"),
+    name = Some("Setup Node.js"),
+  ),
+
+  githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v"))),
+
+  githubWorkflowPublish := Seq(WorkflowStep.Sbt(
+    List("ci-release"),
+    env = Map(
+      "PGP_PASSPHRASE" -> "${{ secrets.PGP_PASSPHRASE }}",
+      "PGP_SECRET" -> "${{ secrets.PGP_SECRET }}",
+      "SONATYPE_PASSWORD" -> "${{ secrets.SONATYPE_PASSWORD }}",
+      "SONATYPE_USERNAME" -> "${{ secrets.SONATYPE_USERNAME }}"
+    )
+  )),
 ))
 
 val forIdeaImport = System.getProperty("idea.managed", "false").toBoolean && System.getProperty("idea.runid") == null
@@ -34,8 +57,6 @@ val browserCapabilities: Capabilities = {
 }
 
 val commonSettings = Seq(
-  scalaVersion := Dependencies.versionOfScala,
-  crossScalaVersions := Seq(Dependencies.versionOfScala),
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",
