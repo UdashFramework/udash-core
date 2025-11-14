@@ -35,6 +35,7 @@ inThisBuild(Seq(
   ),
 
   githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v"))),
+  githubWorkflowEnv += "JAVA_OPTS" -> "-Dfile.encoding=UTF-8 -Xmx4G",
 
   githubWorkflowPublish := Seq(WorkflowStep.Sbt(
     List("ci-release"),

@@ -16,6 +16,7 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  JAVA_OPTS: '-Dfile.encoding=UTF-8 -Xmx4G'
 
 jobs:
   build:
