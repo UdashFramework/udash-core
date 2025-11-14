@@ -14,7 +14,7 @@ on:
 jobs:
   test:
     name: Run tests
-    runs-on: ubuntu-22.04 # https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2204-Readme.md
+    runs-on: ubuntu-24.04 # https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md
     strategy:
       fail-fast: false
       matrix:
@@ -22,13 +22,13 @@ jobs:
         java-version: [ 17, 21, 25 ]
         command: [ udash-jvm/test, udash-js/test, guide-selenium/test ]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: ${{ matrix.java-version }}
           cache: sbt
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           cache: npm
       - name: Install npm dependencies
@@ -41,11 +41,11 @@ jobs:
     # only run on tag push
     if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v'))
     needs: [ test ]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
