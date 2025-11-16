@@ -24,9 +24,7 @@ inThisBuild(Seq(
   ),
   scalaVersion := Dependencies.versionOfScala,
 
-
   githubWorkflowTargetTags ++= Seq("v*"),
-
   githubWorkflowArtifactUpload := false,
   githubWorkflowJavaVersions := Seq(JavaSpec.temurin("17"), JavaSpec.temurin("21"), JavaSpec.temurin("25")),
   githubWorkflowBuildPreamble ++= Seq(
@@ -39,10 +37,14 @@ inThisBuild(Seq(
       name = Some("Install npm dependencies")
     )
   ),
-
   githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v"))),
   githubWorkflowEnv += "JAVA_OPTS" -> "-Dfile.encoding=UTF-8 -Xmx4G",
-
+  githubWorkflowBuildMatrixFailFast := Some(false),
+  githubWorkflowBuildMatrixAdditions += "command" -> List("udash-jvm/test", "udash-js/test", "guide-selenium/test"),
+  githubWorkflowBuild := Seq(WorkflowStep.Sbt(
+    commands = List("${{ matrix.command }}"),
+    name = Some("Run tests"),
+  )),
   githubWorkflowPublish := Seq(WorkflowStep.Sbt(
     List("ci-release"),
     env = Map(

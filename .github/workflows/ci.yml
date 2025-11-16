@@ -22,10 +22,12 @@ jobs:
   build:
     name: Build and Test
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         scala: [2.13.16]
         java: [temurin@17, temurin@21, temurin@25]
+        command: [udash-jvm/test, udash-js/test, guide-selenium/test]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout current branch (full)
@@ -69,8 +71,8 @@ jobs:
       - name: Check that workflows are up to date
         run: sbt '++ ${{ matrix.scala }}' githubWorkflowCheck
 
-      - name: Build project
-        run: sbt '++ ${{ matrix.scala }}' test
+      - name: Run tests
+        run: sbt '++ ${{ matrix.scala }}' '${{ matrix.command }}'
 
   publish:
     name: Publish Artifacts
