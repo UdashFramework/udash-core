@@ -29,9 +29,15 @@ inThisBuild(Seq(
 
   githubWorkflowArtifactUpload := false,
   githubWorkflowJavaVersions := Seq(JavaSpec.temurin("17"), JavaSpec.temurin("21"), JavaSpec.temurin("25")),
-  githubWorkflowBuildPreamble += WorkflowStep.Use(
-    UseRef.Public("actions", "setup-node", "v4"),
-    name = Some("Setup Node.js"),
+  githubWorkflowBuildPreamble ++= Seq(
+    WorkflowStep.Use(
+      ref = UseRef.Public("actions", "setup-node", "v4"),
+      name = Some("Setup Node.js"),
+    ),
+    WorkflowStep.Run(
+      commands = List("npm install"),
+      name = Some("Install npm dependencies")
+    )
   ),
 
   githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v"))),
