@@ -371,7 +371,6 @@ lazy val benchmarks = jsProject(project)
     crossScalaVersions := Seq(Dependencies.versionOfScala),
     libraryDependencies ++= Dependencies.benchmarksSjsDeps.value,
     Compile / scalaJSUseMainModuleInitializer := true,
-    evictionErrorLevel := Level.Warn, //todo: remove after upickle 2.0.1+ is available
   )
 
 // Custom SBT tasks

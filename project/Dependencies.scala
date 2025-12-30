@@ -19,7 +19,6 @@ object Dependencies {
   val atmosphereJSVersion = "3.1.3"
   val atmosphereVersion = "2.7.15"
 
-  val upickleVersion = "4.4.2" // Tests only
   val circeVersion = "0.14.15" // Tests only
   val circeDerivationVersion = "0.13.0-M5" // Tests only
   val monixVersion = "3.4.1" // udash-rest only
@@ -85,7 +84,6 @@ object Dependencies {
   val coreSjsDeps = coreCrossDeps
 
   private val rpcCrossDeps = Def.setting(Seq(
-    "com.lihaoyi" %%% "upickle" % upickleVersion % Test,
     "io.circe" %%% "circe-core" % circeVersion % Test,
     "io.circe" %%% "circe-parser" % circeVersion % Test,
   ))
@@ -152,7 +150,6 @@ object Dependencies {
     "io.circe" %%% "circe-core" % circeVersion,
     "io.circe" %%% "circe-generic" % circeVersion,
     "io.circe" %%% "circe-parser" % circeVersion,
-    "com.lihaoyi" %%% "upickle" % upickleVersion,
   ))
 
   val backendDeps = Def.setting(Seq(
