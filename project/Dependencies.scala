@@ -19,8 +19,6 @@ object Dependencies {
   val atmosphereJSVersion = "3.1.3"
   val atmosphereVersion = "2.7.15"
 
-  val circeVersion = "0.14.15" // Tests only
-  val circeDerivationVersion = "0.13.0-M5" // Tests only
   val monixVersion = "3.4.1" // udash-rest only
 
   val sttpVersion = "3.11.0"
@@ -83,17 +81,11 @@ object Dependencies {
 
   val coreSjsDeps = coreCrossDeps
 
-  private val rpcCrossDeps = Def.setting(Seq(
-    "io.circe" %%% "circe-core" % circeVersion % Test,
-    "io.circe" %%% "circe-parser" % circeVersion % Test,
-  ))
-
-  val rpcJvmDeps = Def.setting(rpcCrossDeps.value ++ Seq(
+  val rpcJvmDeps = Def.setting(Seq(
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "org.atmosphere" % "atmosphere-runtime" % atmosphereVersion
   ))
 
-  val rpcSjsDeps = rpcCrossDeps
 
   val rpcJsDeps = Def.setting(Seq(
     ("org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js").minified(s"$atmosphereJSVersion/atmosphere-min.js")
@@ -103,9 +95,6 @@ object Dependencies {
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
     "com.softwaremill.sttp.client3" %%% "monix" % sttpVersion,
     "io.monix" %%% "monix" % monixVersion,
-    "io.circe" %%% "circe-core" % circeVersion % Test,
-    "io.circe" %%% "circe-parser" % circeVersion % Test,
-    "io.circe" %%% "circe-derivation" % circeDerivationVersion % Test,
   ))
 
   val restJvmDeps = Def.setting(restCrossDeps.value ++ Seq(
@@ -147,9 +136,6 @@ object Dependencies {
 
   val benchmarksSjsDeps = Def.setting(Seq(
     "com.github.japgolly.scalajs-benchmark" %%% "benchmark" % scalaJsBenchmarkVersion,
-    "io.circe" %%% "circe-core" % circeVersion,
-    "io.circe" %%% "circe-generic" % circeVersion,
-    "io.circe" %%% "circe-parser" % circeVersion,
   ))
 
   val backendDeps = Def.setting(Seq(
