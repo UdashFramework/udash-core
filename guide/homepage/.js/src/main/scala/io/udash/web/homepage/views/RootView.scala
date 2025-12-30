@@ -1,21 +1,19 @@
 package io.udash.web.homepage.views
 
-import com.avsystem.commons._
-import io.udash._
+import com.avsystem.commons.*
+import io.udash.*
 import io.udash.css.CssView
 import io.udash.web.commons.components.Footer
 import io.udash.web.commons.styles.GlobalStyles
 import io.udash.web.homepage.RootState
 import io.udash.web.homepage.components.Header
 import io.udash.web.homepage.styles.partials.HomepageStyles
-import scalatags.JsDom.tags2._
-
-import scala.scalajs.js
+import scalatags.JsDom.tags2.*
 
 object RootViewFactory extends StaticViewFactory[RootState.type](() => new RootView)
 
 class RootView extends ContainerView with CssView {
-  import scalatags.JsDom.all._
+  import scalatags.JsDom.all.*
 
   private val content = div(
     Header.getTemplate,
@@ -26,9 +24,4 @@ class RootView extends ContainerView with CssView {
   )
 
   override def getTemplate: Modifier = content
-
-  override def renderChild(view: Option[View]): Unit = {
-    super.renderChild(view)
-    js.Dynamic.global.svg4everybody()
-  }
 }

@@ -5,7 +5,7 @@ import sbt.*
 import sbt.Keys.scalaVersion
 
 object Dependencies {
-  val versionOfScala = "2.13.18" //update .github/workflows/ci.yml as well
+  val versionOfScala = "2.13.18" //run githubWorkflowGenerate
 
   val jqueryWrapperVersion = "3.3.0"
 
@@ -30,7 +30,6 @@ object Dependencies {
   val flexmarkVersion = "0.64.8"
   val logbackVersion = "1.3.16"
   val fontAwesomeVersion = "5.10.1"
-  val svg4everybodyVersion = "2.1.9"
 
   val scalatestVersion = "3.2.19"
   val mockitoScalaVersion = "2.0.0"
@@ -165,7 +164,6 @@ object Dependencies {
   ))
 
   val homepageJsDeps = Def.setting(Seq[JSModuleID](
-    "org.webjars.npm" % "svg4everybody" % svg4everybodyVersion / s"$svg4everybodyVersion/dist/svg4everybody.js",
     ProvidedJS / "prism.js",
   ))
 
