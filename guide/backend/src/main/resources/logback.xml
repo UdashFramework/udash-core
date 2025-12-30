@@ -7,23 +7,7 @@
 
     <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
 
-    <if condition='${DISABLE_FILE_LOGGING:-false} == true'>
-        <then>
-            <appender name="FILE" class="ch.qos.logback.core.helpers.NOPAppender"/>
-        </then>
-        <else>
-            <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-                <file>logs/udash-guide-${bySecond}.log</file>
-                <append>true</append>
-                <encoder>
-                    <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-                </encoder>
-            </appender>
-        </else>
-    </if>
-
     <root level="info">
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="FILE"/>
     </root>
 </configuration>

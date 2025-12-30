@@ -157,11 +157,6 @@ class RpcSerializationView extends View with CssView {
         li(b("rawToString"), " - converts a ", i("RawValue"), " into the string.")
       )
     ),
-    p(
-      "In the Udash RPC repository you can find implementation based on the ",
-      a(href := References.UpickleHomepage, target := "_blank")("uPickle"),
-      " library."
-    ),
     h2("What's next?"),
     p(
       "You might want to take a look at ", a(href := RpcClientServerState.url)("Client ➔ Server"),

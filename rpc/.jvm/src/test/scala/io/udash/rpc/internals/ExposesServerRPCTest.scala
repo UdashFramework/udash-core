@@ -115,19 +115,6 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
     new DefaultExposesServerRPC[TestRPC](impl)
   }
 
-  final class UPickleExposesServerRPC[ServerRPCType]
-  (local: ServerRPCType)(implicit protected val localRpcAsRaw: ServerRawRpc.AsRawRpc[ServerRPCType])
-    extends ExposesServerRPC(local) {
-  }
-
-  def createCustomRpc(calls: mutable.Builder[String, Seq[String]]): UPickleExposesServerRPC[TestRPC] = {
-    val impl = TestRPC.rpcImpl((method: String, args: List[Any], result: Option[Any]) => {
-      calls += method
-    })
-    new UPickleExposesServerRPC[TestRPC](impl)
-  }
-
-
   def createLoggingRpc(calls: mutable.Builder[String, Seq[String]], all: Boolean = false): (ExposesServerRPC[TestRPC], ListBuffer[String]) = {
     val loggedCalls = ListBuffer.empty[String]
     val impl = TestRPC.rpcImpl((method: String, args: List[Any], result: Option[Any]) => {
@@ -143,7 +130,6 @@ class ExposesServerRPCTest extends UdashRpcBackendTest {
   }
 
   "DefaultExposesServerRPC" should tests(createDefaultRpc)
-  "CustomExposesServerRPC" should tests(createCustomRpc)
 
   "LoggingExposesServerRPC" should {
     import io.udash.rpc.InnerRPC

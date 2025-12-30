@@ -5,7 +5,7 @@ import sbt.*
 import sbt.Keys.scalaVersion
 
 object Dependencies {
-  val versionOfScala = "2.13.18" //update .github/workflows/ci.yml as well
+  val versionOfScala = "2.13.18" //run githubWorkflowGenerate
 
   val jqueryWrapperVersion = "3.3.0"
 
@@ -19,9 +19,6 @@ object Dependencies {
   val atmosphereJSVersion = "3.1.3"
   val atmosphereVersion = "2.7.15"
 
-  val upickleVersion = "4.4.2" // Tests only
-  val circeVersion = "0.14.15" // Tests only
-  val circeDerivationVersion = "0.13.0-M5" // Tests only
   val monixVersion = "3.4.1" // udash-rest only
 
   val sttpVersion = "3.11.0"
@@ -32,9 +29,7 @@ object Dependencies {
   val typesafeConfigVersion = "1.4.5"
   val flexmarkVersion = "0.64.8"
   val logbackVersion = "1.3.16"
-  val janinoVersion = "3.1.12"
   val fontAwesomeVersion = "5.10.1"
-  val svg4everybodyVersion = "2.1.9"
 
   val scalatestVersion = "3.2.19"
   val mockitoScalaVersion = "2.0.0"
@@ -84,18 +79,11 @@ object Dependencies {
 
   val coreSjsDeps = coreCrossDeps
 
-  private val rpcCrossDeps = Def.setting(Seq(
-    "com.lihaoyi" %%% "upickle" % upickleVersion % Test,
-    "io.circe" %%% "circe-core" % circeVersion % Test,
-    "io.circe" %%% "circe-parser" % circeVersion % Test,
-  ))
-
-  val rpcJvmDeps = Def.setting(rpcCrossDeps.value ++ Seq(
+  val rpcJvmDeps = Def.setting(Seq(
     "javax.servlet" % "javax.servlet-api" % servletVersion,
     "org.atmosphere" % "atmosphere-runtime" % atmosphereVersion
   ))
 
-  val rpcSjsDeps = rpcCrossDeps
 
   val rpcJsDeps = Def.setting(Seq(
     ("org.webjars" % "atmosphere-javascript" % atmosphereJSVersion / s"$atmosphereJSVersion/atmosphere.js").minified(s"$atmosphereJSVersion/atmosphere-min.js")
@@ -105,9 +93,6 @@ object Dependencies {
     "com.avsystem.commons" %%% "commons-core" % avsCommonsVersion,
     "com.softwaremill.sttp.client3" %%% "monix" % sttpVersion,
     "io.monix" %%% "monix" % monixVersion,
-    "io.circe" %%% "circe-core" % circeVersion % Test,
-    "io.circe" %%% "circe-parser" % circeVersion % Test,
-    "io.circe" %%% "circe-derivation" % circeDerivationVersion % Test,
   ))
 
   val restJvmDeps = Def.setting(restCrossDeps.value ++ Seq(
@@ -149,16 +134,11 @@ object Dependencies {
 
   val benchmarksSjsDeps = Def.setting(Seq(
     "com.github.japgolly.scalajs-benchmark" %%% "benchmark" % scalaJsBenchmarkVersion,
-    "io.circe" %%% "circe-core" % circeVersion,
-    "io.circe" %%% "circe-generic" % circeVersion,
-    "io.circe" %%% "circe-parser" % circeVersion,
-    "com.lihaoyi" %%% "upickle" % upickleVersion,
   ))
 
   val backendDeps = Def.setting(Seq(
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "ch.qos.logback" % "logback-classic" % logbackVersion,
-    "org.codehaus.janino" % "janino" % janinoVersion, //conditional processing in logback
 
     "org.eclipse.jetty" % "jetty-rewrite" % jettyVersion,
     "org.eclipse.jetty.ee8.websocket" % "jetty-ee8-websocket-javax-server" % jettyVersion,
@@ -184,7 +164,6 @@ object Dependencies {
   ))
 
   val homepageJsDeps = Def.setting(Seq[JSModuleID](
-    "org.webjars.npm" % "svg4everybody" % svg4everybodyVersion / s"$svg4everybodyVersion/dist/svg4everybody.js",
     ProvidedJS / "prism.js",
   ))
 

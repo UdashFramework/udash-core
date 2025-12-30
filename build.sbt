@@ -309,7 +309,6 @@ lazy val rpc = jvmProject(project)
 lazy val `rpc-js` = jsProjectFor(project, rpc)
   .dependsOn(`utils-js` % CompileAndTest)
   .settings(
-    libraryDependencies ++= Dependencies.rpcSjsDeps.value,
     jsDependencies ++= Dependencies.rpcJsDeps.value,
   )
 
@@ -371,7 +370,6 @@ lazy val benchmarks = jsProject(project)
     crossScalaVersions := Seq(Dependencies.versionOfScala),
     libraryDependencies ++= Dependencies.benchmarksSjsDeps.value,
     Compile / scalaJSUseMainModuleInitializer := true,
-    evictionErrorLevel := Level.Warn, //todo: remove after upickle 2.0.1+ is available
   )
 
 // Custom SBT tasks

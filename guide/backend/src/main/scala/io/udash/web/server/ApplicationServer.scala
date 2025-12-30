@@ -1,6 +1,7 @@
 package io.udash.web.server
 
 import com.avsystem.commons.universalOps
+import com.typesafe.scalalogging.LazyLogging
 import io.udash.rest.*
 import io.udash.rpc.*
 import io.udash.rpc.utils.CallLogging
@@ -19,9 +20,10 @@ import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.handler.ContextHandlerCollection
 import org.eclipse.jetty.util.resource.ResourceFactory
 
-import java.nio.file.Path
+import java.nio.file.{NoSuchFileException, Path}
+import scala.util.{Failure, Success, Try}
 
-class ApplicationServer(val port: Int, homepageResourceBase: String, guideResourceBase: String)(implicit scheduler: Scheduler) {
+class ApplicationServer(val port: Int, homepageResourceBase: String, guideResourceBase: String)(implicit scheduler: Scheduler) extends LazyLogging {
   private val server = new Server(port)
 
   def start(): Unit =
@@ -76,7 +78,14 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
     val contextHandler = new ServletContextHandler
     contextHandler.setSessionHandler(new SessionHandler)
     contextHandler.setVirtualHosts(hosts)
-    contextHandler.setBaseResource(ResourceFactory.of(contextHandler).newResource(Path.of(resourceBase).toRealPath()))
+    val resource = try {
+      ResourceFactory.of(contextHandler).newResource(Path.of(resourceBase).toRealPath())
+    } catch {
+      case ex: NoSuchFileException =>
+        logger.error(s"Missing static resources at $resourceBase. This usually means that Scala.js compilation artifacts are missing. Try running sbt compileStatics", ex)
+        scala.sys.exit(1)
+    }
+    contextHandler.setBaseResource(resource)
     contextHandler.addServlet(new ServletHolder(new DefaultServlet), "/*")
     contextHandler
   }
