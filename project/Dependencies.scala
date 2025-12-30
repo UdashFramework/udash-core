@@ -7,7 +7,7 @@ import sbt.Keys.scalaVersion
 object Dependencies {
   val versionOfScala = "2.13.18" //run githubWorkflowGenerate
 
-  val jqueryWrapperVersion = "3.3.0"
+  val jqueryWrapperVersion = "3.4.0"
 
   val scalaJsDomVersion = "2.8.1"
   val scalaTagsVersion = "0.13.1"
