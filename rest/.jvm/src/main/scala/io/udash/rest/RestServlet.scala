@@ -123,16 +123,17 @@ class RestServlet(
   }
 
   private def setResponseHeaders(response: HttpServletResponse, code: Int, headers: IMapping[PlainValue]): Unit = {
-    response.setStatus(code)
+    ignoreJettyFieldsNpe(response.setStatus(code))
     headers.entries.foreach {
-      case (name, PlainValue(value)) => response.addHeader(name, value)
+      case (name, PlainValue(value)) =>
+        ignoreJettyFieldsNpe(response.addHeader(name, value))
     }
   }
 
   private def writeNonEmptyBody(response: HttpServletResponse, body: HttpBody.NonEmpty): Unit = {
     val bytes = body.bytes
-    response.setContentType(body.contentType)
-    response.setContentLength(bytes.length)
+    ignoreJettyFieldsNpe(response.setContentType(body.contentType))
+    ignoreJettyFieldsNpe(response.setContentLength(bytes.length))
     response.getOutputStream.write(bytes)
   }
 
@@ -148,14 +149,14 @@ class RestServlet(
       case single: StreamedBody.Single =>
         Task.eval(writeNonEmptyBody(response, single.body))
       case binary: StreamedBody.RawBinary =>
-        response.setContentType(binary.contentType)
+        ignoreJettyFieldsNpe(response.setContentType(binary.contentType))
         binary.content
           .foreachL { chunk =>
             response.getOutputStream.write(chunk)
             response.getOutputStream.flush()
           }
       case jsonList: StreamedBody.JsonList =>
-        response.setContentType(jsonList.contentType)
+        ignoreJettyFieldsNpe(response.setContentType(jsonList.contentType))
         jsonList.elements
           .bufferTumbling(jsonList.customBatchSize.getOrElse(defaultStreamingBatchSize))
           .switchIfEmpty(Observable(Seq.empty))
@@ -217,12 +218,20 @@ class RestServlet(
   }
 
   private def writeFailure(response: HttpServletResponse, message: Opt[String]): Unit = {
-    response.setStatus(500)
+    ignoreJettyFieldsNpe(response.setStatus(500))
     message.foreach { msg =>
-      response.setContentType(s"text/plain;charset=utf-8")
+      ignoreJettyFieldsNpe(response.setContentType(s"text/plain;charset=utf-8"))
       response.getWriter.write(msg)
     }
   }
+
+  private def ignoreJettyFieldsNpe(op: => Unit): Unit =
+    try {
+      op
+    } catch {
+      case e: NullPointerException if Option(e.getMessage).exists(_.contains("_fields")) =>
+        ()
+    }
 
   private def readParameters(request: HttpServletRequest): RestParameters = {
     // can't use request.getPathInfo because it decodes the URL before we can split it
