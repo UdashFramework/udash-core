@@ -14,8 +14,8 @@ import org.slf4j.{Logger, LoggerFactory}
 
 import java.io.{ByteArrayOutputStream, EOFException}
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import javax.servlet.{AsyncEvent, AsyncListener}
+import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse, HttpServletResponseWrapper}
+import javax.servlet.{AsyncEvent, AsyncListener, ServletOutputStream, WriteListener}
 import scala.annotation.tailrec
 import scala.concurrent.duration.*
 
@@ -94,20 +94,21 @@ class RestServlet(
 
     // readRequest must execute in Jetty thread but we want exceptions to be handled uniformly, hence the Try
     val udashRequest = Try(readRequest(request))
+    val safeResponse = new SafeHttpServletResponse(response)
     val cancelable =
       (for {
         restRequest <- Task.fromTry(udashRequest)
         restResponse <- handleRequest(restRequest)
-        _ <- Task(setResponseHeaders(response, restResponse.code, restResponse.headers))
-        _ <- writeResponseBody(response, restResponse)
+        _ <- Task(setResponseHeaders(safeResponse, restResponse.code, restResponse.headers))
+        _ <- writeResponseBody(safeResponse, restResponse)
       } yield ()).executeAsync.runAsync {
         case Right(_) =>
           asyncContext.complete()
         case Left(e: HttpErrorException) =>
-          completeWith(writeResponse(response, e.toResponse))
+          completeWith(writeResponse(safeResponse, e.toResponse))
         case Left(e) =>
           logger.error("Failed to handle REST request", e)
-          completeWith(writeFailure(response, e.getMessage.opt))
+          completeWith(writeFailure(safeResponse, e.getMessage.opt))
       }
 
     asyncContext.setTimeout(handleTimeout.toMillis)
@@ -115,25 +116,29 @@ class RestServlet(
       def onComplete(event: AsyncEvent): Unit = ()
       def onTimeout(event: AsyncEvent): Unit = {
         cancelable.cancel()
-        completeWith(writeFailure(response, s"server operation timed out after $handleTimeout".opt))
+        completeWith(writeFailure(safeResponse, s"server operation timed out after $handleTimeout".opt))
       }
       def onError(event: AsyncEvent): Unit = ()
       def onStartAsync(event: AsyncEvent): Unit = ()
     })
   }
 
-  private def setResponseHeaders(response: HttpServletResponse, code: Int, headers: IMapping[PlainValue]): Unit = {
-    ignoreJettyFieldsNpe(response.setStatus(code))
+  private def setResponseHeaders(
+    response: HttpServletResponse,
+    code: Int,
+    headers: IMapping[PlainValue],
+  ): Unit = {
+    response.setStatus(code)
     headers.entries.foreach {
       case (name, PlainValue(value)) =>
-        ignoreJettyFieldsNpe(response.addHeader(name, value))
+        response.addHeader(name, value)
     }
   }
 
   private def writeNonEmptyBody(response: HttpServletResponse, body: HttpBody.NonEmpty): Unit = {
     val bytes = body.bytes
-    ignoreJettyFieldsNpe(response.setContentType(body.contentType))
-    ignoreJettyFieldsNpe(response.setContentLength(bytes.length))
+    response.setContentType(body.contentType)
+    response.setContentLength(bytes.length)
     response.getOutputStream.write(bytes)
   }
 
@@ -149,14 +154,14 @@ class RestServlet(
       case single: StreamedBody.Single =>
         Task.eval(writeNonEmptyBody(response, single.body))
       case binary: StreamedBody.RawBinary =>
-        ignoreJettyFieldsNpe(response.setContentType(binary.contentType))
+        response.setContentType(binary.contentType)
         binary.content
           .foreachL { chunk =>
             response.getOutputStream.write(chunk)
             response.getOutputStream.flush()
           }
       case jsonList: StreamedBody.JsonList =>
-        ignoreJettyFieldsNpe(response.setContentType(jsonList.contentType))
+        response.setContentType(jsonList.contentType)
         jsonList.elements
           .bufferTumbling(jsonList.customBatchSize.getOrElse(defaultStreamingBatchSize))
           .switchIfEmpty(Observable(Seq.empty))
@@ -218,9 +223,9 @@ class RestServlet(
   }
 
   private def writeFailure(response: HttpServletResponse, message: Opt[String]): Unit = {
-    ignoreJettyFieldsNpe(response.setStatus(500))
+    response.setStatus(500)
     message.foreach { msg =>
-      ignoreJettyFieldsNpe(response.setContentType(s"text/plain;charset=utf-8"))
+      response.setContentType(s"text/plain;charset=utf-8")
       response.getWriter.write(msg)
     }
   }
@@ -232,6 +237,43 @@ class RestServlet(
       case e: NullPointerException if Option(e.getMessage).exists(_.contains("_fields")) =>
         ()
     }
+
+  private final class SafeServletOutputStream(delegate: ServletOutputStream) extends ServletOutputStream {
+    override def isReady: Boolean = delegate.isReady
+    override def setWriteListener(listener: WriteListener): Unit = delegate.setWriteListener(listener)
+    override def write(b: Int): Unit = ignoreJettyFieldsNpe(delegate.write(b))
+    override def write(b: Array[Byte]): Unit = ignoreJettyFieldsNpe(delegate.write(b))
+    override def write(b: Array[Byte], off: Int, len: Int): Unit =
+      ignoreJettyFieldsNpe(delegate.write(b, off, len))
+    override def flush(): Unit = ignoreJettyFieldsNpe(delegate.flush())
+    override def close(): Unit = ignoreJettyFieldsNpe(delegate.close())
+  }
+
+  private final class SafePrintWriter(delegate: java.io.PrintWriter) extends java.io.PrintWriter(delegate) {
+    override def write(buf: Array[Char], off: Int, len: Int): Unit = ignoreJettyFieldsNpe(super.write(buf, off, len))
+    override def write(buf: Array[Char]): Unit = ignoreJettyFieldsNpe(super.write(buf))
+    override def write(s: String, off: Int, len: Int): Unit = ignoreJettyFieldsNpe(super.write(s, off, len))
+    override def write(s: String): Unit = ignoreJettyFieldsNpe(super.write(s))
+    override def write(c: Int): Unit = ignoreJettyFieldsNpe(super.write(c))
+    override def flush(): Unit = ignoreJettyFieldsNpe(super.flush())
+    override def close(): Unit = ignoreJettyFieldsNpe(super.close())
+  }
+
+  private final class SafeHttpServletResponse(response: HttpServletResponse)
+      extends HttpServletResponseWrapper(response) {
+    override def setStatus(sc: Int): Unit = ignoreJettyFieldsNpe(super.setStatus(sc))
+    override def setHeader(name: String, value: String): Unit = ignoreJettyFieldsNpe(super.setHeader(name, value))
+    override def addHeader(name: String, value: String): Unit = ignoreJettyFieldsNpe(super.addHeader(name, value))
+    override def setDateHeader(name: String, date: Long): Unit = ignoreJettyFieldsNpe(super.setDateHeader(name, date))
+    override def addDateHeader(name: String, date: Long): Unit = ignoreJettyFieldsNpe(super.addDateHeader(name, date))
+    override def setIntHeader(name: String, value: Int): Unit = ignoreJettyFieldsNpe(super.setIntHeader(name, value))
+    override def addIntHeader(name: String, value: Int): Unit = ignoreJettyFieldsNpe(super.addIntHeader(name, value))
+    override def setContentType(`type`: String): Unit = ignoreJettyFieldsNpe(super.setContentType(`type`))
+    override def setContentLength(len: Int): Unit = ignoreJettyFieldsNpe(super.setContentLength(len))
+    override def setContentLengthLong(len: Long): Unit = ignoreJettyFieldsNpe(super.setContentLengthLong(len))
+    override def getOutputStream: ServletOutputStream = new SafeServletOutputStream(super.getOutputStream)
+    override def getWriter: java.io.PrintWriter = new SafePrintWriter(super.getWriter)
+  }
 
   private def readParameters(request: HttpServletRequest): RestParameters = {
     // can't use request.getPathInfo because it decodes the URL before we can split it
