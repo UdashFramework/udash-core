@@ -82,19 +82,28 @@ class RestServlet(
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val asyncContext = request.startAsync()
     val completed = new AtomicBoolean(false)
+    val responseActive = new AtomicBoolean(true)
+    val requestInfo = {
+      val query = Option(request.getQueryString).map(q => s"?$q").getOrElse("")
+      s"${request.getMethod} ${request.getRequestURI}$query"
+    }
 
     // Need to protect asyncContext from being completed twice because after a timeout the
     // servlet may recycle the same context instance between subsequent requests (not cool)
     // https://stackoverflow.com/a/27744537
     def completeWith(code: => Unit): Unit =
       if (!completed.getAndSet(true)) {
-        code
-        asyncContext.complete()
+        try {
+          code
+        } finally {
+          responseActive.set(false)
+          asyncContext.complete()
+        }
       }
 
     // readRequest must execute in Jetty thread but we want exceptions to be handled uniformly, hence the Try
     val udashRequest = Try(readRequest(request))
-    val safeResponse = new SafeHttpServletResponse(response)
+    val safeResponse = new SafeHttpServletResponse(response, responseActive, requestInfo)
     val cancelable =
       (for {
         restRequest <- Task.fromTry(udashRequest)
@@ -103,9 +112,12 @@ class RestServlet(
         _ <- writeResponseBody(safeResponse, restResponse)
       } yield ()).executeAsync.runAsync {
         case Right(_) =>
-          asyncContext.complete()
+          completeWith(())
         case Left(e: HttpErrorException) =>
           completeWith(writeResponse(safeResponse, e.toResponse))
+        case Left(e: NullPointerException) =>
+          logger.error("Failed to handle REST request (NPE)", e)
+          completeWith(writeFailure(safeResponse, "Internal server error".opt))
         case Left(e) =>
           logger.error("Failed to handle REST request", e)
           completeWith(writeFailure(safeResponse, e.getMessage.opt))
@@ -230,47 +242,63 @@ class RestServlet(
     }
   }
 
-  private def ignoreJettyFieldsNpe(op: => Unit): Unit =
-    try {
-      op
-    } catch {
-      case e: NullPointerException if Option(e.getMessage).exists(_.contains("_fields")) =>
-        ()
+  private final class SafeHttpServletResponse(
+    response: HttpServletResponse,
+    responseActive: AtomicBoolean,
+    requestInfo: String,
+  )
+      extends HttpServletResponseWrapper(response) {
+    private val suppressionLogged = new AtomicBoolean(false)
+
+    private def logSuppressed(opName: String, reason: String, exception: Throwable = null): Unit =
+      if (suppressionLogged.compareAndSet(false, true)) {
+        val message = s"Suppressed response write ($opName): $reason for $requestInfo"
+        if (exception == null) {
+          logger.warn(message)
+        } else {
+          logger.warn(message, exception)
+        }
+      }
+
+    private def guard(opName: String)(op: => Unit): Unit = {
+      if (!responseActive.get() || super.isCommitted) {
+        logSuppressed(opName, "response already completed or committed")
+      } else {
+        op
+      }
     }
 
-  private final class SafeServletOutputStream(delegate: ServletOutputStream) extends ServletOutputStream {
-    override def isReady: Boolean = delegate.isReady
-    override def setWriteListener(listener: WriteListener): Unit = delegate.setWriteListener(listener)
-    override def write(b: Int): Unit = ignoreJettyFieldsNpe(delegate.write(b))
-    override def write(b: Array[Byte]): Unit = ignoreJettyFieldsNpe(delegate.write(b))
-    override def write(b: Array[Byte], off: Int, len: Int): Unit =
-      ignoreJettyFieldsNpe(delegate.write(b, off, len))
-    override def flush(): Unit = ignoreJettyFieldsNpe(delegate.flush())
-    override def close(): Unit = ignoreJettyFieldsNpe(delegate.close())
-  }
+    private final class SafeServletOutputStream(delegate: ServletOutputStream) extends ServletOutputStream {
+      override def isReady: Boolean = delegate.isReady
+      override def setWriteListener(listener: WriteListener): Unit = delegate.setWriteListener(listener)
+      override def write(b: Int): Unit = guard("write")(delegate.write(b))
+      override def write(b: Array[Byte]): Unit = guard("write")(delegate.write(b))
+      override def write(b: Array[Byte], off: Int, len: Int): Unit =
+        guard("write")(delegate.write(b, off, len))
+      override def flush(): Unit = guard("flush")(delegate.flush())
+      override def close(): Unit = guard("close")(delegate.close())
+    }
 
-  private final class SafePrintWriter(delegate: java.io.PrintWriter) extends java.io.PrintWriter(delegate) {
-    override def write(buf: Array[Char], off: Int, len: Int): Unit = ignoreJettyFieldsNpe(super.write(buf, off, len))
-    override def write(buf: Array[Char]): Unit = ignoreJettyFieldsNpe(super.write(buf))
-    override def write(s: String, off: Int, len: Int): Unit = ignoreJettyFieldsNpe(super.write(s, off, len))
-    override def write(s: String): Unit = ignoreJettyFieldsNpe(super.write(s))
-    override def write(c: Int): Unit = ignoreJettyFieldsNpe(super.write(c))
-    override def flush(): Unit = ignoreJettyFieldsNpe(super.flush())
-    override def close(): Unit = ignoreJettyFieldsNpe(super.close())
-  }
+    private final class SafePrintWriter(delegate: java.io.PrintWriter) extends java.io.PrintWriter(delegate) {
+      override def write(buf: Array[Char], off: Int, len: Int): Unit = guard("write")(super.write(buf, off, len))
+      override def write(buf: Array[Char]): Unit = guard("write")(super.write(buf))
+      override def write(s: String, off: Int, len: Int): Unit = guard("write")(super.write(s, off, len))
+      override def write(s: String): Unit = guard("write")(super.write(s))
+      override def write(c: Int): Unit = guard("write")(super.write(c))
+      override def flush(): Unit = guard("flush")(super.flush())
+      override def close(): Unit = guard("close")(super.close())
+    }
 
-  private final class SafeHttpServletResponse(response: HttpServletResponse)
-      extends HttpServletResponseWrapper(response) {
-    override def setStatus(sc: Int): Unit = ignoreJettyFieldsNpe(super.setStatus(sc))
-    override def setHeader(name: String, value: String): Unit = ignoreJettyFieldsNpe(super.setHeader(name, value))
-    override def addHeader(name: String, value: String): Unit = ignoreJettyFieldsNpe(super.addHeader(name, value))
-    override def setDateHeader(name: String, date: Long): Unit = ignoreJettyFieldsNpe(super.setDateHeader(name, date))
-    override def addDateHeader(name: String, date: Long): Unit = ignoreJettyFieldsNpe(super.addDateHeader(name, date))
-    override def setIntHeader(name: String, value: Int): Unit = ignoreJettyFieldsNpe(super.setIntHeader(name, value))
-    override def addIntHeader(name: String, value: Int): Unit = ignoreJettyFieldsNpe(super.addIntHeader(name, value))
-    override def setContentType(`type`: String): Unit = ignoreJettyFieldsNpe(super.setContentType(`type`))
-    override def setContentLength(len: Int): Unit = ignoreJettyFieldsNpe(super.setContentLength(len))
-    override def setContentLengthLong(len: Long): Unit = ignoreJettyFieldsNpe(super.setContentLengthLong(len))
+    override def setStatus(sc: Int): Unit = guard("setStatus")(super.setStatus(sc))
+    override def setHeader(name: String, value: String): Unit = guard("setHeader")(super.setHeader(name, value))
+    override def addHeader(name: String, value: String): Unit = guard("addHeader")(super.addHeader(name, value))
+    override def setDateHeader(name: String, date: Long): Unit = guard("setDateHeader")(super.setDateHeader(name, date))
+    override def addDateHeader(name: String, date: Long): Unit = guard("addDateHeader")(super.addDateHeader(name, date))
+    override def setIntHeader(name: String, value: Int): Unit = guard("setIntHeader")(super.setIntHeader(name, value))
+    override def addIntHeader(name: String, value: Int): Unit = guard("addIntHeader")(super.addIntHeader(name, value))
+    override def setContentType(`type`: String): Unit = guard("setContentType")(super.setContentType(`type`))
+    override def setContentLength(len: Int): Unit = guard("setContentLength")(super.setContentLength(len))
+    override def setContentLengthLong(len: Long): Unit = guard("setContentLengthLong")(super.setContentLengthLong(len))
     override def getOutputStream: ServletOutputStream = new SafeServletOutputStream(super.getOutputStream)
     override def getWriter: java.io.PrintWriter = new SafePrintWriter(super.getWriter)
   }
