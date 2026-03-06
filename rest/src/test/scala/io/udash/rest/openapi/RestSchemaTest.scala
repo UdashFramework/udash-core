@@ -63,6 +63,12 @@ object HierarchyRoot {
     RestStructure.materialize[HierarchyRoot[String]].standaloneSchema.named("StringHierarchy")
 }
 
+sealed trait NestedHierarchy
+final case class NestedHierarchyCase(value: String) extends NestedHierarchy
+final case class NestedHierarchyCase2(value: Int) extends NestedHierarchy
+
+object NestedHierarchy extends RestDataCompanion[NestedHierarchy]
+
 @flatten("case") sealed trait FullyQualifiedHierarchy
 object FullyQualifiedHierarchy extends RestDataCompanionWithDeps[FullyQualifiedNames.type, FullyQualifiedHierarchy] {
   final case class Foo(str: String) extends FullyQualifiedHierarchy
@@ -347,6 +353,63 @@ class RestSchemaTest extends AnyFunSuite {
         |    ]
         |  }
         |}""".stripMargin)
+  }
+
+  test("Nested hierarchy") {
+    assert(allSchemasStr[NestedHierarchy] ==
+      """{
+        |  "NestedHierarchy": {
+        |    "type": "object",
+        |    "oneOf": [
+        |      {
+        |        "type": "object",
+        |        "title": "NestedHierarchyCase",
+        |        "properties": {
+        |          "NestedHierarchyCase": {
+        |            "type": "object",
+        |            "properties": {
+        |              "value": {
+        |                "type": "string"
+        |              }
+        |            },
+        |            "additionalProperties": false,
+        |            "required": [
+        |              "value"
+        |            ]
+        |          }
+        |        },
+        |        "additionalProperties": false,
+        |        "required": [
+        |          "NestedHierarchyCase"
+        |        ]
+        |      },
+        |      {
+        |        "type": "object",
+        |        "title": "NestedHierarchyCase2",
+        |        "properties": {
+        |          "NestedHierarchyCase2": {
+        |            "type": "object",
+        |            "properties": {
+        |              "value": {
+        |                "type": "integer",
+        |                "format": "int32"
+        |              }
+        |            },
+        |            "additionalProperties": false,
+        |            "required": [
+        |              "value"
+        |            ]
+        |          }
+        |        },
+        |        "additionalProperties": false,
+        |        "required": [
+        |          "NestedHierarchyCase2"
+        |        ]
+        |      }
+        |    ]
+        |  }
+        |}""".stripMargin
+    )
   }
 
   test("Customized schema name") {
