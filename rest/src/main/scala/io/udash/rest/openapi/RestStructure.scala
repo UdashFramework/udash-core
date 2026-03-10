@@ -42,8 +42,9 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
         if (caseFieldOpt.nonEmpty) baseSchema
         else {
           val adjustedBase = baseSchema match {
-            case RefOr.Value(s) => RefOr(s.copy(additionalProperties = AdditionalProperties.Flag(value = false)))
-            case ref => ref
+            case RefOr.Value(s) if s.`type`.contains(DataType.Object) && s.additionalProperties == AdditionalProperties.Flag(value = true) =>
+              RefOr(s.copy(additionalProperties = AdditionalProperties.Flag(value = false)))
+            case other => other
           }
           RefOr(Schema(
             `type` = DataType.Object,

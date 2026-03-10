@@ -69,6 +69,12 @@ final case class NestedHierarchyCase2(value: Int) extends NestedHierarchy
 
 object NestedHierarchy extends RestDataCompanion[NestedHierarchy]
 
+sealed trait NestedHierarchyWithEdgeCases
+@transparent final case class TransparentCase(value: String) extends NestedHierarchyWithEdgeCases
+final case class MapCase(entries: Map[String, Int]) extends NestedHierarchyWithEdgeCases
+
+object NestedHierarchyWithEdgeCases extends RestDataCompanion[NestedHierarchyWithEdgeCases]
+
 @flatten("case") sealed trait FullyQualifiedHierarchy
 object FullyQualifiedHierarchy extends RestDataCompanionWithDeps[FullyQualifiedNames.type, FullyQualifiedHierarchy] {
   final case class Foo(str: String) extends FullyQualifiedHierarchy
@@ -404,6 +410,57 @@ class RestSchemaTest extends AnyFunSuite {
         |        "additionalProperties": false,
         |        "required": [
         |          "NestedHierarchyCase2"
+        |        ]
+        |      }
+        |    ]
+        |  }
+        |}""".stripMargin
+    )
+  }
+
+  test("Nested hierarchy with transparent and map cases") {
+    assert(allSchemasStr[NestedHierarchyWithEdgeCases] ==
+      """{
+        |  "NestedHierarchyWithEdgeCases": {
+        |    "type": "object",
+        |    "oneOf": [
+        |      {
+        |        "type": "object",
+        |        "title": "TransparentCase",
+        |        "properties": {
+        |          "TransparentCase": {
+        |            "type": "string"
+        |          }
+        |        },
+        |        "additionalProperties": false,
+        |        "required": [
+        |          "TransparentCase"
+        |        ]
+        |      },
+        |      {
+        |        "type": "object",
+        |        "title": "MapCase",
+        |        "properties": {
+        |          "MapCase": {
+        |            "type": "object",
+        |            "properties": {
+        |              "entries": {
+        |                "type": "object",
+        |                "additionalProperties": {
+        |                  "type": "integer",
+        |                  "format": "int32"
+        |                }
+        |              }
+        |            },
+        |            "additionalProperties": false,
+        |            "required": [
+        |              "entries"
+        |            ]
+        |          }
+        |        },
+        |        "additionalProperties": false,
+        |        "required": [
+        |          "MapCase"
         |        ]
         |      }
         |    ]
