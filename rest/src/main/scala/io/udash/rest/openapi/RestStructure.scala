@@ -51,7 +51,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
             title = c.info.rawName,
             properties = IListMap(c.info.rawName -> adjustedBase),
             additionalProperties = AdditionalProperties.Flag(value = false),
-            required = List(c.info.rawName)
+            required = List(c.info.rawName),
           ))
         }
       }
