@@ -17,7 +17,7 @@ object Dependencies {
   val avsCommonsVersion = "2.27.1"
 
   val atmosphereJSVersion = "3.1.3"
-  val atmosphereVersion = "2.7.16"
+  val atmosphereVersion = "4.0.31"
 
   val monixVersion = "3.4.1" // udash-rest only
 
