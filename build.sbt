@@ -45,6 +45,18 @@ inThisBuild(Seq(
     commands = List("${{ matrix.command }}"),
     name = Some("Run tests"),
   )),
+  // MiMa only compares bytecode — result is JDK-agnostic, so we run it in a dedicated
+  // single-JDK job instead of multiplying the work across the build matrix.
+  githubWorkflowAddedJobs += WorkflowJob(
+    id = "mima",
+    name = "Binary Compatibility Check",
+    scalas = List(Dependencies.versionOfScala),
+    javas = List(JavaSpec.temurin("21")),
+    steps = githubWorkflowJobSetup.value.toList :+ WorkflowStep.Sbt(
+      List("mimaReportBinaryIssues"),
+      name = Some("Check binary compatibility"),
+    ),
+  ),
   githubWorkflowPublish := Seq(WorkflowStep.Sbt(
     List("ci-release"),
     env = Map(
@@ -58,6 +70,8 @@ inThisBuild(Seq(
 
 val forIdeaImport = System.getProperty("idea.managed", "false").toBoolean && System.getProperty("idea.runid") == null
 val CompileAndTest = "test->test;compile->compile"
+
+val previousCompatibleVersions: Set[String] = Set("0.23.0")
 
 // Settings for JS tests run in browser
 val browserCapabilities: Capabilities = {
@@ -93,6 +107,7 @@ val commonSettings = Seq(
   libraryDependencies ++= Dependencies.compilerPlugins.value,
   libraryDependencies ++= Dependencies.commonTestDeps.value,
   pomIncludeRepository := { _ => false },
+  mimaPreviousArtifacts := previousCompatibleVersions.map(v => organization.value %%% moduleName.value % v),
 )
 
 val commonJsSettings = commonSettings ++ Seq(
@@ -115,6 +130,7 @@ val testInBrowser = Seq(
 val noPublishSettings = Seq(
   publish / skip := true,
   Compile / packageDoc / mappings := Seq.empty,
+  mimaPreviousArtifacts := Set.empty,
 )
 
 val aggregateProjectSettings = noPublishSettings ++ Seq(
@@ -273,6 +289,7 @@ lazy val macros = project
   .settings(
     commonSettings,
     libraryDependencies ++= Dependencies.macroDeps.value,
+    mimaPreviousArtifacts := Set.empty, // no need for MiMa checks
   )
 
 lazy val utils = jvmProject(project)
