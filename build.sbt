@@ -131,6 +131,7 @@ val noPublishSettings = Seq(
   publish / skip := true,
   Compile / packageDoc / mappings := Seq.empty,
   mimaPreviousArtifacts := Set.empty,
+  mimaReportBinaryIssues := {},
 )
 
 val aggregateProjectSettings = noPublishSettings ++ Seq(
