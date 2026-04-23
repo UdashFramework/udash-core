@@ -25,21 +25,21 @@ object Dependencies {
 
   val scalaLoggingVersion = "3.9.6"
 
-  val jettyVersion = "12.1.7"
+  val jettyVersion = "12.1.8"
   val typesafeConfigVersion = "1.4.6"
   val flexmarkVersion = "0.64.8"
   val logbackVersion = "1.3.16"
   val fontAwesomeVersion = "5.10.1"
 
-  val scalatestVersion = "3.2.19"
+  val scalatestVersion = "3.2.20"
   val mockitoScalaVersion = "2.1.0"
   val scalaJsSecureRandomVersion = "1.0.0" // Tests only
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.39.0"
   val momentJsVersion = "2.30.1"
 
-  val seleniumVersion = "4.41.0"
-  val webDriverManagerVersion = "6.3.3"
+  val seleniumVersion = "4.43.0"
+  val webDriverManagerVersion = "6.3.4"
   val scalaJsBenchmarkVersion = "0.10.0"
 
   val compilerPlugins = Def.setting(Seq(
