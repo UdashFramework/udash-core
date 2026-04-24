@@ -32,7 +32,7 @@ object Dependencies {
   val fontAwesomeVersion = "5.10.1"
 
   val scalatestVersion = "3.2.20"
-  val mockitoScalaVersion = "2.1.0"
+  val mockitoScalaVersion = "2.2.1"
   val scalaJsSecureRandomVersion = "1.0.0" // Tests only
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.39.0"
