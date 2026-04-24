@@ -114,6 +114,8 @@ val commonJsSettings = commonSettings ++ Seq(
   Test / scalaJSStage := FastOptStage,
   Test / scalaJSUseMainModuleInitializer := false,
   Test / jsEnv := new JSDOMNodeJSEnv,
+  // Keep Closure Compiler enabled after the Scala.js 1.21+ upgrade (default flipped to OFF in 1.21)
+  scalaJSLinkerConfig ~= (_.withClosureCompiler(true)),
   scalacOptions += {
     val localDir = (ThisBuild / baseDirectory).value.toURI.toString
     val githubDir = "https://raw.githubusercontent.com/UdashFramework/udash-core"
