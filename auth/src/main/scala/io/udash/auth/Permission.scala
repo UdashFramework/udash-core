@@ -1,7 +1,6 @@
 package io.udash.auth
 
-/**
-  * Base class for permissions used with PermissionControl. Permissions are compared by ID.
+/** Base class for permissions used with PermissionControl. Permissions are compared by ID.
   */
 trait Permission {
   def id: PermissionId
@@ -19,6 +18,7 @@ trait Permission {
 }
 
 object Permission {
+
   /** Single permission as a combinator resolved implicitly. */
   implicit final class Single(private val permission: Permission) extends AnyVal with PermissionCombinator {
     override def check(ctx: UserCtx): Boolean =

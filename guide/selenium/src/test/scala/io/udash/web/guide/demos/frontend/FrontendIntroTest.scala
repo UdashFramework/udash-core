@@ -75,7 +75,7 @@ class FrontendIntroTest extends SeleniumTest {
 
     "randomize values on button click" in {
       val demo = findElementById("frontend-intro-demo")
-      val randomizeButton = eventually { demo.findElement(new ById("randomize")) }
+      val randomizeButton = eventually(demo.findElement(new ById("randomize")))
       val minimum = demo.findElement(new ById("minimum"))
       val between = demo.findElement(new ById("between"))
       val maximum = demo.findElement(new ById("maximum"))
@@ -87,8 +87,7 @@ class FrontendIntroTest extends SeleniumTest {
       for (_ <- 1 to 5) {
         randomizeButton.click()
         eventually {
-          (lastMinimum != minimum.getDomProperty("value") ||
-            lastBetween != between.getDomProperty("value") ||
+          (lastMinimum != minimum.getDomProperty("value") || lastBetween != between.getDomProperty("value") ||
             lastMaximum != maximum.getDomProperty("value")) should be(true)
         }
 

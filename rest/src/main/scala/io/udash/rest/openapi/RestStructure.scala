@@ -39,23 +39,30 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
       val caseSchemas = cases.map { c =>
         val baseSchema = resolver.resolve(c.caseSchema(caseFieldOpt))
         if (caseFieldOpt.nonEmpty) baseSchema
-        else RefOr(Schema(
-          `type` = DataType.Object,
-          properties = IListMap(c.info.rawName -> baseSchema),
-          required = List(c.info.rawName)
-        ))
+        else
+          RefOr(
+            Schema(
+              `type` = DataType.Object,
+              properties = IListMap(c.info.rawName -> baseSchema),
+              required = List(c.info.rawName),
+            )
+          )
       }
       val disc = caseFieldOpt.map { caseFieldName =>
-        val mapping = IListMap((cases zip caseSchemas).collect {
-          case (c, RefOr.Ref(ref)) => (c.info.rawName, ref)
+        val mapping = IListMap((cases zip caseSchemas).collect { case (c, RefOr.Ref(ref)) =>
+          (c.info.rawName, ref)
         }: _*)
         Discriminator(caseFieldName, mapping)
       }
-      RefOr(applyAdjusters(Schema(
-        `type` = DataType.Object,
-        oneOf = caseSchemas,
-        discriminator = disc.toOptArg
-      )))
+      RefOr(
+        applyAdjusters(
+          Schema(
+            `type` = DataType.Object,
+            oneOf = caseSchemas,
+            discriminator = disc.toOptArg,
+          )
+        )
+      )
     }
   }
   object Union extends AdtMetadataCompanion[Union]
@@ -66,13 +73,13 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
   }
   object Case extends AdtMetadataCompanion[Case]
 
-  /**
-   * Will be inferred for case types that already have [[io.udash.rest.openapi.RestSchema RestSchema]] defined directly.
-   *
-   * For flat sealed hierarchy, if the existing [[RestSchema]] already has expected discriminator field it will be
-   * returned unchanged (in order to preserve original schema name), otherwise new schema instance will be created with
-   * additional single-value enum field.
-   */
+  /** Will be inferred for case types that already have [[io.udash.rest.openapi.RestSchema RestSchema]] defined
+    * directly.
+    *
+    * For flat sealed hierarchy, if the existing [[RestSchema]] already has expected discriminator field it will be
+    * returned unchanged (in order to preserve original schema name), otherwise new schema instance will be created with
+    * additional single-value enum field.
+    */
   @positioned(positioned.here) final case class CustomCase[T](
     @checked @infer restSchema: RestSchema[T],
     @infer schemaName: GeneratedSchemaName[T],
@@ -99,17 +106,29 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
             if (restSchema.name.contains(preferredTaggedSchemaName)) s"tagged$preferredTaggedSchemaName"
             else preferredTaggedSchemaName
 
-          restSchema.map({
-            case RefOr.Value(caseSchema) => caseSchema.copy(
-              properties = caseSchema.properties + (cfn -> caseFieldSchema),
-              required = cfn :: caseSchema.required
-            )
-            case ref => Schema(allOf = List(RefOr(Schema(
-              `type` = DataType.Object,
-              properties = IListMap(cfn -> caseFieldSchema),
-              required = List(cfn)
-            )), ref))
-          }, taggedName)
+          restSchema.map(
+            {
+              case RefOr.Value(caseSchema) =>
+                caseSchema.copy(
+                  properties = caseSchema.properties + (cfn -> caseFieldSchema),
+                  required = cfn :: caseSchema.required,
+                )
+              case ref =>
+                Schema(allOf =
+                  List(
+                    RefOr(
+                      Schema(
+                        `type` = DataType.Object,
+                        properties = IListMap(cfn -> caseFieldSchema),
+                        required = List(cfn),
+                      )
+                    ),
+                    ref,
+                  )
+                )
+            },
+            taggedName,
+          )
         }
 
         // `restSchema` needs to be resolved in-place to check for discriminator field
@@ -138,15 +157,15 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
       }
   }
 
-  /**
-   * Will be inferred for types having apply/unapply(Seq) pair in their companion.
-   */
+  /** Will be inferred for types having apply/unapply(Seq) pair in their companion.
+    */
   @positioned(positioned.here) final case class Record[T](
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
     @adtParamMetadata @allowOptional @multi fields: List[Field[_]],
     @infer schemaName: GeneratedSchemaName[T],
     @composite info: GenCaseInfo[T],
-  ) extends RestStructure[T] with Case[T] {
+  ) extends RestStructure[T]
+      with Case[T] {
 
     def standaloneSchema: RestSchema[T] =
       RestSchema.create(createSchema(_, Opt.Empty), schemaName.name.toOptArg)
@@ -161,25 +180,25 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
         case _ =>
           val props = caseFieldName.map(cfn => (cfn, RefOr(Schema.enumOf(List(info.rawName))))).iterator ++
             fields.iterator.map(f => (f.info.rawName, f.resolveSchema(resolver)))
-          val required = caseFieldName.iterator ++
-            fields.iterator.filterNot(_.optional).map(_.info.rawName)
-          RefOr(applyAdjusters(Schema(`type` = DataType.Object,
-            properties = IListMap(props.toList: _*),
-            required = required.toList
-          )))
+          val required = caseFieldName.iterator ++ fields.iterator.filterNot(_.optional).map(_.info.rawName)
+          RefOr(
+            applyAdjusters(
+              Schema(`type` = DataType.Object, properties = IListMap(props.toList: _*), required = required.toList)
+            )
+          )
       }
   }
   object Record extends AdtMetadataCompanion[Record]
 
-  /**
-   * Will be inferred for singleton types (objects).
-   */
+  /** Will be inferred for singleton types (objects).
+    */
   @positioned(positioned.here) final case class Singleton[T](
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
     @infer @checked value: scala.ValueOf[T],
     @infer schemaName: GeneratedSchemaName[T],
     @composite info: GenCaseInfo[T],
-  ) extends RestStructure[T] with Case[T] {
+  ) extends RestStructure[T]
+      with Case[T] {
 
     def standaloneSchema: RestSchema[T] =
       RestSchema.create(createSchema(_, Opt.Empty))
@@ -188,10 +207,15 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
       RestSchema.create(createSchema(_, caseFieldName), caseFieldName.flatMap(_ => schemaName.name).toOptArg)
 
     def createSchema(resolver: SchemaResolver, caseFieldName: Opt[String]): RefOr[Schema] =
-      RefOr(applyAdjusters(Schema(`type` = DataType.Object,
-        properties = IListMap(caseFieldName.map(cfn => (cfn, RefOr(Schema.enumOf(List(info.rawName))))).toList: _*),
-        required = caseFieldName.toList
-      )))
+      RefOr(
+        applyAdjusters(
+          Schema(
+            `type` = DataType.Object,
+            properties = IListMap(caseFieldName.map(cfn => (cfn, RefOr(Schema.enumOf(List(info.rawName))))).toList: _*),
+            required = caseFieldName.toList,
+          )
+        )
+      )
   }
   object Singleton extends AdtMetadataCompanion[Singleton]
 

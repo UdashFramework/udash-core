@@ -24,7 +24,7 @@ object TextAreaDemo extends AutoDemo {
         ),
         div(Grid.col(4, ResponsiveBreakpoint.Medium))(
           TextArea(text)(Form.control)
-        )
+        ),
       )
     )
   }.withSourceCode

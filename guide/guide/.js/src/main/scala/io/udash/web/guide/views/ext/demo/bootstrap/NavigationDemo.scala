@@ -25,7 +25,7 @@ object NavigationDemo extends AutoDemo {
       options = UdashButtonOptions(
         tag = ButtonTag.Anchor(link.state.url),
         color = BootstrapStyles.Color.Link.opt,
-        customModifiers = if (dropdown) Seq(Dropdown.item) else Seq(Navigation.link)
+        customModifiers = if (dropdown) Seq(Dropdown.item) else Seq(Navigation.link),
       )
     )(_ => link.name)
 
@@ -34,30 +34,33 @@ object NavigationDemo extends AutoDemo {
     div(
       UdashNavbar(
         darkStyle = true.toProperty,
-        backgroundStyle = Color.Dark.toProperty
-      )(_ => UdashNav(panels)(
-        elemFactory = (panel, nested) => div(nested(produce(panel) {
-          case MenuContainer(name, children) =>
-            val dropdown = UdashDropdown(children.toSeqProperty)(
-              (item, _) => linkButtonFactory(item.get).render,
-              _ => span(name, " "),
-              buttonFactory = UdashButton(
-                options = UdashButtonOptions(
-                  tag = ButtonTag.Button,
-                  color = BootstrapStyles.Color.Link.opt,
-                  customModifiers = Seq(Navigation.link)
-                )
-              )
-            ).render
-            dropdown
-          case link: MenuLink => linkButtonFactory(link, dropdown = false).render
-        })).render,
-        isDropdown = _.transform {
-          case _: MenuContainer => true
-          case _: MenuLink => false
-        }
-      ),
-        span("Udash")
+        backgroundStyle = Color.Dark.toProperty,
+      )(
+        _ =>
+          UdashNav(panels)(
+            elemFactory = (panel, nested) =>
+              div(nested(produce(panel) {
+                case MenuContainer(name, children) =>
+                  val dropdown = UdashDropdown(children.toSeqProperty)(
+                    (item, _) => linkButtonFactory(item.get).render,
+                    _ => span(name, " "),
+                    buttonFactory = UdashButton(
+                      options = UdashButtonOptions(
+                        tag = ButtonTag.Button,
+                        color = BootstrapStyles.Color.Link.opt,
+                        customModifiers = Seq(Navigation.link),
+                      )
+                    ),
+                  ).render
+                  dropdown
+                case link: MenuLink => linkButtonFactory(link, dropdown = false).render
+              })).render,
+            isDropdown = _.transform {
+              case _: MenuContainer => true
+              case _: MenuLink => false
+            },
+          ),
+        span("Udash"),
       )
     ).render
   }.withSourceCode
@@ -67,4 +70,3 @@ object NavigationDemo extends AutoDemo {
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
   }
 }
-

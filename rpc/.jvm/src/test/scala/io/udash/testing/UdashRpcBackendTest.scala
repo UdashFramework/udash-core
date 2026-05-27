@@ -14,7 +14,8 @@ import scala.util.Try
 
 trait UdashRpcBackendTest extends UdashSharedTest with Utils with Eventually {
 
-  override implicit val patienceConfig: PatienceConfig = PatienceConfig(scaled(Span(5000, Millis)), scaled(Span(100, Millis)))
+  override implicit val patienceConfig: PatienceConfig =
+    PatienceConfig(scaled(Span(5000, Millis)), scaled(Span(100, Millis)))
 
   class BroadcasterMock extends DefaultBroadcaster {
     val broadcasts = MListBuffer[String]()
@@ -54,9 +55,10 @@ trait UdashRpcBackendTest extends UdashSharedTest with Utils with Eventually {
     }
   }
 
-  class AtmosphereServiceConfigMock[RPCType](override val filters: ISeq[AtmosphereResource => Try[Unit]] = Nil,
-                                             resolveRpcResult: ExposesServerRPC[RPCType] = null)
-    extends AtmosphereServiceConfig[RPCType] {
+  class AtmosphereServiceConfigMock[RPCType](
+    override val filters: ISeq[AtmosphereResource => Try[Unit]] = Nil,
+    resolveRpcResult: ExposesServerRPC[RPCType] = null,
+  ) extends AtmosphereServiceConfig[RPCType] {
     var closed = false
 
     override def initRpc(resource: AtmosphereResource): Unit = ()
@@ -66,15 +68,18 @@ trait UdashRpcBackendTest extends UdashSharedTest with Utils with Eventually {
     }
   }
 
-  class AtmosphereConfigMock(broadcasterFactory: BroadcasterFactory, _metaBroadcaster: MetaBroadcaster) extends AtmosphereConfig(null) {
+  class AtmosphereConfigMock(broadcasterFactory: BroadcasterFactory, _metaBroadcaster: MetaBroadcaster)
+    extends AtmosphereConfig(null) {
     override def getBroadcasterFactory: BroadcasterFactory = broadcasterFactory
     override def metaBroadcaster(): MetaBroadcaster = _metaBroadcaster
   }
 
-  class AtmosphereResourceMock(override val transport: TRANSPORT,
-                               override val uuid: String,
-                               override val getRequest: AtmosphereRequest,
-                               override val getResponse: AtmosphereResponse = null) extends AtmosphereResourceImpl {
+  class AtmosphereResourceMock(
+    override val transport: TRANSPORT,
+    override val uuid: String,
+    override val getRequest: AtmosphereRequest,
+    override val getResponse: AtmosphereResponse = null,
+  ) extends AtmosphereResourceImpl {
 
     var suspended = false
     var resumed = false

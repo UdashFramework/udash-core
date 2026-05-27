@@ -11,8 +11,10 @@ trait TestRouting {
   var renderer: TestViewRenderer = _
   private[udash] var routingEngine: RoutingEngine[TestState] = _
 
-  protected final def initTestRouting(routing: TestRoutingRegistry = new TestRoutingRegistry,
-    state2vp: Map[TestState, () => ViewFactory[_ <: TestState]] = Map.empty, default: () => ViewFactory[_ <: TestState] = () => viewFactory
+  protected final def initTestRouting(
+    routing: TestRoutingRegistry = new TestRoutingRegistry,
+    state2vp: Map[TestState, () => ViewFactory[_ <: TestState]] = Map.empty,
+    default: () => ViewFactory[_ <: TestState] = () => viewFactory,
   ): Unit = {
     this.routing = routing
     viewFactory = new TestViewFactory[ErrorState.type]
@@ -20,8 +22,9 @@ trait TestRouting {
     renderer = new TestViewRenderer
   }
 
-  protected final def initTestRoutingEngine(routing: TestRoutingRegistry = new TestRoutingRegistry,
-    state2vp: Map[TestState, () => ViewFactory[_ <: TestState]] = Map.empty
+  protected final def initTestRoutingEngine(
+    routing: TestRoutingRegistry = new TestRoutingRegistry,
+    state2vp: Map[TestState, () => ViewFactory[_ <: TestState]] = Map.empty,
   ): Unit = {
     initTestRouting(routing, state2vp)
     routingEngine = new RoutingEngine[TestState](routing, vpRegistry, renderer)

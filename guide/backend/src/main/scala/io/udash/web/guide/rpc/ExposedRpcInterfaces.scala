@@ -6,7 +6,8 @@ import io.udash.web.guide.demos.activity.CallLogger
 import io.udash.web.guide.demos.{DemosServer, DemosServerRPC}
 import io.udash.web.guide.markdown.{MarkdownPageRPC, MarkdownPagesEndpoint}
 
-class ExposedRpcInterfaces(callLogger: CallLogger, guideResourceBase: String)(implicit clientId: ClientId) extends MainServerRPC {
+class ExposedRpcInterfaces(callLogger: CallLogger, guideResourceBase: String)(implicit clientId: ClientId)
+  extends MainServerRPC {
   import io.udash.web.Implicits._
 
   override val demos: DemosServerRPC = new DemosServer(callLogger)

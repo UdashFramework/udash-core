@@ -5,4 +5,3 @@ trait Routing {
   type WindowUrlFragmentChangeProvider = io.udash.routing.WindowUrlFragmentChangeProvider
   type WindowUrlPathChangeProvider = io.udash.routing.WindowUrlPathChangeProvider
 }
-

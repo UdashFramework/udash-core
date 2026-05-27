@@ -181,9 +181,9 @@ class PropertyTest extends UdashCoreTest {
 
       val cp = Property[C](new C(1, "asd"))
       val tp = cp.bitransform(c => (TC1(c.i), TC2(c.s))) {
-          case (TC1(i), TC2(s)) => new C(i, s)
-          case _ => new C(0, "")
-        }
+        case (TC1(i), TC2(s)) => new C(i, s)
+        case _ => new C(0, "")
+      }
 
       tp.listen(listener)
       cp.listen(listener)
@@ -323,10 +323,10 @@ class PropertyTest extends UdashCoreTest {
       transformed.listen(_ => counter += 1)
 
       origin.set(Some(0))
-      counter shouldBe 0 //suppressed at origin
+      counter shouldBe 0 // suppressed at origin
 
       origin.set(Some(1))
-      counter shouldBe 0 //suppressed at transformed
+      counter shouldBe 0 // suppressed at transformed
 
       origin.set(None)
       counter shouldBe 1
@@ -351,10 +351,10 @@ class PropertyTest extends UdashCoreTest {
       target.listen(_ => counter += 1)
 
       origin.set(Some(0))
-      counter shouldBe 0 //suppressed at origin
+      counter shouldBe 0 // suppressed at origin
 
       origin.set(Some(1))
-      counter shouldBe 0 //suppressed at target
+      counter shouldBe 0 // suppressed at target
 
       origin.set(None)
       counter shouldBe 1
@@ -362,9 +362,9 @@ class PropertyTest extends UdashCoreTest {
       origin.set(None)
       counter shouldBe 1
 
-      //todo detect forced / touched?
-      //origin.set(None, force = true)
-      //counter shouldBe 2
+      // todo detect forced / touched?
+      // origin.set(None, force = true)
+      // counter shouldBe 2
     }
 
     "combine with other properties (single properties)" in {
@@ -581,7 +581,7 @@ class PropertyTest extends UdashCoreTest {
       sumCombine.get shouldBe Seq(10, 5)
       sCombine.get shouldBe Seq(10, 5)
       sCombineElements.get shouldBe Seq(10, 5)
-      combinedElementsListenerValue shouldBe Seq(0, 0, 0, 0, 0) //r2 cancelled
+      combinedElementsListenerValue shouldBe Seq(0, 0, 0, 0, 0) // r2 cancelled
     }
 
     "trigger once for multiply combined properties" in {
@@ -591,11 +591,9 @@ class PropertyTest extends UdashCoreTest {
       val p1 = Property(-1)
       val p2 = Property(-1)
 
-      p0.combine(p1)((_, _))
-        .combine(p2)((_, _))
-        .listen { case ((i1, i2), i3) =>
-          calls.append((i1, i2, i3))
-        }
+      p0.combine(p1)((_, _)).combine(p2)((_, _)).listen { case ((i1, i2), i3) =>
+        calls.append((i1, i2, i3))
+      }
 
       CallbackSequencer().sequence {
         p0.set(0)
@@ -618,7 +616,7 @@ class PropertyTest extends UdashCoreTest {
 
     "short-circuit loops on self" in {
       val p0 = Property.blank[Int]
-      p0.listen { v => if (v < 10) p0.set(v + 1) }
+      p0.listen(v => if (v < 10) p0.set(v + 1))
 
       p0.set(1)
 
@@ -670,7 +668,7 @@ class PropertyTest extends UdashCoreTest {
       lastPatch.removed.size should be(2)
       elementsUpdated should be(2)
 
-      //suppressed at s
+      // suppressed at s
       p.set(" 5 ,4 ,3")
       s.get should be(Seq(5, 4, 3))
       lastValue should be(s.get)
@@ -718,8 +716,8 @@ class PropertyTest extends UdashCoreTest {
       lastPatch.removed.size should be(3)
       elementsUpdated should be(3)
 
-      //TODO: Does it make sense to use LCCS?
-      //It could use two patches here
+      // TODO: Does it make sense to use LCCS?
+      // It could use two patches here
       lastValue = null
       lastPatch = null
       elementsUpdated = 0
@@ -807,7 +805,7 @@ class PropertyTest extends UdashCoreTest {
 
       s.elemProperties.foreach {
         case p: Property[Int] => p.set(20)
-        case _: ReadableProperty[Int] => //ignore
+        case _: ReadableProperty[Int] => // ignore
       }
 
       s.get should be(Seq(1, 2, 3, 4, 5))
@@ -821,7 +819,7 @@ class PropertyTest extends UdashCoreTest {
         val sp = p.transformToSeq(Seq(_))
         val transformed = sp.transformElements(_ + 1)
         sp.get shouldBe Seq(1)
-        transformed.get should contain theSameElementsInOrderAs Seq(2) //current value observed immediately
+        transformed.get should contain theSameElementsInOrderAs Seq(2) // current value observed immediately
 
         sp.listenStructure(patches += _)
       }
@@ -829,7 +827,7 @@ class PropertyTest extends UdashCoreTest {
       test()
       patches shouldBe empty
 
-      CallbackSequencer().sequence(test()) //should behave the same
+      CallbackSequencer().sequence(test()) // should behave the same
 
       // No patch should be emitted to newly created structure listeners (after value was set).
       // Previously the patches would be emitted after exiting the sequencer,
@@ -856,13 +854,13 @@ class PropertyTest extends UdashCoreTest {
       var lastValue: BSeq[Int] = null
       var lastPatch: Patch[ReadableProperty[Int]] = null
       val r1 = s.listen(lastValue = _)
-      val r2 = s.listenStructure(p => {
+      val r2 = s.listenStructure { p =>
         registerElementListener(p.added)
         p.removed.foreach { p =>
           elemListeners(p).cancel()
         }
         lastPatch = p
-      })
+      }
 
       s.get should be(Seq(1, 2, 3, 4, 5))
       p.listenersCount() should be(1)
@@ -1206,7 +1204,7 @@ class PropertyTest extends UdashCoreTest {
       target.get shouldBe 5
       targetListener shouldBe 5
 
-      //Init update
+      // Init update
       val registration = source.sync(target)((i: Int) => i * 2, (i: Int) => i / 2)
 
       registration.isActive shouldBe true
@@ -1289,7 +1287,7 @@ class PropertyTest extends UdashCoreTest {
       source.get should be(1)
       target.get should be(Seq(1, 2))
 
-      //Init update
+      // Init update
       source.sync(target)((i: Int) => 1 to i, (s: BSeq[Int]) => s.length)
 
       source.get should be(1)

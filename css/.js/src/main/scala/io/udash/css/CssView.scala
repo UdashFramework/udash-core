@@ -48,16 +48,14 @@ object CssView extends CssView {
     }
 
     def styleIf(property: ReadableProperty[Boolean]): Binding =
-      property.reactiveApply(
-        (elem, value) =>
-          if (value) addTo(elem)
-          else removeFrom(elem)
+      property.reactiveApply((elem, value) =>
+        if (value) addTo(elem)
+        else removeFrom(elem)
       )
 
-    def styleIf(condition: Boolean): Modifier = {
+    def styleIf(condition: Boolean): Modifier =
       if (condition) new StyleModifier(style)
       else new EmptyModifier[Element]
-    }
   }
 
   final class StyleFactoryOps[T](private val factory: T => CssStyle) extends AnyVal {
@@ -67,19 +65,22 @@ object CssView extends CssView {
     def reactiveOptionApply(property: ReadableProperty[Option[T]]): Binding = new Binding {
       private var prevStyle: CssStyle = _
       override def applyTo(el: Element): Unit = {
-        propertyListeners += property.listen(t => {
-          if (prevStyle != null) {
-            prevStyle.classNames.foreach(el.classList.remove)
-          }
-          t match {
-            case Some(t) =>
-              val newStyle = factory(t)
-              newStyle.classNames.foreach(el.classList.add)
-              prevStyle = newStyle
-            case None =>
-              prevStyle = null
-          }
-        }, initUpdate = true)
+        propertyListeners += property.listen(
+          t => {
+            if (prevStyle != null) {
+              prevStyle.classNames.foreach(el.classList.remove)
+            }
+            t match {
+              case Some(t) =>
+                val newStyle = factory(t)
+                newStyle.classNames.foreach(el.classList.add)
+                prevStyle = newStyle
+              case None =>
+                prevStyle = null
+            }
+          },
+          initUpdate = true,
+        )
       }
     }
   }

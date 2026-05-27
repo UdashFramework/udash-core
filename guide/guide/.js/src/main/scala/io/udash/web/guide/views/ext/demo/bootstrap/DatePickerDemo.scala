@@ -25,16 +25,17 @@ object DatePickerDemo extends AutoDemo with CssView {
       new UdashDatePicker.DatePickerOptions(
         format = "MMMM Do YYYY, hh:mm a",
         locale = Some("en_GB"),
-        showClear = true
+        showClear = true,
       )
     )
 
     val disableWeekends = Property(false)
     disableWeekends.streamTo(pickerOptions.subSeq(_.daysOfWeekDisabled)) {
-      case true => Seq(
-        UdashDatePicker.DayOfWeek.Saturday,
-        UdashDatePicker.DayOfWeek.Sunday
-      )
+      case true =>
+        Seq(
+          UdashDatePicker.DayOfWeek.Saturday,
+          UdashDatePicker.DayOfWeek.Sunday,
+        )
       case false => Seq.empty
     }
 
@@ -64,27 +65,33 @@ object DatePickerDemo extends AutoDemo with CssView {
         UdashDatePicker.loadBootstrapDatePickerStyles(),
         UdashInputGroup()(
           UdashInputGroup.input(picker.render),
-          UdashInputGroup.appendText(bind(date.transform(_.toString)))
+          UdashInputGroup.appendText(bind(date.transform(_.toString))),
         ),
       ).render,
       hr,
       UdashForm() { factory =>
         Seq[Modifier](
           factory.input.formGroup()(
-            input = _ => factory.input.textInput(
-              pickerOptions.subProp(_.format)
-            )().render,
-            labelContent = Some(_ => "Date format")
+            input = _ =>
+              factory.input
+                .textInput(
+                  pickerOptions.subProp(_.format)
+                )()
+                .render,
+            labelContent = Some(_ => "Date format"),
           ),
           factory.input.formGroup()(
-            input = _ => factory.input.select(
-              pickerOptions.subProp(_.locale).bitransform(_.get)(Option.apply),
-              Seq("en_GB", "pl", "ru", "af").toSeqProperty
-            )(span(_)).render,
-            labelContent = Some(_ => "Locale")
+            input = _ =>
+              factory.input
+                .select(
+                  pickerOptions.subProp(_.locale).bitransform(_.get)(Option.apply),
+                  Seq("en_GB", "pl", "ru", "af").toSeqProperty,
+                )(span(_))
+                .render,
+            labelContent = Some(_ => "Locale"),
           ),
           factory.input.checkbox(disableWeekends, ValidationTrigger.None)(
-            labelContent = Some(_ => "Disable weekends"),
+            labelContent = Some(_ => "Disable weekends")
           ),
           factory.input.checkbox(pickerOptions.subProp(_.showToday), ValidationTrigger.None)(
             labelContent = Some(_ => "Show `today` button")
@@ -96,18 +103,17 @@ object DatePickerDemo extends AutoDemo with CssView {
             factory.externalBinding(showButton).render,
             factory.externalBinding(hideButton).render,
             factory.externalBinding(enableButton).render,
-            factory.externalBinding(disableButton).render
-          ).render
+            factory.externalBinding(disableButton).render,
+          ).render,
         )
       },
       hr,
       div(Card.card, Card.body, Background.color(Color.Light))(
         repeat(events)(ev => Seq(i(ev.get).render, br.render))
-      )
+      ),
     ).render
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, String) =
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
 }
-

@@ -20,16 +20,17 @@ object AlertsDemo extends AutoDemo {
 
     val dismissed = SeqProperty.blank[String]
 
-    def contentCentered: Seq[Modifier] = {
+    def contentCentered: Seq[Modifier] =
       Seq(Display.flex(), Flex.justifyContent(FlexContentJustification.Center))
-    }
 
     def randomDismissible: Element = {
       val title = Random.nextLong().toString
       val alert = DismissibleUdashAlert(
-        alertStyle = Color.values(
-          Random.nextInt(Color.values.size)
-        ).toProperty
+        alertStyle = Color
+          .values(
+            Random.nextInt(Color.values.size)
+          )
+          .toProperty
       )(div(title, contentCentered))
       alert.dismissed.listen(_ => dismissed.append(title))
       alert.render
@@ -39,7 +40,7 @@ object AlertsDemo extends AutoDemo {
       UdashAlert(Color.Info.toProperty)(div("info", contentCentered)),
       UdashAlert(Color.Success.toProperty)(div("success", contentCentered)),
       UdashAlert(Color.Warning.toProperty)(div("warning", contentCentered)),
-      UdashAlert(Color.Danger.toProperty)(div("danger", contentCentered))
+      UdashAlert(Color.Danger.toProperty)(div("danger", contentCentered)),
     ).render
 
     val create = UdashButton()("Create dismissible alert")
@@ -50,15 +51,17 @@ object AlertsDemo extends AutoDemo {
     div(
       alerts,
       create,
-      div(Spacing.margin(
-        side = Side.Top,
-        size = SpacingSize.Normal
-      ))(
+      div(
+        Spacing.margin(
+          side = Side.Top,
+          size = SpacingSize.Normal,
+        )
+      )(
         h4("Dismissed: "),
         div(Card.card, Card.body, Background.color(Color.Light))(
           produce(dismissed)(seq => ul(seq.map(li(_))).render)
-        )
-      )
+        ),
+      ),
     ).render
   }.withSourceCode
 
@@ -67,4 +70,3 @@ object AlertsDemo extends AutoDemo {
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
   }
 }
-

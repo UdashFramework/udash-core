@@ -10,8 +10,8 @@ trait PolyCodecWithStructure[C[_]] {
   def structure[T0: RestSchema]: RestStructure[C[T0]]
 }
 
-abstract class PolyRestDataCompanion[C[_]](implicit
-  instances: MacroInstances[DefaultRestImplicits, PolyCodecWithStructure[C]]
+abstract class PolyRestDataCompanion[C[_]](
+  implicit instances: MacroInstances[DefaultRestImplicits, PolyCodecWithStructure[C]]
 ) extends {
   implicit def codec[T: GenCodec]: GenCodec[C[T]] = instances(DefaultRestImplicits, this).codec
   implicit def restStructure[T: RestSchema]: RestStructure[C[T]] = instances(DefaultRestImplicits, this).structure

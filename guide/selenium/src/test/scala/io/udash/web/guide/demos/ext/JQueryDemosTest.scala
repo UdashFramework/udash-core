@@ -19,18 +19,22 @@ class JQueryDemosTest extends SeleniumTest {
       list.getText should be("This will be added on every click\nThis will be added only once")
 
       clickButton.click()
-      list.getText should be("This will be added on every click\nThis will be added only once\nThis will be added on every click")
+      list.getText should
+        be("This will be added on every click\nThis will be added only once\nThis will be added on every click")
 
       clickButton.click()
-      list.getText should be("This will be added on every click\nThis will be added only once\nThis will be added on every click\nThis will be added on every click")
+      list.getText should
+        be("This will be added on every click\nThis will be added only once\nThis will be added on every click\nThis will be added on every click")
 
       offButton.click()
 
       clickButton.click()
-      list.getText should be("This will be added on every click\nThis will be added only once\nThis will be added on every click\nThis will be added on every click")
+      list.getText should
+        be("This will be added on every click\nThis will be added only once\nThis will be added on every click\nThis will be added on every click")
 
       clickButton.click()
-      list.getText should be("This will be added on every click\nThis will be added only once\nThis will be added on every click\nThis will be added on every click")
+      list.getText should
+        be("This will be added on every click\nThis will be added only once\nThis will be added on every click\nThis will be added on every click")
     }
 
     "contain working events demo (instant off)" in {

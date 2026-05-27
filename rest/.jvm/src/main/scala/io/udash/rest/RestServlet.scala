@@ -26,22 +26,25 @@ object RestServlet {
   final val DefaultStreamingBatchSize = 100
   private final val BufferSize = 8192
 
-  /**
-   * Wraps an implementation of some REST API trait into a Java Servlet.
-   *
-   * @param apiImpl                   implementation of some REST API trait
-   * @param handleTimeout             maximum time the servlet will wait for results returned by REST API implementation
-   * @param maxPayloadSize            maximum acceptable incoming payload size, in bytes;
-   *                                  if exceeded, `413 Payload Too Large` response will be sent back
-   * @param defaultStreamingBatchSize default batch when streaming [[StreamedBody.JsonList]]
-   */
-  @explicitGenerics def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
+  /** Wraps an implementation of some REST API trait into a Java Servlet.
+    *
+    * @param apiImpl
+    *   implementation of some REST API trait
+    * @param handleTimeout
+    *   maximum time the servlet will wait for results returned by REST API implementation
+    * @param maxPayloadSize
+    *   maximum acceptable incoming payload size, in bytes; if exceeded, `413 Payload Too Large` response will be sent
+    *   back
+    * @param defaultStreamingBatchSize
+    *   default batch when streaming [[StreamedBody.JsonList]]
+    */
+  @explicitGenerics
+  def apply[RestApi: RawRest.AsRawRpc: RestMetadata](
     apiImpl: RestApi,
     handleTimeout: FiniteDuration = DefaultHandleTimeout,
     maxPayloadSize: Long = DefaultMaxPayloadSize,
     defaultStreamingBatchSize: Int = DefaultStreamingBatchSize,
-  )(implicit
-    scheduler: Scheduler
+  )(implicit scheduler: Scheduler
   ): RestServlet =
     new RestServlet(
       handleRequest = RawRest.asHandleRequestWithStreaming[RestApi](apiImpl),
@@ -50,12 +53,11 @@ object RestServlet {
       defaultStreamingBatchSize = defaultStreamingBatchSize,
     )
 
-  @bincompat private[rest] def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
+  @bincompat private[rest] def apply[RestApi: RawRest.AsRawRpc: RestMetadata](
     apiImpl: RestApi,
-    handleTimeout: FiniteDuration ,
+    handleTimeout: FiniteDuration,
     maxPayloadSize: Long,
-  )(implicit
-    scheduler: Scheduler
+  )(implicit scheduler: Scheduler
   ): RestServlet = apply[RestApi](
     apiImpl,
     handleTimeout = handleTimeout,
@@ -70,9 +72,9 @@ class RestServlet(
   maxPayloadSize: Long = DefaultMaxPayloadSize,
   defaultStreamingBatchSize: Int = DefaultStreamingBatchSize,
   customLogger: OptArg[Logger] = OptArg.Empty,
-)(implicit
-  scheduler: Scheduler
-) extends HttpServlet with LazyLogging {
+)(implicit scheduler: Scheduler
+) extends HttpServlet
+    with LazyLogging {
 
   import RestServlet.*
 
@@ -124,8 +126,8 @@ class RestServlet(
 
   private def setResponseHeaders(response: HttpServletResponse, code: Int, headers: IMapping[PlainValue]): Unit = {
     response.setStatus(code)
-    headers.entries.foreach {
-      case (name, PlainValue(value)) => response.addHeader(name, value)
+    headers.entries.foreach { case (name, PlainValue(value)) =>
+      response.addHeader(name, value)
     }
   }
 
@@ -139,57 +141,58 @@ class RestServlet(
   private def writeNonEmptyStreamedBody(
     response: HttpServletResponse,
     responseBody: StreamedBody.NonEmpty,
-  ): Task[Unit] = Task.defer {
-    // The Content-Length header is intentionally omitted for streams.
-    // This signals to the client that the response body size is not predetermined and will be streamed.
-    // Clients implementing the streaming part of the REST interface contract MUST be prepared
-    // to handle responses without Content-Length by reading data incrementally until the stream completes.
-    responseBody match {
-      case single: StreamedBody.Single =>
-        Task.eval(writeNonEmptyBody(response, single.body))
-      case binary: StreamedBody.RawBinary =>
-        response.setContentType(binary.contentType)
-        binary.content
-          .foreachL { chunk =>
+  ): Task[Unit] = Task
+    .defer {
+      // The Content-Length header is intentionally omitted for streams.
+      // This signals to the client that the response body size is not predetermined and will be streamed.
+      // Clients implementing the streaming part of the REST interface contract MUST be prepared
+      // to handle responses without Content-Length by reading data incrementally until the stream completes.
+      responseBody match {
+        case single: StreamedBody.Single =>
+          Task.eval(writeNonEmptyBody(response, single.body))
+        case binary: StreamedBody.RawBinary =>
+          response.setContentType(binary.contentType)
+          binary.content.foreachL { chunk =>
             response.getOutputStream.write(chunk)
             response.getOutputStream.flush()
           }
-      case jsonList: StreamedBody.JsonList =>
-        response.setContentType(jsonList.contentType)
-        jsonList.elements
-          .bufferTumbling(jsonList.customBatchSize.getOrElse(defaultStreamingBatchSize))
-          .switchIfEmpty(Observable(Seq.empty))
-          .zipWithIndex
-          .foreachL { case (batch, idx) =>
-            val firstBatch = idx == 0
-            if (firstBatch) {
-              response.getOutputStream.write("[".getBytes(jsonList.charset))
-              batch.iterator.zipWithIndex.foreach { case (e, idx) =>
-                if (idx != 0) {
-                  response.getOutputStream.write(",".getBytes(jsonList.charset))
+        case jsonList: StreamedBody.JsonList =>
+          response.setContentType(jsonList.contentType)
+          jsonList.elements
+            .bufferTumbling(jsonList.customBatchSize.getOrElse(defaultStreamingBatchSize))
+            .switchIfEmpty(Observable(Seq.empty))
+            .zipWithIndex
+            .foreachL { case (batch, idx) =>
+              val firstBatch = idx == 0
+              if (firstBatch) {
+                response.getOutputStream.write("[".getBytes(jsonList.charset))
+                batch.iterator.zipWithIndex.foreach { case (e, idx) =>
+                  if (idx != 0) {
+                    response.getOutputStream.write(",".getBytes(jsonList.charset))
+                  }
+                  response.getOutputStream.write(e.value.getBytes(jsonList.charset))
                 }
-                response.getOutputStream.write(e.value.getBytes(jsonList.charset))
-              }
-            } else
-              batch.foreach { e =>
-                response.getOutputStream.write(",".getBytes(jsonList.charset))
-                response.getOutputStream.write(e.value.getBytes(jsonList.charset))
-              }
-            response.getOutputStream.flush()
-          }
-          .map(_ => response.getOutputStream.write("]".getBytes(jsonList.charset)))
+              } else
+                batch.foreach { e =>
+                  response.getOutputStream.write(",".getBytes(jsonList.charset))
+                  response.getOutputStream.write(e.value.getBytes(jsonList.charset))
+                }
+              response.getOutputStream.flush()
+            }
+            .map(_ => response.getOutputStream.write("]".getBytes(jsonList.charset)))
+      }
     }
-  }.onErrorHandle {
-    case _: EOFException =>
-      logger.warn("Request was cancelled by the client during streaming REST response")
-    case ex =>
-      // When an error occurs during streaming, we immediately close the connection rather than
-      // attempting to send an error response. This is intentional because:
-      // The client has likely already received and started processing partial data
-      // for structured formats (like JSON arrays), the stream is now in an invalid state
-      logger.error("Failure during streaming REST response", ex)
-      response.getOutputStream.close()
-  }
+    .onErrorHandle {
+      case _: EOFException =>
+        logger.warn("Request was cancelled by the client during streaming REST response")
+      case ex =>
+        // When an error occurs during streaming, we immediately close the connection rather than
+        // attempting to send an error response. This is intentional because:
+        // The client has likely already received and started processing partial data
+        // for structured formats (like JSON arrays), the stream is now in an invalid state
+        logger.error("Failure during streaming REST response", ex)
+        response.getOutputStream.close()
+    }
 
   private def writeResponseBody(
     response: HttpServletResponse,

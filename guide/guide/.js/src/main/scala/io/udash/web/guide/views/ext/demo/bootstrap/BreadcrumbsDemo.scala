@@ -18,16 +18,17 @@ object BreadcrumbsDemo extends AutoDemo with CssView {
       new Breadcrumb("Udash", Url("https://udash.io/")),
       new Breadcrumb("Dev's Guide", Url("https://guide.udash.io/")),
       new Breadcrumb("Extensions", Url("https://guide.udash.io/")),
-      new Breadcrumb("Bootstrap wrapper", Url("https://guide.udash.io/ext/bootstrap"))
+      new Breadcrumb("Bootstrap wrapper", Url("https://guide.udash.io/ext/bootstrap")),
     )
 
     div(
       UdashBreadcrumbs(pages)(
-        (pageProperty, nested) => nested(produce(pageProperty) { page =>
-          if (pages.get.last == page) StringFrag(page.name).render
-          else a(href := page.link)(page.name).render
-        }),
-        pages.get.last == _
+        (pageProperty, nested) =>
+          nested(produce(pageProperty) { page =>
+            if (pages.get.last == page) StringFrag(page.name).render
+            else a(href := page.link)(page.name).render
+          }),
+        pages.get.last == _,
       )
     ).render
   }.withSourceCode
@@ -35,4 +36,3 @@ object BreadcrumbsDemo extends AutoDemo with CssView {
   override protected def demoWithSource(): (Modifier, String) =
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
 }
-

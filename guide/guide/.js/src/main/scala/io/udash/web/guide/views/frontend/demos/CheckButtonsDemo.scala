@@ -30,12 +30,15 @@ object CheckButtonsDemo extends AutoDemo {
       UdashInputGroup.prependText("Fruits:"),
       UdashInputGroup.appendCheckbox(
         CheckButtons(
-          favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
-        )(els => span(els.map {
-          case (i: Input, l: String) => label(Form.checkInline, attr("data-label") := l)(i, l)
-        }).render)
+          favoriteFruitsStrings,
+          Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty,
+        )(els =>
+          span(els.map { case (i: Input, l: String) =>
+            label(Form.checkInline, attr("data-label") := l)(i, l)
+          }).render
+        )
       ),
-      UdashInputGroup.appendText(span(cls := "check-buttons-demo-fruits")(bind(favoriteFruits)))
+      UdashInputGroup.appendText(span(cls := "check-buttons-demo-fruits")(bind(favoriteFruits))),
     )
 
     checkButtons.render
@@ -49,10 +52,10 @@ object CheckButtonsDemo extends AutoDemo {
       div(id := "check-buttons-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
         form(containerFluid)(
           div(Grid.row)(div(firstCheckButtons)),
-          div(Grid.row)(div(secondCheckButtons))
+          div(Grid.row)(div(secondCheckButtons)),
         )
       ),
-      source.dropFinalLine
+      source.dropFinalLine,
     )
   }
 }

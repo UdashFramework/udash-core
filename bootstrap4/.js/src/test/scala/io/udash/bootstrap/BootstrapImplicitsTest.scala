@@ -37,8 +37,6 @@ class BootstrapImplicitsTest extends UdashCoreFrontendTest {
 
   implicit class ElemOps(elem: Element) {
     def hasStyles(styles: CssStyleName*): Boolean =
-      styles
-        .map(_.className)
-        .forall(elem.classList.contains)
+      styles.map(_.className).forall(elem.classList.contains)
   }
 }

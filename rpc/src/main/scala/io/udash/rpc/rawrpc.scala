@@ -75,8 +75,10 @@ object RpcResponse {
 
 /** Message containing response for [[RpcCall]]. */
 final case class RpcResponseSuccess(response: JsonStr, callId: String) extends RpcResponse
+
 /** Message reporting failure of [[RpcCall]]. */
 final case class RpcResponseFailure(cause: String, errorMsg: String, callId: String) extends RpcResponse
+
 /** Message reporting exception from [[RpcCall]]. */
 final case class RpcResponseException(name: String, exception: Throwable, callId: String) extends RpcResponse
 object RpcResponseException {
@@ -88,18 +90,18 @@ object RpcResponseException {
         val callId = in.getNextNamedField("callId").readSimple().readString()
         RpcResponseException(name, exception, callId)
       },
-      {
-        case (out, RpcResponseException(name, exception, callId)) =>
-          out.writeField("name").writeSimple().writeString(name)
-          ecr.get[Throwable](name).write(out.writeField("exception"), exception)
-          out.writeField("callId").writeSimple().writeString(callId)
-      }
+      { case (out, RpcResponseException(name, exception, callId)) =>
+        out.writeField("name").writeSimple().writeString(name)
+        ecr.get[Throwable](name).write(out.writeField("exception"), exception)
+        out.writeField("callId").writeSimple().writeString(callId)
+      },
     )
 }
 
 trait RawRpc[Self <: RawRpc[Self]] { this: Self =>
   @multi def get(@composite invocation: RpcInvocation): Self
-  @multi @verbatim def fire(@composite invocation: RpcInvocation): Unit
+  @multi
+  @verbatim def fire(@composite invocation: RpcInvocation): Unit
 
   final def resolveGetterChain(getterInvocations: List[RpcInvocation]): Self =
     getterInvocations.foldRight[Self](this)((inv, rpc) => rpc.get(inv))
@@ -112,12 +114,16 @@ trait ClientRawRpc extends RawRpc[ClientRawRpc] {
   type Self = ClientRawRpc
 }
 object ClientRawRpc extends RawRpcCompanion[ClientRawRpc] {
-  @implicitNotFound("${T} is not a valid client RPC trait, " +
-    "does it have a companion object that extends DefaultClientRpcCompanion or other similar companion base class?")
+  @implicitNotFound(
+    "${T} is not a valid client RPC trait, " +
+      "does it have a companion object that extends DefaultClientRpcCompanion or other similar companion base class?"
+  )
   implicit def asRealNotFound[T]: ImplicitNotFound[AsReal[ClientRawRpc, T]] = ImplicitNotFound()
 
-  @implicitNotFound("${T} is not a valid client RPC trait, " +
-    "does it have a companion object that extends DefaultClientRpcCompanion or other similar companion base class?")
+  @implicitNotFound(
+    "${T} is not a valid client RPC trait, " +
+      "does it have a companion object that extends DefaultClientRpcCompanion or other similar companion base class?"
+  )
   implicit def asRawNotFound[T]: ImplicitNotFound[AsRaw[ClientRawRpc, T]] = ImplicitNotFound()
 }
 
@@ -129,12 +135,16 @@ trait ServerRawRpc extends RawRpc[ServerRawRpc] {
     resolveGetterChain(rpcCall.gettersChain).call(rpcCall.invocation).catchFailures
 }
 object ServerRawRpc extends RawRpcCompanion[ServerRawRpc] {
-  @implicitNotFound("${T} is not a valid server RPC trait, " +
-    "does it have a companion object that extends DefaultServerRpcCompanion or other similar companion base class?")
+  @implicitNotFound(
+    "${T} is not a valid server RPC trait, " +
+      "does it have a companion object that extends DefaultServerRpcCompanion or other similar companion base class?"
+  )
   implicit def asRealNotFound[T]: ImplicitNotFound[AsReal[ServerRawRpc, T]] = ImplicitNotFound()
 
-  @implicitNotFound("${T} is not a valid server RPC trait, " +
-    "does it have a companion object that extends DefaultServerRpcCompanion or other similar companion base class?")
+  @implicitNotFound(
+    "${T} is not a valid server RPC trait, " +
+      "does it have a companion object that extends DefaultServerRpcCompanion or other similar companion base class?"
+  )
   implicit def asRawNotFound[T]: ImplicitNotFound[AsRaw[ServerRawRpc, T]] = ImplicitNotFound()
 }
 

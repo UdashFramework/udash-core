@@ -6,7 +6,6 @@ import io.udash._
 
 import scalatags.JsDom.all._
 
-
 object DateTimeLocalDemo extends AutoDemo {
 
   private val dateTimeProperty = Property.blank[String]
@@ -25,12 +24,12 @@ object DateTimeLocalDemo extends AutoDemo {
         UdashInputGroup()(
           UdashInputGroup.input(
             DateTimeLocalInput(dateTimeProperty)().render
-          ),
+          )
         )
       ),
       div(Grid.col(4, ResponsiveBreakpoint.Medium))(
-        produce(dateTimeProperty) { date => span(s"Selected date: $date": Modifier).render }
-      )
+        produce(dateTimeProperty)(date => span(s"Selected date: $date": Modifier).render)
+      ),
     )
 
     input.render
@@ -40,10 +39,15 @@ object DateTimeLocalDemo extends AutoDemo {
   override protected def demoWithSource(): (Modifier, String) = {
     import io.udash.bootstrap.utils.BootstrapStyles._
     import io.udash.css.CssView._
-    (div(id := "datetimelocal-input-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
-      form(containerFluid)(
-        firstInput, br, secondInput
-      )
-    ), source.dropFinalLine)
+    (
+      div(id := "datetimelocal-input-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
+        form(containerFluid)(
+          firstInput,
+          br,
+          secondInput,
+        )
+      ),
+      source.dropFinalLine,
+    )
   }
 }

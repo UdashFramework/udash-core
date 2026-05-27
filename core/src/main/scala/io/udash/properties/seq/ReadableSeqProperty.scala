@@ -7,6 +7,7 @@ import io.udash.utils.Registration
 
 /** Read-only interface of SeqProperty[A]. */
 trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends ReadableProperty[BSeq[A]] {
+
   /** @return Sequence of child properties. */
   def elemProperties: BSeq[ElemType]
 
@@ -31,36 +32,49 @@ trait ReadableSeqProperty[+A, +ElemType <: ReadableProperty[A]] extends Readable
   def nonEmpty: Boolean =
     elemProperties.nonEmpty
 
-  /** Transforms ReadableSeqProperty[A] into ReadableSeqProperty[B] element by element.
-   * Prefer this to `transform` whenever you don't need the whole sequence to perform the transformation.
-   *
-   * @return New ReadableSeqProperty[B], which will be synchronised with original ReadableSeqProperty[A]. */
+  /** Transforms ReadableSeqProperty[A] into ReadableSeqProperty[B] element by element. Prefer this to `transform`
+    * whenever you don't need the whole sequence to perform the transformation.
+    *
+    * @return
+    *   New ReadableSeqProperty[B], which will be synchronised with original ReadableSeqProperty[A].
+    */
   def transformElements[B](transformer: A => B): ReadableSeqProperty[B, ReadableProperty[B]]
 
   /** Creates `ReadableSeqProperty[A]` providing reversed order of elements from `this`. */
   def reversed(): ReadableSeqProperty[A, ReadableProperty[A]]
 
   /** Filters ReadableSeqProperty[A].
-   *
-   * @return New ReadableSeqProperty[A] with matched elements, which will be synchronised with original ReadableSeqProperty[A]. */
+    *
+    * @return
+    *   New ReadableSeqProperty[A] with matched elements, which will be synchronised with original
+    *   ReadableSeqProperty[A].
+    */
   def filter(matcher: A => Boolean): ReadableSeqProperty[A, ElemType]
 
-  /** Combines every element of this `SeqProperty` with provided `Property` creating new `ReadableSeqProperty` as the result. */
-  def combineElements[B, O](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] =
+  /** Combines every element of this `SeqProperty` with provided `Property` creating new `ReadableSeqProperty` as the
+    * result.
+    */
+  def combineElements[B, O](property: ReadableProperty[B])(combiner: (A, B) => O)
+    : ReadableSeqProperty[O, ReadableProperty[O]] =
     new CombinedReadableSeqProperty(this, property, combiner)
 
   /** Zips elements from `this` and provided `property` by combining every pair using provided `combiner`. */
   def zip[B, O](
     property: ReadableSeqProperty[B, ReadableProperty[B]]
-  )(combiner: (A, B) => O): ReadableSeqProperty[O, ReadableProperty[O]] =
+  )(
+    combiner: (A, B) => O
+  ): ReadableSeqProperty[O, ReadableProperty[O]] =
     new ZippedReadableSeqProperty(this, property, combiner, defaults = Opt.Empty)
 
-  /** Zips elements from `this` and provided `property` by combining every pair using provided `combiner`.
-   * Uses `defaultA` and `defaultB` to fill smaller sequence. */
-  def zipAll[B, A1 >: A, O](property: ReadableSeqProperty[B, ReadableProperty[B]])(
+  /** Zips elements from `this` and provided `property` by combining every pair using provided `combiner`. Uses
+    * `defaultA` and `defaultB` to fill smaller sequence.
+    */
+  def zipAll[B, A1 >: A, O](
+    property: ReadableSeqProperty[B, ReadableProperty[B]]
+  )(
     combiner: (A1, B) => O,
     defaultA: ReadableProperty[A1],
-    defaultB: ReadableProperty[B]
+    defaultB: ReadableProperty[B],
   ): ReadableSeqProperty[O, ReadableProperty[O]] =
     new ZippedReadableSeqProperty(this, property, combiner, (defaultA, defaultB).opt)
 
@@ -101,7 +115,7 @@ private[properties] trait AbstractReadableSeqProperty[A, ElemType <: ReadablePro
     val originalListeners = structureListeners.toList
     CallbackSequencer().queue(
       s"$hashCode:fireElementsListeners:${patch.hashCode()}",
-      () => originalListeners.foreach { listener => if (structureListeners.contains(listener)) listener(patch) }
+      () => originalListeners.foreach(listener => if (structureListeners.contains(listener)) listener(patch)),
     )
   }
 

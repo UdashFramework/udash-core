@@ -19,22 +19,23 @@ class RpcIntroView extends View with CssView {
     h2("Introduction"),
     p(
       "In frontend applications developers usually struggle with client-server communication. REST APIs which were popular " +
-      "in last few years, are hard to maintain. They are not typed, so IDEs cannot help you with refactoring. " +
-      "Usually it is also impossible to share data models between the frontend and backend code. "
+        "in last few years, are hard to maintain. They are not typed, so IDEs cannot help you with refactoring. " +
+        "Usually it is also impossible to share data models between the frontend and backend code. "
     ),
     p(
       "The Udash project tries to make frontend applications as type-safe as possible. Thanks to the ",
-      a(href := References.ScalaJsHomepage, target := "_blank")("ScalaJS"), " cross-compilation system, it is possible to share the code between " +
-      "the client and server applications. Udash RPC uses this feature to share: "
+      a(href := References.ScalaJsHomepage, target := "_blank")("ScalaJS"),
+      " cross-compilation system, it is possible to share the code between " +
+        "the client and server applications. Udash RPC uses this feature to share: ",
     ),
     ul(GuideStyles.defaultList)(
       li("RPC interfaces with typed arguments and returned value."),
       li("Data models which can be used in RPC communication."),
-      li("Model validators which can be used both in frontend and backend.")
+      li("Model validators which can be used both in frontend and backend."),
     ),
     p(
       "Udash RPC also provides a server for client communication that works out of the box. You only have to create the RPC interface " +
-      "and implement it - that is all, you do not have to worry about connection handling."
+        "and implement it - that is all, you do not have to worry about connection handling."
     ),
     h2("Ping-pong example"),
     p("Take a look at the simple ping-pong example. Click the button below and wait for a response."),
@@ -74,9 +75,13 @@ class RpcIntroView extends View with CssView {
     p(
       "The RPC system uses some macro-generated code. To keep the JavaScript code as small as possible ",
       "and make compilation faster, for each RPC interface create companion object extending ",
-      i("RPCCompanion"), " class from the RPC framework you use. The RPC framework describes supported RPC methods ",
-      "and serialization methods. Usually you will probably use ", i("DefaultClientUdashRPCFramework"),
-      " for the client interfaces and ", i("DefaultServerUdashRPCFramework"), " for the server API."
+      i("RPCCompanion"),
+      " class from the RPC framework you use. The RPC framework describes supported RPC methods ",
+      "and serialization methods. Usually you will probably use ",
+      i("DefaultClientUdashRPCFramework"),
+      " for the client interfaces and ",
+      i("DefaultServerUdashRPCFramework"),
+      " for the server API.",
     ),
     h2("Server push ping-pong example"),
     p("It is also possible to implement the above example using the server push mechanism."),
@@ -119,8 +124,7 @@ class RpcIntroView extends View with CssView {
         |}""".stripMargin
     )(GuideStyles),
     p("To make usage of client RPC more friendly, it is recommended to create a wrapper object like the one below:"),
-    CodeBlock(
-      """import io.udash.rpc._
+    CodeBlock("""import io.udash.rpc._
         |import scala.concurrent.ExecutionContext
         |
         |object ClientRPC {
@@ -141,9 +145,12 @@ class RpcIntroView extends View with CssView {
     h2("What's next?"),
     p(
       "Now you know the basics of the Udash RPC system. You should take a closer look at ",
-      a(href := RpcInterfacesState.url)("RPC interfaces"), " and details of ",
-      a(href := RpcClientServerState.url)("backend"), " and ",
-      a(href := RpcServerClientState.url)("frontend"), " implementation."
-    )
+      a(href := RpcInterfacesState.url)("RPC interfaces"),
+      " and details of ",
+      a(href := RpcClientServerState.url)("backend"),
+      " and ",
+      a(href := RpcServerClientState.url)("frontend"),
+      " implementation.",
+    ),
   )
 }

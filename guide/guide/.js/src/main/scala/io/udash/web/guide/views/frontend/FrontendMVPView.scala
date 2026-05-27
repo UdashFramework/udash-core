@@ -47,8 +47,7 @@ class FrontendMVPView extends View with CssView {
       import io.udash._
       import scalatags.JsDom.all._
 
-      class ExampleView(model: Property[Int], presenter: ExamplePresenter)
-        extends ContainerView {
+      class ExampleView(model: Property[Int], presenter: ExamplePresenter) extends ContainerView {
 
         override def getTemplate: Modifier = div(
           h1("Example view"),
@@ -57,10 +56,10 @@ class FrontendMVPView extends View with CssView {
           div(
             button(onclick :+= { (_: MouseEvent) => presenter.decButtonClick(); true })("-"),
             button(onclick :+= { (_: MouseEvent) => presenter.incButtonClick(); true })("+"),
-            bind(model)
+            bind(model),
           ),
           h3("Below you can find my child view!"),
-          childViewContainer // child view container provided by ContainerView
+          childViewContainer, // child view container provided by ContainerView
         )
       }
     }.sourceCode
@@ -71,35 +70,56 @@ class FrontendMVPView extends View with CssView {
     p("A single page in Udash application is based on four elements:"),
     ul(GuideStyles.defaultList)(
       li(
-        "Model - based on the ", a(href := FrontendPropertiesState.url)("Properties"), " mechanism, ",
-        "it provides one and two-ways bindings to DOM elements."
+        "Model - based on the ",
+        a(href := FrontendPropertiesState.url)("Properties"),
+        " mechanism, ",
+        "it provides one and two-ways bindings to DOM elements.",
       ),
       li(
-        "View - extends ", i("View"), " and creates a ", a(href := References.ScalatagsHomepage, target := "_blank")("Scalatags"), " template ",
-        "with a method getting a child view to render."
+        "View - extends ",
+        i("View"),
+        " and creates a ",
+        a(href := References.ScalatagsHomepage, target := "_blank")("Scalatags"),
+        " template ",
+        "with a method getting a child view to render.",
       ),
       li(
-        "Presenter - extends ", i("Presenter"), ", it should contain a business logic of the related view. It also handles ",
-        "application state changes."
+        "Presenter - extends ",
+        i("Presenter"),
+        ", it should contain a business logic of the related view. It also handles ",
+        "application state changes.",
       ),
       li(
-        "ViewFactory - extends ", i("ViewFactory"), ", it was discussed in detail ",
-        a(href := FrontendRoutingState(None).url)("Routing"), " chapter. ViewFactory is responsible for creating a view and a presenter. "
-      )
+        "ViewFactory - extends ",
+        i("ViewFactory"),
+        ", it was discussed in detail ",
+        a(href := FrontendRoutingState(None).url)("Routing"),
+        " chapter. ViewFactory is responsible for creating a view and a presenter. ",
+      ),
     ),
-    ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "mvp.png", "MVP in the Udash", GuideStyles.imgBig, GuideStyles.frame),
+    ClickableImageFactory(
+      ImageFactoryPrefixSet.Frontend,
+      "mvp.png",
+      "MVP in the Udash",
+      GuideStyles.imgBig,
+      GuideStyles.frame,
+    ),
     h3("ViewFactory"),
     p(
       "The ViewFactory responsibility is simple. It has to prepare Model, View, Presenter and then link them together. ",
-      "If you want to create a static view, then you can use ", i("StaticViewFactory"), " which ",
-      "will create ", i("EmptyPresenter"), " for your view."
+      "If you want to create a static view, then you can use ",
+      i("StaticViewFactory"),
+      " which ",
+      "will create ",
+      i("EmptyPresenter"),
+      " for your view.",
     ),
     h3("Model"),
     p(
       "The Udash framework brings a powerful Properties mechanism, ",
-      "which is used as Model in Udash-based applications. All you have to do is:"
+      "which is used as Model in Udash-based applications. All you have to do is:",
     ),
-    //todo migrate to compiled snippet once HasModelPropertyCreator works locally
+    // todo migrate to compiled snippet once HasModelPropertyCreator works locally
     CodeBlock(
       """import io.udash._
         |
@@ -119,22 +139,29 @@ class FrontendMVPView extends View with CssView {
     p(
       "The Presenter should contain all business logic of a view: user interaction callbacks and server communication. ",
       "It should not call any methods of a View class. The presenter should pass data to the view via Model properties. ",
-      "When implementing a presenter, you should remember, that the ", i("handleState"), " method does not have to be called only on ",
-      "view initialization. For example:"
+      "When implementing a presenter, you should remember, that the ",
+      i("handleState"),
+      " method does not have to be called only on ",
+      "view initialization. For example:",
     ),
     AutoDemo.snippet(presenterSource),
     h3("View"),
     p(
       "The View implementation usually gets the Model and the Presenter as constructor arguments. They can be used ",
-      "in the ", a(href := References.ScalatagsHomepage, target := "_blank")("Scalatags"), " template of a view as user interaction callbacks. ",
-      "The Model can be bound to a template and will automatically update on the Model changes."
+      "in the ",
+      a(href := References.ScalatagsHomepage, target := "_blank")("Scalatags"),
+      " template of a view as user interaction callbacks. ",
+      "The Model can be bound to a template and will automatically update on the Model changes.",
     ),
     AutoDemo.snippet(viewSource),
     h2("What's next?"),
     p(
-      "Take a look at the ", a(href := FrontendTemplatesState.url)("Scalatags & UdashCSS"), " chapter to ",
+      "Take a look at the ",
+      a(href := FrontendTemplatesState.url)("Scalatags & UdashCSS"),
+      " chapter to ",
       "learn more about creating view templates and styling them in Udash. Visit the ",
-      a(href := FrontendPropertiesState.url)("Properties"), " chapter to read about data model in Udash applications."
-    )
+      a(href := FrontendPropertiesState.url)("Properties"),
+      " chapter to read about data model in Udash applications.",
+    ),
   )
 }

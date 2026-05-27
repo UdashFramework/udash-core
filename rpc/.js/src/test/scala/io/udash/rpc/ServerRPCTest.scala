@@ -17,7 +17,7 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
   }
 
   def tests(createServerRpc: FiniteDuration => (MockServerConnector, ServerRPC[TestRPC])): Unit = {
-    val defaultTimeout = 500 millis
+    val defaultTimeout = 500.millis
 
     "gain access to RPC methods of server" in {
       val (connectorMock, serverRPC) = createServerRpc(defaultTimeout)
@@ -111,7 +111,7 @@ class ServerRPCTest extends AsyncUdashFrontendTest with Utils {
 
     "timeout calls without response" in {
       val timeoutMillis = Random.nextInt(1000) + 500
-      val (connectorMock, serverRPC) = createServerRpc(timeoutMillis millis)
+      val (connectorMock, serverRPC) = createServerRpc(timeoutMillis.millis)
       val rpc = serverRPC.remoteRpc
 
       val start = System.nanoTime()

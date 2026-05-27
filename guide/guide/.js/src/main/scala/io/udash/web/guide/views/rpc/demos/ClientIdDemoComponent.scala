@@ -26,12 +26,11 @@ class ClientIdDemoComponent extends Component {
   }
 
   class ClientIdDemoPresenter(model: Property[String]) {
-    def onButtonClick() = {
-      Context.serverRpc.demos.clientIdDemo.clientId() onComplete {
+    def onButtonClick() =
+      Context.serverRpc.demos.clientIdDemo.clientId().onComplete {
         case Success(cid) => println(cid); model.set(cid)
         case Failure(ex) => println(ex); model.set(ex.toString)
       }
-    }
   }
 
   class ClientIdDemoView(model: Property[String], presenter: ClientIdDemoPresenter) {
@@ -40,22 +39,21 @@ class ClientIdDemoComponent extends Component {
     val loadIdButtonDisabled = Property(false)
     val loadIdButton = UdashButton(
       disabled = loadIdButtonDisabled,
-      componentId = ComponentId("client-id-demo")
+      componentId = ComponentId("client-id-demo"),
     )(_ => "Load client id")
 
-    loadIdButton.listen {
-      case UdashButton.ButtonClickEvent(_, _) =>
-        loadIdButtonDisabled.set(true)
-        presenter.onButtonClick()
+    loadIdButton.listen { case UdashButton.ButtonClickEvent(_, _) =>
+      loadIdButtonDisabled.set(true)
+      presenter.onButtonClick()
     }
 
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(
       UdashInputGroup()(
         UdashInputGroup.prependText(
           "Your client id: ",
-          produce(model)(cid => span(id := "client-id-demo-response", cid).render)
+          produce(model)(cid => span(id := "client-id-demo-response", cid).render),
         ),
-        loadIdButton.render
+        loadIdButton.render,
       ).render
     )
   }

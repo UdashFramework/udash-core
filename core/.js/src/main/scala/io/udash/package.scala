@@ -1,9 +1,7 @@
 package io
 
 package object udash
-  extends io.udash.bindings.Bindings
-  with io.udash.properties.Properties
-    with io.udash.routing.Routing {
+  extends io.udash.bindings.Bindings with io.udash.properties.Properties with io.udash.routing.Routing {
 
   // Defaults
   type StaticViewFactory[S <: State] = io.udash.core.StaticViewFactory[S]
@@ -21,7 +19,7 @@ package object udash
   type ContainerView = io.udash.core.ContainerView
 
   type State = io.udash.core.State
-  type GState[HRoot <: State] = io.udash.core.State {type HierarchyRoot = HRoot}
+  type GState[HRoot <: State] = io.udash.core.State { type HierarchyRoot = HRoot }
 
   type RoutingRegistry[HierarchyRoot <: State] = io.udash.routing.RoutingRegistry[HierarchyRoot]
 

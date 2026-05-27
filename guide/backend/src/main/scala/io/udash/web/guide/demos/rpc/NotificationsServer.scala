@@ -11,9 +11,9 @@ import scala.concurrent.Future
 class NotificationsServer(implicit clientId: ClientId) extends NotificationsServerRPC {
   import io.udash.web.Implicits.backendExecutionContext
 
-  override def register(): Future[Unit] = Future { NotificationsService.register }
+  override def register(): Future[Unit] = Future(NotificationsService.register)
 
-  override def unregister(): Future[Unit] = Future { NotificationsService.unregister }
+  override def unregister(): Future[Unit] = Future(NotificationsService.unregister)
 }
 
 object NotificationsService {
@@ -29,15 +29,13 @@ object NotificationsService {
     clients -= clientId
   }
 
-  backendExecutionContext.execute(() => {
+  backendExecutionContext.execute(() =>
     while (true) {
       val msg = jt.LocalDateTime.now().toString
       clients.synchronized {
-        clients.foreach(clientId => {
-          ClientRPC(clientId).demos().notificationsDemo().notify(msg)
-        })
+        clients.foreach(clientId => ClientRPC(clientId).demos().notificationsDemo().notify(msg))
       }
       TimeUnit.SECONDS.sleep(1)
     }
-  })
+  )
 }

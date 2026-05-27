@@ -7,14 +7,15 @@ import io.udash.utils.Registration
 /** Represents ReadableProperty[A] transformed to ReadableProperty[B]. */
 private[properties] class TransformedReadableProperty[A, B](
   override protected val origin: ReadableProperty[A],
-  transformer: A => B
+  transformer: A => B,
 ) extends ForwarderReadableProperty[B] {
   protected var lastValue: Opt[A] = Opt.empty
   protected var transformedValue: B = _
   protected var originListenerRegistration: Registration = _
 
-  protected def originListener(originValue: A) : Unit = {
-    val forced = lastValue.contains(originValue) //if the listener was triggered despite equal value, the update was forced
+  protected def originListener(originValue: A): Unit = {
+    val forced =
+      lastValue.contains(originValue) // if the listener was triggered despite equal value, the update was forced
     val newValue = transformer(originValue)
     val transformedValueChanged = newValue != transformedValue
     lastValue = originValue.opt
@@ -78,8 +79,10 @@ private[properties] class TransformedReadableProperty[A, B](
 /** Represents Property[A] transformed to Property[B]. */
 private[properties] class TransformedProperty[A, B](
   override protected val origin: Property[A],
-  transformer: A => B, revert: B => A
-) extends TransformedReadableProperty[A, B](origin, transformer) with ForwarderProperty[B] {
+  transformer: A => B,
+  revert: B => A,
+) extends TransformedReadableProperty[A, B](origin, transformer)
+    with ForwarderProperty[B] {
 
   override def set(t: B, force: Boolean = false): Unit =
     origin.set(revert(t), force)

@@ -14,25 +14,33 @@ object StaticsDemo extends AutoDemo {
     div(Grid.row)(
       div(
         Grid.col(9),
-        Card.card, Card.body, Background.color(Color.Light)
+        Card.card,
+        Card.body,
+        Background.color(Color.Light),
       )(
         ".col-xs-9"
       ),
       div(
         Grid.col(4),
-        Card.card, Card.body, Background.color(Color.Light)
+        Card.card,
+        Card.body,
+        Background.color(Color.Light),
       )(
-        ".col-xs-4", br,
+        ".col-xs-4",
+        br,
         "Since 9 + 4 = 13 > 12, this 4-column-wide div",
-        "gets wrapped onto a new line as one contiguous unit."
+        "gets wrapped onto a new line as one contiguous unit.",
       ),
       div(
         Grid.col(6),
-        Card.card, Card.body, Background.color(Color.Light)
+        Card.card,
+        Card.body,
+        Background.color(Color.Light),
       )(
-        ".col-xs-6", br,
-        "Subsequent columns continue along the new line."
-      )
+        ".col-xs-6",
+        br,
+        "Subsequent columns continue along the new line.",
+      ),
     ).render
   }.withSourceCode
 
@@ -41,4 +49,3 @@ object StaticsDemo extends AutoDemo {
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
   }
 }
-

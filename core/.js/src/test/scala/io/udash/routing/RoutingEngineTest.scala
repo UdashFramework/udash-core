@@ -22,7 +22,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         NextObjectState -> nextObjectViewFactory,
         ClassState("abc", 1) -> classViewFactory,
         ClassState("abcd", 234) -> class2ViewFactory,
-        ErrorState -> errorViewFactory
+        ErrorState -> errorViewFactory,
       )
 
       def testClosedAndReset(expectedClosed: TestViewFactory[_] => Boolean)(implicit position: Position): Unit = {
@@ -116,7 +116,8 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       renderer.views(1) should be(objectViewFactory.view)
       renderer.views(2) should be(nextObjectViewFactory.view)
       renderer.lastSubPathToLeave.size should be(0)
-      renderer.lastPathToAdd should be(rootViewFactory.view :: objectViewFactory.view :: nextObjectViewFactory.view :: Nil)
+      renderer.lastPathToAdd should
+        be(rootViewFactory.view :: objectViewFactory.view :: nextObjectViewFactory.view :: Nil)
       rootViewFactory.count shouldBe 2
       testClosedAndReset {
         case `rootViewFactory` | `objectViewFactory` | `nextObjectViewFactory` => true
@@ -142,10 +143,10 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
 
       var calls = 0
       var lastCallbackEvent: StateChangeEvent[TestState] = null
-      val reg = routingEngine.onStateChange(ev => {
+      val reg = routingEngine.onStateChange { ev =>
         lastCallbackEvent = ev
         calls += 1
-      })
+      }
 
       routingEngine.handleUrl(Url("/"))
 
@@ -262,9 +263,8 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       }
 
       class ExceptionViewFactory[S <: State](view: View) extends ViewFactory[S] {
-        override def create(): (View, Presenter[S]) = {
+        override def create(): (View, Presenter[S]) =
           (view, new ExceptionPresenter[S])
-        }
       }
 
       class OnCloseExceptionPresenter[S <: State] extends Presenter[S] {
@@ -288,7 +288,7 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
         NextObjectState -> new ExceptionViewFactory[NextObjectState.type](nextObjectView),
         ClassState("abc", 1) -> new ExceptionViewFactory[ClassState](classView),
         ClassState("abcd", 234) -> new OnCloseExceptionViewFactory[ClassState](class2View),
-        ErrorState -> new ExceptionViewFactory[ErrorState.type](errorView)
+        ErrorState -> new ExceptionViewFactory[ErrorState.type](errorView),
       )
 
       initTestRoutingEngine(state2vp = state2VP.view.mapValues(() => _).toMap)
@@ -305,21 +305,21 @@ class RoutingEngineTest extends UdashFrontendTest with TestRouting {
       routingEngine.handleUrl(Url("/abc/1"))
       renderer.views.size should be(0)
 
-      //handleState exception doesn't prevent routing to valid state
+      // handleState exception doesn't prevent routing to valid state
       routingEngine.handleUrl(Url("/root"))
       renderer.views shouldBe Seq(rootView)
 
       routingEngine.handleUrl(Url("/abcd/234"))
       renderer.views shouldBe Seq(rootView, class2View)
 
-      //onClose exception doesn't prevent routing to valid state
+      // onClose exception doesn't prevent routing to valid state
       routingEngine.handleUrl(Url("/root"))
       renderer.views shouldBe Seq(rootView)
 
       routingEngine.handleUrl(Url("/abcd/234"))
       renderer.views shouldBe Seq(rootView, class2View)
 
-      //onClose exception doesn't prevent routing to valid state
+      // onClose exception doesn't prevent routing to valid state
       routingEngine.handleUrl(Url("/root"), fullReload = true)
       renderer.views shouldBe Seq(rootView)
 

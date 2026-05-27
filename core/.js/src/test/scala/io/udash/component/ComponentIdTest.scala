@@ -81,7 +81,7 @@ class ComponentIdTest extends UdashFrontendTest {
       val a1: TestA = new TestA
       val a2: TestA = new TestA
 
-      a1.id should not equal a2.id
+      (a1.id should not).equal(a2.id)
     }
   }
 

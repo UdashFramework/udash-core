@@ -17,7 +17,7 @@ object ListGroupDemo extends AutoDemo with CssView {
 
     val news = SeqProperty("Title 1", "Title 2", "Title 3")
 
-    def newsStyle(newsProperty: Property[String]): ReadableProperty[CssStyleName] = {
+    def newsStyle(newsProperty: Property[String]): ReadableProperty[CssStyleName] =
       newsProperty.transform(_.last match {
         case '1' => activeStyle
         case '2' => disabledStyle
@@ -26,13 +26,15 @@ object ListGroupDemo extends AutoDemo with CssView {
         case '5' => List.color(Color.Info)
         case '6' => List.color(Color.Warning)
       })
-    }
 
     var i = 1
-    val appendHandler = window.setInterval(() => {
-      news.append(s"Dynamic $i")
-      i += 1
-    }, 2000)
+    val appendHandler = window.setInterval(
+      () => {
+        news.append(s"Dynamic $i")
+        i += 1
+      },
+      2000,
+    )
     window.setTimeout(() => window.clearInterval(appendHandler), 12000)
 
     div(

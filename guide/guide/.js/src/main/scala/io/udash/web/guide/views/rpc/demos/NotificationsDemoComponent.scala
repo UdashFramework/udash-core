@@ -42,7 +42,7 @@ class NotificationsDemoComponent extends Component {
     def onButtonClick(disabled: Property[Boolean]): Unit = {
       disabled.set(true)
       if (model.subProp(_.registered).get) {
-        NotificationsClient.unregisterListener(demoListener) onComplete {
+        NotificationsClient.unregisterListener(demoListener).onComplete {
           case Success(_) =>
             model.subProp(_.registered).set(false)
             disabled.set(false)
@@ -51,7 +51,7 @@ class NotificationsDemoComponent extends Component {
             disabled.set(false)
         }
       } else {
-        NotificationsClient.registerListener(demoListener) onComplete {
+        NotificationsClient.registerListener(demoListener).onComplete {
           case Success(_) =>
             model.subProp(_.registered).set(true)
             disabled.set(false)
@@ -69,14 +69,15 @@ class NotificationsDemoComponent extends Component {
     val registerDisabled = Property(false)
     val registerButton = UdashButton(
       disabled = registerDisabled,
-      componentId = ComponentId("notifications-demo")
-    )(nested => nested(produce(model.subProp(_.registered))(
-      p => span(if (!p) "Register for notifications" else "Unregister").render
-    )))
+      componentId = ComponentId("notifications-demo"),
+    )(nested =>
+      nested(
+        produce(model.subProp(_.registered))(p => span(if (!p) "Register for notifications" else "Unregister").render)
+      )
+    )
 
-    registerButton.listen {
-      case UdashButton.ButtonClickEvent(_, _) =>
-        presenter.onButtonClick(registerDisabled)
+    registerButton.listen { case UdashButton.ButtonClickEvent(_, _) =>
+      presenter.onButtonClick(registerDisabled)
     }
 
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(
@@ -84,10 +85,10 @@ class NotificationsDemoComponent extends Component {
         UdashInputGroup.prependText(
           span(id := "notifications-demo-response")(
             "Last message: ",
-            bind(model.subProp(_.lastMessage))
+            bind(model.subProp(_.lastMessage)),
           )
         ),
-        registerButton.render
+        registerButton.render,
       ).render
     )
   }

@@ -20,9 +20,8 @@ class UdashCollapseTest extends AsyncUdashCoreFrontendTest {
       jQ("body").append(element)
 
       val q: JQuery = jQ(s"#${collapse.componentId}")
-      def checkState(): (Boolean, Boolean) = {
+      def checkState(): (Boolean, Boolean) =
         (q.hasClass("show"), q.hasClass("collapsing"))
-      }
 
       var showCounter = 0
       var shownCounter = 0
@@ -78,9 +77,8 @@ class UdashCollapseTest extends AsyncUdashCoreFrontendTest {
       jQ("body").append(element)
 
       val q: JQuery = jQ(s"#${collapse.componentId}")
-      def checkState(): (Boolean, Boolean) = {
+      def checkState(): (Boolean, Boolean) =
         (q.hasClass("show"), q.hasClass("collapsing"))
-      }
 
       var showCounter = 0
       var shownCounter = 0

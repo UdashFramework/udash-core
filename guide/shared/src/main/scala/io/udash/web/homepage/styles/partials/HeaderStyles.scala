@@ -17,40 +17,40 @@ object HeaderStyles extends CssBase with HeaderButtonsStyles with HeaderNavStyle
     top(`0`),
     left(`0`),
     width(100 %%),
-    height(StyleConstants.Sizes.LandingPageHeaderHeight px),
-    fontSize(1 rem),
+    height(StyleConstants.Sizes.LandingPageHeaderHeight.px),
+    fontSize(1.rem),
     zIndex(999),
 
     &.attr(Attributes.data(Attributes.Pinned), "true")(
       position.fixed,
-      height(StyleConstants.Sizes.HeaderHeightPin px),
+      height(StyleConstants.Sizes.HeaderHeightPin.px),
       backgroundColor.black,
       animationName(headerAnimation),
       animationIterationCount.count(1),
-      animationDuration(300 milliseconds),
+      animationDuration(300.milliseconds),
 
       MediaQueries.tabletLandscape(
-        height(StyleConstants.Sizes.HeaderHeightPin * .85 px)
+        height((StyleConstants.Sizes.HeaderHeightPin * .85).px)
       ),
 
       unsafeChild(s".${headerLogo.className}")(
-        width(48 px),
-        height(56 px),
+        width(48.px),
+        height(56.px),
         backgroundImage := "url(/assets/images/udash_logo.png)",
 
         MediaQueries.tabletPortrait(
           display.none
-        )
+        ),
       ),
 
       unsafeChild(s".${btnMobile.className}")(
         CommonStyleUtils.middle
-      )
+      ),
     ),
 
     MediaQueries.tabletPortrait(
-      height(StyleConstants.Sizes.HeaderHeight * .9 px)
-    )
+      height((StyleConstants.Sizes.HeaderHeight * .9).px)
+    ),
   )
 
   private lazy val headerAnimation: CssStyle = keyframes(
@@ -60,34 +60,34 @@ object HeaderStyles extends CssBase with HeaderButtonsStyles with HeaderNavStyle
 
     100d -> keyframe(
       transform := "translateY(0)"
-    )
+    ),
   )
 
   val headerLeft: CssStyle = style(
     position.relative,
     float.left,
-    height(100 %%)
+    height(100 %%),
   )
 
   lazy val headerLogo: CssStyle = style(
     CommonStyleUtils.relativeMiddle,
     display.inlineBlock,
     verticalAlign.middle,
-    width(65 px),
-    height(96 px),
-    marginRight(25 px),
+    width(65.px),
+    height(96.px),
+    marginRight(25.px),
     backgroundImage := "url(/assets/images/udash_logo_l.png)",
     backgroundRepeat.noRepeat,
     backgroundSize := "100%",
 
     MediaQueries.tabletPortrait(
       display.block,
-      width(StyleConstants.Sizes.GuideHeaderHeightMobile px),
-      height(14 px),
+      width(StyleConstants.Sizes.GuideHeaderHeightMobile.px),
+      height(14.px),
       backgroundPosition := Literal.bottom,
       transform := none,
-      top.auto
-    )
+      top.auto,
+    ),
   )
 
   lazy val btnMobile: CssStyle = style(

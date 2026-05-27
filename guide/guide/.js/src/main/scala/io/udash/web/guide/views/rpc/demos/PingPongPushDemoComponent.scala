@@ -10,7 +10,6 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
-
 class PingPongPushDemoComponent extends Component {
 
   override def getTemplate: Modifier = PingPongPushDemoViewFactory()
@@ -49,12 +48,11 @@ class PingPongPushDemoComponent extends Component {
     val pingDisabled = Property(false)
     val pingButton = UdashButton(
       disabled = pingDisabled,
-      componentId = ComponentId("ping-pong-push-demo")
+      componentId = ComponentId("ping-pong-push-demo"),
     )(nested => Seq[Modifier]("Ping(", nested(bind(model)), ")"))
 
-    pingButton.listen {
-      case UdashButton.ButtonClickEvent(_, _) =>
-        presenter.onButtonClick(pingDisabled)
+    pingButton.listen { case UdashButton.ButtonClickEvent(_, _) =>
+      presenter.onButtonClick(pingDisabled)
     }
 
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(

@@ -29,8 +29,8 @@ class ListenableTest extends UdashFrontendTest {
     }
     "execute onEvent handler on fire called correct number of times" in new Fixture {
       var callCounter = 0
-      listenable.listen {
-        case _ => callCounter += 1
+      listenable.listen { case _ =>
+        callCounter += 1
       }
       callCounter should ===(0)
       listenable.fireEvent()
@@ -41,11 +41,11 @@ class ListenableTest extends UdashFrontendTest {
     }
     "notify listeners in correct registration order" in new Fixture {
       val callSequenceIndicator = ListBuffer.empty[String]
-      listenable.listen {
-        case _ => callSequenceIndicator += "FirstListenerNotified"
+      listenable.listen { case _ =>
+        callSequenceIndicator += "FirstListenerNotified"
       }
-      listenable.listen {
-        case _ => callSequenceIndicator += "SecondListenerNotified"
+      listenable.listen { case _ =>
+        callSequenceIndicator += "SecondListenerNotified"
       }
       listenable.fireEvent()
       callSequenceIndicator(0) shouldBe "FirstListenerNotified"
@@ -54,12 +54,12 @@ class ListenableTest extends UdashFrontendTest {
     "allow callback lifecycle management" in new Fixture {
       val callbacks = ListBuffer.empty[Int]
 
-      val registration = listenable.listen {
-        case TestListenableEvent(_) => callbacks += 1
+      val registration = listenable.listen { case TestListenableEvent(_) =>
+        callbacks += 1
       }
 
-      listenable.listen {
-        case TestListenableEvent(_) => callbacks += 2
+      listenable.listen { case TestListenableEvent(_) =>
+        callbacks += 2
       }
 
       callbacks shouldBe empty
@@ -71,7 +71,7 @@ class ListenableTest extends UdashFrontendTest {
 
       assert(registration.isActive)
 
-      registration.restart() //moves first callback to the end
+      registration.restart() // moves first callback to the end
 
       assert(registration.isActive)
 
@@ -93,7 +93,7 @@ class ListenableTest extends UdashFrontendTest {
 
       listenable.fireEvent()
 
-      callbacks should contain theSameElementsInOrderAs Seq(2, 1) //order not maintained after restart
+      callbacks should contain theSameElementsInOrderAs Seq(2, 1) // order not maintained after restart
     }
   }
 

@@ -16,14 +16,17 @@ object FrontendTranslationsDemo extends AutoDemo with CssView {
     object FrontendTranslationsProvider {
 
       private val translations = Map(
-        Lang("en") -> Bundle(BundleHash("enHash"), Map(
-          "auth.loginLabel" -> "Username",
-          "auth.passwordLabel" -> "Password",
-          "auth.login.buttonLabel" -> "Sign in",
-          "auth.login.retriesLeft" -> "{} retries left",
-          "auth.login.retriesLeftOne" -> "1 retry left",
-          "auth.register.buttonLabel" -> "Sign up"
-        ))
+        Lang("en") -> Bundle(
+          BundleHash("enHash"),
+          Map(
+            "auth.loginLabel" -> "Username",
+            "auth.passwordLabel" -> "Password",
+            "auth.login.buttonLabel" -> "Sign in",
+            "auth.login.retriesLeft" -> "{} retries left",
+            "auth.login.retriesLeftOne" -> "1 retry left",
+            "auth.register.buttonLabel" -> "Sign up",
+          ),
+        )
       )
 
       def apply(): LocalTranslationProvider =
@@ -38,28 +41,28 @@ object FrontendTranslationsDemo extends AutoDemo with CssView {
       ul(
         li(
           "auth.loginLabel: ",
-          Translations.auth.loginLabel.translated()
+          Translations.auth.loginLabel.translated(),
         ),
         li(
           "auth.passwordLabel: ",
-          Translations.auth.passwordLabel.translated()
+          Translations.auth.passwordLabel.translated(),
         ),
         li(
           "auth.login.buttonLabel: ",
-          Translations.auth.login.buttonLabel.translated()
+          Translations.auth.login.buttonLabel.translated(),
         ),
         li(
           "auth.login.retriesLeft: ",
-          Translations.auth.login.retriesLeft(3).translated()
+          Translations.auth.login.retriesLeft(3).translated(),
         ),
         li(
           "auth.login.retriesLeftOne: ",
-          Translations.auth.login.retriesLeftOne.translated()
+          Translations.auth.login.retriesLeftOne.translated(),
         ),
         li(
           "auth.register.buttonLabel: ",
-          Translations.auth.register.buttonLabel.translated()
-        )
+          Translations.auth.register.buttonLabel.translated(),
+        ),
       )
     )
   }.withSourceCode
@@ -70,8 +73,8 @@ object FrontendTranslationsDemo extends AutoDemo with CssView {
         BootstrapUtils.wellStyles,
         id := "frontend-translations-demo",
         GuideStyles.frame,
-        GuideStyles.useBootstrap
+        GuideStyles.useBootstrap,
       )(rendered),
-      source
+      source,
     )
 }

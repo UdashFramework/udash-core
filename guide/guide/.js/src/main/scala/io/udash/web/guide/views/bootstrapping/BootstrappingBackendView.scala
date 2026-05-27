@@ -7,7 +7,8 @@ import io.udash.web.guide._
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom
 
-case object BootstrappingBackendViewFactory extends StaticViewFactory[BootstrappingBackendState.type](() => new BootstrappingBackendView)
+case object BootstrappingBackendViewFactory
+  extends StaticViewFactory[BootstrappingBackendState.type](() => new BootstrappingBackendView)
 
 class BootstrappingBackendView extends View with CssView {
   import Context._
@@ -19,21 +20,29 @@ class BootstrappingBackendView extends View with CssView {
     p("This chapter covers:"),
     ul(GuideStyles.defaultList)(
       li("Implementation of the server-side RPC endpoint."),
-      li("Configuration of the ", a(href := JettyHomepage, target := "_blank")("Jetty"), " 10 webserver to handle RPC and static files requests."),
-      li("Implementation of a simple system launcher.")
+      li(
+        "Configuration of the ",
+        a(href := JettyHomepage, target := "_blank")("Jetty"),
+        " 10 webserver to handle RPC and static files requests.",
+      ),
+      li("Implementation of a simple system launcher."),
     ),
     p("The backend application is expected to serve static files like HTML, JS or images and handle RPC requests from client applications."),
     p(
-      "This guide uses ", a(href := JettyHomepage, target := "_blank")("Jetty"), " as the webserver, but of course Udash does not depend on any webserver, " +
-      "so you can use any implementation you like."
+      "This guide uses ",
+      a(href := JettyHomepage, target := "_blank")("Jetty"),
+      " as the webserver, but of course Udash does not depend on any webserver, " +
+        "so you can use any implementation you like.",
     ),
     h3("Server RPC implementation"),
     p(
-      "First of all, the server-side should implement ", i("MainServerRPC"), ". The implementation can take ",
-      i("ClientId"), " as an argument. This identifier can be used to call client's RPC method. "
+      "First of all, the server-side should implement ",
+      i("MainServerRPC"),
+      ". The implementation can take ",
+      i("ClientId"),
+      " as an argument. This identifier can be used to call client's RPC method. ",
     ),
-    CodeBlock(
-      """import io.udash.rpc._
+    CodeBlock("""import io.udash.rpc._
         |import scala.concurrent.Future
         |import scala.concurrent.ExecutionContext.Implicits.global
         |
@@ -48,10 +57,9 @@ class BootstrappingBackendView extends View with CssView {
         |  override def hello(name: String): Future[String] =
         |    Future.successful(s"Hello, $name!")
         |}""".stripMargin)(GuideStyles),
-    //todo remove https://github.com/UdashFramework/udash-core/issues/829
+    // todo remove https://github.com/UdashFramework/udash-core/issues/829
     p("To make usage of client RPC more friendly, it is recommended to create a wrapper object like the one below:"),
-    CodeBlock(
-      """import io.udash.rpc._
+    CodeBlock("""import io.udash.rpc._
         |import scala.concurrent.ExecutionContext
         |
         |object ClientRPC {
@@ -61,12 +69,16 @@ class BootstrappingBackendView extends View with CssView {
         |}""".stripMargin)(GuideStyles),
     h3("Application server"),
     p(
-      "Application server creates Jetty server and configures content holders. ", i("resourceBase"), " is the directory containing ",
-      i("index.html"), " and ", i("port"), " is the port for Jetty server to bind to."
+      "Application server creates Jetty server and configures content holders. ",
+      i("resourceBase"),
+      " is the directory containing ",
+      i("index.html"),
+      " and ",
+      i("port"),
+      " is the port for Jetty server to bind to.",
     ),
-    //todo remove https://github.com/UdashFramework/udash-core/issues/830
-    CodeBlock(
-      """import io.udash.rpc._
+    // todo remove https://github.com/UdashFramework/udash-core/issues/830
+    CodeBlock("""import io.udash.rpc._
         |import org.eclipse.jetty.server.Server
         |import org.eclipse.jetty.server.session.SessionHandler
         |import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler, ServletHolder}
@@ -115,23 +127,34 @@ class BootstrappingBackendView extends View with CssView {
         |  }
         |}""".stripMargin)(GuideStyles),
     p(
-      i("AtmosphereServiceConfig"), " is used to manage ", i("ExposedRpcInterfaces"), " instances and link them to ",
+      i("AtmosphereServiceConfig"),
+      " is used to manage ",
+      i("ExposedRpcInterfaces"),
+      " instances and link them to ",
       "server connections. At this point you can inject something like a user context into a service layer. In this example ",
-      i("DefaultAtmosphereServiceConfig"), " was used. RPC implementation is cached in ", i("resource"),
-      " and it provides ClientId to ", i("ExposedRpcInterfaces"), "."
+      i("DefaultAtmosphereServiceConfig"),
+      " was used. RPC implementation is cached in ",
+      i("resource"),
+      " and it provides ClientId to ",
+      i("ExposedRpcInterfaces"),
+      ".",
     ),
     p(
-      i("AtmosphereServiceConfig"), " takes ", i("ExceptionCodecRegistry"), " as an argument. It provides serialization ",
+      i("AtmosphereServiceConfig"),
+      " takes ",
+      i("ExceptionCodecRegistry"),
+      " as an argument. It provides serialization ",
       "methods for exceptions, which makes possible throwing exceptions from server to client. You can find more details ",
-      "in chapter ", a(href := RpcClientServerState.url)("RPC: Client ➔ server"), "."
+      "in chapter ",
+      a(href := RpcClientServerState.url)("RPC: Client ➔ server"),
+      ".",
     ),
     h4("Frontend routing without hash"),
     p(
       "The above configuration does not support the frontend routing based on the URL path. Take a look at the following ",
-      "path rewrite handler. "
+      "path rewrite handler. ",
     ),
-    CodeBlock(
-      """private def createRewriteHandler(context: ContextHandler) = {
+    CodeBlock("""private def createRewriteHandler(context: ContextHandler) = {
         |  import org.eclipse.jetty.rewrite.handler.RewriteRegexRule
         |  import org.eclipse.jetty.rewrite.handler.RewriteHandler
         |
@@ -149,11 +172,12 @@ class BootstrappingBackendView extends View with CssView {
     p("It returns ", i("index.html"), " for every path except the other static files and the WebSocket connection path."),
     h3("Application launcher"),
     p(
-      "Below you can find a simple application launcher. It just creates ", i("ApplicationServer"), " with hardcoded " +
-      "parameters and starts it. You can also use an IoC container to inject required parameters from a configuration file."
+      "Below you can find a simple application launcher. It just creates ",
+      i("ApplicationServer"),
+      " with hardcoded " +
+        "parameters and starts it. You can also use an IoC container to inject required parameters from a configuration file.",
     ),
-    CodeBlock(
-      """import io.udash.logging.CrossLogging
+    CodeBlock("""import io.udash.logging.CrossLogging
         |
         |object Launcher extends CrossLogging {
         |  def main(args: Array[String]): Unit = {
@@ -173,7 +197,8 @@ class BootstrappingBackendView extends View with CssView {
     h2("What's next?"),
     p(
       "Now that the server-side of the application is ready, it is time to implement the ",
-      a(href := BootstrappingFrontendState.url)("client-side"), " of the application."
-    )
+      a(href := BootstrappingFrontendState.url)("client-side"),
+      " of the application.",
+    ),
   )
 }

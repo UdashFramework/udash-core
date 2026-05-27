@@ -14,18 +14,25 @@ object LabelsDemo extends AutoDemo with CssView {
     import scalatags.JsDom.all._
 
     div(
-      UdashBadge(badgeStyle = Color.Primary.toProperty)(_ => "Primary"), " ",
-      UdashBadge(badgeStyle = Color.Secondary.toProperty, pillStyle = true.toProperty)(_ => "Secondary Pill"), " ",
-      UdashBadge.link(link = Property("https://udash.io/"), badgeStyle = Color.Success.toProperty)(_ => "Success Link"), " ",
-      UdashBadge(badgeStyle = Color.Danger.toProperty)(_ => "Danger"), " ",
-      UdashBadge(badgeStyle = Color.Warning.toProperty)(_ => "Warning"), " ",
-      UdashBadge(badgeStyle = Color.Info.toProperty)(_ => "Info"), " ",
-      UdashBadge(badgeStyle = Color.Light.toProperty)(_ => "Light"), " ",
-      UdashBadge(badgeStyle = Color.Dark.toProperty)(_ => "Dark"), " ",
+      UdashBadge(badgeStyle = Color.Primary.toProperty)(_ => "Primary"),
+      " ",
+      UdashBadge(badgeStyle = Color.Secondary.toProperty, pillStyle = true.toProperty)(_ => "Secondary Pill"),
+      " ",
+      UdashBadge.link(link = Property("https://udash.io/"), badgeStyle = Color.Success.toProperty)(_ => "Success Link"),
+      " ",
+      UdashBadge(badgeStyle = Color.Danger.toProperty)(_ => "Danger"),
+      " ",
+      UdashBadge(badgeStyle = Color.Warning.toProperty)(_ => "Warning"),
+      " ",
+      UdashBadge(badgeStyle = Color.Info.toProperty)(_ => "Info"),
+      " ",
+      UdashBadge(badgeStyle = Color.Light.toProperty)(_ => "Light"),
+      " ",
+      UdashBadge(badgeStyle = Color.Dark.toProperty)(_ => "Dark"),
+      " ",
     ).render
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, String) =
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
 }
-

@@ -34,7 +34,8 @@ class ViewRendererTest extends UdashFrontendTest {
 
       renderer.renderView(Iterator.empty, rootView :: childViewA :: childViewB :: childViewC :: Nil)
 
-      element.outerHTML shouldBe "<div><div>root<div><div>a<div><div>b<div><div>c<div></div></div>end</div></div>end</div></div>end</div></div>end</div>"
+      element.outerHTML shouldBe
+        "<div><div>root<div><div>a<div><div>b<div><div>c<div></div></div>end</div></div>end</div></div>end</div></div>end</div>"
       rootView.lastChild should be(childViewA)
       childViewA.lastChild should be(childViewB)
       childViewB.lastChild should be(childViewC)
@@ -45,12 +46,13 @@ class ViewRendererTest extends UdashFrontendTest {
       childViewB.renderingCounter should be(1)
       childViewC.renderingCounter should be(1)
 
-      //clear last child
+      // clear last child
       Seq(rootView, childViewA, childViewB, childViewC).foreach(_.lastChild = null)
 
       renderer.renderView(Iterator(rootView, childViewA), childViewC :: childViewB :: Nil)
 
-      element.outerHTML shouldBe "<div><div>root<div><div>a<div><div>c<div><div>b<div></div></div>end</div></div>end</div></div>end</div></div>end</div>"
+      element.outerHTML shouldBe
+        "<div><div>root<div><div>a<div><div>c<div><div>b<div></div></div>end</div></div>end</div></div>end</div></div>end</div>"
       rootView.lastChild should be(null) // renderChild was not called
       childViewA.lastChild should be(childViewC)
       childViewB.lastChild should be(null)
@@ -82,7 +84,7 @@ class ViewRendererTest extends UdashFrontendTest {
       childViewB.renderingCounter should be(1)
       childViewC.renderingCounter should be(1)
 
-      //clear last child
+      // clear last child
       Seq(rootView, childViewA, childViewB, childViewC).foreach(_.lastChild = null)
 
       renderer.renderView(Iterator(rootView, childViewB, childViewA), childViewC :: Nil)
@@ -174,7 +176,8 @@ class ViewRendererTest extends UdashFrontendTest {
 
     "handle non-empty endpoint" in testReplace(emptyComponent().setup(_.appendChild(dom.document.createElement("span"))))
 
-    "handle endpoint with non-element node" in testReplace(emptyComponent().setup(_.appendChild(dom.document.createTextNode("lorem ipsum"))))
+    "handle endpoint with non-element node" in
+      testReplace(emptyComponent().setup(_.appendChild(dom.document.createTextNode("lorem ipsum"))))
 
     "not try to call renderChild on non-container view" in {
       val renderer = new ViewRenderer(emptyComponent())

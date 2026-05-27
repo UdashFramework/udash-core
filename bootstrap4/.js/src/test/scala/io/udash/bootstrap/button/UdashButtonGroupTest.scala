@@ -13,7 +13,7 @@ class UdashButtonGroupTest extends UdashCoreFrontendTest {
       val buttons = UdashButtonGroup()(
         UdashButton()("Button 1").render,
         UdashButton()("Button 2").render,
-        UdashButton()("Button 3").render
+        UdashButton()("Button 3").render,
       )
 
       val el = buttons.render

@@ -8,7 +8,7 @@ class FrontendRoutingTest extends SeleniumTest {
   "FrontendRouting view" should {
     "contain demo element" in {
       val link = findElementById("url-demo-link")
-        link.getText should be("/frontend/routing")
+      link.getText should be("/frontend/routing")
     }
 
     "change URL without view redraw" in {

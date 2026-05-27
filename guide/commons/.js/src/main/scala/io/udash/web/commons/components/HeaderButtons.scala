@@ -12,7 +12,7 @@ trait HeaderButtons {
 
   val buttonStyles: HeaderButtonsStyles
 
-  def buttons: JsDom.TypedTag[Div] = {
+  def buttons: JsDom.TypedTag[Div] =
     div(buttonStyles.headerRight)(
       ul(buttonStyles.headerSocial)(
         li(buttonStyles.headerSocialItem)(
@@ -40,11 +40,10 @@ trait HeaderButtons {
                 div(buttonStyles.tooltipTextInner)(
                   "Proudly made by AVSystem"
                 )
-              )
-            )
+              ),
+            ),
           )
-        )
+        ),
       )
     )
-  }
 }

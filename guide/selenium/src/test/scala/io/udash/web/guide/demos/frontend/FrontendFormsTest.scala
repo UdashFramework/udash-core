@@ -40,13 +40,14 @@ class FrontendFormsTest extends SeleniumTest {
       val checkButtons = findElementById("check-buttons-demo")
 
       def clickAndCheck(propertyName: String) = {
-        val checkbox = checkButtons.findElement(new ByCssSelector(s"[data-label=$propertyName]")).findElement(new ByTagName("input"))
+        val checkbox =
+          checkButtons.findElement(new ByCssSelector(s"[data-label=$propertyName]")).findElement(new ByTagName("input"))
         checkbox.click()
         eventually {
-          forAll(checkButtons.findElements(new ByClassName("check-buttons-demo-fruits")))(el => {
+          forAll(checkButtons.findElements(new ByClassName("check-buttons-demo-fruits"))) { el =>
             val contains = el.getText.contains(propertyName)
             assert(if (checkbox.isSelected) contains else !contains)
-          })
+          }
           forAll(checkButtons.findElements(new ByCssSelector(s"[data-label=$propertyName]")))(el =>
             el.findElement(new ByTagName("input")).isSelected shouldBe checkbox.isSelected
           )
@@ -66,13 +67,13 @@ class FrontendFormsTest extends SeleniumTest {
         val option = select.findElement(new ByCssSelector(s"[value='$propertyIdx']"))
         option.click()
         eventually {
-          forAll(multiSelect.findElements(new ByClassName("multi-select-demo-fruits")))(el => {
+          forAll(multiSelect.findElements(new ByClassName("multi-select-demo-fruits"))) { el =>
             val contains = el.getText.contains(propertyName)
             assert(if (option.isSelected) contains else !contains)
-          })
-          forAll(multiSelect.findElements(new ByTagName("select")))(el => {
+          }
+          forAll(multiSelect.findElements(new ByTagName("select")))(el =>
             el.findElement(new ByCssSelector(s"[value='$propertyIdx']")).isSelected shouldBe option.isSelected
-          })
+          )
         }
       }
 
@@ -87,16 +88,17 @@ class FrontendFormsTest extends SeleniumTest {
       val radioButtons = findElementById("radio-buttons-demo")
 
       def clickAndCheck(propertyName: String, propertyIdx: Int) = {
-        val radio = radioButtons.findElement(new ByCssSelector(s"[data-label=$propertyName]")).findElement(new ByTagName("input"))
+        val radio =
+          radioButtons.findElement(new ByCssSelector(s"[data-label=$propertyName]")).findElement(new ByTagName("input"))
         driver.executeScript("arguments[0].click();", radio)
         eventually {
           forAll(radioButtons.findElements(new ByClassName("radio-buttons-demo-fruits")))(el =>
             el.getText shouldBe propertyName
           )
-          forAll(radioButtons.findElements(new ByCssSelector(s"input")))(el => {
+          forAll(radioButtons.findElements(new ByCssSelector(s"input"))) { el =>
             val eq = el.isSelected == radio.isSelected
             assert(if (el.getDomProperty("value").toInt == propertyIdx) eq else !eq)
-          })
+          }
         }
       }
 
@@ -115,12 +117,10 @@ class FrontendFormsTest extends SeleniumTest {
         val option = select.findElement(new ByCssSelector(s"[value='$propertyIdx']"))
         option.click()
         eventually {
-          forAll(selectDemo.findElements(new ByClassName("select-demo-fruits")))(el => {
-            el.getText shouldBe propertyName
-          })
-          forAll(selectDemo.findElements(new ByTagName(s"select")))(el => {
+          forAll(selectDemo.findElements(new ByClassName("select-demo-fruits")))(el => el.getText shouldBe propertyName)
+          forAll(selectDemo.findElements(new ByTagName(s"select")))(el =>
             el.findElement(new ByCssSelector(s"[value='$propertyIdx']")).isSelected shouldBe option.isSelected
-          })
+          )
         }
       }
 
@@ -139,9 +139,7 @@ class FrontendFormsTest extends SeleniumTest {
         textArea.clear()
         textArea.sendKeys(text)
         eventually {
-          forAll(textAreaDemo.findElements(new ByTagName(s"textarea")))(el => {
-            el.getDomProperty("value") shouldBe text
-          })
+          forAll(textAreaDemo.findElements(new ByTagName(s"textarea")))(el => el.getDomProperty("value") shouldBe text)
         }
       }
 
@@ -158,9 +156,9 @@ class FrontendFormsTest extends SeleniumTest {
         input.clear()
         input.sendKeys(text)
         eventually {
-          forAll(inputsDemo.findElements(new ByCssSelector(s"input[type=$tpe]")))(el => {
+          forAll(inputsDemo.findElements(new ByCssSelector(s"input[type=$tpe]")))(el =>
             el.getDomProperty("value") shouldBe text
-          })
+          )
         }
       }
 

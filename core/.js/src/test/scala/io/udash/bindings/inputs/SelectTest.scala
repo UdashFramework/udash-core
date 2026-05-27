@@ -130,12 +130,13 @@ class SelectTest extends UdashFrontendTest {
       val options = Seq(Some("A"), None, Some("B"))
       val p = Property[Option[Option[String]]](Some(None))
 
-      val select = Select.optional(p, options.toSeqProperty,StringFrag("empty"))(x => StringFrag(x.getOrElse(""))).render
+      val select =
+        Select.optional(p, options.toSeqProperty, StringFrag("empty"))(x => StringFrag(x.getOrElse(""))).render
 
       select.childElementCount should be(4) // empty value should be included
       select.value should be("1")
 
-      def trimHtml(s:String):String = s.split("\n").map(_.trim).mkString
+      def trimHtml(s: String): String = s.split("\n").map(_.trim).mkString
 
       val expectedHtml = """<select>
                            |  <option value="">empty</option>
@@ -160,14 +161,14 @@ class SelectTest extends UdashFrontendTest {
 
   "Select with multiple on" should {
     def checkSelected(select: JSSelect, selected: Seq[Boolean])(implicit pos: Position): Unit = {
-      selected.zipWithIndex.foreach {
-        case (value, idx) => select.childNodes(idx).asInstanceOf[JSOption].selected should be(value)
+      selected.zipWithIndex.foreach { case (value, idx) =>
+        select.childNodes(idx).asInstanceOf[JSOption].selected should be(value)
       }
     }
 
     def setSelected(select: JSSelect, selected: Seq[Boolean]): Unit = {
-      selected.zipWithIndex.foreach {
-        case (value, idx) => select.childNodes(idx).asInstanceOf[JSOption].selected = value
+      selected.zipWithIndex.foreach { case (value, idx) =>
+        select.childNodes(idx).asInstanceOf[JSOption].selected = value
       }
     }
 

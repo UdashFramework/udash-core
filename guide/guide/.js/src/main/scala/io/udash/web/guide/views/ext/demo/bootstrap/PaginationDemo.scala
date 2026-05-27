@@ -28,28 +28,34 @@ object PaginationDemo extends AutoDemo {
     val pages = SeqProperty(0 to 7)
     val selected = Property(0)
     val pagination = UdashPagination(
-      pages, selected,
-      showArrows = showArrows, highlightActive = highlightActive
+      pages,
+      selected,
+      showArrows = showArrows,
+      highlightActive = highlightActive,
     )(defaultPageFactory).render
     pagination.firstElementChild.applyTags(
       Flex.justifyContent(FlexContentJustification.Center)
     )
 
     div(
-      div(Spacing.margin(
-        side = Side.Bottom,
-        size = SpacingSize.Normal
-      ))(
+      div(
+        Spacing.margin(
+          side = Side.Bottom,
+          size = SpacingSize.Normal,
+        )
+      )(
         UdashButtonGroup()(
           toggleArrows.render,
-          toggleHighlight.render
+          toggleHighlight.render,
         )
       ),
-      div(Spacing.margin(
-        side = Side.Bottom,
-        size = SpacingSize.Normal
-      ))("Selected page index: ", bind(selected)),
-      div(pagination)
+      div(
+        Spacing.margin(
+          side = Side.Bottom,
+          size = SpacingSize.Normal,
+        )
+      )("Selected page index: ", bind(selected)),
+      div(pagination),
     ).render
   }.withSourceCode
 
@@ -58,4 +64,3 @@ object PaginationDemo extends AutoDemo {
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
   }
 }
-

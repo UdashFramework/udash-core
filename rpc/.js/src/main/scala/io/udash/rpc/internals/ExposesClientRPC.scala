@@ -4,8 +4,8 @@ import io.udash.rpc._
 
 abstract class ExposesClientRPC[ClientRPCType](protected val localRpc: ClientRPCType)
   extends ExposesLocalRPC[ClientRPCType] {
-  /**
-    * This allows the RPC implementation to be wrapped in raw RPC which will translate raw calls coming from network
+
+  /** This allows the RPC implementation to be wrapped in raw RPC which will translate raw calls coming from network
     * into calls on actual RPC implementation.
     */
   protected def localRpcAsRaw: ClientRawRpc.AsRawRpc[ClientRPCType]
@@ -17,6 +17,7 @@ abstract class ExposesClientRPC[ClientRPCType](protected val localRpc: ClientRPC
     rawLocalRpc.handleFire(fire)
 }
 
-class DefaultExposesClientRPC[ClientRPCType](local: ClientRPCType)(
-  implicit protected val localRpcAsRaw: ClientRawRpc.AsRawRpc[ClientRPCType]
+class DefaultExposesClientRPC[ClientRPCType](
+  local: ClientRPCType
+)(implicit protected val localRpcAsRaw: ClientRawRpc.AsRawRpc[ClientRPCType]
 ) extends ExposesClientRPC(local)

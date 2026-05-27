@@ -14,10 +14,12 @@ class ExposesClientRPCTest extends UdashFrontendTest with Utils {
       rpc.handleRpcFire(RpcFire(RpcInvocation("handle", List()), List()))
       calls.result() should contain("handle")
 
-      rpc.handleRpcFire(RpcFire(
-        RpcInvocation("proc", Nil),
-        List(RpcInvocation("innerRpc", List(write("arg0"))))
-      ))
+      rpc.handleRpcFire(
+        RpcFire(
+          RpcInvocation("proc", Nil),
+          List(RpcInvocation("innerRpc", List(write("arg0")))),
+        )
+      )
       calls.result() should contain("innerRpc.proc")
     }
 
@@ -26,10 +28,9 @@ class ExposesClientRPCTest extends UdashFrontendTest with Utils {
     }
   }
 
-  def createDefaultExposesClientRPC(calls: mutable.Builder[String, Seq[String]]): DefaultExposesClientRPC[TestClientRPC] = {
-    val impl = TestClientRPC.rpcImpl((method: String, args: List[Any], result: Option[Any]) => {
-      calls += method
-    })
+  def createDefaultExposesClientRPC(calls: mutable.Builder[String, Seq[String]])
+    : DefaultExposesClientRPC[TestClientRPC] = {
+    val impl = TestClientRPC.rpcImpl((method: String, args: List[Any], result: Option[Any]) => calls += method)
     new DefaultExposesClientRPC[TestClientRPC](impl)
   }
 

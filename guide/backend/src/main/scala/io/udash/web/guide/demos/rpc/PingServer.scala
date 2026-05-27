@@ -12,7 +12,6 @@ class PingServer(implicit clientId: ClientId) extends PingServerRPC {
     ClientRPC(clientId).demos().pingDemo().pong(id)
   }
 
-  override def fPing(id: Int): Future[Int] = {
+  override def fPing(id: Int): Future[Int] =
     Future.successful(id)
-  }
 }

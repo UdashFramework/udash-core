@@ -21,7 +21,7 @@ object RemoteTranslationsDemo extends AutoDemo with CssView {
       new RemoteTranslationProvider(
         serverRpc.demos.translations,
         Some(dom.window.localStorage),
-        6.hours
+        6.hours,
       )
 
     implicit val lang: Lang = Lang("pl")
@@ -30,28 +30,28 @@ object RemoteTranslationsDemo extends AutoDemo with CssView {
       ul(
         li(
           "auth.loginLabel: ",
-          Translations.auth.loginLabel.translated()
+          Translations.auth.loginLabel.translated(),
         ),
         li(
           "auth.passwordLabel: ",
-          Translations.auth.passwordLabel.translated()
+          Translations.auth.passwordLabel.translated(),
         ),
         li(
           "auth.login.buttonLabel: ",
-          Translations.auth.login.buttonLabel.translated()
+          Translations.auth.login.buttonLabel.translated(),
         ),
         li(
           "auth.login.retriesLeft: ",
-          Translations.auth.login.retriesLeft(3).translated()
+          Translations.auth.login.retriesLeft(3).translated(),
         ),
         li(
           "auth.login.retriesLeftOne: ",
-          Translations.auth.login.retriesLeftOne.translated()
+          Translations.auth.login.retriesLeftOne.translated(),
         ),
         li(
           "auth.register.buttonLabel: ",
-          Translations.auth.register.buttonLabel.translated()
-        )
+          Translations.auth.register.buttonLabel.translated(),
+        ),
       )
     )
   }.withSourceCode
@@ -62,8 +62,8 @@ object RemoteTranslationsDemo extends AutoDemo with CssView {
         BootstrapUtils.wellStyles,
         id := "rpc-translations-demo",
         GuideStyles.frame,
-        GuideStyles.useBootstrap
+        GuideStyles.useBootstrap,
       )(rendered),
-      source
+      source,
     )
 }

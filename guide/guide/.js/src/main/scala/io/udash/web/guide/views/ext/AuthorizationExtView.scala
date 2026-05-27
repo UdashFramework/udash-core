@@ -7,7 +7,8 @@ import io.udash.web.guide._
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 
-case object AuthorizationExtViewFactory extends StaticViewFactory[AuthorizationExtState.type](() => new AuthorizationExtView)
+case object AuthorizationExtViewFactory
+  extends StaticViewFactory[AuthorizationExtState.type](() => new AuthorizationExtView)
 
 class AuthorizationExtView extends View with CssView {
 
@@ -44,19 +45,24 @@ class AuthorizationExtView extends View with CssView {
     h1("Udash Authorization Utils"),
     p(
       "The Authorization plugin provides utilities for user's context and data access management. ",
-      "It contains permissions description tools and useful methods for verifying user's access level. "
+      "It contains permissions description tools and useful methods for verifying user's access level. ",
     ),
     h2("Permission & UserCtx"),
     p(
-      i("Permission"), " is an entity granting atomic access to a part of the system. Permissions may be combined into ",
-      i("PermissionCombinator"), ", which describes more complex access requirements. For example:"
+      i("Permission"),
+      " is an entity granting atomic access to a part of the system. Permissions may be combined into ",
+      i("PermissionCombinator"),
+      ", which describes more complex access requirements. For example:",
     ),
     AutoDemo.snippet(permissionsSource),
     p(i("UserCtx"), " provides information about user's permissions. Take a look at an example implementation: "),
     AutoDemo.snippet(userSource),
     p(
-      "You can verify user against ", i("PermissionCombinator"), " using ", i(".check(ctx: userCtx)"),
-      " method as follows:"
+      "You can verify user against ",
+      i("PermissionCombinator"),
+      " using ",
+      i(".check(ctx: userCtx)"),
+      " method as follows:",
     ),
     CodeBlock(
       s"""import io.udash.auth._
@@ -72,8 +78,14 @@ class AuthorizationExtView extends View with CssView {
     ul(GuideStyles.defaultList)(
       li(i("require"), " - renders provided view elements only if the user context has required permissions,"),
       li(i("requireAuthenticated"), " - renders provided view elements only if user is authenticated,"),
-      li(i("requireWithFallback"), " - renders provided primary view elements if the user context has required permissions or provided fallback view elements otherwise,"),
-      li(i("requireAuthenticatedWithFallback"), " - renders provided primary view elements if user is authenticated or provided fallback view elements otherwise.")
+      li(
+        i("requireWithFallback"),
+        " - renders provided primary view elements if the user context has required permissions or provided fallback view elements otherwise,",
+      ),
+      li(
+        i("requireAuthenticatedWithFallback"),
+        " - renders provided primary view elements if user is authenticated or provided fallback view elements otherwise.",
+      ),
     ),
     CodeBlock(
       s"""import scalatags.JsDom.all._
@@ -104,8 +116,12 @@ class AuthorizationExtView extends View with CssView {
     )(GuideStyles),
     h2("RPC endpoints authorization"),
     p(
-      "Similar methods to first two from ", i("AuthView"), " are available in ", i("AuthRequires"), " trait, but instead of filtering GUI elements these ",
-      "methods throw exceptions: "
+      "Similar methods to first two from ",
+      i("AuthView"),
+      " are available in ",
+      i("AuthRequires"),
+      " trait, but instead of filtering GUI elements these ",
+      "methods throw exceptions: ",
     ),
     ul(GuideStyles.defaultList)(
       li(i("require"), " - throws ", i("UnauthorizedException"), " if user does not have reqired premissions,"),
@@ -113,8 +129,10 @@ class AuthorizationExtView extends View with CssView {
     ),
     p(
       "These methods are very helpful in RPC endpoints implementation. Remember that you should use ",
-      i("DefaultAuthExceptionCodecRegistry"), " instead of ", i("DefaultExceptionCodecRegistry"),
-      " - it allows RPC to properly serialize authorization exceptions."
+      i("DefaultAuthExceptionCodecRegistry"),
+      " instead of ",
+      i("DefaultExceptionCodecRegistry"),
+      " - it allows RPC to properly serialize authorization exceptions.",
     ),
     CodeBlock(
       s"""import io.udash._
@@ -137,8 +155,11 @@ class AuthorizationExtView extends View with CssView {
     )(GuideStyles),
     h2("What's next?"),
     p(
-      "Take a look at another extensions like ", a(href := BootstrapExtState.url)("Bootstrap Components"), " or ",
-      a(href := I18NExtState.url)("i18n utilities"), "."
-    )
+      "Take a look at another extensions like ",
+      a(href := BootstrapExtState.url)("Bootstrap Components"),
+      " or ",
+      a(href := I18NExtState.url)("i18n utilities"),
+      ".",
+    ),
   )
 }
