@@ -13,6 +13,7 @@ import scala.scalajs.js
 import scala.util.control.NonFatal
 
 trait ServerConnector {
+
   /** Sends RPCRequest to server. */
   def sendRpcRequest(request: RpcRequest): Unit
 }
@@ -20,8 +21,9 @@ trait ServerConnector {
 /** [[io.udash.rpc.internals.ServerConnector]] implementation based on Atmosphere framework. */
 abstract class AtmosphereServerConnector(
   private val serverUrl: String,
-  val exceptionsRegistry: ExceptionCodecRegistry
-) extends ServerConnector with CrossLogging {
+  val exceptionsRegistry: ExceptionCodecRegistry,
+) extends ServerConnector
+    with CrossLogging {
 
   protected val clientRpc: ExposesClientRPC[_]
 
@@ -38,29 +40,32 @@ abstract class AtmosphereServerConnector(
 
   private val socket: AtmosphereRequest = {
     val reconnectInterval = 1000
-    val atmRequest: AtmosphereRequest = {
+    val atmRequest: AtmosphereRequest =
       if (websocketSupport)
         createRequestObject(
-          Transport.WEBSOCKET, reconnectInterval,
+          Transport.WEBSOCKET,
+          reconnectInterval,
           onOpen = (_: AtmosphereResponse) => ready(ConnectionStatus.Open),
           onReopen = (_: AtmosphereResponse) => ready(ConnectionStatus.Open),
           onReconnect = (_: AtmosphereRequest, _: AtmosphereResponse) => {
             if (onReconnectTimeoutHandler != 0) dom.window.clearTimeout(onReconnectTimeoutHandler)
             ready(ConnectionStatus.Closed)
-            onReconnectTimeoutHandler = dom.window.setTimeout(() => {
-              ready(ConnectionStatus.Open)
-              onReconnectTimeoutHandler = 0
-            }, reconnectInterval * 2)
+            onReconnectTimeoutHandler = dom.window.setTimeout(
+              () => {
+                ready(ConnectionStatus.Open)
+                onReconnectTimeoutHandler = 0
+              },
+              reconnectInterval * 2,
+            )
           },
           onError = (_: AtmosphereResponse) => ready(ConnectionStatus.Closed),
           onClose = (_: AtmosphereResponse) => ready(ConnectionStatus.Closed),
-          onClientTimeout = (_: AtmosphereResponse) => ready(ConnectionStatus.Closed)
+          onClientTimeout = (_: AtmosphereResponse) => ready(ConnectionStatus.Closed),
         )
       else {
         isReady = ConnectionStatus.Open
         createRequestObject(Transport.SSE, reconnectInterval)
       }
-    }
     Atmosphere.subscribe(atmRequest)
   }
 
@@ -74,10 +79,12 @@ abstract class AtmosphereServerConnector(
 
   private def handleMessage(msg: String): Unit = {
     implicit val ecr: ExceptionCodecRegistry = exceptionsRegistry
-    try JsonStringInput.read[RpcServerMessage](msg) match {
-      case fire: RpcFire => handleRpcFire(fire)
-      case response: RpcResponse => handleResponse(response)
-    } catch {
+    try
+      JsonStringInput.read[RpcServerMessage](msg) match {
+        case fire: RpcFire => handleRpcFire(fire)
+        case response: RpcResponse => handleResponse(response)
+      }
+    catch {
       case NonFatal(e) =>
         logger.error(s"Failure reading server message: $msg", e)
     }
@@ -102,15 +109,20 @@ abstract class AtmosphereServerConnector(
     connectionStatusCallbacks.fire(isReady)
   }
 
-  private def createRequestObject(transport: Transport, reconnectInterval: Int,
+  private def createRequestObject(
+    transport: Transport,
+    reconnectInterval: Int,
     onOpen: js.Function1[AtmosphereResponse, Any] = (_: AtmosphereResponse) => {},
     onReopen: js.Function1[AtmosphereResponse, Any] = (_: AtmosphereResponse) => {},
     onClose: js.Function1[AtmosphereResponse, Any] = (_: AtmosphereResponse) => {},
     onError: js.Function1[AtmosphereResponse, Any] = (_: AtmosphereResponse) => {},
-    onReconnect: js.Function2[AtmosphereRequest, AtmosphereResponse, Any] = (_: AtmosphereRequest, _: AtmosphereResponse) => {},
+    onReconnect: js.Function2[AtmosphereRequest, AtmosphereResponse, Any] = (
+      _: AtmosphereRequest,
+      _: AtmosphereResponse,
+    ) => {},
     onClientTimeout: js.Function1[AtmosphereResponse, Any] = (_: AtmosphereResponse) => {},
-    onTransportFailure: js.Function2[String, AtmosphereRequest, Any] = (_: String, _: AtmosphereRequest) => {}
-  ): AtmosphereRequest = {
+    onTransportFailure: js.Function2[String, AtmosphereRequest, Any] = (_: String, _: AtmosphereRequest) => {},
+  ): AtmosphereRequest =
     AtmosphereRequest(
       url = serverUrl,
       contentType = "application/json",
@@ -127,16 +139,15 @@ abstract class AtmosphereServerConnector(
       onClose = onClose,
       onClientTimeout = onClientTimeout,
       onMessage = (res: AtmosphereResponse) => handleMessage(res.responseBody),
-      onMessagePublished = (req: AtmosphereRequest, _: AtmosphereResponse) => handleMessage(req.responseBody)
+      onMessagePublished = (req: AtmosphereRequest, _: AtmosphereResponse) => handleMessage(req.responseBody),
     )
-  }
 }
 
 class DefaultAtmosphereServerConnector(
   override protected val clientRpc: DefaultExposesClientRPC[_],
   responseHandler: RpcResponse => Any,
   serverUrl: String,
-  override val exceptionsRegistry: ExceptionCodecRegistry
+  override val exceptionsRegistry: ExceptionCodecRegistry,
 ) extends AtmosphereServerConnector(serverUrl, exceptionsRegistry) {
 
   override def handleResponse(response: RpcResponse): Any =

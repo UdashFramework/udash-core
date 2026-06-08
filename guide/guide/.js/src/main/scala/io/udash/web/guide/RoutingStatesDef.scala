@@ -11,7 +11,8 @@ sealed abstract class RoutingState(val parentState: Option[ContainerRoutingState
     s"${application.matchState(this).value}"
 }
 sealed abstract class ContainerRoutingState(parentState: Option[ContainerRoutingState]) extends RoutingState(parentState)
-sealed abstract class MarkdownState(final val page: MarkdownPage) extends RoutingState(Some(ContentState)) with MarkdownPageState
+sealed abstract class MarkdownState(final val page: MarkdownPage)
+  extends RoutingState(Some(ContentState)) with MarkdownPageState
 object MarkdownState {
   def chapterFragment(chapterTitle: String): String =
     chapterTitle.replaceAll("[^A-Za-z0-9_ ]+", "").trim.replaceAll("\\s+", "-").toLowerCase
@@ -79,7 +80,7 @@ case object RpcServerClientState extends RoutingState(Some(RpcState))
 /** REST communication chapters */
 case object RestState extends MarkdownState(MarkdownPage.Rest)
 
-/** Extensions **/
+/** Extensions * */
 case object BootstrapExtState extends RoutingState(Some(ContentState))
 
 case object AuthorizationExtState extends RoutingState(Some(ContentState))
@@ -89,5 +90,3 @@ case object JQueryExtState extends RoutingState(Some(ContentState))
 case object I18NExtState extends RoutingState(Some(ContentState))
 
 case object UserActivityExtState extends RoutingState(Some(ContentState))
-
-

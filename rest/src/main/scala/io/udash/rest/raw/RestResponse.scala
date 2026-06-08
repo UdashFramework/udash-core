@@ -11,7 +11,9 @@ import monix.reactive.Observable
 
 import scala.annotation.implicitNotFound
 
-/** Base trait for REST response types, either standard or streaming. Contains common properties like status code and headers. */
+/** Base trait for REST response types, either standard or streaming. Contains common properties like status code and
+  * headers.
+  */
 sealed trait AbstractRestResponse {
   def code: Int
   def headers: IMapping[PlainValue]
@@ -19,7 +21,9 @@ sealed trait AbstractRestResponse {
   final def isSuccess: Boolean = code >= 200 && code < 300
 }
 
-/** Standard REST response containing a status code, headers, and a body. The body is loaded fully in memory as an [[HttpBody]]. */
+/** Standard REST response containing a status code, headers, and a body. The body is loaded fully in memory as an
+  * [[HttpBody]].
+  */
 final case class RestResponse(
   code: Int,
   headers: IMapping[PlainValue],
@@ -41,7 +45,8 @@ object RestResponse extends RestResponseLowPrio {
     RestResponse(status, IMapping.empty, HttpBody.plain(message))
 
   final class LazyOps(private val resp: () => RestResponse) extends AnyVal {
-    def recoverHttpError: RestResponse = try resp() catch {
+    def recoverHttpError: RestResponse = try resp()
+    catch {
       case e: HttpErrorException => e.toResponse
     }
   }
@@ -49,8 +54,8 @@ object RestResponse extends RestResponseLowPrio {
 
   implicit final class TaskOps(private val asyncResp: Task[RestResponse]) extends AnyVal {
     def recoverHttpError: Task[RestResponse] =
-      asyncResp.onErrorRecover {
-        case e: HttpErrorException => e.toResponse
+      asyncResp.onErrorRecover { case e: HttpErrorException =>
+        e.toResponse
       }
   }
 
@@ -70,14 +75,14 @@ object RestResponse extends RestResponseLowPrio {
   // while the async wrapper is fine (e.g. Future)
 
   @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
-  implicit def effAsyncAsRealNotFound[F[_], T](implicit
-    fromAsync: TaskLike[F],
+  implicit def effAsyncAsRealNotFound[F[_], T](
+    implicit fromAsync: TaskLike[F],
     forResponseType: ImplicitNotFound[AsReal[RestResponse, T]],
   ): ImplicitNotFound[AsReal[Task[RestResponse], Try[F[T]]]] = ImplicitNotFound()
 
   @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
-  implicit def effAsyncAsRawNotFound[F[_], T](implicit
-    toAsync: TaskLike[F],
+  implicit def effAsyncAsRawNotFound[F[_], T](
+    implicit toAsync: TaskLike[F],
     forResponseType: ImplicitNotFound[AsRaw[RestResponse, T]],
   ): ImplicitNotFound[AsRaw[Task[RestResponse], Try[F[T]]]] = ImplicitNotFound()
 
@@ -113,10 +118,9 @@ trait RestResponseLowPrio { this: RestResponse.type =>
   ): ImplicitNotFound[AsRaw[RestResponse, T]] = ImplicitNotFound()
 }
 
-/**
- * Streaming REST response containing a status code, headers, and a streamed body.
- * Unlike standard [[RestResponse]], the body content can be delivered incrementally through a reactive stream.
- */
+/** Streaming REST response containing a status code, headers, and a streamed body. Unlike standard [[RestResponse]],
+  * the body content can be delivered incrementally through a reactive stream.
+  */
 final case class StreamedRestResponse(
   code: Int,
   headers: IMapping[PlainValue],
@@ -132,10 +136,9 @@ final case class StreamedRestResponse(
 
 object StreamedRestResponse extends StreamedRestResponseLowPrio {
 
-  /**
-   * Converts a [[StreamedRestResponse]] to a standard [[RestResponse]] by materializing streamed content.
-   * This is useful for compatibility with APIs that don't support streaming.
-   */
+  /** Converts a [[StreamedRestResponse]] to a standard [[RestResponse]] by materializing streamed content. This is
+    * useful for compatibility with APIs that don't support streaming.
+    */
   def fallbackToRestResponse(response: StreamedRestResponse): Task[RestResponse] = {
     val httpBody: Task[HttpBody] = response.body match {
       case StreamedBody.Empty =>
@@ -158,10 +161,9 @@ object StreamedRestResponse extends StreamedRestResponseLowPrio {
     httpBody.map(RestResponse(response.code, response.headers, _))
   }
 
-  /**
-   * Converts any [[AbstractRestResponse]] to a standard [[RestResponse]] by materializing streamed content if necessary.
-   * This is useful for compatibility with APIs that don't support streaming.
-   */
+  /** Converts any [[AbstractRestResponse]] to a standard [[RestResponse]] by materializing streamed content if
+    * necessary. This is useful for compatibility with APIs that don't support streaming.
+    */
   def fallbackToRestResponse(response: Task[AbstractRestResponse]): Task[RestResponse] =
     response.flatMap {
       case restResponse: RestResponse => Task.now(restResponse)
@@ -172,7 +174,8 @@ object StreamedRestResponse extends StreamedRestResponseLowPrio {
     StreamedRestResponse(error.code, IMapping.empty, StreamedBody.fromHttpBody(error.payload))
 
   final class LazyOps(private val resp: () => StreamedRestResponse) extends AnyVal {
-    def recoverHttpError: StreamedRestResponse = try resp() catch {
+    def recoverHttpError: StreamedRestResponse = try resp()
+    catch {
       case e: HttpErrorException => StreamedRestResponse.fromHttpError(e)
     }
   }
@@ -180,8 +183,8 @@ object StreamedRestResponse extends StreamedRestResponseLowPrio {
 
   implicit final class TaskOps(private val asyncResp: Task[StreamedRestResponse]) extends AnyVal {
     def recoverHttpError: Task[StreamedRestResponse] =
-      asyncResp.onErrorRecover {
-        case e: HttpErrorException => StreamedRestResponse.fromHttpError(e)
+      asyncResp.onErrorRecover { case e: HttpErrorException =>
+        StreamedRestResponse.fromHttpError(e)
       }
   }
 
@@ -211,26 +214,24 @@ object StreamedRestResponse extends StreamedRestResponseLowPrio {
   // while the async wrapper is fine
 
   @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
-  implicit def effAsyncAsRealNotFound[F[_], T](implicit
-    fromAsync: TaskLike[F],
-    forResponseType: ImplicitNotFound[AsReal[StreamedRestResponse, T]]
+  implicit def effAsyncAsRealNotFound[F[_], T](
+    implicit fromAsync: TaskLike[F],
+    forResponseType: ImplicitNotFound[AsReal[StreamedRestResponse, T]],
   ): ImplicitNotFound[AsReal[Task[StreamedRestResponse], Try[F[T]]]] = ImplicitNotFound()
 
   @implicitNotFound("${F}[${T}] is not a valid result type because:\n#{forResponseType}")
-  implicit def effAsyncAsRawNotFound[F[_], T](implicit
-    toAsync: TaskLike[F],
-    forResponseType: ImplicitNotFound[AsRaw[StreamedRestResponse, T]]
+  implicit def effAsyncAsRawNotFound[F[_], T](
+    implicit toAsync: TaskLike[F],
+    forResponseType: ImplicitNotFound[AsRaw[StreamedRestResponse, T]],
   ): ImplicitNotFound[AsRaw[Task[StreamedRestResponse], Try[F[T]]]] = ImplicitNotFound()
 
   @implicitNotFound("Observable[${T}] is not a valid result type because:\n#{forResponseType}")
-  implicit def observableAsRealNotFound[T](implicit
-    forResponseType: ImplicitNotFound[AsReal[StreamedBody, Observable[T]]]
-  ): ImplicitNotFound[AsReal[Task[StreamedRestResponse], Try[Observable[T]]]] = ImplicitNotFound()
+  implicit def observableAsRealNotFound[T](implicit forResponseType: ImplicitNotFound[AsReal[StreamedBody, Observable[T]]])
+    : ImplicitNotFound[AsReal[Task[StreamedRestResponse], Try[Observable[T]]]] = ImplicitNotFound()
 
   @implicitNotFound("Observable[${T}] is not a valid result type because:\n#{forResponseType}")
-  implicit def observableAsRawNotFound[T](implicit
-    forResponseType: ImplicitNotFound[AsRaw[StreamedBody, Observable[T]]]
-  ): ImplicitNotFound[AsRaw[Task[StreamedRestResponse], Try[Observable[T]]]] = ImplicitNotFound()
+  implicit def observableAsRawNotFound[T](implicit forResponseType: ImplicitNotFound[AsRaw[StreamedBody, Observable[T]]])
+    : ImplicitNotFound[AsRaw[Task[StreamedRestResponse], Try[Observable[T]]]] = ImplicitNotFound()
 
   // following two implicits provide nice error messages when result type of HTTP method is totally wrong
 

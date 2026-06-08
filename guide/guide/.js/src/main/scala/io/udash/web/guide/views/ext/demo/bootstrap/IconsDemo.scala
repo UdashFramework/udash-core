@@ -19,17 +19,17 @@ object IconsDemo extends AutoDemo {
           UdashIcons.FontAwesome.Solid.alignLeft,
           UdashIcons.FontAwesome.Solid.alignCenter,
           UdashIcons.FontAwesome.Solid.alignRight,
-          UdashIcons.FontAwesome.Solid.alignJustify
-        ).map(icon => UdashButton()(i(icon)).render): _*,
+          UdashIcons.FontAwesome.Solid.alignJustify,
+        ).map(icon => UdashButton()(i(icon)).render): _*
       ).render,
       UdashButtonGroup()(
         Seq(
           UdashIcons.FontAwesome.Brands.bitcoin,
           UdashIcons.FontAwesome.Solid.euroSign,
           UdashIcons.FontAwesome.Solid.dollarSign,
-          UdashIcons.FontAwesome.Brands.superpowers
-        ).map(icon => UdashButton()(i(icon)).render): _*,
-      ).render
+          UdashIcons.FontAwesome.Brands.superpowers,
+        ).map(icon => UdashButton()(i(icon)).render): _*
+      ).render,
     )
   }.withSourceCode
 
@@ -38,4 +38,3 @@ object IconsDemo extends AutoDemo {
     (div(GuideStyles.frame)(rendered), source)
   }
 }
-

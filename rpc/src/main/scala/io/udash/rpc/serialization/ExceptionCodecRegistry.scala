@@ -6,12 +6,16 @@ import scala.collection.mutable
 import scala.reflect.ClassTag
 
 trait ExceptionCodecRegistry {
+
   /** Registers GenCodec for provided class name. It can override previous value. */
-  def register[T <: Throwable : ClassTag](codec: GenCodec[T]): Unit
+  def register[T <: Throwable: ClassTag](codec: GenCodec[T]): Unit
+
   /** Returns GenCodec for provided class name. */
   def get[T <: Throwable](name: String): GenCodec[T]
+
   /** Returns true, if contains GenCodec for provided class name. */
   def contains(name: String): Boolean
+
   /** Returns name used for class T. */
   def name[T <: Throwable](ex: T): String
 }
@@ -40,7 +44,7 @@ abstract class ClassNameBasedECR extends ExceptionCodecRegistry {
   register(GenCodec.create(input => new NoSuchElementException(exceptionReader(input)), exceptionWriter))
   register(GenCodec.create(input => new NumberFormatException(exceptionReader(input)), exceptionWriter))
 
-  override def register[T <: Throwable : ClassTag](codec: GenCodec[T]): Unit =
+  override def register[T <: Throwable: ClassTag](codec: GenCodec[T]): Unit =
     codecs(classTag[T].runtimeClass.getName) = codec
 
   override def get[T <: Throwable](name: String): GenCodec[T] =

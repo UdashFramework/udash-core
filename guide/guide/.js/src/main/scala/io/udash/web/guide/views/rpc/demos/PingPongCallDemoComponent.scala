@@ -27,7 +27,7 @@ class PingPongCallDemoComponent extends Component {
   class PingPongCallDemoPresenter(model: Property[Int]) {
     def onButtonClick(disabled: Property[Boolean]) = {
       disabled.set(true)
-      Context.serverRpc.demos.pingDemo.fPing(model.get) onComplete {
+      Context.serverRpc.demos.pingDemo.fPing(model.get).onComplete {
         case Success(response) =>
           model.set(response + 1)
           disabled.set(false)
@@ -43,12 +43,11 @@ class PingPongCallDemoComponent extends Component {
     val pingDisabled = Property(false)
     val pingButton = UdashButton(
       disabled = pingDisabled,
-      componentId = ComponentId("ping-pong-call-demo")
+      componentId = ComponentId("ping-pong-call-demo"),
     )(nested => Seq[Modifier]("Ping(", nested(bind(model)), ")"))
 
-    pingButton.listen {
-      case UdashButton.ButtonClickEvent(_, _) =>
-        presenter.onButtonClick(pingDisabled)
+    pingButton.listen { case UdashButton.ButtonClickEvent(_, _) =>
+      presenter.onButtonClick(pingDisabled)
     }
 
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(

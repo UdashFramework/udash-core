@@ -21,13 +21,22 @@ class PermissionTest extends UdashSharedTest {
       class PermAType(override val id: PermissionId) extends Permission
       class PermBType(override val id: PermissionId) extends Permission
 
-      Set(new PermAType(PermissionId("1")), new PermAType(PermissionId("1")),
-        new PermAType(PermissionId("1")), new PermAType(PermissionId("2")),
-        new PermAType(PermissionId("1")), new PermBType(PermissionId("1")),
-        new PermBType(PermissionId("1")), new PermAType(PermissionId("1")),
-        new PermBType(PermissionId("1")), new PermBType(PermissionId("1")),
-        new PermAType(PermissionId("1")), new PermBType(PermissionId("2")),
-        new PermBType(PermissionId("1")), new PermBType(PermissionId("2"))).size should be(2)
+      Set(
+        new PermAType(PermissionId("1")),
+        new PermAType(PermissionId("1")),
+        new PermAType(PermissionId("1")),
+        new PermAType(PermissionId("2")),
+        new PermAType(PermissionId("1")),
+        new PermBType(PermissionId("1")),
+        new PermBType(PermissionId("1")),
+        new PermAType(PermissionId("1")),
+        new PermBType(PermissionId("1")),
+        new PermBType(PermissionId("1")),
+        new PermAType(PermissionId("1")),
+        new PermBType(PermissionId("2")),
+        new PermBType(PermissionId("1")),
+        new PermBType(PermissionId("2")),
+      ).size should be(2)
     }
   }
 }

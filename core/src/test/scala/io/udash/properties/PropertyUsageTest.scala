@@ -125,7 +125,7 @@ class PropertyUsageTest extends UdashCoreTest {
     }
   }
 
-  //rough approximation of scala.xml.Document, which used to be the test case for fixed-param Seq type here
+  // rough approximation of scala.xml.Document, which used to be the test case for fixed-param Seq type here
   class Document extends AbstractSeq[Int] with scala.collection.immutable.Seq[Int] {
     override def length: Int = ???
     override def apply(idx: Int): Int = ???

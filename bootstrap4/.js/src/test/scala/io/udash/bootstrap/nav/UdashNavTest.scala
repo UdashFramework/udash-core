@@ -10,9 +10,7 @@ class UdashNavTest extends UdashCoreFrontendTest {
   "UdashNav component" should {
     "render provided elements" in {
       val items = SeqProperty[String]("a", "b", "c")
-      val nav = UdashNav(items)(
-        (item, nested) => span(nested(bind(item))).render
-      )
+      val nav = UdashNav(items)((item, nested) => span(nested(bind(item))).render)
       val el = nav.render
       el.childNodes.length should be(3)
       el.textContent should be("abc")
@@ -45,9 +43,8 @@ class UdashNavTest extends UdashCoreFrontendTest {
       val tabs: ReadableProperty[Boolean] = Property(true)
       val pills: ReadableProperty[Boolean] = Property(false)
 
-      val nav = UdashNav(items, align, vertical, fill, justified, tabs, pills)(
-        (item, nested) => span(nested(bind(item))).render
-      )
+      val nav =
+        UdashNav(items, align, vertical, fill, justified, tabs, pills)((item, nested) => span(nested(bind(item))).render)
       val el = nav.render
       el.childNodes.length should be(3)
       el.textContent should be("abc")

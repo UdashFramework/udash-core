@@ -60,19 +60,31 @@ final case class CustomResp(value: String)
 object CustomResp {
   implicit val asResponse: AsRawReal[RestResponse, CustomResp] = AsRawReal.create(
     cr => RestResponse(200, IMapping.create("X-Value" -> PlainValue(cr.value)), HttpBody.plain("Yes")),
-    resp => CustomResp(resp.headers("X-Value").value)
+    resp => CustomResp(resp.headers("X-Value").value),
   )
   implicit val restResponses: RestResponses[CustomResp] = new RestResponses[CustomResp] {
     def responses(resolver: SchemaResolver, schemaTransform: RestSchema[_] => RestSchema[_]): Responses =
-      Responses(byStatusCode = Map(200 -> RefOr(Response(
-        description = "Custom response",
-        headers = Map("X-Value" -> RefOr(OASHeader(
-          schema = RefOr(Schema.String)
-        ))),
-        content = Map(HttpBody.PlainType -> MediaType(
-          schema = RefOr(Schema.String)
-        ))
-      ))))
+      Responses(byStatusCode =
+        Map(
+          200 -> RefOr(
+            Response(
+              description = "Custom response",
+              headers = Map(
+                "X-Value" -> RefOr(
+                  OASHeader(
+                    schema = RefOr(Schema.String)
+                  )
+                )
+              ),
+              content = Map(
+                HttpBody.PlainType -> MediaType(
+                  schema = RefOr(Schema.String)
+                )
+              ),
+            )
+          )
+        )
+      )
   }
 }
 
@@ -96,8 +108,11 @@ object ErrorWrapper extends HasPolyGenCodec[ErrorWrapper]
 
 trait RestTestApi {
 
-  @GET @group("TrivialGroup") def trivialGet: Future[Unit]
-  @GET @group("TrivialDescribedGroup") @tagDescription("something") def failingGet: Future[Unit]
+  @GET
+  @group("TrivialGroup") def trivialGet: Future[Unit]
+  @GET
+  @group("TrivialDescribedGroup")
+  @tagDescription("something") def failingGet: Future[Unit]
   @GET def jsonFailingGet: Future[Unit]
   @GET def moreFailingGet: Future[Unit]
   @GET def neverGet: Future[Unit]
@@ -116,7 +131,7 @@ trait RestTestApi {
     @Query("q=2") @whenAbsent("q2def") q2: String = whenAbsent.value,
     @OptQuery @whenAbsent(Opt(42)) q3: Opt[Int], // @whenAbsent value must be completely ignored in this case
     @Cookie c1: Int,
-    @Cookie("có") c2: String
+    @Cookie("có") c2: String,
   ): Future[RestEntity]
 
   @POST("multi/param") def multiParamPost(
@@ -127,7 +142,7 @@ trait RestTestApi {
     @Query q1: Int,
     @Query("q=2") q2: String,
     b1: Int,
-    @Body("b\"2") @description("weird body field") b2: String
+    @Body("b\"2") @description("weird body field") b2: String,
   ): Future[RestEntity]
 
   @CustomBody
@@ -141,7 +156,7 @@ trait RestTestApi {
   @POST def formPost(
     @Query q1: String,
     p1: String,
-    @whenAbsent(42) p2: Int = whenAbsent.value
+    @whenAbsent(42) p2: Int = whenAbsent.value,
   ): Future[String]
 
   @pathSummary("summary for prefix paths")
@@ -149,7 +164,7 @@ trait RestTestApi {
   def prefix(
     p0: String,
     @Header("X-H0") h0: String,
-    @Query @example("q0example") q0: String
+    @Query @example("q0example") q0: String,
   ): RestTestSubApi
 
   @group
@@ -159,12 +174,12 @@ trait RestTestApi {
 
   def complexParams(
     baseEntity: BaseEntity,
-    @whenAbsent(Opt.Empty) flatBaseEntity: Opt[FlatBaseEntity]
+    @whenAbsent(Opt.Empty) flatBaseEntity: Opt[FlatBaseEntity],
   ): Future[Unit]
 
   @PUT def complexParams(
     flatBaseEntity: FlatBaseEntity,
-    @whenAbsent(Opt.Empty) baseEntity: Opt[BaseEntity]
+    @whenAbsent(Opt.Empty) baseEntity: Opt[BaseEntity],
   ): Future[Unit]
 
   def customResponse(@Query value: String): Future[CustomResp]
@@ -181,7 +196,8 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
   final class Impl extends RestTestApi {
     def trivialGet: Future[Unit] = Future.unit
     def failingGet: Future[Unit] = Future.failed(HttpErrorException.plain(503, "nie"))
-    def jsonFailingGet: Future[Unit] = Future.failed(HttpErrorException(503, HttpBody.json(JsonValue(JsonStringOutput.write(ErrorWrapper("nie"))))))
+    def jsonFailingGet: Future[Unit] =
+      Future.failed(HttpErrorException(503, HttpBody.json(JsonValue(JsonStringOutput.write(ErrorWrapper("nie"))))))
     def moreFailingGet: Future[Unit] = throw HttpErrorException.plain(503, "nie")
     def neverGet: Future[Unit] = {
       counter.increment()
@@ -189,9 +205,11 @@ object RestTestApi extends DefaultRestApiCompanion[RestTestApi] {
     }
     def wait(millis: Int): Future[String] = FutureUtils.delayedResult(millis.millis)(s"waited $millis ms")
     def getEntity(id: RestEntityId): Future[RestEntity] = Future.successful(RestEntity(id, s"${id.value}-name"))
-    def complexGet(p1: Int, p2: String, h1: Int, h2: String, q1: Int, q2: String, q3: Opt[Int], c1: Int, c2: String): Future[RestEntity] =
+    def complexGet(p1: Int, p2: String, h1: Int, h2: String, q1: Int, q2: String, q3: Opt[Int], c1: Int, c2: String)
+      : Future[RestEntity] =
       Future.successful(RestEntity(RestEntityId(s"$p1-$h1-$q1-$c1"), s"$p2-$h2-$q2-${q3.getOrElse(".")}-$c2"))
-    def multiParamPost(p1: Int, p2: String, h1: Int, h2: String, q1: Int, q2: String, b1: Int, b2: String): Future[RestEntity] =
+    def multiParamPost(p1: Int, p2: String, h1: Int, h2: String, q1: Int, q2: String, b1: Int, b2: String)
+      : Future[RestEntity] =
       Future.successful(RestEntity(RestEntityId(s"$p1-$h1-$q1-$b1"), s"$p2-$h2-$q2-$b2"))
     def singleBodyPut(entity: RestEntity): Future[String] =
       Future.successful(entity.toString)

@@ -63,38 +63,38 @@ class GenCodecsDemoComponent extends Component with CrossLogging {
 
     def onButtonClick() = {
       val demoRpc: GenCodecServerRPC = Context.serverRpc.demos.gencodecsDemo
-      demoRpc.sendInt(Random.nextInt()) onComplete {
+      demoRpc.sendInt(Random.nextInt()).onComplete {
         case Success(response) => model.subProp(_.int).set(Some(response))
         case Failure(ex) => logger.error(ex.getMessage)
       }
-      demoRpc.sendDouble(Random.nextLong().toDouble * 2e20) onComplete {
+      demoRpc.sendDouble(Random.nextLong().toDouble * 2e20).onComplete {
         case Success(response) => model.subProp(_.double).set(Some(response))
         case Failure(ex) => logger.error(ex.getMessage)
       }
-      demoRpc.sendString(randomString(10)) onComplete {
+      demoRpc.sendString(randomString(10)).onComplete {
         case Success(response) => model.subProp(_.string).set(Some(response))
         case Failure(ex) => logger.error(ex.getMessage)
       }
-      demoRpc.sendSeq(Seq(randomString(5), randomString(5))) onComplete {
+      demoRpc.sendSeq(Seq(randomString(5), randomString(5))).onComplete {
         case Success(response) => model.subProp(_.seq).set(Some(response))
         case Failure(ex) => logger.error(ex.getMessage)
       }
-      demoRpc.sendMap(Map(randomString(5) -> Random.nextInt(), randomString(5) -> Random.nextInt())) onComplete {
+      demoRpc.sendMap(Map(randomString(5) -> Random.nextInt(), randomString(5) -> Random.nextInt())).onComplete {
         case Success(response) => model.subProp(_.map).set(Some(response.toSeq))
         case Failure(ex) => logger.error(ex.getMessage)
       }
-      demoRpc.sendCaseClass(DemoCaseClass(Random.nextInt(), randomString(5), 42)) onComplete {
+      demoRpc.sendCaseClass(DemoCaseClass(Random.nextInt(), randomString(5), 42)).onComplete {
         case Success(response) => model.subProp(_.caseClass).set(Some(response))
         case Failure(ex) => logger.error(ex.getMessage)
       }
-      demoRpc.sendClass(new DemoClass(Random.nextInt(), randomString(5))) onComplete {
+      demoRpc.sendClass(new DemoClass(Random.nextInt(), randomString(5))).onComplete {
         case Success(response) =>
           model.subProp(_.clsInt).set(Some(response.i))
           model.subProp(_.clsString).set(Some(response.s))
           model.subProp(_.clsVar).set(Some(response._v))
         case Failure(ex) => logger.error(ex.getMessage)
       }
-      demoRpc.sendSealedTrait(Seq(Fruit.Apple, Fruit.Orange, Fruit.Banana)(Random.nextInt(3))) onComplete {
+      demoRpc.sendSealedTrait(Seq(Fruit.Apple, Fruit.Orange, Fruit.Banana)(Random.nextInt(3))).onComplete {
         case Success(response) => model.subProp(_.sealedTrait).set(Some(response))
         case Failure(ex) => logger.error(ex.getMessage)
       }
@@ -107,38 +107,72 @@ class GenCodecsDemoComponent extends Component with CrossLogging {
     val loadDisabled = Property(false)
     val loadIdButton = UdashButton(
       disabled = loadDisabled,
-      componentId = ComponentId("gencodec-demo")
+      componentId = ComponentId("gencodec-demo"),
     )(_ => "Send request")
 
-    loadIdButton.listen {
-      case UdashButton.ButtonClickEvent(_, _) =>
-        loadDisabled.set(true)
-        presenter.onButtonClick()
+    loadIdButton.listen { case UdashButton.ButtonClickEvent(_, _) =>
+      loadDisabled.set(true)
+      presenter.onButtonClick()
     }
 
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(
-      div(BootstrapStyles.Spacing.margin(
-        side = BootstrapStyles.Side.Bottom,
-        size = BootstrapStyles.SpacingSize.Normal
-      ))(loadIdButton.render),
-      h3(BootstrapStyles.Spacing.margin(
-        side = BootstrapStyles.Side.Bottom,
-        size = BootstrapStyles.SpacingSize.Normal
-      ))("Results:"),
+      div(
+        BootstrapStyles.Spacing.margin(
+          side = BootstrapStyles.Side.Bottom,
+          size = BootstrapStyles.SpacingSize.Normal,
+        )
+      )(loadIdButton.render),
+      h3(
+        BootstrapStyles.Spacing.margin(
+          side = BootstrapStyles.Side.Bottom,
+          size = BootstrapStyles.SpacingSize.Normal,
+        )
+      )("Results:"),
       p(BootstrapUtils.wellStyles)(
         ul(
           li("Int: ", produce(model.subProp(_.int))(response => span(id := "gencodec-demo-int", response).render)),
-          li("Double: ", produce(model.subProp(_.double))(response => span(id := "gencodec-demo-double", response).render)),
-          li("String: ", produce(model.subProp(_.string))(response => span(id := "gencodec-demo-string", response).render)),
-          li("Seq[String]: ", produce(model.subProp(_.seq))(response => span(id := "gencodec-demo-seq", response.map(_.toString)).render)),
-          li("Map[String, Int]: ", produce(model.subProp(_.map))(response => span(id := "gencodec-demo-map", response.map(_.toString)).render)),
-          li("DemoCaseClass: ", produce(model.subProp(_.caseClass))(response => span(id := "gencodec-demo-caseClass", response.map(_.toString)).render)),
-          li("DemoClass Int: ", produce(model.subProp(_.clsInt))(response => span(id := "gencodec-demo-cls-int", response).render)),
-          li("DemoClass String: ", produce(model.subProp(_.clsString))(response => span(id := "gencodec-demo-cls-string", response).render)),
-          li("DemoClass Var: ", produce(model.subProp(_.clsVar))(response => span(id := "gencodec-demo-cls-var", response).render)),
-          li("Fruit: ", produce(model.subProp(_.sealedTrait))(response => span(id := "gencodec-demo-sealedTrait", response.map(_.toString)).render))
+          li(
+            "Double: ",
+            produce(model.subProp(_.double))(response => span(id := "gencodec-demo-double", response).render),
+          ),
+          li(
+            "String: ",
+            produce(model.subProp(_.string))(response => span(id := "gencodec-demo-string", response).render),
+          ),
+          li(
+            "Seq[String]: ",
+            produce(model.subProp(_.seq))(response => span(id := "gencodec-demo-seq", response.map(_.toString)).render),
+          ),
+          li(
+            "Map[String, Int]: ",
+            produce(model.subProp(_.map))(response => span(id := "gencodec-demo-map", response.map(_.toString)).render),
+          ),
+          li(
+            "DemoCaseClass: ",
+            produce(model.subProp(_.caseClass))(response =>
+              span(id := "gencodec-demo-caseClass", response.map(_.toString)).render
+            ),
+          ),
+          li(
+            "DemoClass Int: ",
+            produce(model.subProp(_.clsInt))(response => span(id := "gencodec-demo-cls-int", response).render),
+          ),
+          li(
+            "DemoClass String: ",
+            produce(model.subProp(_.clsString))(response => span(id := "gencodec-demo-cls-string", response).render),
+          ),
+          li(
+            "DemoClass Var: ",
+            produce(model.subProp(_.clsVar))(response => span(id := "gencodec-demo-cls-var", response).render),
+          ),
+          li(
+            "Fruit: ",
+            produce(model.subProp(_.sealedTrait))(response =>
+              span(id := "gencodec-demo-sealedTrait", response.map(_.toString)).render
+            ),
+          ),
         )
-      )
+      ),
     )
   }
 }

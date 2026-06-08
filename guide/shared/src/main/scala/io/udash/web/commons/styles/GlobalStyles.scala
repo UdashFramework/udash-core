@@ -9,16 +9,16 @@ object GlobalStyles extends CssBase {
   import dsl._
 
   val clearfix: CssStyle = style(
-    &.before (
+    &.before(
       content.string(" "),
-      display.table
+      display.table,
     ),
 
     &.after(
       content.string(" "),
       display.table,
-      clear.both
-    )
+      clear.both,
+    ),
   )
 
   val main: CssStyle = style(
@@ -27,31 +27,31 @@ object GlobalStyles extends CssBase {
 
   val body: CssStyle = style(
     position.relative,
-    lineHeight(1.5 rem),
+    lineHeight(1.5.rem),
     height(100 %%),
-    margin(0 px, auto),
+    margin(0.px, auto),
 
     MediaQueries.desktop(
-      padding(StyleConstants.Sizes.BodyPaddingPx px),
+      padding(StyleConstants.Sizes.BodyPaddingPx.px)
     ),
 
     MediaQueries.tabletLandscape(
       width(100 %%),
-      paddingLeft(1.25 rem),
-      paddingRight(1.25 rem)
+      paddingLeft(1.25.rem),
+      paddingRight(1.25.rem),
     ),
 
     MediaQueries.phone(
       paddingLeft(3 %%),
-      paddingRight(3 %%)
-    )
+      paddingRight(3 %%),
+    ),
   )
 
   val col: CssStyle = mixin(
     position.relative,
     display.inlineBlock,
     verticalAlign.top,
-    height(100 %%)
+    height(100 %%),
   )
 
   val block: CssStyle = style(
@@ -75,7 +75,7 @@ object GlobalStyles extends CssBase {
   )
 
   val smallMargin: CssStyle = style(
-    margin(5 px).important
+    margin(5.px).important
   )
 
   val underlineLink: CssStyle = style(
@@ -91,27 +91,26 @@ object GlobalStyles extends CssBase {
       content.string(" "),
       width(100 %%),
       borderBottomColor.white,
-      borderBottomWidth(1 px),
+      borderBottomWidth(1.px),
       borderBottomStyle.solid,
       transform := "scaleX(0)",
-      transformOrigin := "100% 50%"
+      transformOrigin := "100% 50%",
     ),
 
     &.hover(
       cursor.pointer,
       textDecoration := none,
 
-      &.after (
+      &.after(
         transformOrigin := "0 50%",
-        transform := "scaleX(1)"
-      )
-    )
+        transform := "scaleX(1)",
+      ),
+    ),
   )
 
   val centerBlock: CssStyle = style(
     display.block,
     textAlign.center,
-    margin(`0`, auto)
+    margin(`0`, auto),
   )
 }
-

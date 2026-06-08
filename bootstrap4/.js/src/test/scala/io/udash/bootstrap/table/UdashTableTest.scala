@@ -15,9 +15,10 @@ class UdashTableTest extends UdashCoreFrontendTest {
       val items = SeqProperty(
         TestEntity("Adam", 34, "EN"),
         TestEntity("John", 21, "GE"),
-        TestEntity("Alice", 24, "FR")
+        TestEntity("Alice", 24, "FR"),
       )
-      val responsive = Property[Option[BootstrapStyles.ResponsiveBreakpoint]](Some(BootstrapStyles.ResponsiveBreakpoint.Small))
+      val responsive =
+        Property[Option[BootstrapStyles.ResponsiveBreakpoint]](Some(BootstrapStyles.ResponsiveBreakpoint.Small))
       val dark = Property(false)
       val striped = Property(false)
       val bordered = Property(false)
@@ -25,14 +26,22 @@ class UdashTableTest extends UdashCoreFrontendTest {
       val hover = Property(false)
       val small = Property(false)
       val table = UdashTable(
-        items, responsive, dark, striped, bordered, borderless, hover, small
+        items,
+        responsive,
+        dark,
+        striped,
+        bordered,
+        borderless,
+        hover,
+        small,
       )(
-        (item, nested) => tr(
-          td(nested(bind(item.asModel.subProp(_.name)))),
-          td(nested(bind(item.asModel.subProp(_.age)))),
-          td(nested(bind(item.asModel.subProp(_.language))))
-        ).render,
-        headerFactory = Some(_ => tr(th("Name"), th("Age"), th("Language")))
+        (item, nested) =>
+          tr(
+            td(nested(bind(item.asModel.subProp(_.name)))),
+            td(nested(bind(item.asModel.subProp(_.age)))),
+            td(nested(bind(item.asModel.subProp(_.language)))),
+          ).render,
+        headerFactory = Some(_ => tr(th("Name"), th("Age"), th("Language"))),
       )
       val el = table.render
       el.textContent should be("NameAgeLanguageAdam34ENJohn21GEAlice24FR")

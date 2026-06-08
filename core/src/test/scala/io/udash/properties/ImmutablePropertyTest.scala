@@ -60,7 +60,12 @@ class ImmutablePropertyTest extends UdashCoreTest {
 
   "ImmutableModelProperty" should {
     "handle standard operations of ReadableModelProperty" in {
-      val e = ModelEntity("a", Seq(1), Vector(2, 3), ModelEntity("b", Seq(4), Vector(5, 6), ModelEntity("c", Seq(7), Vector(8, 9), null)))
+      val e = ModelEntity(
+        "a",
+        Seq(1),
+        Vector(2, 3),
+        ModelEntity("b", Seq(4), Vector(5, 6), ModelEntity("c", Seq(7), Vector(8, 9), null)),
+      )
       val p: ReadableModelProperty[ModelEntity] = new ImmutableModelProperty[ModelEntity](e)
 
       p.get should be(e)
@@ -86,7 +91,12 @@ class ImmutablePropertyTest extends UdashCoreTest {
     }
 
     "support mirrors" in {
-      val e = ModelEntity("a", Seq(1), Vector(2, 3), ModelEntity("b", Seq(4), Vector(5, 6), ModelEntity("c", Seq(7), Vector(8, 9), null)))
+      val e = ModelEntity(
+        "a",
+        Seq(1),
+        Vector(2, 3),
+        ModelEntity("b", Seq(4), Vector(5, 6), ModelEntity("c", Seq(7), Vector(8, 9), null)),
+      )
       val origin: ReadableModelProperty[ModelEntity] = new ImmutableModelProperty[ModelEntity](e)
       val p: ModelProperty[ModelEntity] = origin.mirror().asModel
 
@@ -101,7 +111,7 @@ class ImmutablePropertyTest extends UdashCoreTest {
 
       val subSeq = p.subSeq(_.v)
       subSeq.elemProperties.head.set(3)
-      subSeq.get shouldBe Seq(3,3)
+      subSeq.get shouldBe Seq(3, 3)
 
       origin.listenersCount() shouldBe 0
       origin.get shouldBe e
@@ -112,8 +122,8 @@ class ImmutablePropertyTest extends UdashCoreTest {
     "handle standard operations of ReadableSeqProperty" in {
       val p: ReadableSeqProperty[Int, ReadableProperty[Int]] = new ImmutableSeqProperty[Int, Seq](Seq(1, 2, 3))
 
-      p.get should be(Seq(1,2,3))
-      p.elemProperties.map(_.get) should be(Seq(1,2,3))
+      p.get should be(Seq(1, 2, 3))
+      p.elemProperties.map(_.get) should be(Seq(1, 2, 3))
       p.transformElements(_ + 1).get should be(Seq(2, 3, 4))
 
       var counter = 0
@@ -129,8 +139,8 @@ class ImmutablePropertyTest extends UdashCoreTest {
       val origin = new ImmutableSeqProperty[Int, Seq](Seq(1, 2, 3))
       val p: SeqProperty[Int, Property[Int]] = origin.mirror().asSeq
 
-      p.get should be(Seq(1,2,3))
-      p.elemProperties.map(_.get) should be(Seq(1,2,3))
+      p.get should be(Seq(1, 2, 3))
+      p.elemProperties.map(_.get) should be(Seq(1, 2, 3))
       p.transformElements(_ + 1).get should be(Seq(2, 3, 4))
 
       var counter = 0
@@ -142,7 +152,7 @@ class ImmutablePropertyTest extends UdashCoreTest {
       counter should be(1)
 
       p.elemProperties.head.set(7)
-      p.get should be(Seq(7,2,3))
+      p.get should be(Seq(7, 2, 3))
       counter should be(3)
       origin.listenersCount() should be(0)
     }

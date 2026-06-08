@@ -8,7 +8,7 @@ object ForceBootstrap {
   import scalatags.JsDom.all._
 
   def apply(modifiers: Modifier*): JsDom.TypedTag[Div] =
-    div(cls := "bootstrap")( //force Bootstrap styles
-      modifiers:_*
+    div(cls := "bootstrap")( // force Bootstrap styles
+      modifiers: _*
     )
 }

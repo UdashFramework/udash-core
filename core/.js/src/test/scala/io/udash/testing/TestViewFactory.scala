@@ -40,7 +40,7 @@ class TestView(overrideContent: OptArg[String] = OptArg.Empty) extends Container
     Seq[Modifier](
       div(
         content,
-        childViewContainer
+        childViewContainer,
       ),
       dom.document.createTextNode("end"),
     )

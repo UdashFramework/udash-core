@@ -21,7 +21,7 @@ object FileInputDemo extends AutoDemo with CssView {
     div(
       FileInput(selectedFiles, acceptMultipleFiles)("files"),
       h4("Selected files"),
-      ul(repeat(selectedFiles){ file =>
+      ul(repeat(selectedFiles) { file =>
         val content = Property(Array.empty[Byte])
 
         FileService.asBytesArray(file.get).foreach { bytes =>
@@ -29,20 +29,24 @@ object FileInputDemo extends AutoDemo with CssView {
         }
 
         val name = file.get.name
-        li(showIfElse(content.transform(_.isEmpty))(
-          span(name).render,
-          {
-            val url = FileService.createURL(content.get)
-            val download = a(href := url.value, attr("download") := name)(name)
-            val revoke = a(href := "#", onclick := { () =>
-              content.set(Array.empty[Byte])
-              url.close()
-            })("revoke")
+        li(
+          showIfElse(content.transform(_.isEmpty))(
+            span(name).render, {
+              val url = FileService.createURL(content.get)
+              val download = a(href := url.value, attr("download") := name)(name)
+              val revoke = a(
+                href := "#",
+                onclick := { () =>
+                  content.set(Array.empty[Byte])
+                  url.close()
+                },
+              )("revoke")
 
-            Seq(download, span(" or "), revoke).render
-          }
-        )).render
-      })
+              Seq(download, span(" or "), revoke).render
+            },
+          )
+        ).render
+      }),
     )
   }.withSourceCode
 

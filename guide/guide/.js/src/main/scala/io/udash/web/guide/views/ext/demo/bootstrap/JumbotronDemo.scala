@@ -14,21 +14,23 @@ object JumbotronDemo extends AutoDemo with CssView {
     import io.udash.bootstrap.utils.BootstrapStyles._
     import scalatags.JsDom.all._
 
-    UdashJumbotron()(_ => Seq[Modifier](
-      h1("Jumbo poem!"),
-      p("One component to rule them all, one component to find them, " +
-        "one component to bring them all and in the darkness bind them."
-      ),
-      UdashButton(
-        options = UdashButtonOptions(
-          color = Color.Info.opt,
-          size = Size.Large.opt
-        )
-      )(_ => "Click")
-    ))
+    UdashJumbotron()(_ =>
+      Seq[Modifier](
+        h1("Jumbo poem!"),
+        p(
+          "One component to rule them all, one component to find them, " +
+            "one component to bring them all and in the darkness bind them."
+        ),
+        UdashButton(
+          options = UdashButtonOptions(
+            color = Color.Info.opt,
+            size = Size.Large.opt,
+          )
+        )(_ => "Click"),
+      )
+    )
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, String) =
     (div(GuideStyles.frame)(rendered), source)
 }
-

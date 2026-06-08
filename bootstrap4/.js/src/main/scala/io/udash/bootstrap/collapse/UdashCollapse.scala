@@ -12,13 +12,14 @@ import scalatags.generic.AttrPair
 
 import scala.scalajs.js
 
-final class UdashCollapse private(
+final class UdashCollapse private (
   parentSelector: Option[String],
   toggleOnInit: Boolean,
-  override val componentId: ComponentId
+  override val componentId: ComponentId,
 )(
   content: Binding.NestedInterceptor => Modifier
-) extends UdashBootstrapComponent with Listenable {
+) extends UdashBootstrapComponent
+    with Listenable {
 
   import UdashCollapse._
   import io.udash.bootstrap.utils.BootstrapTags._
@@ -36,27 +37,54 @@ final class UdashCollapse private(
   /** Hides this collapse. */
   def hide(): Unit = jQSelector().collapse("hide")
 
-  /** Attributes which should be added to the button toggling this collapse component.
-    * Example: `UdashButton()(_ => Seq[Modifier](collapse.toggleButtonAttrs(), "Toggle..."))`*/
+  /** Attributes which should be added to the button toggling this collapse component. Example:
+    * `UdashButton()(_ => Seq[Modifier](collapse.toggleButtonAttrs(), "Toggle..."))`
+    */
   def toggleButtonAttrs(): Seq[AttrPair[Element, String]] = {
     import scalatags.JsDom.all._
     Seq(
       dataToggle := "collapse",
-      dataTarget := s"#$componentId"
+      dataTarget := s"#$componentId",
     )
   }
 
   override val render: Element = {
     val el = div(
-      parentSelector.map(dataParent := _), dataToggle := toggleOnInit,
-      BootstrapStyles.Collapse.collapse, componentId
+      parentSelector.map(dataParent := _),
+      dataToggle := toggleOnInit,
+      BootstrapStyles.Collapse.collapse,
+      componentId,
     )(content(nestedInterceptor)).render
 
     val jQEl = jQ(el)
-    nestedInterceptor(new JQueryOnBinding(jQEl, "show.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Show))))
-    nestedInterceptor(new JQueryOnBinding(jQEl, "shown.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Shown))))
-    nestedInterceptor(new JQueryOnBinding(jQEl, "hide.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Hide))))
-    nestedInterceptor(new JQueryOnBinding(jQEl, "hidden.bs.collapse", (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Hidden))))
+    nestedInterceptor(
+      new JQueryOnBinding(
+        jQEl,
+        "show.bs.collapse",
+        (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Show)),
+      )
+    )
+    nestedInterceptor(
+      new JQueryOnBinding(
+        jQEl,
+        "shown.bs.collapse",
+        (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Shown)),
+      )
+    )
+    nestedInterceptor(
+      new JQueryOnBinding(
+        jQEl,
+        "hide.bs.collapse",
+        (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Hide)),
+      )
+    )
+    nestedInterceptor(
+      new JQueryOnBinding(
+        jQEl,
+        "hidden.bs.collapse",
+        (_: Element, _: JQueryEvent) => fire(CollapseEvent(this, CollapseEvent.EventType.Hidden)),
+      )
+    )
     el
   }
 
@@ -71,45 +99,59 @@ final class UdashCollapse private(
 }
 
 object UdashCollapse {
+
   /** More: <a href="http://getbootstrap.com/docs/4.1/components/collapse/#events">Bootstrap Docs</a> */
   final case class CollapseEvent(
     override val source: UdashCollapse,
-    tpe: CollapseEvent.EventType
-  ) extends AbstractCase with ListenableEvent
+    tpe: CollapseEvent.EventType,
+  ) extends AbstractCase
+      with ListenableEvent
 
   object CollapseEvent {
     final class EventType(implicit enumCtx: EnumCtx) extends AbstractValueEnum
     object EventType extends AbstractValueEnumCompanion[EventType] {
+
       /** This event fires immediately when the show instance method is called. */
       final val Show: Value = new EventType
-      /** This event is fired when a collapse element has been made visible to the user (will wait for CSS transitions to complete). */
+
+      /** This event is fired when a collapse element has been made visible to the user (will wait for CSS transitions
+        * to complete).
+        */
       final val Shown: Value = new EventType
+
       /** This event is fired immediately when the hide method has been called. */
       final val Hide: Value = new EventType
-      /** This event is fired when a collapse element has been hidden from the user (will wait for CSS transitions to complete). */
+
+      /** This event is fired when a collapse element has been hidden from the user (will wait for CSS transitions to
+        * complete).
+        */
       final val Hidden: Value = new EventType
     }
   }
 
-  /**
-    * Creates a collapsible component.
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/collapse/">Bootstrap Docs</a>.
+  /** Creates a collapsible component. More: <a href="http://getbootstrap.com/docs/4.1/components/collapse/">Bootstrap
+    * Docs</a>.
     *
-    * @param parentSelector If a selector is provided, all collapsible elements under the specified parent will be
-    *                       closed when this collapsible item is shown.
-    * @param toggleOnInit   Toggles the collapsible element on invocation.
-    * @param componentId    An id of the root DOM node.
-    * @param content        A content of the component.
-    *                       Use the provided interceptor to properly clean up bindings inside the content.
-    * @return A `UdashCollapse` component, call `render` to create a DOM element.
+    * @param parentSelector
+    *   If a selector is provided, all collapsible elements under the specified parent will be closed when this
+    *   collapsible item is shown.
+    * @param toggleOnInit
+    *   Toggles the collapsible element on invocation.
+    * @param componentId
+    *   An id of the root DOM node.
+    * @param content
+    *   A content of the component. Use the provided interceptor to properly clean up bindings inside the content.
+    * @return
+    *   A `UdashCollapse` component, call `render` to create a DOM element.
     */
   def apply(
     parentSelector: Option[String] = None,
     toggleOnInit: Boolean = true,
-    componentId: ComponentId = ComponentId.generate()
-  )(content: Binding.NestedInterceptor => Modifier): UdashCollapse = {
+    componentId: ComponentId = ComponentId.generate(),
+  )(
+    content: Binding.NestedInterceptor => Modifier
+  ): UdashCollapse =
     new UdashCollapse(parentSelector, toggleOnInit, componentId)(content)
-  }
 
   @js.native
   private trait UdashCollapseJQuery extends JQuery {

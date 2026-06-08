@@ -5,7 +5,8 @@ import java.{util => ju}
 import com.avsystem.commons._
 
 /** Loads translations from provided `java.util.ResourceBundles`. */
-class ResourceBundlesTranslationTemplatesProvider(bundles: Map[Lang, Seq[ju.ResourceBundle]]) extends TranslationTemplatesProvider {
+class ResourceBundlesTranslationTemplatesProvider(bundles: Map[Lang, Seq[ju.ResourceBundle]])
+  extends TranslationTemplatesProvider {
   private val cache: MMap[Lang, Bundle] = MMap.empty
 
   override def template(key: String)(implicit lang: Lang): String =
@@ -21,15 +22,17 @@ class ResourceBundlesTranslationTemplatesProvider(bundles: Map[Lang, Seq[ju.Reso
     def parseBundles(bundles: Seq[ju.ResourceBundle]): Bundle = {
       val templates = bundles
         .flatMap(resource =>
-          resource.getKeys.asScala.map(k => {
+          resource.getKeys.asScala.map { k =>
             val template: String = resource.getString(k)
 
-            if (TranslationProvider.indexedArgRegex.findFirstIn(template).nonEmpty &&
-                TranslationProvider.unindexedArgRegex.findFirstIn(template).nonEmpty)
+            if (
+              TranslationProvider.indexedArgRegex.findFirstIn(template).nonEmpty &&
+              TranslationProvider.unindexedArgRegex.findFirstIn(template).nonEmpty
+            )
               throw IndexedAndUnindexedPlaceholdersMixed(template)
 
             k -> template
-          })
+          }
         )
         .toMap
       Bundle(hash(templates), templates)

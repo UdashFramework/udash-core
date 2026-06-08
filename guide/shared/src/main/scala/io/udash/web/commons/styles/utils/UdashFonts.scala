@@ -30,7 +30,8 @@ object FontStyle extends AbstractValueEnumCompanion[FontStyle] with CssBase {
   final val Italic: Value = new FontStyle(fontStyle.italic)
 }
 
-final class FontFileType(val extension: String, val format: Option[String])(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+final class FontFileType(val extension: String, val format: Option[String])(implicit enumCtx: EnumCtx)
+  extends AbstractValueEnum
 
 object FontFileType extends ValueEnumCompanion[FontFileType] {
   final val EotFont: Value = new FontFileType("eot", None)
@@ -39,7 +40,11 @@ object FontFileType extends ValueEnumCompanion[FontFileType] {
   final val TruetypeFont: Value = new FontFileType("ttf", Some("format('truetype')"))
 }
 
-final case class FontVariation(path: String, fontWeight: FontWeight = FontWeight.Regular, fontStyle: FontStyle = FontStyle.Normal)
+final case class FontVariation(
+  path: String,
+  fontWeight: FontWeight = FontWeight.Regular,
+  fontStyle: FontStyle = FontStyle.Normal,
+)
 
 object FontFamily {
   val Roboto = "'Roboto', sans-serif"
@@ -51,7 +56,7 @@ object UdashFonts extends CssBase {
   def roboto(fontWeight: FontWeight = FontWeight.Regular, fontStyle: FontStyle = FontStyle.Normal): CssStyle = mixin(
     fontFamily :=! FontFamily.Roboto,
     fontStyle.value,
-    fontWeight.value
+    fontWeight.value,
   )
 
   private val fontFiles = immutable.Seq(
@@ -66,12 +71,13 @@ object UdashFonts extends CssBase {
     FontVariation("/fonts/roboto/Roboto-Light", FontWeight.Light, FontStyle.Normal),
     FontVariation("/fonts/roboto/Roboto-LightItalic", FontWeight.Light, FontStyle.Italic),
     FontVariation("/fonts/roboto/Roboto-Thin", FontWeight.Thin, FontStyle.Normal),
-    FontVariation("/fonts/roboto/Roboto-ThinItalic", FontWeight.Thin, FontStyle.Italic)
+    FontVariation("/fonts/roboto/Roboto-ThinItalic", FontWeight.Thin, FontStyle.Italic),
   )
 
-  val font: immutable.Map[FontVariation, CssStyle] = fontFiles.map(fontFile =>
-    fontFile ->
-      namedFontFace(FontFamily.Roboto,
+  val font: immutable.Map[FontVariation, CssStyle] = fontFiles
+    .map(fontFile =>
+      fontFile -> namedFontFace(
+        FontFamily.Roboto,
         _ => {
           new FontFace(
             fontFamily = Some(FontFamily.Roboto),
@@ -79,11 +85,12 @@ object UdashFonts extends CssBase {
               fontSrc(fontFile.path, FontFileType.TruetypeFont.extension, FontFileType.TruetypeFont.format)
             ),
             fontWeightValue = Some(fontFile.fontWeight.value.value),
-            fontStyleValue = Some(fontFile.fontStyle.value.value)
+            fontStyleValue = Some(fontFile.fontStyle.value.value),
           )
-        }
+        },
       )
-  ).toMap
+    )
+    .toMap
 
   private def fontSrc(fileUrl: String, fileExt: String, fileFormat: Option[String]) =
     s"url('$fileUrl.$fileExt')${fileFormat.map(v => s" $v").getOrElse("")}"

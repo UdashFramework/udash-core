@@ -8,6 +8,7 @@ import io.udash.utils.CrossCollections
 
 /** Property based on trait representing data model. Read only access. */
 trait ReadableModelProperty[+A] extends ReadableProperty[A] {
+
   /** Returns child ModelProperty[B]. */
   def roSubModel[B: ModelPropertyCreator](f: A => B): ReadableModelProperty[B] =
     macro io.udash.macros.PropertyMacros.reifyRoSubModel[A, B]
@@ -17,7 +18,8 @@ trait ReadableModelProperty[+A] extends ReadableProperty[A] {
     macro io.udash.macros.PropertyMacros.reifyRoSubProp[A, B]
 
   /** Returns child DirectSeqProperty[B] */
-  def roSubSeq[B, SeqTpe[T] <: BSeq[T]](f: A => SeqTpe[B])(implicit ev: SeqPropertyCreator[B, SeqTpe]): ReadableSeqProperty[B, CastableReadableProperty[B]] =
+  def roSubSeq[B, SeqTpe[T] <: BSeq[T]](f: A => SeqTpe[B])(implicit ev: SeqPropertyCreator[B, SeqTpe])
+    : ReadableSeqProperty[B, CastableReadableProperty[B]] =
     macro io.udash.macros.PropertyMacros.reifyRoSubSeq[A, B]
 }
 

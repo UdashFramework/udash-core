@@ -18,10 +18,12 @@ object CheckboxButtonsDemo extends AutoDemo {
     val selected = SeqProperty(options.get.head)
 
     div(
-      div(Spacing.margin(
-        side = Side.Bottom,
-        size = SpacingSize.Normal
-      ))(
+      div(
+        Spacing.margin(
+          side = Side.Bottom,
+          size = SpacingSize.Normal,
+        )
+      )(
         UdashButtonGroup.checkboxes(selected, options)().render
       ),
       h4("Is active: "),
@@ -29,11 +31,12 @@ object CheckboxButtonsDemo extends AutoDemo {
         repeatWithNested(options) { (option, nested) =>
           val checked = selected.transform(_.contains(option.get))
           div(
-            nested(bind(option)), ": ",
-            nested(bind(checked))
+            nested(bind(option)),
+            ": ",
+            nested(bind(checked)),
           ).render
         }
-      )
+      ),
     ).render
   }.withSourceCode
 
@@ -42,4 +45,3 @@ object CheckboxButtonsDemo extends AutoDemo {
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
   }
 }
-

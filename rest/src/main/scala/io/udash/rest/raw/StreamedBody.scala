@@ -8,7 +8,7 @@ import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import monix.reactive.Observable
 
 import scala.annotation.implicitNotFound
-import scala.reflect.{ClassTag, classTag}
+import scala.reflect.{classTag, ClassTag}
 
 sealed trait StreamedBody {
   final def defaultStatus: Int = this match {
@@ -30,21 +30,17 @@ object StreamedBody extends StreamedBodyLowPrio {
     def contentType: String
   }
 
-  /**
-   * Represents a binary streamed response body.
-   * The content is delivered as a stream of byte arrays which can be processed incrementally.
-   * Useful for large binary files or content that is generated dynamically.
-   */
+  /** Represents a binary streamed response body. The content is delivered as a stream of byte arrays which can be
+    * processed incrementally. Useful for large binary files or content that is generated dynamically.
+    */
   final case class RawBinary(
     content: Observable[Array[Byte]],
     override val contentType: String,
   ) extends NonEmpty
 
-  /**
-   * Represents a streamed list of JSON values.
-   * Each element in the stream is a complete JSON value, allowing for incremental processing
-   * of potentially large collections without loading everything into memory at once.
-   */
+  /** Represents a streamed list of JSON values. Each element in the stream is a complete JSON value, allowing for
+    * incremental processing of potentially large collections without loading everything into memory at once.
+    */
   final case class JsonList(
     elements: Observable[JsonValue],
     charset: String = HttpBody.Utf8Charset,
@@ -53,11 +49,10 @@ object StreamedBody extends StreamedBodyLowPrio {
     def contentType: String = s"${HttpBody.JsonType};charset=$charset"
   }
 
-  /**
-   * Represents a single non-empty HTTP body that will be delivered as a streaming response.
-   * Used when the content is already fully loaded but needs to be returned through a streaming API
-   * for consistency with other streaming operations.
-   */
+  /** Represents a single non-empty HTTP body that will be delivered as a streaming response. Used when the content is
+    * already fully loaded but needs to be returned through a streaming API for consistency with other streaming
+    * operations.
+    */
   final case class Single(body: HttpBody.NonEmpty) extends NonEmpty {
     override def contentType: String = body.contentType
   }

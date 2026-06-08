@@ -47,26 +47,26 @@ class TranslationKeyTest extends UdashSharedTest {
 
   "Test template placeholders substitution" in {
     implicit val provider: TranslationProvider = new TranslationProvider {
-      override def translate(key: String, argv: Any*)(implicit lang: Lang): Future[Translated] = {
+      override def translate(key: String, argv: Any*)(implicit lang: Lang): Future[Translated] =
         Future.successful(putArgs(key, argv: _*))
-      }
 
       override protected def handleMixedPlaceholders(template: String): Unit = ()
     }
 
-    //escape regex chars in replacement (actually: putArgs test)
+    // escape regex chars in replacement (actually: putArgs test)
     val plainKey = TranslationKey.key1[String]("This is {}")
     getTranslatedString(plainKey("plain string")) should be("This is plain string")
     getTranslatedString(plainKey("${foo}")) should be("This is ${foo}")
-    getTranslatedString(plainKey("<([{\\^-=$!|]})?*+.>")) should be("This is <([{\\^-=$!|]})?*+.>") //regex special chars
+    getTranslatedString(plainKey("<([{\\^-=$!|]})?*+.>")) should
+      be("This is <([{\\^-=$!|]})?*+.>") // regex special chars
 
-    //indexed template
+    // indexed template
     val indexedKey = TranslationKey.key3[Int, Int, Int]("This is {2} {1} {0}")
-    getTranslatedString(indexedKey(1,2,3)) should be("This is 3 2 1")
+    getTranslatedString(indexedKey(1, 2, 3)) should be("This is 3 2 1")
 
-    //mixed templates are actually unhandled
+    // mixed templates are actually unhandled
     val mixedKey = TranslationKey.key3[Int, Int, Int]("This is {2} {} {0}")
-    getTranslatedString(mixedKey(1,2,3)) should be("This is 3 {} 1")
+    getTranslatedString(mixedKey(1, 2, 3)) should be("This is 3 {} 1")
   }
 
   "TranslationKey" should {
@@ -143,7 +143,11 @@ class TranslationKeyTest extends UdashSharedTest {
       }
       cmp(testKey0, TranslationKey0("test0"), TranslationKey0("test1"))
       cmp(testKey1, TranslationKey1("test1"), TranslationKey1("test2"))
-      cmp(testKeyU, TranslationKey.untranslatable("testUntranslatable"), TranslationKey.untranslatable("testUntranslatable2"))
+      cmp(
+        testKeyU,
+        TranslationKey.untranslatable("testUntranslatable"),
+        TranslationKey.untranslatable("testUntranslatable2"),
+      )
       cmp(testKeyR, testKey3(1, "two", 5), testKey3(1, "two", 6))
     }
 

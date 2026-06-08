@@ -55,8 +55,9 @@ abstract class RestApiTest extends AsyncUdashSharedTest with BeforeAndAfterEach 
     }
 
   def testStream[T](call: StreamingRestTestApi => Observable[T])(implicit pos: Position): Future[Assertion] =
-    (call(streamingProxy).toListL.materialize, call(streamingImpl).toListL.materialize).mapN { (proxyResult, implResult) =>
-      assert(proxyResult.map(_.map(mkDeep)) == implResult.map(_.map(mkDeep)))
+    (call(streamingProxy).toListL.materialize, call(streamingImpl).toListL.materialize).mapN {
+      (proxyResult, implResult) =>
+        assert(proxyResult.map(_.map(mkDeep)) == implResult.map(_.map(mkDeep)))
     }.runToFuture
 
   def mkDeep(value: Any): Any = value match {
@@ -129,7 +130,9 @@ trait RestApiTestScenarios extends RestApiTest {
   "close connection on monix task timeout" in {
     Task
       .traverse(List.range(0, Connections))(_ => Task.deferFuture(proxy.neverGet).timeout(CallTimeout).failed)
-      .map(_ => assertResult(expected = Connections)(actual = impl.counterValue())) // neverGet should be called Connections times
+      .map(_ =>
+        assertResult(expected = Connections)(actual = impl.counterValue())
+      ) // neverGet should be called Connections times
       .runToFuture
   }
 
@@ -137,11 +140,11 @@ trait RestApiTestScenarios extends RestApiTest {
     Task
       .traverse(List.range(0, Connections)) { i =>
         val cancelable = Task.deferFuture(proxy.neverGet).runAsync(_ => ())
-        Task.sleep(100.millis)
-          .restartUntil(_ => impl.counterValue() >= i)
-          .map(_ => cancelable.cancel())
+        Task.sleep(100.millis).restartUntil(_ => impl.counterValue() >= i).map(_ => cancelable.cancel())
       }
-      .map(_ => assertResult(expected = Connections)(actual = impl.counterValue())) // neverGet should be called Connections times
+      .map(_ =>
+        assertResult(expected = Connections)(actual = impl.counterValue())
+      ) // neverGet should be called Connections times
       .runToFuture
   }
 }
@@ -209,9 +212,7 @@ trait StreamingRestApiTestScenarios extends RestApiTest {
   }
 
   "client-side timeout on slow stream" in {
-    val streamTask = streamingProxy
-      .delayedStream(size = 10, delayMillis = 200)
-      .toListL
+    val streamTask = streamingProxy.delayedStream(size = 10, delayMillis = 200).toListL
 
     val timeoutTask = streamTask.timeout(500.millis).materialize
 

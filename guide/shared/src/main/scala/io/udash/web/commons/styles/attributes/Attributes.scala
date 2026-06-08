@@ -1,8 +1,8 @@
 package io.udash.web.commons.styles.attributes
 
 object Attributes {
-  /**
-    * States
+
+  /** States
     */
   val Hidden = "hidden"
   val Active = "active"
@@ -14,10 +14,11 @@ object Attributes {
   val State = "state"
   val Pinned = "pinned"
 
-  /**
-    * Generate attribute data-attr
-    * @param attr name of attribute
-    * @return attribute data-attr
+  /** Generate attribute data-attr
+    * @param attr
+    *   name of attribute
+    * @return
+    *   attribute data-attr
     */
   def data(attr: String) = s"data-$attr"
 }

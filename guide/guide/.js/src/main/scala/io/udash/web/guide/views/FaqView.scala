@@ -10,7 +10,7 @@ class FaqView extends View {
 
   private val content = div(
     h2("FAQ"),
-    p("TODO")
+    p("TODO"),
   )
 
   override def getTemplate: Modifier = content

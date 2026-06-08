@@ -5,22 +5,27 @@ import com.avsystem.commons._
 import io.udash.properties.single._
 import io.udash.utils.{CrossCollections, Registration}
 
-private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: PropertyCreator, ElemType <: ReadableProperty[B]](
-  origin: ReadableProperty[A], transformer: A => BSeq[B], listenChildren: Boolean
+private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[
+  A,
+  B: PropertyCreator,
+  ElemType <: ReadableProperty[B],
+](
+  origin: ReadableProperty[A],
+  transformer: A => BSeq[B],
+  listenChildren: Boolean,
 ) extends AbstractReadableSeqProperty[B, ElemType] {
 
-  override final protected[properties] def parent: ReadableProperty[_] = null
+  override protected[properties] final def parent: ReadableProperty[_] = null
 
   private final val children = CrossCollections.createArray[Property[B]]
   private final val childrenRegistrations = CrossCollections.createMap[Property[B], Registration]
   private final var originListenerRegistration: Registration = _
   private final var lastOriginValue: Opt[A] = Opt.empty
 
-  override final def get: BSeq[B] = {
+  override final def get: BSeq[B] =
     if ((originListenerRegistration == null || !originListenerRegistration.isActive) && childrenRegistrations.isEmpty)
       transformer(origin.get)
     else children.map(_.get)
-  }
 
   override final def listen(valueListener: BSeq[B] => Any, initUpdate: Boolean): Registration = {
     initOriginListeners()
@@ -64,7 +69,8 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
     } else None
 
     CallbackSequencer().sequence {
-      transformed.iterator.zip(children.iterator)
+      transformed.iterator
+        .zip(children.iterator)
         .slice(commonBegin, math.max(commonBegin + transformed.size - current.size, transformed.size - commonEnd))
         .foreach { case (pv, p) => p.set(pv) }
       patch.foreach(fireElementsListeners)
@@ -90,20 +96,22 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
   }
 
   private def killOriginListeners(): Unit = {
-    if (originListenerRegistration != null && listeners.isEmpty
-      && structureListeners.isEmpty && children.forall(_.listenersCount() == 0)) {
+    if (
+      originListenerRegistration != null && listeners.isEmpty && structureListeners.isEmpty &&
+      children.forall(_.listenersCount() == 0)
+    ) {
       originListenerRegistration.cancel()
       originListenerRegistration = null
     }
   }
 
-  override final protected[properties] def listenersUpdate(): Unit = {
+  override protected[properties] final def listenersUpdate(): Unit = {
     super.listenersUpdate()
     initOriginListeners()
     killOriginListeners()
   }
 
-  override final protected def wrapListenerRegistration(reg: Registration): Registration =
+  override protected final def wrapListenerRegistration(reg: Registration): Registration =
     super.wrapListenerRegistration(new Registration {
       override def restart(): Unit = {
         initOriginListeners()
@@ -133,23 +141,29 @@ private[properties] abstract class BaseReadableSeqPropertyFromSingleValue[A, B: 
 }
 
 private[properties] final class ReadableSeqPropertyFromSingleValue[A, B: PropertyCreator](
-  origin: ReadableProperty[A], transformer: A => BSeq[B]
+  origin: ReadableProperty[A],
+  transformer: A => BSeq[B],
 ) extends BaseReadableSeqPropertyFromSingleValue[A, B, ReadableProperty[B]](origin, transformer, listenChildren = false) {
 
   override protected def toElemProp(p: Property[B]): ReadableProperty[B] = p
 }
 
 private[properties] final class SeqPropertyFromSingleValue[A, B: PropertyCreator](
-  origin: Property[A], transformer: A => BSeq[B], revert: BSeq[B] => A
+  origin: Property[A],
+  transformer: A => BSeq[B],
+  revert: BSeq[B] => A,
 ) extends BaseReadableSeqPropertyFromSingleValue[A, B, Property[B]](origin, transformer, listenChildren = true)
-  with AbstractSeqProperty[B, Property[B]] {
+    with AbstractSeqProperty[B, Property[B]] {
 
   protected def toElemProp(p: Property[B]): Property[B] = p
 
   override protected[properties] def valueChanged(): Unit = {
-    CallbackSequencer().queue(s"revertSet:$hashCode", () => {
-      origin.set(revert(get))
-    })
+    CallbackSequencer().queue(
+      s"revertSet:$hashCode",
+      () => {
+        origin.set(revert(get))
+      },
+    )
     super.valueChanged()
   }
 

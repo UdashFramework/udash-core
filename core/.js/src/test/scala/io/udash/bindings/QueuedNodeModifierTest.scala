@@ -12,7 +12,7 @@ class QueuedNodeModifierTest extends AsyncUdashFrontendTest with Bindings { bind
         queuedNode {
           span("heavy thing").render
         },
-        "end"
+        "end",
       ).render
 
       template.childNodes.length should be(3)
@@ -30,10 +30,8 @@ class QueuedNodeModifierTest extends AsyncUdashFrontendTest with Bindings { bind
     "render node with timeout > 0" in {
       val template = div(
         "start",
-        queuedNode({
-          span("heavy thing 2").render
-        }, (patienceConfig.interval.millisPart * 3).toInt),
-        "end"
+        queuedNode(span("heavy thing 2").render, (patienceConfig.interval.millisPart * 3).toInt),
+        "end",
       ).render
 
       template.childNodes.length should be(3)

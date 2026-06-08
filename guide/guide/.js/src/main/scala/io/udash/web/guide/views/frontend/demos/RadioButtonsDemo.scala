@@ -23,21 +23,21 @@ object RadioButtonsDemo extends AutoDemo {
 
     val favoriteFruit = Property[Fruit](Apple)
     val favoriteFruitString = favoriteFruit.bitransform(_.toString) {
-        case "Apple" => Apple
-        case "Orange" => Orange
-        case "Banana" => Banana
-      }
+      case "Apple" => Apple
+      case "Orange" => Orange
+      case "Banana" => Banana
+    }
 
     def radioButtons: UdashInputGroup = UdashInputGroup()(
       prependText("Fruits:"),
       appendRadio(
-        RadioButtons(favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty)(
-          els => span(els.map {
-            case (i: Input, l: String) => label(Form.checkInline, BootstrapTags.dataLabel := l)(i, l)
+        RadioButtons(favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty)(els =>
+          span(els.map { case (i: Input, l: String) =>
+            label(Form.checkInline, BootstrapTags.dataLabel := l)(i, l)
           }).render
         )
       ),
-      appendText(span(cls := "radio-buttons-demo-fruits")(bind(favoriteFruit)))
+      appendText(span(cls := "radio-buttons-demo-fruits")(bind(favoriteFruit))),
     )
 
     radioButtons.render
@@ -49,12 +49,12 @@ object RadioButtonsDemo extends AutoDemo {
     import io.udash.css.CssView._
     (
       div(id := "radio-buttons-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
-      form(containerFluid)(
-        div(Grid.row)(firstRadioButtons),
-        div(Grid.row)(secondRadioButtons)
-      )
-    ),
-      source.dropFinalLine
+        form(containerFluid)(
+          div(Grid.row)(firstRadioButtons),
+          div(Grid.row)(secondRadioButtons),
+        )
+      ),
+      source.dropFinalLine,
     )
   }
 }

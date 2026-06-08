@@ -13,33 +13,29 @@ import monix.reactive.Observable
 
 import scala.annotation.implicitNotFound
 
-@implicitNotFound("RestMetadata for ${T} not found, " +
-  "is it a valid REST API trait with properly defined companion object?")
+@implicitNotFound(
+  "RestMetadata for ${T} not found, " + "is it a valid REST API trait with properly defined companion object?"
+)
 @methodTag[RestMethodTag]
 @methodTag[BodyTypeTag]
 final case class RestMetadata[T](
-  @multi
-  @tagged[Prefix](whenUntagged = new Prefix)
-  @tagged[NoBody](whenUntagged = new NoBody)
-  @paramTag[RestParamTag](defaultTag = new Path)
-  @unmatched(RawRest.NotValidPrefixMethod)
-  @unmatchedParam[Body](RawRest.PrefixMethodBodyParam)
-  @rpcMethodMetadata prefixMethods: List[PrefixMetadata[_]],
+  @multi @tagged[Prefix](whenUntagged = new Prefix) @tagged[NoBody](whenUntagged = new NoBody) @paramTag[RestParamTag](
+    defaultTag = new Path
+  ) @unmatched(RawRest.NotValidPrefixMethod) @unmatchedParam[Body](
+    RawRest.PrefixMethodBodyParam
+  ) @rpcMethodMetadata prefixMethods: List[PrefixMetadata[_]],
 
-  @multi
-  @tagged[GET]
-  @tagged[NoBody](whenUntagged = new NoBody)
-  @paramTag[RestParamTag](defaultTag = new Query)
-  @unmatched(RawRest.NotValidGetMethod)
-  @unmatchedParam[Body](RawRest.GetMethodBodyParam)
-  @rpcMethodMetadata httpGetMethods: List[HttpMethodMetadata[_]],
+  @multi @tagged[GET] @tagged[NoBody](whenUntagged = new NoBody) @paramTag[RestParamTag](defaultTag =
+    new Query
+  ) @unmatched(RawRest.NotValidGetMethod) @unmatchedParam[Body](
+    RawRest.GetMethodBodyParam
+  ) @rpcMethodMetadata httpGetMethods: List[HttpMethodMetadata[_]],
 
-  @multi
-  @tagged[BodyMethodTag](whenUntagged = new POST)
-  @tagged[SomeBodyTag](whenUntagged = new JsonBody)
-  @paramTag[RestParamTag](defaultTag = new Body)
-  @unmatched(RawRest.NotValidHttpMethod)
-  @rpcMethodMetadata httpBodyMethods: List[HttpMethodMetadata[_]],
+  @multi @tagged[BodyMethodTag](whenUntagged = new POST) @tagged[SomeBodyTag](whenUntagged = new JsonBody) @paramTag[
+    RestParamTag
+  ](defaultTag = new Body) @unmatched(RawRest.NotValidHttpMethod) @rpcMethodMetadata httpBodyMethods: List[
+    HttpMethodMetadata[_]
+  ],
 ) {
   val httpMethods: List[HttpMethodMetadata[_]] =
     httpGetMethods ++ httpBodyMethods
@@ -70,7 +66,8 @@ final case class RestMetadata[T](
         if prefix.parametersMetadata.headerParamsMap.contains(headerParam.name.toLowerCase)
       } throw new InvalidRestApiException(
         s"Header parameter ${headerParam.name} of ${method.name} collides with header parameter of the same " +
-          s"(case insensitive) name in prefix ${prefix.name}")
+          s"(case insensitive) name in prefix ${prefix.name}"
+      )
 
       for {
         prefix <- prefixes
@@ -78,7 +75,8 @@ final case class RestMetadata[T](
         if prefix.parametersMetadata.queryParamsMap.contains(queryParam.name)
       } throw new InvalidRestApiException(
         s"Query parameter ${queryParam.name} of ${method.name} collides with query parameter of the same " +
-          s"name in prefix ${prefix.name}")
+          s"name in prefix ${prefix.name}"
+      )
 
       for {
         prefix <- prefixes
@@ -86,7 +84,8 @@ final case class RestMetadata[T](
         if prefix.parametersMetadata.cookieParamsMap.contains(cookieParam.name)
       } throw new InvalidRestApiException(
         s"Cookie parameter ${cookieParam.name} of ${method.name} collides with cookie parameter of the same " +
-          s"name in prefix ${prefix.name}")
+          s"name in prefix ${prefix.name}"
+      )
     }
 
     prefixMethods.foreach { prefix =>
@@ -114,31 +113,38 @@ final case class RestMetadata[T](
     resolutionTrie.resolvePath(this, Nil, Nil, path).toList
 }
 object RestMetadata extends RpcMetadataCompanion[RestMetadata] {
-  /**
-   * Materializes [[RestMetadata]] for an arbitrary type rather than a trait.
-   * Scans all public methods instead of just abstract methods.
-   */
+
+  /** Materializes [[RestMetadata]] for an arbitrary type rather than a trait. Scans all public methods instead of just
+    * abstract methods.
+    */
   def materializeForImpl[Real]: RestMetadata[Real] = macro RestMacros.materializeImplMetadata[Real]
 
   private class ResolutionTrie(methods: List[(List[PathPatternElement], RestMethodMetadata[_])]) {
     private val named: Map[PlainValue, ResolutionTrie] = methods.iterator
       .collect { case (PathName(pv) :: tail, method) => (pv, (tail, method)) }
-      .groupToMap(_._1, _._2).iterator
+      .groupToMap(_._1, _._2)
+      .iterator
       .map { case (pv, submethods) => (pv, new ResolutionTrie(submethods.toList)) }
       .toMap
 
     private val wildcard: Opt[ResolutionTrie] =
-      methods.collect { case (PathParam(_) :: tail, method) => (tail, method) }
-        .opt.filter(_.nonEmpty).map(new ResolutionTrie(_))
+      methods
+        .collect { case (PathParam(_) :: tail, method) => (tail, method) }
+        .opt
+        .filter(_.nonEmpty)
+        .map(new ResolutionTrie(_))
 
-    private val httpMethods: List[HttpMethodMetadata[_]] = methods
-      .collect { case (Nil, hmm: HttpMethodMetadata[_]) => hmm }
+    private val httpMethods: List[HttpMethodMetadata[_]] = methods.collect { case (Nil, hmm: HttpMethodMetadata[_]) =>
+      hmm
+    }
 
-    private val prefixes: List[PrefixMetadata[_]] = methods
-      .collect { case (Nil, pm: PrefixMetadata[_]) => pm }
+    private val prefixes: List[PrefixMetadata[_]] = methods.collect { case (Nil, pm: PrefixMetadata[_]) => pm }
 
     def resolvePath(
-      root: RestMetadata[_], prefixCalls: List[PrefixCall], pathParams: List[PlainValue], path: List[PlainValue]
+      root: RestMetadata[_],
+      prefixCalls: List[PrefixCall],
+      pathParams: List[PlainValue],
+      path: List[PlainValue],
     ): Iterator[ResolvedCall] = {
 
       val fromPrefixes = prefixes.iterator.flatMap { prefix =>
@@ -183,7 +189,8 @@ object RestMetadata extends RpcMetadataCompanion[RestMetadata] {
       metadata.prefixMethods.foreach { pm =>
         if (prefixStack.contains(pm)) {
           throw new InvalidRestApiException(
-            s"call chain $prefixChain${pm.name} is recursive, recursively defined server APIs are forbidden")
+            s"call chain $prefixChain${pm.name} is recursive, recursively defined server APIs are forbidden"
+          )
         }
         forPattern(pm.pathPattern).fillWith(pm.result.value, pm :: prefixStack)
       }
@@ -196,7 +203,10 @@ object RestMetadata extends RpcMetadataCompanion[RestMetadata] {
       HttpMethod.values.foreach { meth =>
         rpcChains(meth) ++= other.rpcChains(meth)
       }
-      for (w <- wildcard; ow <- other.wildcard) w.merge(ow)
+      for {
+        w <- wildcard
+        ow <- other.wildcard
+      } w.merge(ow)
       wildcard = wildcard orElse other.wildcard
       other.byName.foreach { case (name, trie) =>
         byName.getOrElseUpdate(name, new ValidationTrie).merge(trie)
@@ -247,8 +257,10 @@ sealed abstract class RestMethodMetadata[T] extends TypedMetadata[T] {
         case (Nil, Nil) => Nil
         case (_, PathName(patternHead) :: patternTail) => patternHead :: loop(params, patternTail)
         case (param :: paramsTail, PathParam(_) :: patternTail) => param :: loop(paramsTail, patternTail)
-        case _ => throw new IllegalArgumentException(
-          s"got ${params.size} path params, expected ${parametersMetadata.pathParams.size}")
+        case _ =>
+          throw new IllegalArgumentException(
+            s"got ${params.size} path params, expected ${parametersMetadata.pathParams.size}"
+          )
       }
     loop(params, pathPattern)
   }
@@ -339,7 +351,7 @@ final case class HttpMethodMetadata[T](
     requestAdjusters,
     responseAdjusters,
     Nil,
-    responseType
+    responseType,
   )
 
   val method: HttpMethod = methodTag.method
@@ -358,19 +370,20 @@ final case class HttpMethodMetadata[T](
     PlainValue.decodePath(methodTag.path)
 }
 
-/**
- * Typeclass used during [[io.udash.rest.raw.RestMetadata RestMetadata]] materialization to determine whether a real method is a valid HTTP
- * method. Usually this means that the result must be a type wrapped into something that captures asynchronous
- * computation, e.g. `Future`. Because REST framework core tries to be agnostic about this
- * asynchronous wrapper (not everyone likes `Future`s), there are no default implicits provided for [[io.udash.rest.raw.HttpResponseType HttpResponseType]].
- * They must be provided externally.
- *
- * For example, [[io.udash.rest.FutureRestImplicits FutureRestImplicits]] introduces an instance of [[io.udash.rest.raw.HttpResponseType HttpResponseType]] for `Future[T]`,
- * for arbitrary type `T`. For [[io.udash.rest.raw.RestMetadata RestMetadata]] materialization this means that every method which returns a
- * `Future` is considered a valid HTTP method. [[io.udash.rest.FutureRestImplicits FutureRestImplicits]] is injected into materialization of
- * [[io.udash.rest.raw.RestMetadata RestMetadata]] through one of the base companion classes, e.g. [[io.udash.rest.DefaultRestApiCompanion DefaultRestApiCompanion]].
- * See `MacroInstances` for more information on injection of implicits.
- */
+/** Typeclass used during [[io.udash.rest.raw.RestMetadata RestMetadata]] materialization to determine whether a real
+  * method is a valid HTTP method. Usually this means that the result must be a type wrapped into something that
+  * captures asynchronous computation, e.g. `Future`. Because REST framework core tries to be agnostic about this
+  * asynchronous wrapper (not everyone likes `Future`s), there are no default implicits provided for
+  * [[io.udash.rest.raw.HttpResponseType HttpResponseType]]. They must be provided externally.
+  *
+  * For example, [[io.udash.rest.FutureRestImplicits FutureRestImplicits]] introduces an instance of
+  * [[io.udash.rest.raw.HttpResponseType HttpResponseType]] for `Future[T]`, for arbitrary type `T`. For
+  * [[io.udash.rest.raw.RestMetadata RestMetadata]] materialization this means that every method which returns a
+  * `Future` is considered a valid HTTP method. [[io.udash.rest.FutureRestImplicits FutureRestImplicits]] is injected
+  * into materialization of [[io.udash.rest.raw.RestMetadata RestMetadata]] through one of the base companion classes,
+  * e.g. [[io.udash.rest.DefaultRestApiCompanion DefaultRestApiCompanion]]. See `MacroInstances` for more information on
+  * injection of implicits.
+  */
 @implicitNotFound("${T} is not a valid result type of HTTP REST method")
 final case class HttpResponseType[T](streamed: Boolean = false)
 object HttpResponseType extends HttpResponseTypeLowPrio {
@@ -378,11 +391,12 @@ object HttpResponseType extends HttpResponseTypeLowPrio {
   implicit def observableResponseType[T]: HttpResponseType[Observable[T]] =
     HttpResponseType(streamed = true)
 
-  implicit def streamedResponseType[F[_] : TaskLike, T](implicit asRaw: AsRaw[StreamedRestResponse, T]): HttpResponseType[F[T]] =
+  implicit def streamedResponseType[F[_]: TaskLike, T](implicit asRaw: AsRaw[StreamedRestResponse, T])
+    : HttpResponseType[F[T]] =
     HttpResponseType(streamed = true)
 }
 trait HttpResponseTypeLowPrio { this: HttpResponseType.type =>
-  implicit def asyncEffectResponseType[F[_] : TaskLike, T]: HttpResponseType[F[T]] =
+  implicit def asyncEffectResponseType[F[_]: TaskLike, T]: HttpResponseType[F[T]] =
     HttpResponseType()
 }
 
@@ -390,7 +404,7 @@ final case class RestParametersMetadata(
   @multi @tagged[Path] @rpcParamMetadata pathParams: List[PathParamMetadata[_]],
   @multi @tagged[Header] @rpcParamMetadata @allowOptional headerParams: List[ParamMetadata[_]],
   @multi @tagged[Query] @rpcParamMetadata @allowOptional queryParams: List[ParamMetadata[_]],
-  @multi @tagged[Cookie] @rpcParamMetadata @allowOptional cookieParams: List[ParamMetadata[_]]
+  @multi @tagged[Cookie] @rpcParamMetadata @allowOptional cookieParams: List[ParamMetadata[_]],
 ) {
   lazy val headerParamsMap: Map[String, ParamMetadata[_]] =
     headerParams.toMapBy(_.name.toLowerCase)

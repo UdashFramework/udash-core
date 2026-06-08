@@ -9,64 +9,72 @@ name := "udash"
 
 Global / excludeLintKeys ++= Set(ideOutputDirectory, ideSkipProject)
 
-inThisBuild(Seq(
-  organization := "io.udash",
-  resolvers += Resolver.defaultLocal,
-  homepage := Some(url("https://udash.io")),
-  licenses := Seq(License.Apache2),
-  scmInfo := Some(ScmInfo(
-    browseUrl = url("https://github.com/UdashFramework/udash-core"),
-    connection = "scm:git:git@github.com:UdashFramework/udash-core.git",
-    devConnection = Some("scm:git:git@github.com:UdashFramework/udash-core.git"),
-  )),
-  developers := List(
-    Developer("ddworak", "Dawid Dworak", "d.dworak@avsystem.com", url("https://github.com/ddworak")),
-  ),
-  scalaVersion := Dependencies.versionOfScala,
+inThisBuild(
+  Seq(
+    organization := "io.udash",
+    resolvers += Resolver.defaultLocal,
+    homepage := Some(url("https://udash.io")),
+    licenses := Seq(License.Apache2),
+    scmInfo := Some(
+      ScmInfo(
+        browseUrl = url("https://github.com/UdashFramework/udash-core"),
+        connection = "scm:git:git@github.com:UdashFramework/udash-core.git",
+        devConnection = Some("scm:git:git@github.com:UdashFramework/udash-core.git"),
+      )
+    ),
+    developers := List(
+      Developer("ddworak", "Dawid Dworak", "d.dworak@avsystem.com", url("https://github.com/ddworak"))
+    ),
+    scalaVersion := Dependencies.versionOfScala,
 
-  githubWorkflowTargetTags ++= Seq("v*"),
-  githubWorkflowArtifactUpload := false,
-  githubWorkflowJavaVersions := Seq(JavaSpec.temurin("17"), JavaSpec.temurin("21"), JavaSpec.temurin("25")),
-  githubWorkflowBuildPreamble ++= Seq(
-    WorkflowStep.Use(
-      ref = UseRef.Public("actions", "setup-node", "v4"),
-      name = Some("Setup Node.js"),
+    githubWorkflowTargetTags ++= Seq("v*"),
+    githubWorkflowArtifactUpload := false,
+    githubWorkflowJavaVersions := Seq(JavaSpec.temurin("17"), JavaSpec.temurin("21"), JavaSpec.temurin("25")),
+    githubWorkflowBuildPreamble ++= Seq(
+      WorkflowStep.Use(
+        ref = UseRef.Public("actions", "setup-node", "v4"),
+        name = Some("Setup Node.js"),
+      ),
+      WorkflowStep.Run(
+        commands = List("npm install"),
+        name = Some("Install npm dependencies"),
+      ),
     ),
-    WorkflowStep.Run(
-      commands = List("npm install"),
-      name = Some("Install npm dependencies")
-    )
-  ),
-  githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v"))),
-  githubWorkflowEnv += "JAVA_OPTS" -> "-Dfile.encoding=UTF-8 -Xmx4G",
-  githubWorkflowBuildMatrixFailFast := Some(false),
-  githubWorkflowBuildMatrixAdditions += "command" -> List("udash-jvm/test", "udash-js/test", "guide-selenium/test"),
-  githubWorkflowBuild := Seq(WorkflowStep.Sbt(
-    commands = List("${{ matrix.command }}"),
-    name = Some("Run tests"),
-  )),
-  // MiMa only compares bytecode — result is JDK-agnostic, so we run it in a dedicated
-  // single-JDK job instead of multiplying the work across the build matrix.
-  githubWorkflowAddedJobs += WorkflowJob(
-    id = "mima",
-    name = "Binary Compatibility Check",
-    scalas = List(Dependencies.versionOfScala),
-    javas = List(JavaSpec.temurin("21")),
-    steps = githubWorkflowJobSetup.value.toList :+ WorkflowStep.Sbt(
-      List("mimaReportBinaryIssues"),
-      name = Some("Check binary compatibility"),
+    githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v"))),
+    githubWorkflowEnv += "JAVA_OPTS" -> "-Dfile.encoding=UTF-8 -Xmx4G",
+    githubWorkflowBuildMatrixFailFast := Some(false),
+    githubWorkflowBuildMatrixAdditions += "command" -> List("udash-jvm/test", "udash-js/test", "guide-selenium/test"),
+    githubWorkflowBuild := Seq(
+      WorkflowStep.Sbt(
+        commands = List("${{ matrix.command }}"),
+        name = Some("Run tests"),
+      )
     ),
-  ),
-  githubWorkflowPublish := Seq(WorkflowStep.Sbt(
-    List("ci-release"),
-    env = Map(
-      "PGP_PASSPHRASE" -> "${{ secrets.PGP_PASSPHRASE }}",
-      "PGP_SECRET" -> "${{ secrets.PGP_SECRET }}",
-      "SONATYPE_PASSWORD" -> "${{ secrets.SONATYPE_PASSWORD }}",
-      "SONATYPE_USERNAME" -> "${{ secrets.SONATYPE_USERNAME }}"
-    )
-  )),
-))
+    // MiMa only compares bytecode — result is JDK-agnostic, so we run it in a dedicated
+    // single-JDK job instead of multiplying the work across the build matrix.
+    githubWorkflowAddedJobs += WorkflowJob(
+      id = "mima",
+      name = "Binary Compatibility Check",
+      scalas = List(Dependencies.versionOfScala),
+      javas = List(JavaSpec.temurin("21")),
+      steps = githubWorkflowJobSetup.value.toList :+ WorkflowStep.Sbt(
+        List("mimaReportBinaryIssues"),
+        name = Some("Check binary compatibility"),
+      ),
+    ),
+    githubWorkflowPublish := Seq(
+      WorkflowStep.Sbt(
+        List("ci-release"),
+        env = Map(
+          "PGP_PASSPHRASE" -> "${{ secrets.PGP_PASSPHRASE }}",
+          "PGP_SECRET" -> "${{ secrets.PGP_SECRET }}",
+          "SONATYPE_PASSWORD" -> "${{ secrets.SONATYPE_PASSWORD }}",
+          "SONATYPE_USERNAME" -> "${{ secrets.SONATYPE_USERNAME }}",
+        ),
+      )
+    ),
+  )
+)
 
 val forIdeaImport = System.getProperty("idea.managed", "false").toBoolean && System.getProperty("idea.runid") == null
 val CompileAndTest = "test->test;compile->compile"
@@ -74,10 +82,9 @@ val CompileAndTest = "test->test;compile->compile"
 val previousCompatibleVersions: Set[String] = Set("0.23.0")
 
 // Settings for JS tests run in browser
-val browserCapabilities: Capabilities = {
+val browserCapabilities: Capabilities =
   // requires gecko driver, see https://github.com/mozilla/geckodriver
   new FirefoxOptions().setHeadless(true).setLogLevel(FirefoxDriverLogLevel.WARN)
-}
 
 val commonSettings = Seq(
   scalacOptions ++= Seq(
@@ -94,7 +101,8 @@ val commonSettings = Seq(
     "-Xlint:_,-missing-interpolator,-unused",
     "-Xsource:3",
     "-Yrangepos",
-    "-Ybackend-parallelism", "8",
+    "-Ybackend-parallelism",
+    "8",
     "-Ycache-plugin-class-loader:last-modified",
     "-Ycache-macro-class-loader:last-modified",
     "-Xnon-strict-patmat-analysis",
@@ -145,7 +153,7 @@ def sourceDirsSettings(baseMapper: File => File) = {
   def mkSourceDirs(base: File, scalaBinary: String, conf: String): Seq[File] = Seq(
     base / "src" / conf / "scala",
     base / "src" / conf / s"scala-$scalaBinary",
-    base / "src" / conf / "java"
+    base / "src" / conf / "java",
   )
 
   def mkResourceDirs(base: File, conf: String): Seq[File] = Seq(
@@ -154,12 +162,9 @@ def sourceDirsSettings(baseMapper: File => File) = {
   Seq(
     Compile / unmanagedSourceDirectories ++=
       mkSourceDirs(baseMapper(baseDirectory.value), scalaBinaryVersion.value, "main"),
-    Compile / unmanagedResourceDirectories ++=
-      mkResourceDirs(baseMapper(baseDirectory.value), "main"),
-    Test / unmanagedSourceDirectories ++=
-      mkSourceDirs(baseMapper(baseDirectory.value), scalaBinaryVersion.value, "test"),
-    Test / unmanagedResourceDirectories ++=
-      mkResourceDirs(baseMapper(baseDirectory.value), "test"),
+    Compile / unmanagedResourceDirectories ++= mkResourceDirs(baseMapper(baseDirectory.value), "main"),
+    Test / unmanagedSourceDirectories ++= mkSourceDirs(baseMapper(baseDirectory.value), scalaBinaryVersion.value, "test"),
+    Test / unmanagedResourceDirectories ++= mkResourceDirs(baseMapper(baseDirectory.value), "test"),
   )
 }
 
@@ -170,12 +175,11 @@ def jvmProject(proj: Project): Project =
   )
 
 def jsProject(proj: Project): Project =
-  proj.in(proj.base / ".js")
-    .enablePlugins(ScalaJSPlugin, JSDependenciesPlugin)
-    .settings(commonJsSettings)
+  proj.in(proj.base / ".js").enablePlugins(ScalaJSPlugin, JSDependenciesPlugin).settings(commonJsSettings)
 
 def jsProjectFor(jsProj: Project, jvmProj: Project): Project =
-  jsProj.in(jvmProj.base / ".js")
+  jsProj
+    .in(jvmProj.base / ".js")
     .enablePlugins(ScalaJSPlugin, JSDependenciesPlugin)
     .configure(p => if (forIdeaImport) p.dependsOn(jvmProj) else p)
     .settings(
@@ -185,15 +189,17 @@ def jsProjectFor(jsProj: Project, jvmProj: Project): Project =
       sourceDirsSettings(_.getParentFile),
 
       // workaround for some cross-compilation problems in IntelliJ
-      libraryDependencies ++= (if (forIdeaImport) (jvmProj / libraryDependencies).value else Seq.empty)
+      libraryDependencies ++= (if (forIdeaImport) (jvmProj / libraryDependencies).value else Seq.empty),
     )
 
-def frontendExecutable(proj: Project)(
+def frontendExecutable(
+  proj: Project
+)(
   staticsRoot: String,
   jsDeps: Def.Initialize[Seq[JSModuleID]],
   cssRenderer: Option[(Project, String)] = None,
   additionalAssetsDirectory: Def.Initialize[Task[Option[File]]] = Def.task(None),
-) = {
+) =
   proj
     .enablePlugins(ScalaJSPlugin, JSDependenciesPlugin, SbtWeb)
     .settings(commonJsSettings)
@@ -204,7 +210,7 @@ def frontendExecutable(proj: Project)(
       jsDependencies ++= jsDeps.value,
       Compile / scalaJSUseMainModuleInitializer := true,
 
-      //library CSS settings
+      // library CSS settings
       Assets / LessKeys.cleancss := true,
       Assets / LessKeys.compress := true,
       Assets / LessKeys.strictMath := true,
@@ -212,7 +218,7 @@ def frontendExecutable(proj: Project)(
       Assets / LessKeys.less / includeFilter := "assets.less",
       Assets / LessKeys.less / resourceManaged := (Compile / target).value / staticsRoot / "assets" / "styles",
 
-      //fastOptJS invokes less, which would fail without additional assets (e.g. prism.css)
+      // fastOptJS invokes less, which would fail without additional assets (e.g. prism.css)
       Assets / LessKeys.less := (Assets / LessKeys.less).dependsOn(Compile / copyAssets).value,
 
       Compile / copyAssets := {
@@ -226,7 +232,7 @@ def frontendExecutable(proj: Project)(
         // (appropriate CSS file is inlined by less within UdashStatics/WebContent/guide/assets/styles/assets.min.css)
         IO.copyDirectory(
           (Assets / WebKeys.webJarsDirectory).value / WebKeys.webModulesLib.value / "font-awesome/webfonts",
-          assets / "webfonts"
+          assets / "webfonts",
         )
       },
       // a font-awesome WebJar is required on the classpath to execute the copyAssets task
@@ -234,12 +240,14 @@ def frontendExecutable(proj: Project)(
 
       // Compiles CSS files and put them in the target directory
       compileCss := Def.taskDyn {
-        cssRenderer.map { case (rendererProject, rendererClass) =>
-          val dir = (Compile / target).value / staticsRoot / "styles"
-          val path = dir.absolutePath
-          dir.mkdirs()
-          (rendererProject / Compile / runMain).toTask(s" $rendererClass $path false")
-        }.getOrElse(Def.task(()))
+        cssRenderer
+          .map { case (rendererProject, rendererClass) =>
+            val dir = (Compile / target).value / staticsRoot / "styles"
+            val path = dir.absolutePath
+            dir.mkdirs()
+            (rendererProject / Compile / runMain).toTask(s" $rendererClass $path false")
+          }
+          .getOrElse(Def.task(()))
       }.value,
 
       // Compiles JS files without full optimizations
@@ -248,27 +256,33 @@ def frontendExecutable(proj: Project)(
 
       // Compiles JS files with full optimizations
       compileAndOptimizeStatics := (Compile / fullOptJS / target).value / "UdashStatics",
-      compileAndOptimizeStatics := compileAndOptimizeStatics.dependsOn(
-        Compile / fullOptJS, Compile / copyAssets, Compile / compileCss
-      ).value,
+      compileAndOptimizeStatics :=
+        compileAndOptimizeStatics
+          .dependsOn(
+            Compile / fullOptJS,
+            Compile / copyAssets,
+            Compile / compileCss,
+          )
+          .value,
 
       // force fullOpt dependencies generation after fastOpt deps generation
-      Compile / packageMinifiedJSDependencies :=
-        (Compile / packageMinifiedJSDependencies).dependsOn(Compile / packageJSDependencies).value,
+      Compile / packageMinifiedJSDependencies := (Compile / packageMinifiedJSDependencies)
+        .dependsOn(Compile / packageJSDependencies)
+        .value,
 
       // Target files for Scala.js plugin
-      Compile / fastOptJS / artifactPath :=
-        (Compile / fastOptJS / target).value / staticsRoot / "scripts" / "frontend.js",
-      Compile / fullOptJS / artifactPath :=
-        (Compile / fullOptJS / target).value / staticsRoot / "scripts" / "frontend.js",
-      Compile / packageJSDependencies / artifactPath :=
-        (Compile / packageJSDependencies / target).value / staticsRoot / "scripts" / "frontend-deps.js",
+      Compile / fastOptJS / artifactPath := (Compile / fastOptJS / target).value / staticsRoot / "scripts" /
+        "frontend.js",
+      Compile / fullOptJS / artifactPath := (Compile / fullOptJS / target).value / staticsRoot / "scripts" /
+        "frontend.js",
+      Compile / packageJSDependencies / artifactPath := (Compile / packageJSDependencies / target).value / staticsRoot /
+        "scripts" / "frontend-deps.js",
       Compile / packageMinifiedJSDependencies / artifactPath :=
-        (Compile / packageMinifiedJSDependencies / target).value / staticsRoot / "scripts" / "frontend-deps.js"
+        (Compile / packageMinifiedJSDependencies / target).value / staticsRoot / "scripts" / "frontend-deps.js",
     )
-}
 
-lazy val udash = project.in(file("."))
+lazy val udash = project
+  .in(file("."))
   .aggregate(`udash-jvm`, `udash-js`, guide)
   .settings(
     aggregateProjectSettings,
@@ -277,40 +291,43 @@ lazy val udash = project.in(file("."))
 
 //for simplifying Travis build matrix and project dependencies
 lazy val jvmLibraries = Seq[ProjectReference](macros, utils, core, rpc, rest, `rest-jetty`, i18n, auth, css)
-lazy val `udash-jvm` = project.in(file(".jvm"))
-  .aggregate(jvmLibraries: _*)
-  .settings(aggregateProjectSettings)
+lazy val `udash-jvm` = project.in(file(".jvm")).aggregate(jvmLibraries: _*).settings(aggregateProjectSettings)
 
 lazy val jsLibraries = Seq[ProjectReference](
-  macros, `utils-js`, `core-js`, `rpc-js`, `rest-js`, `i18n-js`, `auth-js`, `css-js`, bootstrap4
+  macros,
+  `utils-js`,
+  `core-js`,
+  `rpc-js`,
+  `rest-js`,
+  `i18n-js`,
+  `auth-js`,
+  `css-js`,
+  bootstrap4,
 )
-lazy val `udash-js` = project.in(file(".js"))
-  .aggregate(jsLibraries: _*)
-  .settings(aggregateProjectSettings)
+lazy val `udash-js` = project.in(file(".js")).aggregate(jsLibraries: _*).settings(aggregateProjectSettings)
 
-lazy val macros = project
-  .settings(
-    commonSettings,
-    libraryDependencies ++= Dependencies.macroDeps.value,
-    mimaPreviousArtifacts := Set.empty, // no need for MiMa checks
-  )
+lazy val macros = project.settings(
+  commonSettings,
+  libraryDependencies ++= Dependencies.macroDeps.value,
+  mimaPreviousArtifacts := Set.empty, // no need for MiMa checks
+)
 
 lazy val utils = jvmProject(project)
   .dependsOn(macros)
   .settings(
-    libraryDependencies ++= Dependencies.utilsJvmDeps.value,
+    libraryDependencies ++= Dependencies.utilsJvmDeps.value
   )
 
 lazy val `utils-js` = jsProjectFor(project, utils)
   .dependsOn(macros)
   .settings(
-    libraryDependencies ++= Dependencies.utilsSjsDeps.value,
+    libraryDependencies ++= Dependencies.utilsSjsDeps.value
   )
 
 lazy val core = jvmProject(project)
   .dependsOn(utils % CompileAndTest)
   .settings(
-    libraryDependencies ++= Dependencies.coreJvmDeps.value,
+    libraryDependencies ++= Dependencies.coreJvmDeps.value
   )
 
 lazy val `core-js` = jsProjectFor(project, core)
@@ -323,55 +340,51 @@ lazy val `core-js` = jsProjectFor(project, core)
 lazy val rpc = jvmProject(project)
   .dependsOn(utils % CompileAndTest)
   .settings(
-    libraryDependencies ++= Dependencies.rpcJvmDeps.value,
+    libraryDependencies ++= Dependencies.rpcJvmDeps.value
   )
 
 lazy val `rpc-js` = jsProjectFor(project, rpc)
   .dependsOn(`utils-js` % CompileAndTest)
   .settings(
-    jsDependencies ++= Dependencies.rpcJsDeps.value,
+    jsDependencies ++= Dependencies.rpcJsDeps.value
   )
 
 lazy val rest = jvmProject(project)
   .dependsOn(utils % CompileAndTest)
   .settings(
-    libraryDependencies ++= Dependencies.restJvmDeps.value,
+    libraryDependencies ++= Dependencies.restJvmDeps.value
   )
 
 lazy val `rest-js` = jsProjectFor(project, rest)
   .dependsOn(`utils-js` % CompileAndTest)
   .settings(
-    libraryDependencies ++= Dependencies.restSjsDeps.value,
+    libraryDependencies ++= Dependencies.restSjsDeps.value
   )
 
 lazy val `rest-jetty` = jvmProject(project.in(file("rest/jetty")))
   .dependsOn(rest % CompileAndTest)
   .settings(
-    libraryDependencies ++= Dependencies.restJettyDeps.value,
+    libraryDependencies ++= Dependencies.restJettyDeps.value
   )
 
-lazy val i18n = jvmProject(project)
-  .dependsOn(core % CompileAndTest, rpc % CompileAndTest)
+lazy val i18n = jvmProject(project).dependsOn(core % CompileAndTest, rpc % CompileAndTest)
 
-lazy val `i18n-js` = jsProjectFor(project, i18n)
-  .dependsOn(`core-js` % CompileAndTest, `rpc-js` % CompileAndTest)
+lazy val `i18n-js` = jsProjectFor(project, i18n).dependsOn(`core-js` % CompileAndTest, `rpc-js` % CompileAndTest)
 
-lazy val auth = jvmProject(project)
-  .dependsOn(core % CompileAndTest, rpc)
+lazy val auth = jvmProject(project).dependsOn(core % CompileAndTest, rpc)
 
-lazy val `auth-js` = jsProjectFor(project, auth)
-  .dependsOn(`core-js` % CompileAndTest, `rpc-js`)
+lazy val `auth-js` = jsProjectFor(project, auth).dependsOn(`core-js` % CompileAndTest, `rpc-js`)
 
 lazy val css = jvmProject(project)
   .dependsOn(core % CompileAndTest)
   .settings(
-    libraryDependencies ++= Dependencies.cssJvmDeps.value,
+    libraryDependencies ++= Dependencies.cssJvmDeps.value
   )
 
 lazy val `css-js` = jsProjectFor(project, css)
   .dependsOn(`core-js` % CompileAndTest)
   .settings(
-    libraryDependencies ++= Dependencies.cssSjsDeps.value,
+    libraryDependencies ++= Dependencies.cssSjsDeps.value
   )
 
 lazy val bootstrap4 = jsProject(project)
@@ -379,7 +392,7 @@ lazy val bootstrap4 = jsProject(project)
   .settings(
     testInBrowser,
     libraryDependencies ++= Dependencies.bootstrap4SjsDeps.value,
-    jsDependencies ++= Dependencies.bootstrap4JsDeps.value
+    jsDependencies ++= Dependencies.bootstrap4JsDeps.value,
   )
 
 lazy val benchmarks = jsProject(project)
@@ -402,9 +415,18 @@ val compileAndOptimizeStatics = taskKey[File](
   "Compiles and optimizes JavaScript files and copies all assets to the target directory."
 )
 
-lazy val guide = project.in(file("guide"))
-  .aggregate(`guide-shared`, `guide-shared-js`, `guide-backend`, `guide-commons`, `guide-homepage`,
-    `guide-guide`, `guide-packager`, `guide-selenium`)
+lazy val guide = project
+  .in(file("guide"))
+  .aggregate(
+    `guide-shared`,
+    `guide-shared-js`,
+    `guide-backend`,
+    `guide-commons`,
+    `guide-homepage`,
+    `guide-guide`,
+    `guide-packager`,
+    `guide-selenium`,
+  )
   .settings(
     aggregateProjectSettings,
     ideSkipProject := true,
@@ -450,7 +472,7 @@ lazy val `guide-homepage` =
     "UdashStatics/WebContent/homepage",
     Dependencies.homepageJsDeps,
     Some((`guide-backend`, "io.udash.web.styles.HomepageCssRenderer")),
-    Def.task(Some((`guide-commons` / sourceDirectory).value / "main" / "assets"))
+    Def.task(Some((`guide-commons` / sourceDirectory).value / "main" / "assets")),
   )
 
 lazy val `guide-guide` =
@@ -458,11 +480,12 @@ lazy val `guide-guide` =
     "UdashStatics/WebContent/guide",
     Dependencies.guideJsDeps,
     Some((`guide-backend`, "io.udash.web.styles.GuideCssRenderer")),
-    Def.task(Some((`guide-commons` / sourceDirectory).value / "main" / "assets"))
+    Def.task(Some((`guide-commons` / sourceDirectory).value / "main" / "assets")),
   )
 
 lazy val `guide-packager` =
-  project.in(file("guide/packager"))
+  project
+    .in(file("guide/packager"))
     .dependsOn(`guide-backend`)
     .enablePlugins(JavaServerAppPackaging)
     .settings(
@@ -478,17 +501,17 @@ lazy val `guide-packager` =
       Universal / mappings ++= {
         import Path.relativeTo
         val frontendStatics = (`guide-homepage` / Compile / compileAndOptimizeStatics).value
-        (frontendStatics.allPaths --- frontendStatics) pair relativeTo(frontendStatics.getParentFile)
+        (frontendStatics.allPaths --- frontendStatics).pair(relativeTo(frontendStatics.getParentFile))
       },
 
       // add guide statics to the package
       Universal / mappings ++= {
         import Path.relativeTo
         val frontendStatics = (`guide-guide` / Compile / compileAndOptimizeStatics).value
-        (frontendStatics.allPaths --- frontendStatics) pair relativeTo(frontendStatics.getParentFile)
+        (frontendStatics.allPaths --- frontendStatics).pair(relativeTo(frontendStatics.getParentFile))
       },
 
-      dockerExposedPorts += 8080, //should match ui.server.port
+      dockerExposedPorts += 8080, // should match ui.server.port
       dockerEnvVars += "DISABLE_FILE_LOGGING" -> "true",
       dockerBaseImage := "eclipse-temurin:17-jdk-jammy",
       dockerUpdateLatest := true,
@@ -505,13 +528,16 @@ lazy val `guide-selenium` =
 
       Test / parallelExecution := false,
 
-      Test / compile := (Test / compile).dependsOn(
-        `guide-homepage` / Compile / compileStatics,
-        `guide-guide` / Compile / compileStatics,
-      ).value
+      Test / compile := (Test / compile)
+        .dependsOn(
+          `guide-homepage` / Compile / compileStatics,
+          `guide-guide` / Compile / compileStatics,
+        )
+        .value,
     )
 
-lazy val benchmarksJVM =   project.in(file("benchmarks"))
+lazy val benchmarksJVM = project
+  .in(file("benchmarks"))
   .enablePlugins(JmhPlugin)
   .dependsOn(jvmLibraries.map(p => p: ClasspathDep[ProjectReference]): _*)
   .settings(

@@ -23,7 +23,12 @@ import org.eclipse.jetty.util.resource.ResourceFactory
 import java.nio.file.{NoSuchFileException, Path}
 import scala.util.{Failure, Success, Try}
 
-class ApplicationServer(val port: Int, homepageResourceBase: String, guideResourceBase: String)(implicit scheduler: Scheduler) extends LazyLogging {
+class ApplicationServer(
+  val port: Int,
+  homepageResourceBase: String,
+  guideResourceBase: String,
+)(implicit scheduler: Scheduler
+) extends LazyLogging {
   private val server = new Server(port)
 
   def start(): Unit =
@@ -33,22 +38,25 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
     server.stop()
 
   private val homepage =
-    new CompressionHandler(createContextHandler(
-      hosts = Array("udash.io", "www.udash.io", "udash.local", "127.0.0.1"),
-      resourceBase = homepageResourceBase
-    ).get())
+    new CompressionHandler(
+      createContextHandler(
+        hosts = Array("udash.io", "www.udash.io", "udash.local", "127.0.0.1"),
+        resourceBase = homepageResourceBase,
+      ).get()
+    )
 
   private val guide = {
     val contextHandler = createContextHandler(
       hosts = Array("guide.udash.io", "www.guide.udash.io", "guide.udash.local", "127.0.0.2", "localhost"),
-      resourceBase = guideResourceBase
+      resourceBase = guideResourceBase,
     )
     contextHandler.getSessionHandler.addEventListener(new org.atmosphere.cpr.SessionSupport())
 
     val atmosphereHolder = {
       val config = new DefaultAtmosphereServiceConfig[MainServerRPC](clientId => {
         val callLogger = new CallLogger
-        new DefaultExposesServerRPC[MainServerRPC](new ExposedRpcInterfaces(callLogger, guideResourceBase)(clientId)) with CallLogging[MainServerRPC] {
+        new DefaultExposesServerRPC[MainServerRPC](new ExposedRpcInterfaces(callLogger, guideResourceBase)(clientId))
+          with CallLogging[MainServerRPC] {
           override protected val metadata: ServerRpcMetadata[MainServerRPC] = MainServerRPC.metadata
 
           override def log(rpcName: String, methodName: String, args: Seq[String]): Unit =
@@ -61,7 +69,7 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
     }
     contextHandler.addServlet(atmosphereHolder, "/atm/*")
 
-    //required for org.atmosphere.container.JSR356AsyncSupport
+    // required for org.atmosphere.container.JSR356AsyncSupport
     JavaxWebSocketServletContainerInitializer.configure(contextHandler, null)
 
     contextHandler.addServlet(new ServletHolder(RestServlet[MainServerREST](new ExposedRestInterfaces)), "/rest_api/*")
@@ -82,7 +90,10 @@ class ApplicationServer(val port: Int, homepageResourceBase: String, guideResour
       ResourceFactory.of(contextHandler).newResource(Path.of(resourceBase).toRealPath())
     } catch {
       case ex: NoSuchFileException =>
-        logger.error(s"Missing static resources at $resourceBase. This usually means that Scala.js compilation artifacts are missing. Try running sbt compileStatics", ex)
+        logger.error(
+          s"Missing static resources at $resourceBase. This usually means that Scala.js compilation artifacts are missing. Try running sbt compileStatics",
+          ex,
+        )
         scala.sys.exit(1)
     }
     contextHandler.setBaseResource(resource)

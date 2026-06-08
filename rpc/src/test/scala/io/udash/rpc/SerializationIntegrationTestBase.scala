@@ -12,7 +12,14 @@ class SerializationIntegrationTestBase extends UdashSharedTest with Utils {
   def tests(implicit pos: Position): Unit = {
     "serialize and deserialize all types" in {
       for (i <- 1 to repeats) {
-        def cc() = TestCC(Random.nextInt(), Random.nextLong(), 123, Random.nextBoolean(), Random.nextString(200), List.fill(Random.nextInt(200))('a'))
+        def cc() = TestCC(
+          Random.nextInt(),
+          Random.nextLong(),
+          123,
+          Random.nextBoolean(),
+          Random.nextString(200),
+          List.fill(Random.nextInt(200))('a'),
+        )
         def ncc() = NestedTestCC(Random.nextInt(), cc(), cc())
         def dncc(counter: Int = 0): DeepNestedTestCC =
           if (counter < 200) DeepNestedTestCC(ncc(), dncc(counter + 1))
@@ -43,14 +50,14 @@ class SerializationIntegrationTestBase extends UdashSharedTest with Utils {
       val testOpts = Seq(
         None,
         Some(10L),
-        Some(Long.MaxValue)
+        Some(Long.MaxValue),
       )
 
-      testOpts.foreach(opt => {
+      testOpts.foreach { opt =>
         val serialized = write(opt)
         val deserialized = read[Option[Long]](serialized)
         deserialized should be(opt)
-      })
+      }
     }
   }
 }

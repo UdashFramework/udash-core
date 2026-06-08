@@ -3,7 +3,7 @@ package rest.openapi
 package adjusters
 
 import com.avsystem.commons._
-import com.avsystem.commons.annotation.{AnnotationAggregate, NotInheritedFromSealedTypes, defaultsToName}
+import com.avsystem.commons.annotation.{defaultsToName, AnnotationAggregate, NotInheritedFromSealedTypes}
 import com.avsystem.commons.meta.infer
 import com.avsystem.commons.rpc.AsRaw
 import io.udash.rest.raw._
@@ -12,22 +12,17 @@ import scala.annotation.StaticAnnotation
 
 sealed trait Adjuster extends StaticAnnotation
 
-/**
-  * Base trait for annotations which may adjust [[io.udash.rest.openapi.Schema Schema]] derived for various symbols
-  * in REST API traits.
-  * Schema adjusters may be applied on:
+/** Base trait for annotations which may adjust [[io.udash.rest.openapi.Schema Schema]] derived for various symbols in
+  * REST API traits. Schema adjusters may be applied on:
   *
-  * - Types for which [[io.udash.rest.openapi.RestStructure RestStructure]] is macro materialized and
-  * [[io.udash.rest.openapi.RestSchema RestSchema]] derived from it.
-  * This includes all types with companion extending
-  * [[io.udash.rest.RestDataCompanion RestDataCompanion]].
+  *   - Types for which [[io.udash.rest.openapi.RestStructure RestStructure]] is macro materialized and
+  *     [[io.udash.rest.openapi.RestSchema RestSchema]] derived from it. This includes all types with companion
+  *     extending [[io.udash.rest.RestDataCompanion RestDataCompanion]].
+  *   - Fields of case classes for which [[io.udash.rest.openapi.RestStructure RestStructure]] is macro materialized.
+  *   - [[io.udash.rest.Body Body]] parameters of REST methods.
   *
-  * - Fields of case classes for which [[io.udash.rest.openapi.RestStructure RestStructure]] is macro materialized.
-  *
-  * - [[io.udash.rest.Body Body]] parameters of REST methods.
-  *
-  * Schema adjusters DO NOT WORK on REST methods themselves and their path/header/query/cookie parameters.
-  * Instead, use [[io.udash.rest.openapi.adjusters.OperationAdjuster OperationAdjuster]] and
+  * Schema adjusters DO NOT WORK on REST methods themselves and their path/header/query/cookie parameters. Instead, use
+  * [[io.udash.rest.openapi.adjusters.OperationAdjuster OperationAdjuster]] and
   * [[io.udash.rest.openapi.adjusters.ParameterAdjuster ParameterAdjuster]].
   *
   * Also, be aware that schema adjusters may also be applied on schema references. In such cases, the schema reference
@@ -44,16 +39,14 @@ object SchemaAdjuster {
     else schema
 }
 
-/**
-  * Base trait for annotation which may adjust [[io.udash.rest.openapi.Parameter Parameter]] generated for path,
-  * query or header parameters of REST RPC methods.
+/** Base trait for annotation which may adjust [[io.udash.rest.openapi.Parameter Parameter]] generated for path, query
+  * or header parameters of REST RPC methods.
   */
 trait ParameterAdjuster extends Adjuster {
   def adjustParameter(parameter: Parameter): Parameter
 }
 
-/**
-  * A [[io.udash.rest.openapi.adjusters.SchemaAdjuster SchemaAdjuster]] which can also be applied on a (non-body)
+/** A [[io.udash.rest.openapi.adjusters.SchemaAdjuster SchemaAdjuster]] which can also be applied on a (non-body)
   * parameter to affect its schema.
   */
 trait ParameterSchemaAdjuster extends ParameterAdjuster { this: SchemaAdjuster =>
@@ -61,30 +54,26 @@ trait ParameterSchemaAdjuster extends ParameterAdjuster { this: SchemaAdjuster =
     parameter.schema.fold(parameter)(s => parameter.copy(schema = s.map(adjustSchema)))
 }
 
-/**
-  * Base trait for annotations which may adjust [[io.udash.rest.openapi.Operation Operation]] generated for REST HTTP methods.
-  * Operation adjusters may also be specified on prefix methods - they will be applied to all operations
+/** Base trait for annotations which may adjust [[io.udash.rest.openapi.Operation Operation]] generated for REST HTTP
+  * methods. Operation adjusters may also be specified on prefix methods - they will be applied to all operations
   * generated for the result of this prefix method.
   */
 trait OperationAdjuster extends Adjuster {
   def adjustOperation(operation: Operation): Operation
 }
 
-/**
-  * Base trait for annotations which may adjust [[io.udash.rest.openapi.PathItem PathItem]] generated for REST HTTP methods.
-  * Path item adjusters may also be specified on prefix methods - they will be applied to all path items
+/** Base trait for annotations which may adjust [[io.udash.rest.openapi.PathItem PathItem]] generated for REST HTTP
+  * methods. Path item adjusters may also be specified on prefix methods - they will be applied to all path items
   * generated for the result this prefix method.
   */
 trait PathItemAdjuster extends Adjuster {
   def adjustPathItem(pathItem: PathItem): PathItem
 }
 
-/**
-  * Convenience implementation of [[io.udash.rest.openapi.adjusters.OperationAdjuster OperationAdjuster]] for adjusting
-  * [[io.udash.rest.openapi.RequestBody RequestBody]] of an operation.
-  * Request body adjuster is only be applied if [[io.udash.rest.openapi.Operation Operation]] has
-  * [[io.udash.rest.openapi.RequestBody RequestBody]] defined and it's not a
-  * reference.
+/** Convenience implementation of [[io.udash.rest.openapi.adjusters.OperationAdjuster OperationAdjuster]] for adjusting
+  * [[io.udash.rest.openapi.RequestBody RequestBody]] of an operation. Request body adjuster is only be applied if
+  * [[io.udash.rest.openapi.Operation Operation]] has [[io.udash.rest.openapi.RequestBody RequestBody]] defined and it's
+  * not a reference.
   */
 trait RequestBodyAdjuster extends OperationAdjuster {
   final def adjustOperation(operation: Operation): Operation =
@@ -97,13 +86,10 @@ trait RequestBodyAdjuster extends OperationAdjuster {
   def adjustRequestBody(requestBody: RequestBody): RequestBody
 }
 
-/**
-  * Convenience implementation of [[io.udash.rest.openapi.adjusters.OperationAdjuster OperationAdjuster]] for adjusting
-  * [[io.udash.rest.openapi.Response Response]] associated with `200 OK`
-  * status code (this may be changed by overriding `statusCode` method).
-  * Default response adjuster is only applied if [[io.udash.rest.openapi.Responses Responses]] contains a
-  * [[io.udash.rest.openapi.Response Response]] defined for
-  * `200 OK` and it's not a reference.
+/** Convenience implementation of [[io.udash.rest.openapi.adjusters.OperationAdjuster OperationAdjuster]] for adjusting
+  * [[io.udash.rest.openapi.Response Response]] associated with `200 OK` status code (this may be changed by overriding
+  * `statusCode` method). Default response adjuster is only applied if [[io.udash.rest.openapi.Responses Responses]]
+  * contains a [[io.udash.rest.openapi.Response Response]] defined for `200 OK` and it's not a reference.
   */
 trait SuccessfulResponseAdjuster extends OperationAdjuster {
   def statusCode: Int = 200
@@ -111,9 +97,11 @@ trait SuccessfulResponseAdjuster extends OperationAdjuster {
     operation.responses |> { resps =>
       resps.byStatusCode.getOpt(statusCode) match {
         case Opt(RefOr.Value(resp)) =>
-          operation.copy(responses = resps.copy(
-            byStatusCode = resps.byStatusCode.updated(statusCode, RefOr(adjustResponse(resp)))
-          ))
+          operation.copy(responses =
+            resps.copy(
+              byStatusCode = resps.byStatusCode.updated(statusCode, RefOr(adjustResponse(resp)))
+            )
+          )
         case _ => operation
       }
     }
@@ -121,11 +109,10 @@ trait SuccessfulResponseAdjuster extends OperationAdjuster {
   def adjustResponse(response: Response): Response
 }
 
-/**
- * Base trait for annotation which may adjust [[io.udash.rest.openapi.Tag Tag]] generated for REST HTTP methods.
- * Tag adjusters may also be specified on prefix methods - they will be added to all operations
- * generated for the result of this prefix method.
- */
+/** Base trait for annotation which may adjust [[io.udash.rest.openapi.Tag Tag]] generated for REST HTTP methods. Tag
+  * adjusters may also be specified on prefix methods - they will be added to all operations generated for the result of
+  * this prefix method.
+  */
 trait TagAdjuster extends StaticAnnotation {
   def adjustTag(tag: Tag): Tag
 }
@@ -134,49 +121,50 @@ trait TagAdjuster extends StaticAnnotation {
 class adjustSchema(f: Schema => Schema) extends SchemaAdjuster {
   def adjustSchema(value: Schema): Schema = f(value)
 }
+
 /** Convenience implementation of [[io.udash.rest.openapi.adjusters.ParameterAdjuster ParameterAdjuster]] */
 class adjustParameter(f: Parameter => Parameter) extends ParameterAdjuster {
   def adjustParameter(value: Parameter): Parameter = f(value)
 }
+
 /** Convenience implementation of [[io.udash.rest.openapi.adjusters.OperationAdjuster OperationAdjuster]] */
 class adjustOperation(f: Operation => Operation) extends OperationAdjuster {
   def adjustOperation(value: Operation): Operation = f(value)
 }
+
 /** Convenience implementation of [[io.udash.rest.openapi.adjusters.PathItemAdjuster PathItemAdjuster]] */
 class adjustPathItem(f: PathItem => PathItem) extends PathItemAdjuster {
   def adjustPathItem(value: PathItem): PathItem = f(value)
 }
+
 /** Convenience implementation of [[io.udash.rest.openapi.adjusters.TagAdjuster TagAdjuster]] */
 class adjustTag(f: Tag => Tag) extends TagAdjuster {
   override def adjustTag(tag: Tag): Tag = f(tag)
 }
 
-/**
-  * Sets the `title` of a [[io.udash.rest.openapi.Schema Schema]]. It can be applied on standard
-  * [[io.udash.rest.openapi.adjusters.SchemaAdjuster SchemaAdjuster]] targets and also
-  * all parameters of REST methods (not just body parameters).
+/** Sets the `title` of a [[io.udash.rest.openapi.Schema Schema]]. It can be applied on standard
+  * [[io.udash.rest.openapi.adjusters.SchemaAdjuster SchemaAdjuster]] targets and also all parameters of REST methods
+  * (not just body parameters).
   */
 class title(title: String) extends SchemaAdjuster with ParameterSchemaAdjuster {
   def adjustSchema(schema: Schema): Schema = schema.copy(title = title)
 }
 
-/**
-  * Like [[io.udash.rest.openapi.adjusters.description description]] but changes [[io.udash.rest.openapi.Schema Schema]]
-  * description instead of [[io.udash.rest.openapi.Parameter Parameter]] description when applied
-  * on a (non-body) parameter. It has no effect when applied on a method.
+/** Like [[io.udash.rest.openapi.adjusters.description description]] but changes [[io.udash.rest.openapi.Schema Schema]]
+  * description instead of [[io.udash.rest.openapi.Parameter Parameter]] description when applied on a (non-body)
+  * parameter. It has no effect when applied on a method.
   */
 class schemaDescription(desc: String) extends SchemaAdjuster with ParameterSchemaAdjuster {
   def adjustSchema(schema: Schema): Schema = schema.copy(description = desc)
 }
 
-/**
-  * Annotation that specifies description that will be included into generated OpenAPI specification.
-  * It can be applied on REST methods ([[OperationAdjuster OperationAdjuster]]), path/header/query/cookie parameters
-  * ([[io.udash.rest.openapi.adjusters.ParameterAdjuster ParameterAdjuster]]),
-  * body parameters ([[io.udash.rest.openapi.adjusters.SchemaAdjuster SchemaAdjuster]]), case class fields
+/** Annotation that specifies description that will be included into generated OpenAPI specification. It can be applied
+  * on REST methods ([[OperationAdjuster OperationAdjuster]]), path/header/query/cookie parameters
+  * ([[io.udash.rest.openapi.adjusters.ParameterAdjuster ParameterAdjuster]]), body parameters
+  * ([[io.udash.rest.openapi.adjusters.SchemaAdjuster SchemaAdjuster]]), case class fields
   * ([[io.udash.rest.openapi.adjusters.SchemaAdjuster SchemaAdjuster]]) and ADTs for which
-  * [[io.udash.rest.openapi.RestStructure RestStructure]]
-  * is macro generated ([[io.udash.rest.openapi.adjusters.SchemaAdjuster SchemaAdjuster]]).
+  * [[io.udash.rest.openapi.RestStructure RestStructure]] is macro generated
+  * ([[io.udash.rest.openapi.adjusters.SchemaAdjuster SchemaAdjuster]]).
   */
 class description(desc: String) extends SchemaAdjuster with ParameterAdjuster with OperationAdjuster {
   def adjustSchema(schema: Schema): Schema = schema.copy(description = desc)
@@ -184,48 +172,42 @@ class description(desc: String) extends SchemaAdjuster with ParameterAdjuster wi
   def adjustOperation(operation: Operation): Operation = operation.copy(description = desc)
 }
 
-/**
-  * Annotation which may be applied on HTTP REST method to specify description for that method's
+/** Annotation which may be applied on HTTP REST method to specify description for that method's
   * [[io.udash.rest.openapi.RequestBody RequestBody]].
   */
 class bodyDescription(desc: String) extends RequestBodyAdjuster {
   def adjustRequestBody(requestBody: RequestBody): RequestBody = requestBody.copy(description = desc)
 }
 
-/**
-  * Annotation which may be applied on HTTP REST method to specify description for that method's
+/** Annotation which may be applied on HTTP REST method to specify description for that method's
   * [[io.udash.rest.openapi.Response Response]] associated with `200 OK` status code.
   */
 class responseDescription(desc: String, override val statusCode: Int = 200) extends SuccessfulResponseAdjuster {
   def adjustResponse(response: Response): Response = response.copy(description = desc)
 }
 
-/**
-  * Annotation which may be applied on HTTP REST method to specify description for
+/** Annotation which may be applied on HTTP REST method to specify description for
   * [[io.udash.rest.openapi.PathItem PathItem]] associated with that method's path.
   */
 class pathDescription(desc: String) extends PathItemAdjuster {
   def adjustPathItem(pathItem: PathItem): PathItem = pathItem.copy(description = desc)
 }
 
-/**
-  * Annotation which may be applied on HTTP REST method to specify summary for
+/** Annotation which may be applied on HTTP REST method to specify summary for
   * [[io.udash.rest.openapi.Operation Operation]] generated for that method.
   */
 class summary(summary: String) extends OperationAdjuster {
   def adjustOperation(operation: Operation): Operation = operation.copy(summary = summary)
 }
 
-/**
-  * Annotation which may be applied on HTTP REST method to specify summary for
+/** Annotation which may be applied on HTTP REST method to specify summary for
   * [[io.udash.rest.openapi.PathItem PathItem]] associated with that method's path.
   */
 class pathSummary(summary: String) extends PathItemAdjuster {
   def adjustPathItem(pathItem: PathItem): PathItem = pathItem.copy(summary = summary)
 }
 
-/**
-  * Adds example to [[io.udash.rest.openapi.Schema Schema]] or [[io.udash.rest.openapi.Parameter Parameter]] object
+/** Adds example to [[io.udash.rest.openapi.Schema Schema]] or [[io.udash.rest.openapi.Parameter Parameter]] object
   */
 class example[+T](value: T, @infer asJson: AsRaw[JsonValue, T] = infer.value)
   extends SchemaAdjuster with ParameterAdjuster {
@@ -236,66 +218,60 @@ class example[+T](value: T, @infer asJson: AsRaw[JsonValue, T] = infer.value)
     parameter.copy(example = asJson.asRaw(value))
 }
 
-/**
-  * Can be applied on REST method parameters, case class parameters and REST types themselves to include
+/** Can be applied on REST method parameters, case class parameters and REST types themselves to include
   * `"nullable": true` property into their OpenAPI Schema.
   */
 class nullable extends SchemaAdjuster with ParameterSchemaAdjuster {
   def adjustSchema(schema: Schema): Schema = schema.copy(nullable = true)
 }
 
-/**
-  * Allows setting custom `operationId` for [[io.udash.rest.openapi.Operation Operation]] objects generated
-  * for REST HTTP methods.
+/** Allows setting custom `operationId` for [[io.udash.rest.openapi.Operation Operation]] objects generated for REST
+  * HTTP methods.
   *
-  * By default, `operationId` is set to method's `rpcName` which in turn
-  * defaults to method's regular name. If method is overloaded, method name may be prepended with lowercased
-  * HTTP method followed by underscore (e.g. "post_")
+  * By default, `operationId` is set to method's `rpcName` which in turn defaults to method's regular name. If method is
+  * overloaded, method name may be prepended with lowercased HTTP method followed by underscore (e.g. "post_")
   */
 class operationId(operationId: OptArg[String] = OptArg.Empty) extends OperationAdjuster {
   def adjustOperation(operation: Operation): Operation =
     operation.copy(operationId = operationId)
 }
 
-/**
-  * Adds OpenAPI operation tags to an [[io.udash.rest.openapi.Operation Operation]] object.
+/** Adds OpenAPI operation tags to an [[io.udash.rest.openapi.Operation Operation]] object.
   */
 class tags(tags: String*) extends OperationAdjuster {
   def adjustOperation(operation: Operation): Operation =
     operation.copy(tags = operation.tags ++ tags)
 }
 
-/**
- * Annotation which may be applied on HTTP REST method to add a single Open API [[io.udash.rest.openapi.Tag Tag]] for
- * that method. Group can be also defined on prefix methods - it will be applied to all operations generated for the
- * result of this prefix method.
- *
- * @param name OpenAPI tag name, defaults to method name
- */
+/** Annotation which may be applied on HTTP REST method to add a single Open API [[io.udash.rest.openapi.Tag Tag]] for
+  * that method. Group can be also defined on prefix methods - it will be applied to all operations generated for the
+  * result of this prefix method.
+  *
+  * @param name
+  *   OpenAPI tag name, defaults to method name
+  */
 class group(@defaultsToName name: String = null) extends tags(name.capitalize) {
   def groupName: String = name.capitalize
 }
 
-/**
- * Annotation which may be applied on HTTP REST method to specify description for
- * [[io.udash.rest.openapi.Tag Tag]] defined in that method.
- */
+/** Annotation which may be applied on HTTP REST method to specify description for [[io.udash.rest.openapi.Tag Tag]]
+  * defined in that method.
+  */
 class tagDescription(desc: String) extends TagAdjuster {
   override def adjustTag(tag: Tag): Tag = tag.copy(description = desc)
 }
 
-/**
- * Shortcut aggregating both [[group]] and [[tagDescription]]. Always uses default `group` name.
- */
+/** Shortcut aggregating both [[group]] and [[tagDescription]]. Always uses default `group` name.
+  */
 class describedGroup(desc: String) extends AnnotationAggregate {
-  @group @tagDescription(desc)
+  @group
+  @tagDescription(desc)
   final def aggregated: List[StaticAnnotation] = reifyAggregated
 }
 
-/**
-  * Prefix methods may be annotated with this annotation to specify prefix that will be prepended to
-  * `operationId` of all [[io.udash.rest.openapi.Operation Operation]] objects generated for result of that prefix method.
-  * By default, this prefix is prefix method's name with underscore,
-  * so this annotation may be used in particular to set empty prefix.
+/** Prefix methods may be annotated with this annotation to specify prefix that will be prepended to `operationId` of
+  * all [[io.udash.rest.openapi.Operation Operation]] objects generated for result of that prefix method. By default,
+  * this prefix is prefix method's name with underscore, so this annotation may be used in particular to set empty
+  * prefix.
   */
 class operationIdPrefix(val prefix: String) extends StaticAnnotation

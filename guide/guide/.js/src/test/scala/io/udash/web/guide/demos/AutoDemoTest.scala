@@ -55,5 +55,4 @@ class AutoDemoTest extends AnyFunSuite {
     assert(result == expected)
   }
 
-
 }

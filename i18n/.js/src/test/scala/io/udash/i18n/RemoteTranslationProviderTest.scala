@@ -23,12 +23,17 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
 
     override def loadTranslationsForLang(lang: Lang, oldHash: BundleHash): Future[Option[Bundle]] = {
       loadTranslationsForLangCalls += 1
-      Future.successful(if (lang == RemoteTranslationProviderTest.this.lang) Some(translations) else Some(Bundle(oldHash, Map.empty)))
+      Future.successful(
+        if (lang == RemoteTranslationProviderTest.this.lang) Some(translations) else Some(Bundle(oldHash, Map.empty))
+      )
     }
 
     override def loadTemplateForLang(lang: Lang, key: String): Future[String] = {
       loadTemplateForLangCalls += 1
-      Future { translations.translations(key) + " remote" + (if (lang != RemoteTranslationProviderTest.this.lang) lang.lang else "") }
+      Future {
+        translations.translations(key) + " remote" +
+          (if (lang != RemoteTranslationProviderTest.this.lang) lang.lang else "")
+      }
     }
   }
 
@@ -39,13 +44,17 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
   "RemoteTranslationProvider" should {
     "provide translations without argument" in {
       val rpc = new RemoteTranslationRPCMock
-      val translator = new RemoteTranslationProvider(rpc, Some(localStorage), 1 second, missingTranslationError = "ERROR")
+      val translator =
+        new RemoteTranslationProvider(rpc, Some(localStorage), 1.second, missingTranslationError = "ERROR")
 
-      rpc.updateTranslations(BundleHash("hash1"), Map(
-        "tr1" -> "Translation",
-        "tr2" -> "Translation2",
-        "tr3" -> "Translation3"
-      ))
+      rpc.updateTranslations(
+        BundleHash("hash1"),
+        Map(
+          "tr1" -> "Translation",
+          "tr2" -> "Translation2",
+          "tr3" -> "Translation3",
+        ),
+      )
 
       for {
         t1 <- translator.translate("tr1")
@@ -64,14 +73,18 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
 
     "provide translations with arguments" in {
       val rpc = new RemoteTranslationRPCMock
-      val translator = new RemoteTranslationProvider(rpc, Some(localStorage), 1 second, missingTranslationError = "ERROR")
+      val translator =
+        new RemoteTranslationProvider(rpc, Some(localStorage), 1.second, missingTranslationError = "ERROR")
 
-      rpc.updateTranslations(BundleHash("hash2"), Map(
-        "tr1" -> "Translation {0}",
-        "tr2" -> "Translation2 {1} {0}",
-        "tr3" -> "Translation3 {}",
-        "tr4" -> "Translation4 {1} {} {}"
-      ))
+      rpc.updateTranslations(
+        BundleHash("hash2"),
+        Map(
+          "tr1" -> "Translation {0}",
+          "tr2" -> "Translation2 {1} {0}",
+          "tr3" -> "Translation3 {}",
+          "tr4" -> "Translation4 {1} {} {}",
+        ),
+      )
 
       for {
         t1 <- translator.translate("tr1", 123.3)
@@ -86,7 +99,7 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
         t5 <- translator.translate("trMissing")
         _ <- retrying(t5.string should be("ERROR"))
         _ <- retrying(rpc.loadTemplateForLangCalls should be(1))
-        //error fallback in io.udash.i18n.RemoteTranslationProvider.translate can add one
+        // error fallback in io.udash.i18n.RemoteTranslationProvider.translate can add one
         _ <- retrying(rpc.loadTranslationsForLangCalls should be > 0)
         r <- retrying(rpc.loadTranslationsForLangCalls should be < 3)
       } yield r
@@ -94,14 +107,18 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
 
     "try to reload cache after TTL" in {
       val rpc = new RemoteTranslationRPCMock
-      val translator = new RemoteTranslationProvider(rpc, Some(localStorage), 0 seconds, missingTranslationError = "ERROR")
+      val translator =
+        new RemoteTranslationProvider(rpc, Some(localStorage), 0.seconds, missingTranslationError = "ERROR")
 
-      rpc.updateTranslations(BundleHash("hash3"), Map(
-        "tr1" -> "Translation {0}",
-        "tr2" -> "Translation2 {1} {0}",
-        "tr3" -> "Translation3 {}",
-        "tr4" -> "Translation4 {1} {} {}"
-      ))
+      rpc.updateTranslations(
+        BundleHash("hash3"),
+        Map(
+          "tr1" -> "Translation {0}",
+          "tr2" -> "Translation2 {1} {0}",
+          "tr3" -> "Translation3 {}",
+          "tr4" -> "Translation4 {1} {} {}",
+        ),
+      )
 
       for {
         t1 <- translator.translate("tr1", 123.3)
@@ -118,12 +135,15 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
         _ <- retrying(rpc.loadTemplateForLangCalls should be(1))
 
         _ <- Future {
-          rpc.updateTranslations(BundleHash("hash4"), Map(
-            "tr1" -> "Translation {0} reloaded",
-            "tr2" -> "Translation2 {1} {0} reloaded",
-            "tr3" -> "Translation3 {} reloaded",
-            "tr4" -> "Translation4 {1} {} {} reloaded"
-          ))
+          rpc.updateTranslations(
+            BundleHash("hash4"),
+            Map(
+              "tr1" -> "Translation {0} reloaded",
+              "tr2" -> "Translation2 {1} {0} reloaded",
+              "tr3" -> "Translation3 {} reloaded",
+              "tr4" -> "Translation4 {1} {} {} reloaded",
+            ),
+          )
         }
 
         t6 <- translator.translate("tr1", 123.3)
@@ -144,14 +164,18 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
 
     "not try to reload cache before TTL" in {
       val rpc = new RemoteTranslationRPCMock
-      val translator = new RemoteTranslationProvider(rpc, Some(localStorage), 10 seconds, missingTranslationError = "ERROR")
+      val translator =
+        new RemoteTranslationProvider(rpc, Some(localStorage), 10.seconds, missingTranslationError = "ERROR")
 
-      rpc.updateTranslations(BundleHash("hash3"), Map(
-        "tr1" -> "Translation {0}",
-        "tr2" -> "Translation2 {1} {0}",
-        "tr3" -> "Translation3 {}",
-        "tr4" -> "Translation4 {1} {} {}"
-      ))
+      rpc.updateTranslations(
+        BundleHash("hash3"),
+        Map(
+          "tr1" -> "Translation {0}",
+          "tr2" -> "Translation2 {1} {0}",
+          "tr3" -> "Translation3 {}",
+          "tr4" -> "Translation4 {1} {} {}",
+        ),
+      )
 
       for {
         t1 <- translator.translate("tr1", 123.3)
@@ -168,12 +192,15 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
         _ <- retrying(rpc.loadTemplateForLangCalls should be(1))
 
         _ <- Future {
-          rpc.updateTranslations(BundleHash("hash4"), Map(
-            "tr1" -> "Translation {0} reloaded",
-            "tr2" -> "Translation2 {1} {0} reloaded",
-            "tr3" -> "Translation3 {} reloaded",
-            "tr4" -> "Translation4 {1} {} {} reloaded"
-          ))
+          rpc.updateTranslations(
+            BundleHash("hash4"),
+            Map(
+              "tr1" -> "Translation {0} reloaded",
+              "tr2" -> "Translation2 {1} {0} reloaded",
+              "tr3" -> "Translation3 {} reloaded",
+              "tr4" -> "Translation4 {1} {} {} reloaded",
+            ),
+          )
         }
 
         t6 <- translator.translate("tr1", 123.3)
@@ -194,14 +221,17 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
 
     "fall back to remote calls when no cache storage provided" in {
       val rpc = new RemoteTranslationRPCMock
-      val translator = new RemoteTranslationProvider(rpc, None, 1 second, missingTranslationError = "ERROR")
+      val translator = new RemoteTranslationProvider(rpc, None, 1.second, missingTranslationError = "ERROR")
 
-      rpc.updateTranslations(BundleHash("hash2"), Map(
-        "tr1" -> "Translation {0}",
-        "tr2" -> "Translation2 {1} {0}",
-        "tr3" -> "Translation3 {}",
-        "tr4" -> "Translation4 {1} {} {}"
-      ))
+      rpc.updateTranslations(
+        BundleHash("hash2"),
+        Map(
+          "tr1" -> "Translation {0}",
+          "tr2" -> "Translation2 {1} {0}",
+          "tr3" -> "Translation3 {}",
+          "tr4" -> "Translation4 {1} {} {}",
+        ),
+      )
 
       for {
         t1 <- translator.translate("tr1", 123.3)
@@ -222,14 +252,18 @@ class RemoteTranslationProviderTest extends AsyncUdashFrontendTest with BeforeAn
 
     "handle languages" in {
       val rpc = new RemoteTranslationRPCMock
-      val translator = new RemoteTranslationProvider(rpc, Some(localStorage), 10 seconds, missingTranslationError = "ERROR")
+      val translator =
+        new RemoteTranslationProvider(rpc, Some(localStorage), 10.seconds, missingTranslationError = "ERROR")
 
-      rpc.updateTranslations(BundleHash("hash2"), Map(
-        "tr1" -> "Translation {0}",
-        "tr2" -> "Translation2 {1} {0}",
-        "tr3" -> "Translation3 {}",
-        "tr4" -> "Translation4 {1} {} {}"
-      ))
+      rpc.updateTranslations(
+        BundleHash("hash2"),
+        Map(
+          "tr1" -> "Translation {0}",
+          "tr2" -> "Translation2 {1} {0}",
+          "tr3" -> "Translation3 {}",
+          "tr4" -> "Translation4 {1} {} {}",
+        ),
+      )
 
       for {
         t1 <- translator.translate("tr1", 123.3)

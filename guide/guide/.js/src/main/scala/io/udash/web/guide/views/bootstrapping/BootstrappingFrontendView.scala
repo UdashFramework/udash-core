@@ -12,7 +12,8 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.References
 import scalatags.JsDom.Modifier
 
-case object BootstrappingFrontendViewFactory extends StaticViewFactory[BootstrappingFrontendState.type](() => new BootstrappingFrontendView)
+case object BootstrappingFrontendViewFactory
+  extends StaticViewFactory[BootstrappingFrontendState.type](() => new BootstrappingFrontendView)
 
 class BootstrappingFrontendView extends View with CssView {
 
@@ -54,7 +55,7 @@ class BootstrappingFrontendView extends View with CssView {
         def matchUrl(url: Url): RoutingState =
           url2State.applyOrElse(
             url.value.stripSuffix("/"),
-            (x: String) => LandingPageState
+            (x: String) => LandingPageState,
           )
 
         def matchState(state: RoutingState): Url =
@@ -68,7 +69,8 @@ class BootstrappingFrontendView extends View with CssView {
       }
     }.sourceCode
 
-    val RootViewFactory, LandingPageViewFactory, NewsletterViewFactory, NewsletterSubscribeViewFactory, NewsletterUnsubscribeViewFactory, ErrorViewFactory = null
+    val RootViewFactory, LandingPageViewFactory, NewsletterViewFactory, NewsletterSubscribeViewFactory,
+      NewsletterUnsubscribeViewFactory, ErrorViewFactory = null
 
     val factorySource = {
       import io.udash._
@@ -107,8 +109,7 @@ class BootstrappingFrontendView extends View with CssView {
         implicit val mpc: ModelPropertyCreator[SubscribeModel] = ModelPropertyCreator.materialize
       }
 
-      case object NewsletterSubscribeViewFactory
-        extends ViewFactory[SubscribeState.type] {
+      case object NewsletterSubscribeViewFactory extends ViewFactory[SubscribeState.type] {
 
         override def create(): (View, Presenter[SubscribeState.type]) = {
           val model = ModelProperty(new SubscribeModel(""))
@@ -119,8 +120,7 @@ class BootstrappingFrontendView extends View with CssView {
         }
       }
 
-      class NewsletterSubscribePresenter(model: ModelProperty[SubscribeModel])
-        extends Presenter[SubscribeState.type] {
+      class NewsletterSubscribePresenter(model: ModelProperty[SubscribeModel]) extends Presenter[SubscribeState.type] {
 
         /** Called before view starts rendering. */
         override def handleState(state: SubscribeState.type): Unit = {
@@ -133,7 +133,7 @@ class BootstrappingFrontendView extends View with CssView {
 
       class NewsletterSubscribeView(
         model: ModelProperty[SubscribeModel],
-        presenter: NewsletterSubscribePresenter
+        presenter: NewsletterSubscribePresenter,
       ) extends View {
 
         import scalatags.JsDom.all._
@@ -143,10 +143,13 @@ class BootstrappingFrontendView extends View with CssView {
           // automatic two way binding with html input
           TextInput(model.subProp(_.email))().render,
           // :+= operator allows to add more than one callback for one event
-          button(onclick :+= ((_: Event) => {
-            presenter.subscribe()
-            true // prevent default
-          }))("Subscribe")
+          button(
+            onclick :+=
+              ((_: Event) => {
+                presenter.subscribe()
+                true // prevent default
+              })
+          )("Subscribe"),
         )
       }
     }.sourceCode
@@ -165,20 +168,30 @@ class BootstrappingFrontendView extends View with CssView {
           span("ViewFactories - a logical pairing between a view and a presenter:"),
           ul(GuideStyles.innerList)(
             li("Mapping from states to ViewFactories,"),
-            li("Views & Presenters.")
-          )),
-        li("Client RPC.")
+            li("Views & Presenters."),
+          ),
+        ),
+        li("Client RPC."),
       ),
       h3("States"),
       p(
         "A Udash application is based on states. The application state determines the created ViewFactories structure and is determined ",
         "by a URL. The application states structure is your decision, Udash requires only that all states must extend ",
-        i("State"), ". States usually will create a nested hierarchy. This hierarchy describes nesting of views. ",
-        "A state can contain other ", i("State"), "s. ",
-        "For example:"
+        i("State"),
+        ". States usually will create a nested hierarchy. This hierarchy describes nesting of views. ",
+        "A state can contain other ",
+        i("State"),
+        "s. ",
+        "For example:",
       ),
       AutoDemo.snippet(statesSource),
-      ClickableImageFactory(ImageFactoryPrefixSet.Boostrapping, "states.png", "Example of application states.", GuideStyles.imgMedium, GlobalStyles.noMargin),
+      ClickableImageFactory(
+        ImageFactoryPrefixSet.Boostrapping,
+        "states.png",
+        "Example of application states.",
+        GuideStyles.imgMedium,
+        GlobalStyles.noMargin,
+      ),
       h3("Routing system"),
       p(
         "The routing system reacts on URL changes and updates the application state. It requires only mappings from the URL to the state " +
@@ -187,41 +200,55 @@ class BootstrappingFrontendView extends View with CssView {
       p("Take a look at example ", i("RoutingRegistry"), " implementation:"),
       AutoDemo.snippet(registrySource),
       p(
-        i("Bidirectional"), " returns tuple ",
+        i("Bidirectional"),
+        " returns tuple ",
         i("(PartialFunction[String, RoutingState], PartialFunction[RoutingState, String])"),
-        ". It is useful, when given mapping is an one to one relation."
+        ". It is useful, when given mapping is an one to one relation.",
       ),
       h3("View, Presenter & ViewFactory"),
       p(
-        "ViewFactory creates a pair of View and Presenter. ", i("ViewFactoryRegistry"), " is responsible " +
+        "ViewFactory creates a pair of View and Presenter. ",
+        i("ViewFactoryRegistry"),
+        " is responsible " +
           "for matching a current application state to ViewFactory. Below you can find an example implementation of ",
-        i("ViewFactoryRegistry"), "."
+        i("ViewFactoryRegistry"),
+        ".",
       ),
       AutoDemo.snippet(factorySource),
       p(
         "Each ViewFactory is expected to initialize a View and a Presenter. At this point you can ",
-        "create the shared model for them. Take a look at following view implementation."
+        "create the shared model for them. Take a look at following view implementation.",
       ),
       AutoDemo.snippet(subscribeSource),
       p(
         "The above example shows simple View, Presenter and ViewFactory implementations. ",
         ul(GuideStyles.defaultList)(
           li(
-            i("SubscribeModel"), " is a model trait which is used to create shared ", i("ModelProperty"), ". ",
-            a(href := FrontendPropertiesState.url)("Properties in Udash"), " are described in other part of this guide. "
+            i("SubscribeModel"),
+            " is a model trait which is used to create shared ",
+            i("ModelProperty"),
+            ". ",
+            a(href := FrontendPropertiesState.url)("Properties in Udash"),
+            " are described in other part of this guide. ",
           ),
           li(
-            i("NewsletterSubscribeViewFactory"), " creates a model, view, presenter and connects them together."
+            i("NewsletterSubscribeViewFactory"),
+            " creates a model, view, presenter and connects them together.",
           ),
           li(
-            i("NewsletterSubscribePresenter"), " initializes an email in the model and exposes the ", i("subscribe"), " method. "
+            i("NewsletterSubscribePresenter"),
+            " initializes an email in the model and exposes the ",
+            i("subscribe"),
+            " method. ",
           ),
           li(
-            i("NewsletterSubscribeView"), " creates an input and button template using the ",
-            a(href := References.ScalatagsHomepage, target := "_blank")("Scalatags"), " project with some Udash extensions."
+            i("NewsletterSubscribeView"),
+            " creates an input and button template using the ",
+            a(href := References.ScalatagsHomepage, target := "_blank")("Scalatags"),
+            " project with some Udash extensions.",
           ),
-          li("View ignores child views, because it is the final view.")
-        )
+          li("View ignores child views, because it is the final view."),
+        ),
       ),
       p("If the view does not need a presenter, you can use ", i("StaticViewFactory"), "."),
       CodeBlock(
@@ -245,8 +272,9 @@ class BootstrappingFrontendView extends View with CssView {
       p("Now you should implement the rest of ", i("ViewFactories"), " from ", i("StatesToViewFactoryDef"), " class."),
       h3("Udash Application"),
       p(
-        "Everything is ready to create ", i("Application"), ". It can be done in some object, " +
-          "which will be useful to handle server RPC connector later. "
+        "Everything is ready to create ",
+        i("Application"),
+        ". It can be done in some object, " + "which will be useful to handle server RPC connector later. ",
       ),
       CodeBlock(
         """import io.udash._
@@ -274,7 +302,11 @@ class BootstrappingFrontendView extends View with CssView {
       p("The application should compile and it is ready to start."),
       h3("Frontend RPC"),
       p("The last thing that should be bootstrapped is the client RPC implementation."),
-      p("First of all, the application requires implementing ", i("MainClientRPC"), ". It will be a simple class extending the RPC interface:"),
+      p(
+        "First of all, the application requires implementing ",
+        i("MainClientRPC"),
+        ". It will be a simple class extending the RPC interface:",
+      ),
       CodeBlock(
         """class RPCService extends MainClientRPC {
           |  override def pong(id: Int): Unit =
@@ -303,15 +335,17 @@ class BootstrappingFrontendView extends View with CssView {
       h2("What's next?"),
       p(
         "Now all parts of the Udash application are ready. You can find a complete demo application in the ",
-        a(href := IntroState.url)("Udash applications generator"), "."
+        a(href := IntroState.url)("Udash applications generator"),
+        ".",
       ),
 
       p(
         "You can also learn more about ",
         a(href := FrontendIntroState.url)("Frontend application development"),
         " or ",
-        a(href := RpcIntroState.url)("RPC in Udash"), "."
-      )
+        a(href := RpcIntroState.url)("RPC in Udash"),
+        ".",
+      ),
     )
   }
 }

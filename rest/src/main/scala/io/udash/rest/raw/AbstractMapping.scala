@@ -7,13 +7,12 @@ import io.udash.rest.raw.AbstractMapping.ConcatSeq
 
 import scala.collection.Factory
 
-/**
- * Represents an immutable, ordered sequence of key-value pairs with textual keys. Mapping additionally holds a lazy
- * initialized map which allows fast lookup by key. When looking up values by key, duplicate entries are dropped and
- * only the last value for given key is returned.
- *
- * Mappings have O(1) prepend, append and concatenation operations.
- */
+/** Represents an immutable, ordered sequence of key-value pairs with textual keys. Mapping additionally holds a lazy
+  * initialized map which allows fast lookup by key. When looking up values by key, duplicate entries are dropped and
+  * only the last value for given key is returned.
+  *
+  * Mappings have O(1) prepend, append and concatenation operations.
+  */
 final case class Mapping[V](entries: ISeq[(String, V)]) extends AbstractMapping[V] {
   type Self = Mapping[V]
   def caseSensitive: Boolean = true
@@ -22,10 +21,9 @@ final case class Mapping[V](entries: ISeq[(String, V)]) extends AbstractMapping[
 }
 object Mapping extends AbstractMappingCompanion[Mapping]
 
-/**
- * A version of [[Mapping]] which is case-insensitive when looking up values by key.
- * Used primarily to represent [[io.udash.rest.Header Header]] parameter values.
- */
+/** A version of [[Mapping]] which is case-insensitive when looking up values by key. Used primarily to represent
+  * [[io.udash.rest.Header Header]] parameter values.
+  */
 final case class IMapping[V](entries: ISeq[(String, V)]) extends AbstractMapping[V] {
   type Self = IMapping[V]
   def caseSensitive: Boolean = false
@@ -85,7 +83,7 @@ sealed abstract class AbstractMapping[V] extends PartialFunction[String, V] {
 
   override def toString(): String = {
     val pref = if (caseSensitive) "Mapping(" else "IMapping("
-    entries.iterator.map({ case (k, v) => s"$k->$v" }).mkString(pref, ",", ")")
+    entries.iterator.map { case (k, v) => s"$k->$v" }.mkString(pref, ",", ")")
   }
 }
 
