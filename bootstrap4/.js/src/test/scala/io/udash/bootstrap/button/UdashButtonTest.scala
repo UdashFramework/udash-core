@@ -84,7 +84,11 @@ class UdashButtonTest extends UdashCoreFrontendTest {
       val active: Property[Boolean] = Property(false)
       val disabled: Property[Boolean] = Property(false)
 
-      val btn = UdashButton(active = active, disabled = disabled, options = UdashButtonOptions(color = buttonStyle, size = size, outline = outline, block = block))("btn")
+      val btn = UdashButton(
+        active = active,
+        disabled = disabled,
+        options = UdashButtonOptions(color = buttonStyle, size = size, outline = outline, block = block),
+      )("btn")
       val el = btn.render
       el.classList.length should be(4)
       el.classList should contain(BootstrapStyles.Button.btn.className)
@@ -111,7 +115,6 @@ class UdashButtonTest extends UdashCoreFrontendTest {
       el.classList should contain(BootstrapStyles.Button.size(BootstrapStyles.Size.Large).className)
       el.classList should contain(BootstrapStyles.Button.color(BootstrapStyles.Color.Secondary).className)
 
-
       btn.kill()
       active.listenersCount() should be(0)
       disabled.listenersCount() should be(0)
@@ -128,7 +131,7 @@ class UdashButtonTest extends UdashCoreFrontendTest {
       val btn = UdashButton(
         active = active,
         disabled = disabled,
-        options = UdashButtonOptions(color = buttonStyle, size = size, outline = outline, block = block)
+        options = UdashButtonOptions(color = buttonStyle, size = size, outline = outline, block = block),
       )("btn")
       val el = btn.render
       el.classList.length should be(4)

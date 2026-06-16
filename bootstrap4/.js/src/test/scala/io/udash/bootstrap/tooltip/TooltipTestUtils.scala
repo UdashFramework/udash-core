@@ -22,13 +22,13 @@ class TooltipTestUtils extends AsyncUdashCoreFrontendTest {
       implicit val tp = new LocalTranslationProvider(
         Map(
           Lang("test") -> Bundle(BundleHash("h"), Map("a" -> s"$randMarker:AAA", "b" -> s"$randMarker:BBB")),
-          Lang("test2") -> Bundle(BundleHash("h"), Map("a" -> s"$randMarker:ccc", "b" -> s"$randMarker:ddd"))
+          Lang("test2") -> Bundle(BundleHash("h"), Map("a" -> s"$randMarker:ccc", "b" -> s"$randMarker:ddd")),
         )
       )
 
       val tooltip = companion.apply(
         title = span(translatedDynamic(TranslationKey.key("a"))(_.apply())).render,
-        content = span(translatedDynamic(TranslationKey.key("b"))(_.apply())).render
+        content = span(translatedDynamic(TranslationKey.key("b"))(_.apply())).render,
       )(item)
 
       def expectedText(): String =

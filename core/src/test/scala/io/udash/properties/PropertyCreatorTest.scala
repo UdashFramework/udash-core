@@ -991,7 +991,7 @@ class PropertyCreatorTest extends UdashCoreTest {
       "SeqProperty.apply[Nothing](Seq.empty)" shouldNot compile
     }
 
-    //https://github.com/UdashFramework/udash-core/issues/271
+    // https://github.com/UdashFramework/udash-core/issues/271
     "fail implicit search for SeqPropertyCreator on default generic value" in {
       """
         |case class Chunk[T](

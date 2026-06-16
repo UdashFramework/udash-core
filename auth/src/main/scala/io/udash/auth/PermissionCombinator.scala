@@ -1,13 +1,14 @@
 package io.udash.auth
 
 trait PermissionCombinator extends Any {
-  /** Should return `true` if provided user context passes this combinator test.
-    * It should not check `isAuthenticated` flag of user context. */
+
+  /** Should return `true` if provided user context passes this combinator test. It should not check `isAuthenticated`
+    * flag of user context.
+    */
   def check(ctx: UserCtx): Boolean
 
-  /**
-    * Combines this person combinator with another,
-    * creating a new one granting permission only in case both combinators do so.
+  /** Combines this person combinator with another, creating a new one granting permission only in case both combinators
+    * do so.
     */
   def and(other: PermissionCombinator): PermissionCombinator = new PermissionCombinator {
     override def check(ctx: UserCtx): Boolean =
@@ -17,9 +18,8 @@ trait PermissionCombinator extends Any {
       s"($this && $other)"
   }
 
-  /**
-    * Combines this person combinator with another,
-    * creating a new one granting permission only in case any of combinators does so.
+  /** Combines this person combinator with another, creating a new one granting permission only in case any of
+    * combinators does so.
     */
   def or(other: PermissionCombinator): PermissionCombinator = new PermissionCombinator {
     override def check(ctx: UserCtx): Boolean =
@@ -31,6 +31,7 @@ trait PermissionCombinator extends Any {
 }
 
 object PermissionCombinator {
+
   /** PermissionCombinator always granting permission. */
   val AllowAll: PermissionCombinator = _ => true
 
@@ -52,4 +53,3 @@ object PermissionCombinator {
       permissions.map(_.toString).mkString("(", " || ", ")")
   }
 }
-

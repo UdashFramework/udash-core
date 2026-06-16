@@ -1,7 +1,7 @@
 package io.udash.i18n
 
 import com.avsystem.commons.misc.{AbstractCase, CaseMethods}
-import com.avsystem.commons.serialization.{HasGenCodec, transparent}
+import com.avsystem.commons.serialization.{transparent, HasGenCodec}
 
 @transparent final case class Lang(lang: String) extends AnyVal with CaseMethods
 object Lang extends HasGenCodec[Lang]

@@ -101,7 +101,7 @@ class CallbackSequencerTest extends UdashCoreTest {
       }
 
       fires.size should be(10)
-      for (i <- count-9 to count) {
+      for (i <- count - 9 to count) {
         fires should contain(s"l$i")
       }
     }
@@ -124,7 +124,7 @@ class CallbackSequencerTest extends UdashCoreTest {
       CallbackSequencer().queue("3", l3)
       fires should contain theSameElementsInOrderAs Seq("a", "b", "c")
 
-      CallbackSequencer().queue("z", lz) //same id won't be triggered again
+      CallbackSequencer().queue("z", lz) // same id won't be triggered again
       fires should contain theSameElementsInOrderAs Seq("a", "b", "c")
     }
 

@@ -18,7 +18,10 @@ class UdashPaginationTest extends AsyncUdashCoreFrontendTest {
       val pages = SeqProperty(Seq.tabulate[Int](7)(identity))
 
       val pagination = UdashPagination(
-        pages, selected, showArrows = showArrows, highlightActive = highlightActive
+        pages,
+        selected,
+        showArrows = showArrows,
+        highlightActive = highlightActive,
       )()
 
       val paginationElement = pagination.render
@@ -37,7 +40,10 @@ class UdashPaginationTest extends AsyncUdashCoreFrontendTest {
       val pages = SeqProperty(Seq.tabulate[Int](7)(identity))
 
       val pagination = UdashPagination(
-        pages, selected, showArrows = showArrows, highlightActive = highlightActive
+        pages,
+        selected,
+        showArrows = showArrows,
+        highlightActive = highlightActive,
       )()
 
       val paginationElement = pagination.render
@@ -109,7 +115,10 @@ class UdashPaginationTest extends AsyncUdashCoreFrontendTest {
       val pages = SeqProperty(Seq.tabulate[Int](7)(identity))
 
       val pagination = UdashPagination(
-        pages, selected, showArrows = showArrows, highlightActive = highlightActive
+        pages,
+        selected,
+        showArrows = showArrows,
+        highlightActive = highlightActive,
       )()
 
       val paginationElement = pagination.render
@@ -145,7 +154,10 @@ class UdashPaginationTest extends AsyncUdashCoreFrontendTest {
       val pages = SeqProperty(Seq.tabulate[Int](7)(identity))
 
       val pagination = UdashPagination(
-        pages, selected, showArrows = showArrows, highlightActive = highlightActive
+        pages,
+        selected,
+        showArrows = showArrows,
+        highlightActive = highlightActive,
       )()
 
       val paginationElement = pagination.render
@@ -165,7 +177,7 @@ class UdashPaginationTest extends AsyncUdashCoreFrontendTest {
       implicit val tp = new LocalTranslationProvider(
         Map(
           Lang("test") -> Bundle(BundleHash("h"), Map("prev" -> "Poprzedni", "next" -> "Następny")),
-          Lang("test2") -> Bundle(BundleHash("h"), Map("prev" -> "Prev", "next" -> "next"))
+          Lang("test2") -> Bundle(BundleHash("h"), Map("prev" -> "Prev", "next" -> "next")),
         )
       )
       val lang = Property(Lang("test"))
@@ -178,31 +190,43 @@ class UdashPaginationTest extends AsyncUdashCoreFrontendTest {
 
       val pagination = UdashPagination(pages, selected)(
         arrowFactory = UdashPagination.defaultArrowFactory(Some((previous, next)))
-      ).setup(_.addRegistration(
-        lang.listen(implicit lang =>
-          for {
-            p <- TranslationKey.key("prev")()
-            n <- TranslationKey.key("next")()
-          } yield CallbackSequencer().sequence {
-            previous.set(p.string)
-            next.set(n.string)
-          },
-          initUpdate = true)
-      ))
+      ).setup(
+        _.addRegistration(
+          lang.listen(
+            implicit lang =>
+              for {
+                p <- TranslationKey.key("prev")()
+                n <- TranslationKey.key("next")()
+              } yield CallbackSequencer().sequence {
+                previous.set(p.string)
+                next.set(n.string)
+              },
+            initUpdate = true,
+          )
+        )
+      )
       val el = pagination.render
 
       import scalatags.JsDom.all._
       for {
         _ <- retrying {
-          el.getElementsByTagName("li")(0).firstElementChild.firstElementChild.getAttribute(aria.label.name) should be("Poprzedni")
-          el.getElementsByTagName("li")(pages.size + 1).firstElementChild.firstElementChild.getAttribute(aria.label.name) should be("Następny")
+          el.getElementsByTagName("li")(0).firstElementChild.firstElementChild.getAttribute(aria.label.name) should
+            be("Poprzedni")
+          el.getElementsByTagName("li")(pages.size + 1)
+            .firstElementChild
+            .firstElementChild
+            .getAttribute(aria.label.name) should be("Następny")
         }
         _ <- Future {
           lang.set(Lang("test2"))
         }
         _ <- retrying {
-          el.getElementsByTagName("li")(0).firstElementChild.firstElementChild.getAttribute(aria.label.name) should be("Prev")
-          el.getElementsByTagName("li")(pages.size + 1).firstElementChild.firstElementChild.getAttribute(aria.label.name) should be("next")
+          el.getElementsByTagName("li")(0).firstElementChild.firstElementChild.getAttribute(aria.label.name) should
+            be("Prev")
+          el.getElementsByTagName("li")(pages.size + 1)
+            .firstElementChild
+            .firstElementChild
+            .getAttribute(aria.label.name) should be("next")
         }
         _ <- Future {
           pagination.kill()
@@ -217,10 +241,9 @@ class UdashPaginationTest extends AsyncUdashCoreFrontendTest {
       val selected = Property(0)
       val pages = SeqProperty(Seq.tabulate[Int](7)(identity))
 
-      val pagination = UdashPagination(pages, selected, showArrows = false.toProperty) {
-        (v, _, nested) =>
-          import scalatags.JsDom.all._
-          span(nested(bind(v)))
+      val pagination = UdashPagination(pages, selected, showArrows = false.toProperty) { (v, _, nested) =>
+        import scalatags.JsDom.all._
+        span(nested(bind(v)))
       }
       val paginationElement = pagination.render
 
@@ -242,9 +265,9 @@ class UdashPaginationTest extends AsyncUdashCoreFrontendTest {
   }
 
   def checkDisabled(els: Element*)(expectFirst: Boolean, expectLast: Boolean): Unit = {
-    els.foreach(el => {
+    els.foreach { el =>
       jQ(el).find("li").first().hasClass("disabled") should be(expectFirst)
       jQ(el).find("li").last().hasClass("disabled") should be(expectLast)
-    })
+    }
   }
 }

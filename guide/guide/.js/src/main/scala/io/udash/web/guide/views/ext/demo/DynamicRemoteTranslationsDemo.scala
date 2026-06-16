@@ -22,7 +22,7 @@ object DynamicRemoteTranslationsDemo extends AutoDemo {
       new RemoteTranslationProvider(
         serverRpc.demos.translations,
         Some(dom.window.localStorage),
-        6.hours
+        6.hours,
       )
 
     implicit val lang: Property[Lang] = Property(Lang("en"))
@@ -30,41 +30,49 @@ object DynamicRemoteTranslationsDemo extends AutoDemo {
     div(
       button(
         Button.btn,
-        Button.color(Color.Primary)
-      )(id := "enButton", onclick := ((_: dom.Event) => lang.set(Lang("en"))))("EN"), " ",
+        Button.color(Color.Primary),
+      )(id := "enButton", onclick := ((_: dom.Event) => lang.set(Lang("en"))))("EN"),
+      " ",
       button(
         Button.btn,
-        Button.color(Color.Primary)
+        Button.color(Color.Primary),
       )(id := "plButton", onclick := ((_: dom.Event) => lang.set(Lang("pl"))))("PL"),
-      div(Card.card, Card.body, Background.color(Color.Light), Spacing.margin(
-        side = Side.Top,
-        size = SpacingSize.Normal
-      ))(ul(
-        li(
-          "auth.loginLabel: ",
-          Translations.auth.loginLabel.translatedDynamic()
+      div(
+        Card.card,
+        Card.body,
+        Background.color(Color.Light),
+        Spacing.margin(
+          side = Side.Top,
+          size = SpacingSize.Normal,
         ),
-        li(
-          "auth.passwordLabel: ",
-          Translations.auth.passwordLabel.translatedDynamic()
-        ),
-        li(
-          "auth.login.buttonLabel: ",
-          Translations.auth.login.buttonLabel.translatedDynamic()
-        ),
-        li(
-          "auth.login.retriesLeft: ",
-          Translations.auth.login.retriesLeft(3).translatedDynamic()
-        ),
-        li(
-          "auth.login.retriesLeftOne: ",
-          Translations.auth.login.retriesLeftOne.translatedDynamic()
-        ),
-        li(
-          "auth.register.buttonLabel: ",
-          Translations.auth.register.buttonLabel.translatedDynamic()
+      )(
+        ul(
+          li(
+            "auth.loginLabel: ",
+            Translations.auth.loginLabel.translatedDynamic(),
+          ),
+          li(
+            "auth.passwordLabel: ",
+            Translations.auth.passwordLabel.translatedDynamic(),
+          ),
+          li(
+            "auth.login.buttonLabel: ",
+            Translations.auth.login.buttonLabel.translatedDynamic(),
+          ),
+          li(
+            "auth.login.retriesLeft: ",
+            Translations.auth.login.retriesLeft(3).translatedDynamic(),
+          ),
+          li(
+            "auth.login.retriesLeftOne: ",
+            Translations.auth.login.retriesLeftOne.translatedDynamic(),
+          ),
+          li(
+            "auth.register.buttonLabel: ",
+            Translations.auth.register.buttonLabel.translatedDynamic(),
+          ),
         )
-      ))
+      ),
     )
   }.withSourceCode
 
@@ -74,9 +82,9 @@ object DynamicRemoteTranslationsDemo extends AutoDemo {
       div(
         id := "dynamic-rpc-translations-demo",
         GuideStyles.frame,
-        GuideStyles.useBootstrap
+        GuideStyles.useBootstrap,
       )(rendered),
-      source
+      source,
     )
   }
 }

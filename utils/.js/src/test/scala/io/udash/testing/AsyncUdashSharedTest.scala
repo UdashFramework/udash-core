@@ -18,20 +18,23 @@ trait AsyncUdashSharedTest extends AsyncUdashSharedTestBase {
     val p = Promise[Assertion]()
     var lastEx: Option[Throwable] = None
     def startTest(): Unit = {
-      dom.window.setTimeout(() => {
-        if (patienceConfig.timeout.toMillis > Date.now() - start) {
-          try {
-            code
-            p.complete(Success(Succeeded))
-          } catch {
-            case NonFatal(ex) =>
-              lastEx = Some(ex)
-              startTest()
+      dom.window.setTimeout(
+        () => {
+          if (patienceConfig.timeout.toMillis > Date.now() - start) {
+            try {
+              code
+              p.complete(Success(Succeeded))
+            } catch {
+              case NonFatal(ex) =>
+                lastEx = Some(ex)
+                startTest()
+            }
+          } else {
+            p.complete(Failure(lastEx.getOrElse(RetryingTimeout())))
           }
-        } else {
-          p.complete(Failure(lastEx.getOrElse(RetryingTimeout())))
-        }
-      }, patienceConfig.interval.toMillis.toDouble)
+        },
+        patienceConfig.interval.toMillis.toDouble,
+      )
     }
     startTest()
     p.future

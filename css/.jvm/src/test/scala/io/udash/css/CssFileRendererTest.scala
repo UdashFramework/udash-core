@@ -19,9 +19,9 @@ class CssFileRendererTest extends UdashSharedTest {
       mainCssLines(0) should be("@import \"io.udash.css.StylesheetExample$.css\";")
       mainCssLines(1) should be("@import \"io.udash.css.SecondStylesheetExample$.css\";")
 
-      val firstCss = Source.fromFile(s"$testDir/io.udash.css.StylesheetExample$$.css").getLines().mkString(System.lineSeparator())
-      firstCss.trim should be(
-        """.io-udash-css-StylesheetExample-common {
+      val firstCss =
+        Source.fromFile(s"$testDir/io.udash.css.StylesheetExample$$.css").getLines().mkString(System.lineSeparator())
+      firstCss.trim should be(""".io-udash-css-StylesheetExample-common {
           |  background-color: red;
           |}
           |
@@ -143,9 +143,9 @@ class CssFileRendererTest extends UdashSharedTest {
           |}
           """.stripMargin.trim)
 
-      val secondCss = Source.fromFile(s"$testDir/io.udash.css.SecondStylesheetExample$$.css").getLines().mkString(System.lineSeparator())
-      secondCss.trim should be(
-        """.io-udash-css-SecondStylesheetExample-test {
+      val secondCss =
+        Source.fromFile(s"$testDir/io.udash.css.SecondStylesheetExample$$.css").getLines().mkString(System.lineSeparator())
+      secondCss.trim should be(""".io-udash-css-SecondStylesheetExample-test {
           |  margin: 12px auto;
           |  text-align: left;
           |  cursor: pointer;

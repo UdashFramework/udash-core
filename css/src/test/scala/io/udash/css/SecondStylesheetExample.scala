@@ -1,13 +1,12 @@
 package io.udash.css
 
-
 object SecondStylesheetExample extends CssBase {
   import dsl._
 
   def utils(x: Int): CssStyle = mixin(
-    margin(x px, auto),
+    margin(x.px, auto),
     textAlign.left,
-    cursor.pointer
+    cursor.pointer,
   )
 
   val test: CssStyle = style(
@@ -17,8 +16,8 @@ object SecondStylesheetExample extends CssBase {
       cursor.zoomIn
     ),
 
-    media.not.handheld.landscape.maxWidth(640 px)(
-      width(400 px)
-    )
+    media.not.handheld.landscape.maxWidth(640.px)(
+      width(400.px)
+    ),
   )
 }

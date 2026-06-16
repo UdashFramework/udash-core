@@ -26,7 +26,7 @@ object EscapeUtils {
         case '\n' => _append("\\n")
         case '\r' => _append("\\r")
         case '\t' => _append("\\t")
-        case _ => _append("\\u%04x" format c.toInt)
+        case _ => _append("\\u%04x".format(c.toInt))
       }
       else if (c == '"') _append("\\\"")
       else if (c == '\\') _append("\\\\")
@@ -52,7 +52,7 @@ object EscapeUtils {
       s(i) match {
         case '\\' =>
           if (i > j) sb.append(s.substring(j, i))
-          sb.append(s(i+1) match {
+          sb.append(s(i + 1) match {
             case '\"' => '"'
             case '\\' => '\\'
             case 'b' => '\b'
@@ -61,7 +61,7 @@ object EscapeUtils {
             case 'r' => '\r'
             case 't' => '\t'
             case 'u' =>
-              val r = Integer.parseInt(s.substring(i+2, i+6), 16).toChar
+              val r = Integer.parseInt(s.substring(i + 2, i + 6), 16).toChar
               i += 4
               r
             case _ =>

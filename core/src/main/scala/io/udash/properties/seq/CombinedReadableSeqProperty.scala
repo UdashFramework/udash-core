@@ -5,10 +5,11 @@ import io.udash.properties.single.{CombinedProperty, ReadableProperty}
 import io.udash.utils.{CrossCollections, Registration}
 
 private[properties] final class CombinedReadableSeqProperty[A, B, R](
-  s: ReadableSeqProperty[A, _ <: ReadableProperty[A]], p: ReadableProperty[B],
-  combiner: (A, B) => R
+  s: ReadableSeqProperty[A, _ <: ReadableProperty[A]],
+  p: ReadableProperty[B],
+  combiner: (A, B) => R,
 ) extends CombinedProperty[BSeq[A], B, BSeq[R]](s, p, (x, y) => x.map(v => combiner(v, y)))
-  with AbstractReadableSeqProperty[R, ReadableProperty[R]] {
+    with AbstractReadableSeqProperty[R, ReadableProperty[R]] {
 
   private var combinedChildren: MBuffer[ReadableProperty[R]] = _
   private var originListenerRegistration: Registration = _
@@ -17,7 +18,7 @@ private[properties] final class CombinedReadableSeqProperty[A, B, R](
     val combinedNewChildren = originPatch.added.map(sub => sub.combine(p)(combiner))
     val mappedPatch: Patch[ReadableProperty[R]] = originPatch.copy(
       removed = originPatch.removed.indices.map(idx => combinedChildren(idx + originPatch.idx)),
-      added = combinedNewChildren
+      added = combinedNewChildren,
     )
     CrossCollections.replaceSeq(combinedChildren, originPatch.idx, originPatch.removed.size, combinedNewChildren)
     fireElementsListeners(mappedPatch)

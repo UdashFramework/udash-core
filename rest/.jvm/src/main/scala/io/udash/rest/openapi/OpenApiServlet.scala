@@ -7,13 +7,14 @@ import com.avsystem.commons.serialization.json.JsonStringOutput
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 object OpenApiServlet {
-  @explicitGenerics def apply[RestApi: OpenApiMetadata](
+  @explicitGenerics
+  def apply[RestApi: OpenApiMetadata](
     info: Info,
     components: Components = Components(),
     servers: List[Server] = Nil,
     security: List[SecurityRequirement] = Nil,
     tags: List[Tag] = Nil,
-    externalDocs: OptArg[ExternalDocumentation] = OptArg.Empty
+    externalDocs: OptArg[ExternalDocumentation] = OptArg.Empty,
   ): OpenApiServlet = new OpenApiServlet {
     protected def render(request: HttpServletRequest): OpenApi =
       implicitly[OpenApiMetadata[RestApi]].openapi(info, components, servers, security, tags, externalDocs)

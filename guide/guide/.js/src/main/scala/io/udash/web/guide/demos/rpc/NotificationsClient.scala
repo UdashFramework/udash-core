@@ -23,6 +23,6 @@ object NotificationsClient extends NotificationsClientRPC {
   }
 
   override def notify(msg: String): Unit = {
-    listeners.foreach(_ (msg))
+    listeners.foreach(_(msg))
   }
 }

@@ -37,31 +37,30 @@ object NavsDemo extends AutoDemo {
       override val title: String,
       override val content: String
     ) extends NavPanel
-    */
+     */
 
     val panels = SeqProperty[NavPanel](
       DefaultNavPanel("Title 1", "Content of panel 1..."),
       DefaultNavPanel("Title 2", "Content of panel 2..."),
       DefaultNavPanel("Title 3", "Content of panel 3..."),
-      DefaultNavPanel("Title 4", "Content of panel 4...")
+      DefaultNavPanel("Title 4", "Content of panel 4..."),
     )
     val selected = Property(panels.elemProperties.head.get)
     panels.append(DefaultNavPanel("Title 5", "Content of panel 5..."))
 
     div(
       UdashNav(panels, justified = true.toProperty, tabs = true.toProperty)(
-        elemFactory = (panel, nested) => a(
-          Navigation.link,
-          href := "",
-          onclick :+= ((_: Event) => selected.set(panel.get).thenReturn(true))
-        )(nested(bind(panel.asModel.subProp(_.title)))).render,
-        isActive = panel => panel.combine(selected)((panel, selected) =>
-          panel.title == selected.title
-        )
+        elemFactory = (panel, nested) =>
+          a(
+            Navigation.link,
+            href := "",
+            onclick :+= ((_: Event) => selected.set(panel.get).thenReturn(true)),
+          )(nested(bind(panel.asModel.subProp(_.title)))).render,
+        isActive = panel => panel.combine(selected)((panel, selected) => panel.title == selected.title),
       ),
       div(Card.card, Card.body, Background.color(Color.Light))(
         bind(selected.asModel.subProp(_.content))
-      )
+      ),
     ).render
   }.withSourceCode
 
@@ -70,4 +69,3 @@ object NavsDemo extends AutoDemo {
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
   }
 }
-

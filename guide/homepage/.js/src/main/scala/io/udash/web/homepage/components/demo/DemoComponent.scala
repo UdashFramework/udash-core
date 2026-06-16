@@ -31,7 +31,8 @@ final class DemoComponent(implicit application: Application[RoutingState]) exten
               a(
                 DemoStyles.demoTabsLink,
                 href := state.url,
-                (attr(Attributes.data(Attributes.Active)) := "true").attrIf(application.currentStateProperty.transform(_ == state))
+                (attr(Attributes.data(Attributes.Active)) := "true")
+                  .attrIf(application.currentStateProperty.transform(_ == state)),
               )(state.name)
             )
           }.toSeq
@@ -39,7 +40,7 @@ final class DemoComponent(implicit application: Application[RoutingState]) exten
         produce(application.currentStateProperty) {
           case state: IndexState => code(state.codeDemo).setup(Prism.highlightAllUnder)
           case _ => div().render
-        }
-      )
+        },
+      ),
     ).render
 }

@@ -9,7 +9,8 @@ import io.udash.web.guide._
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 
-case object FrontendPropertiesViewFactory extends StaticViewFactory[FrontendPropertiesState.type](() => new FrontendPropertiesView)
+case object FrontendPropertiesViewFactory
+  extends StaticViewFactory[FrontendPropertiesState.type](() => new FrontendPropertiesView)
 
 class FrontendPropertiesView extends View with CssView {
 
@@ -21,9 +22,7 @@ class FrontendPropertiesView extends View with CssView {
     val username = Property.blank[String]
 
     // Register value change listener
-    username.listen((name: String) =>
-      println(s"Username changed to: $name")
-    )
+    username.listen((name: String) => println(s"Username changed to: $name"))
 
     username.set("Udash")
   }.sourceCode
@@ -56,10 +55,10 @@ class FrontendPropertiesView extends View with CssView {
     def isOdd(i: Int) = i % 2 == 1
     val s = SeqProperty(1, 2, 3, 4, 5)
     val odds = Property(true)
-    val filtered = s
-      .combineElements(odds)((i, odds) => (i, isOdd(i) == odds))
-      .filter { case (_, keep) => keep }
-      .transformElements { case (i, _) => i }
+    val filtered =
+      s.combineElements(odds)((i, odds) => (i, isOdd(i) == odds)).filter { case (_, keep) => keep }.transformElements {
+        case (i, _) => i
+      }
 
     println(s.get -> odds.get) // prints: Seq(1, 2, 3, 4, 5), true
     println(filtered.get) // prints: Seq(1, 3, 5)
@@ -77,24 +76,25 @@ class FrontendPropertiesView extends View with CssView {
     val numbers = SeqProperty[Int](1, 2, 3)
     val evens = numbers.filter(_ % 2 == 0) // evens.get == Seq(2)
     numbers.append(4, 5, 6) // evens.get == Seq(2, 4, 6)
-    //evens.append(4, 5, 6) <- ERROR: evens is only the readable property
+    // evens.append(4, 5, 6) <- ERROR: evens is only the readable property
   }.sourceCode
 
   private val zipSource = {
     val numbers = SeqProperty[Int](1, 2, 3)
     val strings = SeqProperty[String]("A", "B", "C", "D")
-    val z = numbers.zip(strings)((_, _)) //Seq((1,"A"), (2,"B"), (3,"C"))
-    val all = numbers.zipAll(strings)((_, _), Property(-1), Property("empty")) ///Seq((1,"A"), (2,"B"), (3,"C"), (-1, "D"))
+    val z = numbers.zip(strings)((_, _)) // Seq((1,"A"), (2,"B"), (3,"C"))
+    val all =
+      numbers.zipAll(strings)((_, _), Property(-1), Property("empty")) /// Seq((1,"A"), (2,"B"), (3,"C"), (-1, "D"))
 
     numbers.append(7)
     numbers.append(8)
-    //z.get == Seq((1,"A"), (2,"B"), (3,"C"), (7,"D"))
-    //all.get == Seq((1,"A"), (2,"B"), (3,"C"), (7,"D"), (8,"empty"))
+    // z.get == Seq((1,"A"), (2,"B"), (3,"C"), (7,"D"))
+    // all.get == Seq((1,"A"), (2,"B"), (3,"C"), (7,"D"), (8,"empty"))
   }.sourceCode
 
   private val zipWithIndexSource = {
     val strings = SeqProperty[String]("A", "B", "C", "D")
-    val withIdx = strings.zipWithIndex //Seq(("A",0), ("B",1), ("C",2), ("D",3))
+    val withIdx = strings.zipWithIndex // Seq(("A",0), ("B",1), ("C",2), ("D",3))
 
     strings.append("Another")
     // withIdx.get == Seq(("A",0), ("B",1), ("C",2), ("D",3), ("Another",4))
@@ -129,11 +129,11 @@ class FrontendPropertiesView extends View with CssView {
     p(
       "Udash provides the powerful Properties mechanism for a data model management. ",
       "The Properties system wraps your data model, in order to enable ",
-      "convenient value change listening. Take a look at the example below:"
+      "convenient value change listening. Take a look at the example below:",
     ),
     AutoDemo.snippet(listenSource),
     p("That was the simple example. Now it is time for something more complex:"),
-    //todo migrate to compiled snippet once HasModelPropertyCreator works locally
+    // todo migrate to compiled snippet once HasModelPropertyCreator works locally
     CodeBlock(
       """case class NumbersInRange(minimum: Int, maximum: Int, numbers: Seq[Int])
         |object NumbersInRange extends HasModelPropertyCreator[NumbersInRange]
@@ -152,8 +152,16 @@ class FrontendPropertiesView extends View with CssView {
     p(
       "Each property should be initialized with some meaningful value. You can put an initial value directly into ",
       "the property constructor as in the example above, but it is also possible to use a blank value. The blank constructor looks ",
-      "for an implicit instance of the type class ", i("Blank[T]"), " and uses this value to initialize the property. ",
-      "The blank values are defined for some basic types like ", i("String"), ", ", i("Int"), ", ", i("Option"), " or collections. "
+      "for an implicit instance of the type class ",
+      i("Blank[T]"),
+      " and uses this value to initialize the property. ",
+      "The blank values are defined for some basic types like ",
+      i("String"),
+      ", ",
+      i("Int"),
+      ", ",
+      i("Option"),
+      " or collections. ",
     ),
     CodeBlock(
       """case class NumbersInRange(minimum: Int, maximum: Int, numbers: Seq[Int])
@@ -166,21 +174,41 @@ class FrontendPropertiesView extends View with CssView {
     )(GuideStyles),
     h3("Types of Properties"),
     p(
-      i("ReadableProperty"), " is the simplest version of the data model representation. It allows you to get wrapped value ",
-      "or register a listener. ", i("Property"), " extends ", i("ReadableProperty"),
-      " API with value changing methods. You can create ", i("Property"), " containing any type you want. ",
-      "Remember: there is no guarantee that the ", i("get"), " method called twice will return the same object."
+      i("ReadableProperty"),
+      " is the simplest version of the data model representation. It allows you to get wrapped value ",
+      "or register a listener. ",
+      i("Property"),
+      " extends ",
+      i("ReadableProperty"),
+      " API with value changing methods. You can create ",
+      i("Property"),
+      " containing any type you want. ",
+      "Remember: there is no guarantee that the ",
+      i("get"),
+      " method called twice will return the same object.",
     ),
     p(
-      i("(Readable)ModelProperty"), " contains other properties. The structure of the property can be described with a trait, ",
+      i("(Readable)ModelProperty"),
+      " contains other properties. The structure of the property can be described with a trait, ",
       "a class or a case class. In case of traits all abstract vals and defs (without parameters) are considered as subproperties. ",
       "In case of classes all elements of the primary constructor are considered as subproperties. ",
     ),
     p(
-      "If you want to use your type as a model template you have to create ", i("ModelPropertyCreator"), " for this type. ",
-      "You can do it by creating companion object extending ", i("HasModelPropertyCreator"),
-      " or explicitly using ", i("ModelPropertyCreator.materialize"), " method in the companion object of your type. ",
-      "You can access any subproperty with ", i("subModel"), ", ", i("subProp"), " and ", i("subSeq"), " methods."
+      "If you want to use your type as a model template you have to create ",
+      i("ModelPropertyCreator"),
+      " for this type. ",
+      "You can do it by creating companion object extending ",
+      i("HasModelPropertyCreator"),
+      " or explicitly using ",
+      i("ModelPropertyCreator.materialize"),
+      " method in the companion object of your type. ",
+      "You can access any subproperty with ",
+      i("subModel"),
+      ", ",
+      i("subProp"),
+      " and ",
+      i("subSeq"),
+      " methods.",
     ),
     p("Take a look at these two equivalent examples of model creation:"),
     CodeBlock(
@@ -214,16 +242,32 @@ class FrontendPropertiesView extends View with CssView {
         |person.subProp(_.birthYear).set(2001)""".stripMargin
     )(GuideStyles),
     p(
-      i("SeqProperty"), " represents a sequence of properties. It supports partial updates of the value with methods like: ",
-      i("append"), ", ", i("replace"), " or ", i("remove"), ". Method ", i("listenStructure"),
+      i("SeqProperty"),
+      " represents a sequence of properties. It supports partial updates of the value with methods like: ",
+      i("append"),
+      ", ",
+      i("replace"),
+      " or ",
+      i("remove"),
+      ". Method ",
+      i("listenStructure"),
       " registers callback which will be called in case any element is added or removed from this property. ",
-      "You can also access a sequence of properties contained in the ", i("SeqProperty"), " with ",
-      i("elemProperties"), " method."
+      "You can also access a sequence of properties contained in the ",
+      i("SeqProperty"),
+      " with ",
+      i("elemProperties"),
+      " method.",
     ),
     p(
-      "Elements of ", i("SeqProperty"), " can be any of properties type. This is expressed with ", i("CastableProperty"),
-      " type, which can be casted to Model or SeqProperty with compile-time checked methods: ", i("asModel"), " and ",
-      i("asSeq"), ". Take a look at the following example: "
+      "Elements of ",
+      i("SeqProperty"),
+      " can be any of properties type. This is expressed with ",
+      i("CastableProperty"),
+      " type, which can be casted to Model or SeqProperty with compile-time checked methods: ",
+      i("asModel"),
+      " and ",
+      i("asSeq"),
+      ". Take a look at the following example: ",
     ),
     CodeBlock(
       """import io.udash._
@@ -236,21 +280,42 @@ class FrontendPropertiesView extends View with CssView {
         |}""".stripMargin
     )(GuideStyles),
     p(
-      "The standard import of Udash utils provides ", i("SeqProperty"), " alias with a single generic type describing type of ",
-      "data contained in the elements. It assumes that in ", i("SeqProperty"), " elements type is ",
-      i("CastableProperty"), " and ", i("ReadableCastableProperty"), " for ", i("ReadableSeqProperty"), ". You can import ",
-      i("io.udash.seq.SeqProperty"), " and provide the second generic argument to specify element type."
+      "The standard import of Udash utils provides ",
+      i("SeqProperty"),
+      " alias with a single generic type describing type of ",
+      "data contained in the elements. It assumes that in ",
+      i("SeqProperty"),
+      " elements type is ",
+      i("CastableProperty"),
+      " and ",
+      i("ReadableCastableProperty"),
+      " for ",
+      i("ReadableSeqProperty"),
+      ". You can import ",
+      i("io.udash.seq.SeqProperty"),
+      " and provide the second generic argument to specify element type.",
     ),
     p(
-      i("SeqProperty"), " may be based on: ",
-      i("scala.collection.Seq"), ", ",
-      i("scala.collection.immutable.Seq"), ", ",
-      i("scala.collection.immutable.List"), ", ",
-      i("scala.collection.immutable.Vector"), " and ",
-      i("scala.collection.mutable.Seq"), ". ",
-      "Note that due to, ", i("SeqProperty"), "'s mutable nature, you may incur a performance overhead when calling ", i("subSeq"),
-      " on fields of type more specific than ", i("scala.collection.Seq"),
-      ". ", "This is due to potential conversion of the underlying data structure."
+      i("SeqProperty"),
+      " may be based on: ",
+      i("scala.collection.Seq"),
+      ", ",
+      i("scala.collection.immutable.Seq"),
+      ", ",
+      i("scala.collection.immutable.List"),
+      ", ",
+      i("scala.collection.immutable.Vector"),
+      " and ",
+      i("scala.collection.mutable.Seq"),
+      ". ",
+      "Note that due to, ",
+      i("SeqProperty"),
+      "'s mutable nature, you may incur a performance overhead when calling ",
+      i("subSeq"),
+      " on fields of type more specific than ",
+      i("scala.collection.Seq"),
+      ". ",
+      "This is due to potential conversion of the underlying data structure.",
     ),
 
     h3("Properties hierarchy"),
@@ -275,17 +340,40 @@ class FrontendPropertiesView extends View with CssView {
         |)""".stripMargin
     )(GuideStyles),
     p("The ", i("comment"), " property might be illustrated like:"),
-    ClickableImageFactory(ImageFactoryPrefixSet.Frontend, "propertyhierarchy.png", "Properties hierarchy example.", GuideStyles.imgBig, GuideStyles.frame),
+    ClickableImageFactory(
+      ImageFactoryPrefixSet.Frontend,
+      "propertyhierarchy.png",
+      "Properties hierarchy example.",
+      GuideStyles.imgBig,
+      GuideStyles.frame,
+    ),
     p(
-      "We can say that the ", i("comment"), " property is a parent of ", i("author"), ", ", i("content"), " and ", i("responses"), " properties, ",
-      "while ", i("author"), " is the parent of ", i("id"), " and ", i("name"), "."
+      "We can say that the ",
+      i("comment"),
+      " property is a parent of ",
+      i("author"),
+      ", ",
+      i("content"),
+      " and ",
+      i("responses"),
+      " properties, ",
+      "while ",
+      i("author"),
+      " is the parent of ",
+      i("id"),
+      " and ",
+      i("name"),
+      ".",
     ),
     h3("Property value change listeners"),
     p("On any property you can register a value change listener. The value change listeners are aware of the properties hierarchy. "),
     ul(GuideStyles.defaultList)(
       li(i("Property"), " - fires the listeners when you change its value."),
       li(i("ModelProperty"), " - fires the listeners when you change a value of any subproperty."),
-      li(i("SeqProperty"), " - fires the listeners when you change a value of any element or the structure of the sequence.")
+      li(
+        i("SeqProperty"),
+        " - fires the listeners when you change a value of any element or the structure of the sequence.",
+      ),
     ),
     p("Take a look at the following example:"),
     CodeBlock(
@@ -303,8 +391,10 @@ class FrontendPropertiesView extends View with CssView {
     )(GuideStyles),
     p("As you may notice, when you change a nested property, all its ancestors will be treated as changed."),
     p(
-      "SeqProperty has the ", i("listenStructure"), " method which allows you to listen on adding or removing elements ",
-      "in this property, yet it will not fire on change inside children of a property. For example:"
+      "SeqProperty has the ",
+      i("listenStructure"),
+      " method which allows you to listen on adding or removing elements ",
+      "in this property, yet it will not fire on change inside children of a property. For example:",
     ),
     AutoDemo.snippet(listenStructureSource),
     h3("Properties transformation"),
@@ -326,28 +416,48 @@ class FrontendPropertiesView extends View with CssView {
         |val name: ReadableProperty[String] = user.transform(_.name)""".stripMargin
     )(GuideStyles),
     p(
-      "Remember that ", i("userId"), " is not an independent property. All operations will be synchronized between the both ",
-      "original and new property. You do not need to pass the second argument to the ", i("transform"), " method, then ",
-      "you will receive ", i("ReadableProperty"), " as a result."
+      "Remember that ",
+      i("userId"),
+      " is not an independent property. All operations will be synchronized between the both ",
+      "original and new property. You do not need to pass the second argument to the ",
+      i("transform"),
+      " method, then ",
+      "you will receive ",
+      i("ReadableProperty"),
+      " as a result.",
     ),
     p(
-      "It is possible to transform ", i("SeqProperty[A]"), " to ", i("SeqProperty[B]"), " and ",
-      i("Property[A]"), " to ", i("SeqProperty[B]"), ". For example:"
+      "It is possible to transform ",
+      i("SeqProperty[A]"),
+      " to ",
+      i("SeqProperty[B]"),
+      " and ",
+      i("Property[A]"),
+      " to ",
+      i("SeqProperty[B]"),
+      ". For example:",
     ),
     AutoDemo.snippet(transformSource),
     h4("Properties combining"),
     p("You can combine two properties into a new one synchronised with both of them:"),
     AutoDemo.snippet(combineSource),
-    p(i("SeqProperty"), " has specialized version of this method which combines every element of seq with the provided one."),
+    p(
+      i("SeqProperty"),
+      " has specialized version of this method which combines every element of seq with the provided one.",
+    ),
     AutoDemo.snippet(combineElementsSource),
     h4("SeqProperty filtering"),
     p(
       "You can filter SeqProperty if you need, however you will not be able to modify the filtered property. ",
-      "A filtered property is synchronised with the original one."
+      "A filtered property is synchronised with the original one.",
     ),
     AutoDemo.snippet(filterSource),
     h4("SeqProperty zip/zipAll"),
-    p("It is possible to zip elements from two ", i("SeqProperties"), ". You have to pass a combiner, so you can combine the elements as you want."),
+    p(
+      "It is possible to zip elements from two ",
+      i("SeqProperties"),
+      ". You have to pass a combiner, so you can combine the elements as you want.",
+    ),
     AutoDemo.snippet(zipSource),
     h4("SeqProperty zipWithIndex"),
     p("It is also very easy to create sequence of elements zipped with index."),
@@ -359,14 +469,22 @@ class FrontendPropertiesView extends View with CssView {
       "of arguments to  properties is an unnecessary overhead. The static value can be wrapped ",
       "into the immutable property, which takes advantage of the value immutability ",
       "and improves the application performance without reducing the API flexibility. ",
-      "The ", i("import io.udash._"), " provides three extension methods: ",
-      i("_.toProperty"), ", ", i("_.toModelProperty"), " and ", i("_.toSeqProperty"), "."
+      "The ",
+      i("import io.udash._"),
+      " provides three extension methods: ",
+      i("_.toProperty"),
+      ", ",
+      i("_.toModelProperty"),
+      " and ",
+      i("_.toSeqProperty"),
+      ".",
     ),
     AutoDemo.snippet(immutablePropertiesSource),
     h2("What's next?"),
     p(
-      "Take a look at ", a(href := FrontendBindingsState.url)("Template Data Binding"),
-      " chapter to read about the data model view bindings in Udash applications."
-    )
+      "Take a look at ",
+      a(href := FrontendBindingsState.url)("Template Data Binding"),
+      " chapter to read about the data model view bindings in Udash applications.",
+    ),
   )
 }

@@ -16,23 +16,21 @@ object ButtonToolbarDemo extends AutoDemo with CssView {
     val groups = SeqProperty[Seq[Int]](Seq[Seq[Int]](1 to 4, 5 to 7, 8 to 8))
 
     div(
-      UdashButtonToolbar.reactive(groups)((p, nested) => {
+      UdashButtonToolbar.reactive(groups) { (p, nested) =>
         val group = UdashButtonGroup.reactive(
           p.transformToSeq(identity),
-          size = Some(Size.Large).toProperty[Option[Size]]
-        ) {
-          case (element, nested) =>
-            val btn = UdashButton()(_ => nested(bind(element)))
-            nested(btn)
-            btn.render
+          size = Some(Size.Large).toProperty[Option[Size]],
+        ) { case (element, nested) =>
+          val btn = UdashButton()(_ => nested(bind(element)))
+          nested(btn)
+          btn.render
         }
         nested(group)
         group.render
-      })
+      }
     ).render
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, String) =
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
 }
-

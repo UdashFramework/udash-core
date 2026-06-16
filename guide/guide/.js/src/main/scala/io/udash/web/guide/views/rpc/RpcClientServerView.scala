@@ -8,7 +8,8 @@ import io.udash.web.guide.views.rpc.demos._
 import io.udash.web.guide.{Context, _}
 import scalatags.JsDom
 
-case object RpcClientServerViewFactory extends StaticViewFactory[RpcClientServerState.type](() => new RpcClientServerView)
+case object RpcClientServerViewFactory
+  extends StaticViewFactory[RpcClientServerState.type](() => new RpcClientServerView)
 
 class RpcClientServerView extends View with CssView {
   import Context._
@@ -18,12 +19,12 @@ class RpcClientServerView extends View with CssView {
     h2("Client ➔ server communication"),
     p(
       "Every dynamic web application needs to communicate with a server, every modern application should do it asynchronously. " +
-      "In Udash all you have to do to make asynchronous server calls is:"
+        "In Udash all you have to do to make asynchronous server calls is:"
     ),
     ul(GuideStyles.defaultList)(
       li("Prepare RPC interfaces as described in the ", a(href := RpcInterfacesState.url)("RPC interfaces"), " chapter."),
       li("Implement prepared interface in your backend code."),
-      li("Use ", i("DefaultServerRPC"), " in the frontend code to make a server connection.")
+      li("Use ", i("DefaultServerRPC"), " in the frontend code to make a server connection."),
     ),
     h2("Server connection"),
     p("Let's start with creating a client-server connection in the client code:"),
@@ -35,15 +36,31 @@ class RpcClientServerView extends View with CssView {
         |)""".stripMargin
     )(GuideStyles),
     p(
-      i("MainClientRPC"), " and ", i("MainServerRPC"), " are the root RPC interfaces of the application. ",
-      i("FrontendRPCService"), " is a ", i("MainClientRPC"), " implementation. Ignore it for now, this topic will be covered in the ",
-      a(href := RpcServerClientState.url)("Server ➔ Client communication"), " chapter."
+      i("MainClientRPC"),
+      " and ",
+      i("MainServerRPC"),
+      " are the root RPC interfaces of the application. ",
+      i("FrontendRPCService"),
+      " is a ",
+      i("MainClientRPC"),
+      " implementation. Ignore it for now, this topic will be covered in the ",
+      a(href := RpcServerClientState.url)("Server ➔ Client communication"),
+      " chapter.",
     ),
     p(
-      i("DefaultServerRPC"), " is a convenient method for client-server connection creation, assuming that you want to ",
-      "use the default RPC framework: ", i("DefaultServerUdashRPCFramework"), " and ", i("DefaultClientUdashRPCFramework"), ". ",
-      "These frameworks use ", i("GenCodec"), " for serialization, so you have to define it for every type used ",
-      "in your RPC interfaces. ", i("GenCodec"), " is already defined for basic types like Int, String, collections, etc."
+      i("DefaultServerRPC"),
+      " is a convenient method for client-server connection creation, assuming that you want to ",
+      "use the default RPC framework: ",
+      i("DefaultServerUdashRPCFramework"),
+      " and ",
+      i("DefaultClientUdashRPCFramework"),
+      ". ",
+      "These frameworks use ",
+      i("GenCodec"),
+      " for serialization, so you have to define it for every type used ",
+      "in your RPC interfaces. ",
+      i("GenCodec"),
+      " is already defined for basic types like Int, String, collections, etc.",
     ),
     p("Now you can use ", i("serverRpc"), " to make RPC calls from the client to the server application."),
     CodeBlock("""serverRpc.remoteCall("Test") onComplete { ... }""".stripMargin)(GuideStyles),
@@ -52,29 +69,42 @@ class RpcClientServerView extends View with CssView {
     ul(GuideStyles.defaultList)(
       li(
         "Basic implementation - the easiest way which is useful when your service layer does not need to know anything ",
-        "about a client (i.e. it does not use the ", a(href := RpcServerClientState.url)("server ➔ client communication"), "). "
+        "about a client (i.e. it does not use the ",
+        a(href := RpcServerClientState.url)("server ➔ client communication"),
+        "). ",
       ),
       li(
         "Client-aware implementation - the most common implementation for services without authentication, the service layer ",
-        "has access to the ", i("ClientId"), " and can use it in ",
-        a(href := RpcServerClientState.url)("server ➔ client communication"), "."
+        "has access to the ",
+        i("ClientId"),
+        " and can use it in ",
+        a(href := RpcServerClientState.url)("server ➔ client communication"),
+        ".",
       ),
       li(
         "User-aware implementation - the most common implementation for services with authentication, the service layer ",
-        "has access to ", i("ClientId"), " and ", i("UserContext"), "."
-      )
+        "has access to ",
+        i("ClientId"),
+        " and ",
+        i("UserContext"),
+        ".",
+      ),
     ),
     p("Things to consider when implementing the backend RPC interface:"),
     ul(GuideStyles.defaultList)(
       li("How to create and cache the RPC endpoints?"),
       li("How to handle authentication and authorization in an endpoint?"),
-      li("How to pass a required data (like ", i("ClientId"), " and ", i("UserContext"), ") to the RPC endpoints?")
+      li("How to pass a required data (like ", i("ClientId"), " and ", i("UserContext"), ") to the RPC endpoints?"),
     ),
-    p("The way the endpoints and ", i("AtmosphereServiceConfig"), " should be implemented depends on answer to these questions."),
+    p(
+      "The way the endpoints and ",
+      i("AtmosphereServiceConfig"),
+      " should be implemented depends on answer to these questions.",
+    ),
     h3("Basic implementation"),
     p(
       "Let's assume that an interface implementation does not need to know anything about a client. In such case ",
-      "every endpoint can be a Scala object, so it does not need any caching."
+      "every endpoint can be a Scala object, so it does not need any caching.",
     ),
     CodeBlock(
       """object MainRpcEndpoint extends MainServerRpc {
@@ -98,9 +128,13 @@ class RpcClientServerView extends View with CssView {
         |}""".stripMargin
     )(GuideStyles),
     p(
-      i("ExposesServerRPC"), " is a wrapper for your RPC interface implementation. It defines the RPC framework ",
-      "used by your application. The default implementation (", i("DefaultExposesServerRPC"), ") uses ",
-      i("DefaultServerUdashRPCFramework"), " to expose your interface."
+      i("ExposesServerRPC"),
+      " is a wrapper for your RPC interface implementation. It defines the RPC framework ",
+      "used by your application. The default implementation (",
+      i("DefaultExposesServerRPC"),
+      ") uses ",
+      i("DefaultServerUdashRPCFramework"),
+      " to expose your interface.",
     ),
     p("Now you can use it in the following way:"),
     CodeBlock(
@@ -114,14 +148,20 @@ class RpcClientServerView extends View with CssView {
         |new RpcServlet(framework) """.stripMargin
     )(GuideStyles),
     p(
-      i("DefaultAtmosphereFramework"), " is a wrapper for the ", i("AtmosphereFramework"), " class with some ",
-      "default configuration. It is responsible for the WebSocket communication with the client application. "
+      i("DefaultAtmosphereFramework"),
+      " is a wrapper for the ",
+      i("AtmosphereFramework"),
+      " class with some ",
+      "default configuration. It is responsible for the WebSocket communication with the client application. ",
     ),
     p("This is a very simple example of backend implementation. Unfortunately, it is only sufficient for very small and simple applications."),
     h3("Client-aware implementation"),
     p(
-      "Usually knowing the method caller ", i("ClientId"), " is useful, especially when you want to use the ",
-      a(href := RpcServerClientState.url)("server ➔ client communication"), " for a specific client. "
+      "Usually knowing the method caller ",
+      i("ClientId"),
+      " is useful, especially when you want to use the ",
+      a(href := RpcServerClientState.url)("server ➔ client communication"),
+      " for a specific client. ",
     ),
     CodeBlock(
       """import io.udash.rpc._
@@ -132,9 +172,12 @@ class RpcClientServerView extends View with CssView {
         |}""".stripMargin
     )(GuideStyles),
     p(
-      "Now the RPC interface is implemented as a class, with the constructor taking a ", i("ClientId"), ". This is an implicit argument ",
-      " in order to make passing the client id to nested interfaces implementations easier. Now the ", i("AtmosphereServiceConfig"),
-      " implementation will be more complicated."
+      "Now the RPC interface is implemented as a class, with the constructor taking a ",
+      i("ClientId"),
+      ". This is an implicit argument ",
+      " in order to make passing the client id to nested interfaces implementations easier. Now the ",
+      i("AtmosphereServiceConfig"),
+      " implementation will be more complicated.",
     ),
     CodeBlock(
       """class DefaultAtmosphereServiceConfig[ServerRPCType]
@@ -162,8 +205,10 @@ class RpcClientServerView extends View with CssView {
         |}""".stripMargin
     )(GuideStyles),
     p(
-      "This is the default ", i("AtmosphereServiceConfig"), " implementation from Udash. It creates a new RPC endpoint for each ",
-      "connection and stores it in the session attribute. Usage is as simple as earlier:"
+      "This is the default ",
+      i("AtmosphereServiceConfig"),
+      " implementation from Udash. It creates a new RPC endpoint for each ",
+      "connection and stores it in the session attribute. Usage is as simple as earlier:",
     ),
     CodeBlock(
       """import io.udash.rpc._
@@ -185,7 +230,7 @@ class RpcClientServerView extends View with CssView {
       "Sometimes your services cannot be created per client connection. For example, when initialization takes too much time ",
       "or needs to share data between the clients. In such cases, you can split your backend into a service and an endpoints layer. ",
       "The endpoint should be a lightweight implementation of the RPC interface which will be created per client and pass calls to ",
-      "the service layer. "
+      "the service layer. ",
     ),
     CodeBlock(
       """import io.udash.rpc._
@@ -238,13 +283,17 @@ class RpcClientServerView extends View with CssView {
         |new RpcServlet(framework)""".stripMargin
     )(GuideStyles),
     h3("User-aware implementation"),
-    p("More complex services might need the ", i("UserContext"), " of the method call. Look at one of possible ways to provide it:"),
+    p(
+      "More complex services might need the ",
+      i("UserContext"),
+      " of the method call. Look at one of possible ways to provide it:",
+    ),
     ul(GuideStyles.defaultList)(
       li(i("MainServerRpc"), " will expose two subinterfaces: ", i("PrimeRPC"), " and ", i("AuthRPC"), "."),
       li(i("AuthRPC"), " will resolve the ", i("UserToken"), " based on a username and a password."),
       li(i("MainServerRpc"), " will resolve the ", i("UserContext"), " based on a ", i("UserToken"), "."),
       li("The RPC endpoint will authorize method access for the provided user."),
-      li("The service will do the job.")
+      li("The service will do the job."),
     ),
     p("Let's declare ", i("UserContext"), " and ", i("UserToken"), " first."),
     CodeBlock(
@@ -328,13 +377,26 @@ class RpcClientServerView extends View with CssView {
         |}""".stripMargin
     )(GuideStyles),
     p(
-      "The interfaces hierarchy is a convenient way to handle authentication. ", i("MainRpcEndpoint"), " exposes two subinterfaces. ",
+      "The interfaces hierarchy is a convenient way to handle authentication. ",
+      i("MainRpcEndpoint"),
+      " exposes two subinterfaces. ",
       "The first one provides a method for user authentication. The second one verifies the client token. ",
-      "It is not possible to access the ", i("PrimeService"), " without a valid ", i("UserToken"), ". The ",
-      i("UserContext"), " checks if the user has permission required to call the service method. The ",
-      i("isPrime"), " method from the ", i("PrimeService"), " takes a ", i("UserContext"), " and passes the user ID to the ", i("QuotaService"),
+      "It is not possible to access the ",
+      i("PrimeService"),
+      " without a valid ",
+      i("UserToken"),
+      ". The ",
+      i("UserContext"),
+      " checks if the user has permission required to call the service method. The ",
+      i("isPrime"),
+      " method from the ",
+      i("PrimeService"),
+      " takes a ",
+      i("UserContext"),
+      " and passes the user ID to the ",
+      i("QuotaService"),
       " for a quota check. As you can see, the endpoints are well suited for authorizing GUI users. ",
-      "The services are not aware of GUI permissions and can be easily reused in other application endpoints like REST API."
+      "The services are not aware of GUI permissions and can be easily reused in other application endpoints like REST API.",
     ),
     p("Now it is ready to use in the following way:"),
     CodeBlock(
@@ -352,13 +414,22 @@ class RpcClientServerView extends View with CssView {
     h2("Exceptions handling"),
     p(
       "The exceptions thrown by the backend application are passed to the frontend application. In a general case ",
-      "they are passed as the ", i("RPCFailure"), " exception contaning basic data related to the error, but it is also ",
-      "possible to serialize the original exception with assigned ", i("GenCodec"), ". "
+      "they are passed as the ",
+      i("RPCFailure"),
+      " exception contaning basic data related to the error, but it is also ",
+      "possible to serialize the original exception with assigned ",
+      i("GenCodec"),
+      ". ",
     ),
     p(
-      "First of all you have to create an instance of the ", i("ExceptionCodecRegistry"), " in the cross-compiled module and register ",
-      "the codecs for your exceptions. You can also use a default implementation named ", i("DefaultExceptionCodecRegistry"),
-      " - it performs serialization of basic exceptions like ", i("NullPointerException"), "."
+      "First of all you have to create an instance of the ",
+      i("ExceptionCodecRegistry"),
+      " in the cross-compiled module and register ",
+      "the codecs for your exceptions. You can also use a default implementation named ",
+      i("DefaultExceptionCodecRegistry"),
+      " - it performs serialization of basic exceptions like ",
+      i("NullPointerException"),
+      ".",
     ),
     CodeBlock(
       """import io.udash.rpc.serialization.ExceptionCodecRegistry
@@ -375,22 +446,31 @@ class RpcClientServerView extends View with CssView {
         |}""".stripMargin
     )(GuideStyles),
     p(
-      "Then you have to pass the registry to the server connector (usually: ", i("DefaultServerRPC"),
-      ") in the frontend application and to the Atmosphere service (usually: ", i("DefaultAtmosphereFramework"),
+      "Then you have to pass the registry to the server connector (usually: ",
+      i("DefaultServerRPC"),
+      ") in the frontend application and to the Atmosphere service (usually: ",
+      i("DefaultAtmosphereFramework"),
       ") on the server side. Now the registered exceptions will be passed from the server to the client. Take a look at ",
-      "the following demo: "
+      "the following demo: ",
     ),
     ForceBootstrap(new ExceptionsDemoComponent().getTemplate),
     p(
-      "In some cases you may want to handle exceptions globally. ", i("DefaultServerRPC"), " constructor takes ",
-      i("rpcFailureInterceptors"), " argument and every passed callback will be executed on all RPC call failures. ",
-      "You can also register a callback in the ", i("DefaultServerRPC"), " instance with ",
-      i("registerCallFailureCallback"), "."
+      "In some cases you may want to handle exceptions globally. ",
+      i("DefaultServerRPC"),
+      " constructor takes ",
+      i("rpcFailureInterceptors"),
+      " argument and every passed callback will be executed on all RPC call failures. ",
+      "You can also register a callback in the ",
+      i("DefaultServerRPC"),
+      " instance with ",
+      i("registerCallFailureCallback"),
+      ".",
     ),
     h2("What's next?"),
     p(
-      "You may find the ", a(href := RpcServerClientState.url)("server ➔ client communication"),
-      " chapter interesting later on. "
-    )
+      "You may find the ",
+      a(href := RpcServerClientState.url)("server ➔ client communication"),
+      " chapter interesting later on. ",
+    ),
   )
 }

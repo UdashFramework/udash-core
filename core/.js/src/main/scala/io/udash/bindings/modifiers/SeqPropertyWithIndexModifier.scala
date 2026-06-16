@@ -10,7 +10,7 @@ private[bindings] final class SeqPropertyWithIndexModifier[T, E <: ReadablePrope
   override val property: ReadableSeqProperty[T, E],
   builder: (E, ReadableProperty[Int], Binding.NestedInterceptor) => Seq[Node],
   override val customElementsReplace: DOMManipulator.ReplaceMethod,
-  override val customElementsInsert: DOMManipulator.InsertMethod
+  override val customElementsInsert: DOMManipulator.InsertMethod,
 ) extends SeqPropertyModifierUtils[T, E] {
 
   private val indexes = CrossCollections.createMap[E, Property[Int]]

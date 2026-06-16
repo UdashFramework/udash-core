@@ -10,13 +10,11 @@ import com.avsystem.commons.{JStringBuilder, Opt, OptArg, _}
 import scala.annotation.implicitNotFound
 import scala.util.hashing.MurmurHash3
 
-/**
-  * Value used to represent HTTP body. Also used as direct encoding of [[io.udash.rest.Body Body]] parameter in
-  * [[io.udash.rest.CustomBody CustomBody]] methods.
-  * Types that have encoding to [[io.udash.rest.raw.JsonValue JsonValue]] automatically have encoding to
-  * [[io.udash.rest.raw.HttpBody HttpBody]] with `application/json` media type.
-  * There is also a specialized encoding provided for `Unit` which returns empty HTTP body when writing and ignores
-  * the body when reading.
+/** Value used to represent HTTP body. Also used as direct encoding of [[io.udash.rest.Body Body]] parameter in
+  * [[io.udash.rest.CustomBody CustomBody]] methods. Types that have encoding to
+  * [[io.udash.rest.raw.JsonValue JsonValue]] automatically have encoding to [[io.udash.rest.raw.HttpBody HttpBody]]
+  * with `application/json` media type. There is also a specialized encoding provided for `Unit` which returns empty
+  * HTTP body when writing and ignores the body when reading.
   */
 sealed trait HttpBody {
   def nonEmptyOpt: Opt[HttpBody.NonEmpty] = this match {
@@ -42,18 +40,20 @@ sealed trait HttpBody {
     case ne: HttpBody.NonEmpty if requiredMediaType.forall(_ == ne.mediaType) =>
       ne.text(defaultCharset)
     case ne: HttpBody.NonEmpty =>
-      throw new ReadFailure(s"Expected non-empty textual body" +
-        requiredMediaType.fold("")(mt => s" with media type $mt") +
-        s" but got body with content type ${ne.contentType}")
+      throw new ReadFailure(
+        s"Expected non-empty textual body" + requiredMediaType.fold("")(mt => s" with media type $mt") +
+          s" but got body with content type ${ne.contentType}"
+      )
   }
 
   final def readBytes(requiredMediaType: OptArg[String] = OptArg.Empty): Array[Byte] = this match {
     case HttpBody.Empty => throw new ReadFailure("Expected non-empty body")
     case ne: HttpBody.NonEmpty if requiredMediaType.forall(_ == ne.mediaType) => ne.bytes
     case ne: HttpBody.NonEmpty =>
-      throw new ReadFailure(s"Expected non-empty body" +
-        requiredMediaType.fold("")(mt => s" with media type $mt") +
-        s" but got body with content type ${ne.contentType}")
+      throw new ReadFailure(
+        s"Expected non-empty body" + requiredMediaType.fold("")(mt => s" with media type $mt") +
+          s" but got body with content type ${ne.contentType}"
+      )
   }
 
   final def defaultStatus: Int = this match {
@@ -67,8 +67,7 @@ sealed trait HttpBody {
 object HttpBody extends HttpBodyLowPrio {
   case object Empty extends HttpBody
 
-  /**
-    * Non empty body can be either textual or binary. This is mostly an optimization to avoid unnecessary conversions
+  /** Non empty body can be either textual or binary. This is mostly an optimization to avoid unnecessary conversions
     * between strings and byte arrays. Both [[Binary]] and [[Textual]] can be read as text and as raw bytes.
     */
   sealed trait NonEmpty extends HttpBody {
@@ -78,8 +77,7 @@ object HttpBody extends HttpBodyLowPrio {
     def bytes: Array[Byte]
   }
 
-  /**
-    * Represents textual HTTP body. A body is considered textual if `Content-Type` has `charset` defined.
+  /** Represents textual HTTP body. A body is considered textual if `Content-Type` has `charset` defined.
     */
   final case class Textual(content: String, mediaType: String, charset: String) extends NonEmpty {
     def contentType: String = s"$mediaType;charset=$charset"
@@ -87,8 +85,7 @@ object HttpBody extends HttpBodyLowPrio {
     lazy val bytes: Array[Byte] = content.getBytes(charset)
   }
 
-  /**
-    * Represents binary HTTP body. A body is considered binary if `Content-Type` does not have `charset` defined.
+  /** Represents binary HTTP body. A body is considered binary if `Content-Type` does not have `charset` defined.
     */
   final case class Binary(bytes: Array[Byte], contentType: String) extends NonEmpty {
     def mediaType: String = mediaTypeOf(contentType)
@@ -135,13 +132,11 @@ object HttpBody extends HttpBodyLowPrio {
     }
 
   def charsetOf(contentType: String): Opt[String] =
-    CharsetParamRegex.findFirstMatchIn(contentType)
-      .toOpt.map(_.group(1).trim)
-      .map { charset =>
-        if (charset.startsWith("\"") && charset.endsWith("\""))
-          charset.substring(1, charset.length - 1)
-        else charset
-      }
+    CharsetParamRegex.findFirstMatchIn(contentType).toOpt.map(_.group(1).trim).map { charset =>
+      if (charset.startsWith("\"") && charset.endsWith("\""))
+        charset.substring(1, charset.length - 1)
+      else charset
+    }
 
   def plain(content: OptArg[String] = OptArg.Empty): HttpBody =
     content.toOpt.map(textual(_, PlainType)).getOrElse(Empty)
@@ -157,12 +152,12 @@ object HttpBody extends HttpBodyLowPrio {
   }
 
   def createJsonBody(fields: Mapping[JsonValue]): HttpBody =
-    if (fields.isEmpty) HttpBody.Empty else {
+    if (fields.isEmpty) HttpBody.Empty
+    else {
       val sb = new JStringBuilder
       val oo = new JsonStringOutput(sb).writeObject()
-      fields.entries.foreach {
-        case (key, JsonValue(json)) =>
-          oo.writeField(key).writeRawJson(json)
+      fields.entries.foreach { case (key, JsonValue(json)) =>
+        oo.writeField(key).writeRawJson(json)
       }
       oo.finish()
       HttpBody.json(JsonValue(sb.toString))

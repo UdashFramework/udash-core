@@ -10,9 +10,7 @@ class UdashNavbarTest extends UdashCoreFrontendTest {
   "UdashNavbar component" should {
     "render provided elements and cleanup provided navigation only if it was wrapped with interceptor" in {
       val items = SeqProperty[String]("a", "b", "c")
-      val nav = UdashNav(items)(
-        (item, nested) => span(nested(bind(item))).render
-      )
+      val nav = UdashNav(items)((item, nested) => span(nested(bind(item))).render)
       val navbar = UdashNavbar() { nested =>
         nested(nav)
         nav
@@ -36,9 +34,7 @@ class UdashNavbarTest extends UdashCoreFrontendTest {
     }
     "render provided elements and cleanup provided navigation only if it was wrapped with interceptor (without wrap)" in {
       val items = SeqProperty[String]("a", "b", "c")
-      val nav = UdashNav(items)(
-        (item, nested) => span(nested(bind(item))).render
-      )
+      val nav = UdashNav(items)((item, nested) => span(nested(bind(item))).render)
       val navbar = UdashNavbar()(_ => nav)
       val el = navbar.render
       el.textContent should be("abc")
@@ -66,7 +62,8 @@ class UdashNavbarTest extends UdashCoreFrontendTest {
       val items = SeqProperty[String]("a", "b", "c")
       val nav = UdashNav(items)((item, nested) => span(nested(bind(item))).render)
 
-      val expandBreakpoint: ReadableProperty[BootstrapStyles.ResponsiveBreakpoint] = Property(BootstrapStyles.ResponsiveBreakpoint.Small)
+      val expandBreakpoint: ReadableProperty[BootstrapStyles.ResponsiveBreakpoint] =
+        Property(BootstrapStyles.ResponsiveBreakpoint.Small)
       val darkStyle: ReadableProperty[Boolean] = Property(true)
       val backgroundStyle: ReadableProperty[BootstrapStyles.Color] = Property(BootstrapStyles.Color.Secondary)
       val position: ReadableProperty[UdashNavbar.Position] = Property(UdashNavbar.Position.StickyTop)

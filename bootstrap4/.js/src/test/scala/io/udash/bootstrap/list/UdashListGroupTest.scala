@@ -11,9 +11,7 @@ class UdashListGroupTest extends UdashCoreFrontendTest {
     "update items list and clean up listeners properly" in {
       val items = SeqProperty("a", "b", "c")
       val flush = Property[Boolean](false)
-      val group = UdashListGroup(items, flush)(
-        (item, nested) => div(nested(bind(item))).render
-      )
+      val group = UdashListGroup(items, flush)((item, nested) => div(nested(bind(item))).render)
       val el = group.render
       el.childNodes.length should be(3)
       el.textContent should be("abc")

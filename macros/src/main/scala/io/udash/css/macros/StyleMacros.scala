@@ -25,14 +25,16 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
     } else other
 
   private def style(name: Tree, impl: Tree*): c.Tree =
-    handleScalaJs(name,
+    handleScalaJs(
+      name,
       q"""
         {
           val tmp = new $StyleImplCls($name, $Dsl.style(..$impl)($Compose.trust))
           ${c.prefix}.elementsBuffer += tmp
           tmp
         }
-      """)
+      """,
+    )
 
   def mixin(impl: Tree*): Tree = {
     val fullName = c.internal.enclosingOwner.fullName.replace('.', '-')
@@ -48,7 +50,8 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
     style(className, impl: _*)
 
   private def keyframes(name: Tree, impl: Tree*): Tree =
-    handleScalaJs(name,
+    handleScalaJs(
+      name,
       q"""
         {
           val tmp = new $KeyframesCls($name,
@@ -59,7 +62,8 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
           ${c.prefix}.elementsBuffer += tmp
           tmp
         }
-      """)
+      """,
+    )
 
   def keyframes(impl: Tree*): Tree = {
     val fullName = c.internal.enclosingOwner.fullName.replace('.', '-')
@@ -70,14 +74,16 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
     keyframes(className, impl: _*)
 
   private def fontFace(name: Tree, font: Tree): Tree =
-    handleScalaJs(name,
+    handleScalaJs(
+      name,
       q"""
         {
           val tmp = new $FontFaceCls($name, $font.apply(new $FontSrcSelector(None)))
           ${c.prefix}.elementsBuffer += tmp
           tmp
         }
-      """)
+      """,
+    )
 
   def fontFace(font: Tree): Tree = {
     val fullName = c.internal.enclosingOwner.fullName.replace('.', '-')

@@ -1,7 +1,7 @@
 package io.udash
 package rest.openapi
 
-import com.avsystem.commons.meta.{MacroInstances, infer}
+import com.avsystem.commons.meta.{infer, MacroInstances}
 import com.avsystem.commons.serialization.GenCodec
 import io.udash.rest.openapi.adjusters.description
 import io.udash.rest.raw.{RawRest, RestMetadata}
@@ -45,8 +45,7 @@ abstract class RestI18NOpenApiCompanion[Real](
     RawRest.asHandleRequest(real)
 }
 
-class descriptionKey(key: String, @infer i18n: I18N = infer.value)
-  extends description(i18n.t(key))
+class descriptionKey(key: String, @infer i18n: I18N = infer.value) extends description(i18n.t(key))
 
 @descriptionKey("person.desc")
 final case class Person(

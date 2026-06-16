@@ -11,11 +11,11 @@ trait ReadableProperty[+A] {
   /** @return Current property value. */
   def get: A
 
-  /**
-   * Registers listener which will be called on value change.
-   *
-   * @param initUpdate If `true`, listener will be instantly triggered with current value of property.
-   */
+  /** Registers listener which will be called on value change.
+    *
+    * @param initUpdate
+    *   If `true`, listener will be instantly triggered with current value of property.
+    */
   def listen(valueListener: A => Any, initUpdate: Boolean = false): Registration
 
   /** Registers listener which will be called on the next value change. This listener will be fired only once. */
@@ -30,46 +30,52 @@ trait ReadableProperty[+A] {
   /** This method should be called when the listener is registered or removed. */
   protected[properties] def listenersUpdate(): Unit
 
-  /**
-   * Creates ReadableProperty[B] linked to `this`. Changes will be synchronized with `this`.
-   *
-   * @param transformer Method transforming type A of existing Property to type B of new Property.
-   * @tparam B Type of new Property.
-   * @return New ReadableProperty[B], which will be synchronised with original ReadableProperty[A].
-   */
+  /** Creates ReadableProperty[B] linked to `this`. Changes will be synchronized with `this`.
+    *
+    * @param transformer
+    *   Method transforming type A of existing Property to type B of new Property.
+    * @tparam B
+    *   Type of new Property.
+    * @return
+    *   New ReadableProperty[B], which will be synchronised with original ReadableProperty[A].
+    */
   def transform[B](transformer: A => B): ReadableProperty[B]
 
-  /**
-   * Creates ReadableSeqProperty[B] linked to `this`. Changes will be synchronized with `this`.
-   *
-   * @param transformer Method transforming type A of existing Property to type Seq[B] of new Property.
-   * @tparam B Type of elements in new SeqProperty.
-   * @return New ReadableSeqProperty[B], which will be synchronised with original ReadableProperty[A].
-   */
+  /** Creates ReadableSeqProperty[B] linked to `this`. Changes will be synchronized with `this`.
+    *
+    * @param transformer
+    *   Method transforming type A of existing Property to type Seq[B] of new Property.
+    * @tparam B
+    *   Type of elements in new SeqProperty.
+    * @return
+    *   New ReadableSeqProperty[B], which will be synchronised with original ReadableProperty[A].
+    */
   def transformToSeq[B: PropertyCreator](transformer: A => BSeq[B]): ReadableSeqProperty[B, ReadableProperty[B]]
 
-  /**
-   * Streams value changes to the `target` property.
-   * It is not as strong relation as `transform`, because `target` can change value independently.
-   */
+  /** Streams value changes to the `target` property. It is not as strong relation as `transform`, because `target` can
+    * change value independently.
+    */
   def streamTo[B](target: Property[B], initUpdate: Boolean = true)(transformer: A => B): Registration
 
-  /**
-   * Creates a mutable copy of this property which follows the stream of updates from this property.
-   * Similarly to [[streamTo]], the target can change value independently and origin value updates can be cancelled.
-   */
-  def mirror[B >: A : PropertyCreator](): MirrorProperty[B] =
+  /** Creates a mutable copy of this property which follows the stream of updates from this property. Similarly to
+    * [[streamTo]], the target can change value independently and origin value updates can be cancelled.
+    */
+  def mirror[B >: A: PropertyCreator](): MirrorProperty[B] =
     new MirrorProperty(this)
 
-  /**
-   * Combines two properties into a new one. Created property will be updated after any change in the origin ones.
-   *
-   * @param property `Property[B]` to combine with `this`.
-   * @param combiner Method combining values A and B into O.
-   * @tparam B Type of elements in provided property.
-   * @tparam O Output property elements type.
-   * @return Property[O] updated on any change in `this` or `property`.
-   */
+  /** Combines two properties into a new one. Created property will be updated after any change in the origin ones.
+    *
+    * @param property
+    *   `Property[B]` to combine with `this`.
+    * @param combiner
+    *   Method combining values A and B into O.
+    * @tparam B
+    *   Type of elements in provided property.
+    * @tparam O
+    *   Output property elements type.
+    * @return
+    *   Property[O] updated on any change in `this` or `property`.
+    */
   def combine[B, O](property: ReadableProperty[B])(combiner: (A, B) => O): ReadableProperty[O] =
     new CombinedProperty[A, B, O](this, property, combiner)
 }
@@ -122,7 +128,8 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
   override def transform[B](transformer: A => B): ReadableProperty[B] =
     new TransformedReadableProperty[A, B](this, transformer)
 
-  override def transformToSeq[B: PropertyCreator](transformer: A => BSeq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
+  override def transformToSeq[B: PropertyCreator](transformer: A => BSeq[B])
+    : ReadableSeqProperty[B, ReadableProperty[B]] =
     new ReadableSeqPropertyFromSingleValue(this, transformer)
 
   override def streamTo[B](target: Property[B], initUpdate: Boolean = true)(transformer: A => B): Registration = {
@@ -139,14 +146,17 @@ private[properties] trait AbstractReadableProperty[A] extends ReadableProperty[A
     }
   }
 
-  protected[properties] override def valueChanged(): Unit = {
+  override protected[properties] def valueChanged(): Unit = {
     val originalListeners = listeners.toList
-    CallbackSequencer().queue(s"$hashCode:valueChanged", () => {
-      val value = get
-      originalListeners.foreach { listener => if (listeners.contains(listener)) listener(value) }
-      oneTimeListeners.foreach(_.cancel())
-      oneTimeListeners.clear()
-    })
+    CallbackSequencer().queue(
+      s"$hashCode:valueChanged",
+      () => {
+        val value = get
+        originalListeners.foreach(listener => if (listeners.contains(listener)) listener(value))
+        oneTimeListeners.foreach(_.cancel())
+        oneTimeListeners.clear()
+      },
+    )
     if (parent != null) parent.valueChanged()
   }
 

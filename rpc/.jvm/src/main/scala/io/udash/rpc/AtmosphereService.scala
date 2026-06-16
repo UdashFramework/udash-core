@@ -17,19 +17,18 @@ import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.util.{Failure, Success, Try}
 
 trait AtmosphereServiceConfig[ServerRPCType] {
-  /**
-    * Called after AtmosphereResource gets closed.
+
+  /** Called after AtmosphereResource gets closed.
     *
-    * @param resource Closed resource
+    * @param resource
+    *   Closed resource
     */
   def onClose(resource: AtmosphereResource): Unit
 
   /** Should return RPC for provided resource. */
   def resolveRpc(resource: AtmosphereResource): ExposesServerRPC[ServerRPCType]
 
-  /**
-    * Initialize RPC for resource.
-    * This is called on every request from resource!
+  /** Initialize RPC for resource. This is called on every request from resource!
     */
   def initRpc(resource: AtmosphereResource): Unit
 
@@ -37,18 +36,20 @@ trait AtmosphereServiceConfig[ServerRPCType] {
   def filters: ISeq[AtmosphereResource => Try[Unit]]
 }
 
-/**
-  * Integration between Atmosphere framework and Udash RPC system.
+/** Integration between Atmosphere framework and Udash RPC system.
   *
-  * @param config Configuration of AtmosphereService.
-  * @tparam ServerRPCType Main server side RPC interface
+  * @param config
+  *   Configuration of AtmosphereService.
+  * @tparam ServerRPCType
+  *   Main server side RPC interface
   */
 class AtmosphereService[ServerRPCType](
   config: AtmosphereServiceConfig[ServerRPCType],
   exceptionsRegistry: ExceptionCodecRegistry,
-  sseSuspendTime: FiniteDuration = 1 minute,
-  onRequestHandlingFailure: (Throwable, Logger) => Unit = (ex, logger) => logger.error("RPC request handling failed", ex)
-) extends AtmosphereServletProcessor with StrictLogging {
+  sseSuspendTime: FiniteDuration = 1.minute,
+  onRequestHandlingFailure: (Throwable, Logger) => Unit = (ex, logger) => logger.error("RPC request handling failed", ex),
+) extends AtmosphereServletProcessor
+    with StrictLogging {
 
   private var brodcasterFactory: BroadcasterFactory = _
 
@@ -79,10 +80,7 @@ class AtmosphereService[ServerRPCType](
     BroadcastManager.registerResource(resource, uuid)
 
     try {
-      handleRequest(resource,
-        data => BroadcastManager.sendToClient(uuid, data.json),
-        () => ()
-      )
+      handleRequest(resource, data => BroadcastManager.sendToClient(uuid, data.json), () => ())
     } catch {
       case e: Exception =>
         logger.error("Error occurred while handling websocket data.", e)
@@ -98,12 +96,13 @@ class AtmosphereService[ServerRPCType](
     try {
       resource.setBroadcaster(brodcasterFactory.lookup(s"polling-tmp-${resource.uuid()}-${UUID.randomUUID()}", true))
       resource.suspend()
-      handleRequest(resource,
+      handleRequest(
+        resource,
         data => {
           resource.getResponse.write(data.json)
           resource.resume()
         },
-        () => resource.resume()
+        () => resource.resume(),
       )
     } catch {
       case e: Exception =>
@@ -128,14 +127,18 @@ class AtmosphereService[ServerRPCType](
             case Failure(ex) =>
               onRequestHandlingFailure(ex, logger)
               val exceptionName = exceptionsRegistry.name(ex)
-              onCall(JsonStr(JsonStringOutput.write[RpcServerMessage](
-                if (exceptionsRegistry.contains(exceptionName)) {
-                  RpcResponseException(exceptionName, ex, call.callId)
-                } else {
-                  val cause: String = if (ex.getCause != null) ex.getCause.getMessage else exceptionName
-                  RpcResponseFailure(cause, Option(ex.getMessage).getOrElse(""), call.callId)
-                }
-              )))
+              onCall(
+                JsonStr(
+                  JsonStringOutput.write[RpcServerMessage](
+                    if (exceptionsRegistry.contains(exceptionName)) {
+                      RpcResponseException(exceptionName, ex, call.callId)
+                    } else {
+                      val cause: String = if (ex.getCause != null) ex.getCause.getMessage else exceptionName
+                      RpcResponseFailure(cause, Option(ex.getMessage).getOrElse(""), call.callId)
+                    }
+                  )
+                )
+              )
           }
         case _ => onFire()
       }
@@ -166,14 +169,19 @@ class AtmosphereService[ServerRPCType](
 
   override def destroy(): Unit = {}
 
-  private def handleRpcRequest(rpc: ExposesServerRPC[ServerRPCType])(
-    resource: AtmosphereResource, request: RpcRequest
+  private def handleRpcRequest(
+    rpc: ExposesServerRPC[ServerRPCType]
+  )(
+    resource: AtmosphereResource,
+    request: RpcRequest,
   ): Option[Future[JsonStr]] = {
 
-    val filterResult = config.filters.foldLeft[Try[Unit]](Success(()))((result, filter) => result match {
-      case Success(_) => filter.apply(resource)
-      case failure: Failure[_] => failure
-    })
+    val filterResult = config.filters.foldLeft[Try[Unit]](Success(()))((result, filter) =>
+      result match {
+        case Success(_) => filter.apply(resource)
+        case failure: Failure[_] => failure
+      }
+    )
     filterResult match {
       case Success(_) =>
         request match {
@@ -183,12 +191,13 @@ class AtmosphereService[ServerRPCType](
             rpc.handleRpcFire(fire)
             None
         }
-      case Failure(ex) => request match {
-        case _: RpcCall =>
-          Some(Future.failed(ex))
-        case _: RpcFire =>
-          None
-      }
+      case Failure(ex) =>
+        request match {
+          case _: RpcCall =>
+            Some(Future.failed(ex))
+          case _: RpcFire =>
+            None
+        }
     }
   }
 

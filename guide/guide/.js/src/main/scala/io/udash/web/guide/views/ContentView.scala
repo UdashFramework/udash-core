@@ -22,7 +22,7 @@ class ContentView extends ViewContainer {
       div(GuideStyles.menuWrapper)(
         GuideMenu().getTemplate
       ),
-      child
+      child,
     )
   )
 

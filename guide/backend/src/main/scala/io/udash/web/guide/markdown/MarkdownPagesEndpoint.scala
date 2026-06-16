@@ -26,13 +26,17 @@ final class MarkdownPagesEndpoint(guideResourceBase: String)(implicit ec: Execut
   }
 
   override def loadContent(page: MarkdownPage): Future[String] = {
-    val (result, _) = renderedPages.compute(page, { (_, cached) =>
-      val pageFile = new File(guideResourceBase + page.file)
-      cached.opt.filter {
-        case (currentRender, renderedInstant) =>
-          currentRender.value.exists(_.isSuccess) && renderedInstant.toEpochMilli >= pageFile.lastModified()
-      }.getOrElse((render(pageFile), Instant.ofEpochMilli(pageFile.lastModified())))
-    })
+    val (result, _) = renderedPages.compute(
+      page,
+      { (_, cached) =>
+        val pageFile = new File(guideResourceBase + page.file)
+        cached.opt
+          .filter { case (currentRender, renderedInstant) =>
+            currentRender.value.exists(_.isSuccess) && renderedInstant.toEpochMilli >= pageFile.lastModified()
+          }
+          .getOrElse((render(pageFile), Instant.ofEpochMilli(pageFile.lastModified())))
+      },
+    )
     result
   }
 }

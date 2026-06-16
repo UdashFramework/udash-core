@@ -9,18 +9,23 @@ import scala.concurrent.duration.FiniteDuration
 import scala.scalajs.js
 import scala.util.Try
 
-/**
-  * TranslationProvider dedicated to applications using RPC system.
+/** TranslationProvider dedicated to applications using RPC system.
   *
-  * @param translationsEndpoint RPC endpoint serving translations.
-  * @param cache Optional `org.scalajs.dom.ext.Storage`, it will be used as translations cache.
-  * @param ttl Time period between translations refresh, if using `cache`.
-  * @param missingTranslationError This text will be used in place of missing translations.
+  * @param translationsEndpoint
+  *   RPC endpoint serving translations.
+  * @param cache
+  *   Optional `org.scalajs.dom.ext.Storage`, it will be used as translations cache.
+  * @param ttl
+  *   Time period between translations refresh, if using `cache`.
+  * @param missingTranslationError
+  *   This text will be used in place of missing translations.
   */
-class RemoteTranslationProvider(translationsEndpoint: RemoteTranslationRPC,
-                                cache: Option[Storage], ttl: FiniteDuration,
-                                missingTranslationError: String = "Missing translation")
-  extends FrontendTranslationProvider {
+class RemoteTranslationProvider(
+  translationsEndpoint: RemoteTranslationRPC,
+  cache: Option[Storage],
+  ttl: FiniteDuration,
+  missingTranslationError: String = "Missing translation",
+) extends FrontendTranslationProvider {
 
   protected def storageKey(key: String)(implicit lang: Lang): String = s"udash-i18n_${lang.lang}_$key"
   protected val cacheHashKey: String = "udash-i18n-cache-hash"
@@ -28,7 +33,8 @@ class RemoteTranslationProvider(translationsEndpoint: RemoteTranslationRPC,
 
   private var reloading: Future[Option[Bundle]] = _
 
-  if (cache.isEmpty) logger.warn("RemoteTranslationProvider has no cache, so it will request server for every translation.")
+  if (cache.isEmpty)
+    logger.warn("RemoteTranslationProvider has no cache, so it will request server for every translation.")
 
   def translate(key: String, argv: Any*)(implicit lang: Lang): Future[Translated] =
     fromCache(key)
@@ -39,15 +45,13 @@ class RemoteTranslationProvider(translationsEndpoint: RemoteTranslationRPC,
   private def fromCache(key: String)(implicit lang: Lang): Future[String] =
     cache match {
       case Some(storage) =>
-        reloadCache(storage)
-          .mapNow(_ => storage.getItem(storageKey(key)).opt)
-          .flatMapNow {
-            case Opt(translationString) =>
-              Future.successful(translationString)
-            case Opt.Empty =>
-              logger.warn(s"Key $key not found in cache!")
-              Future.failed(new IllegalArgumentException(s"Key $key not found in cache!"))
-          }
+        reloadCache(storage).mapNow(_ => storage.getItem(storageKey(key)).opt).flatMapNow {
+          case Opt(translationString) =>
+            Future.successful(translationString)
+          case Opt.Empty =>
+            logger.warn(s"Key $key not found in cache!")
+            Future.failed(new IllegalArgumentException(s"Key $key not found in cache!"))
+        }
       case None =>
         Future.failed(new UnsupportedOperationException)
     }
@@ -63,12 +67,12 @@ class RemoteTranslationProvider(translationsEndpoint: RemoteTranslationRPC,
       case _ if reloading != null =>
         reloading.mapNow(_ => true)
       case _ =>
-        reloading = translationsEndpoint.loadTranslations(BundleHash(storage.getItem(storageKey(cacheHashKey)).opt.getOrElse("")))
+        reloading =
+          translationsEndpoint.loadTranslations(BundleHash(storage.getItem(storageKey(cacheHashKey)).opt.getOrElse("")))
         reloading.mapNow {
           case Some(Bundle(hash, translations)) =>
-            translations.foreach {
-              case (key, value) =>
-                storage.setItem(storageKey(key), value)
+            translations.foreach { case (key, value) =>
+              storage.setItem(storageKey(key), value)
             }
             storage.setItem(storageKey(cacheHashKey), hash.hash)
             storage.setItem(storageKey(cacheTTLKey), (js.Date.now() + ttl.fromNow.timeLeft.toMillis).toString)

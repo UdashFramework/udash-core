@@ -33,7 +33,7 @@ class CssViewTest extends UdashFrontendTest {
 
       val el = div(
         f1.reactiveApply(p1),
-        f2.reactiveOptionApply(p2)
+        f2.reactiveOptionApply(p2),
       ).render
 
       el.classList.length should be(2)

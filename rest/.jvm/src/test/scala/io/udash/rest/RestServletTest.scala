@@ -20,9 +20,9 @@ import scala.concurrent.Future
 class RestServletTest extends AnyFunSuite with ScalaFutures with Matchers with BeforeAndAfterEach with Eventually {
   implicit def scheduler: Scheduler = Scheduler.global
 
-  implicit override val patienceConfig: PatienceConfig = PatienceConfig(
+  override implicit val patienceConfig: PatienceConfig = PatienceConfig(
     timeout = Span(5, Seconds),
-    interval = Span(50, Millis)
+    interval = Span(50, Millis),
   )
 
   var request: HttpServletRequest = _
@@ -47,9 +47,7 @@ class RestServletTest extends AnyFunSuite with ScalaFutures with Matchers with B
     when(response.getOutputStream).thenReturn(spy(new ServletOutputStreamMock(outputStream)))
     when(response.getWriter).thenReturn(printWriter)
 
-    servlet = RestServlet[TestApi](new TestApiImpl(),
-      maxPayloadSize = 1024 * 1024
-    )
+    servlet = RestServlet[TestApi](new TestApiImpl(), maxPayloadSize = 1024 * 1024)
   }
 
   def setupRequest(
@@ -59,7 +57,7 @@ class RestServletTest extends AnyFunSuite with ScalaFutures with Matchers with B
     body: String = "",
     queryString: String = null,
     headers: Map[String, String] = Map.empty,
-    cookies: Array[javax.servlet.http.Cookie] = null
+    cookies: Array[javax.servlet.http.Cookie] = null,
   ): Unit = {
     when(request.getMethod).thenReturn(method)
     when(request.getRequestURI).thenReturn(path)
@@ -118,7 +116,7 @@ class RestServletTest extends AnyFunSuite with ScalaFutures with Matchers with B
     setupPostRequest(
       "/echo",
       "application/json;charset=utf-8",
-      """{"message":"Hello World"}"""
+      """{"message":"Hello World"}""",
     )
 
     servlet.service(request, response)
@@ -158,7 +156,7 @@ class RestServletTest extends AnyFunSuite with ScalaFutures with Matchers with B
       method = "PUT",
       path = "/update/123",
       contentType = "application/json;charset=utf-8",
-      body = """{"data":"new content"}"""
+      body = """{"data":"new content"}""",
     )
 
     servlet.service(request, response)
@@ -185,7 +183,7 @@ class RestServletTest extends AnyFunSuite with ScalaFutures with Matchers with B
       path = "/form",
       contentType = "application/x-www-form-urlencoded;charset=utf-8",
       body = "name=John%20Doe&age=30",
-      queryString = "id=user123"
+      queryString = "id=user123",
     )
 
     servlet.service(request, response)
@@ -222,7 +220,7 @@ class RestServletTest extends AnyFunSuite with ScalaFutures with Matchers with B
   test("Request headers should be processed correctly") {
     setupRequest(
       path = "/withHeader",
-      headers = Map("X-Custom" -> "test-value")
+      headers = Map("X-Custom" -> "test-value"),
     )
 
     servlet.service(request, response)
@@ -287,7 +285,8 @@ trait TestApi {
   @GET def error: Future[String]
   @streamingResponseBatchSize(1)
   @GET def streamError(@Query failAt: Int): Observable[String]
-  @POST @FormBody def form(@Query id: String, name: String, age: Int): Future[String]
+  @POST
+  @FormBody def form(@Query id: String, name: String, age: Int): Future[String]
   @GET def emptyStream: Observable[String]
   @GET def longRunning(@Query seconds: Int): Future[String]
   @GET def withCookie(@Cookie sessionId: String): Future[String]
@@ -324,10 +323,12 @@ class TestApiImpl extends TestApi {
     Future.failed(new RuntimeException("Test error"))
 
   def streamError(failAt: Int): Observable[String] =
-    Observable.range(1, 10).map(i =>
-      if (i == failAt) throw new RuntimeException(s"Error at item $i")
-      else s"item-$i"
-    )
+    Observable
+      .range(1, 10)
+      .map(i =>
+        if (i == failAt) throw new RuntimeException(s"Error at item $i")
+        else s"item-$i"
+      )
 
   def form(id: String, name: String, age: Int): Future[String] =
     Future.successful(s"Form: $id, $name, $age")

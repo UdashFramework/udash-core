@@ -14,41 +14,35 @@ import io.udash.utils.URLEncoder
 
 import scala.annotation.implicitNotFound
 
-@implicitNotFound("OpenApiMetadata for ${T} not found, " +
-  "is it a valid REST API trait with properly defined companion object?")
+@implicitNotFound(
+  "OpenApiMetadata for ${T} not found, " + "is it a valid REST API trait with properly defined companion object?"
+)
 @methodTag[RestMethodTag]
 @methodTag[BodyTypeTag]
 final case class OpenApiMetadata[T](
-  @multi @rpcMethodMetadata
-  @tagged[Prefix](whenUntagged = new Prefix)
-  @tagged[NoBody](whenUntagged = new NoBody)
-  @paramTag[RestParamTag](defaultTag = new Path)
-  @unmatched(RawRest.NotValidPrefixMethod)
-  @unmatchedParam[Body](RawRest.PrefixMethodBodyParam)
-  prefixes: List[OpenApiPrefix[_]],
+  @multi @rpcMethodMetadata @tagged[Prefix](whenUntagged = new Prefix) @tagged[NoBody](whenUntagged =
+    new NoBody
+  ) @paramTag[RestParamTag](defaultTag = new Path) @unmatched(RawRest.NotValidPrefixMethod) @unmatchedParam[Body](
+    RawRest.PrefixMethodBodyParam
+  ) prefixes: List[OpenApiPrefix[_]],
 
-  @multi @rpcMethodMetadata
-  @tagged[GET]
-  @tagged[NoBody](whenUntagged = new NoBody)
-  @paramTag[RestParamTag](defaultTag = new Query)
-  @unmatched(RawRest.NotValidGetMethod)
-  @unmatchedParam[Body](RawRest.GetMethodBodyParam)
-  gets: List[OpenApiGetOperation[_]],
+  @multi @rpcMethodMetadata @tagged[GET] @tagged[NoBody](whenUntagged = new NoBody) @paramTag[RestParamTag](defaultTag =
+    new Query
+  ) @unmatched(RawRest.NotValidGetMethod) @unmatchedParam[Body](RawRest.GetMethodBodyParam) gets: List[
+    OpenApiGetOperation[_]
+  ],
 
-  @multi @rpcMethodMetadata
-  @tagged[BodyMethodTag](whenUntagged = new POST)
-  @tagged[CustomBody]
-  @paramTag[RestParamTag](defaultTag = new Body)
-  @unmatched(RawRest.NotValidCustomBodyMethod)
-  @unmatchedParam[Body](RawRest.SuperfluousBodyParam)
-  customBodyMethods: List[OpenApiCustomBodyOperation[_]],
+  @multi @rpcMethodMetadata @tagged[BodyMethodTag](whenUntagged = new POST) @tagged[CustomBody] @paramTag[RestParamTag](
+    defaultTag = new Body
+  ) @unmatched(RawRest.NotValidCustomBodyMethod) @unmatchedParam[Body](
+    RawRest.SuperfluousBodyParam
+  ) customBodyMethods: List[OpenApiCustomBodyOperation[_]],
 
-  @multi @rpcMethodMetadata
-  @tagged[BodyMethodTag](whenUntagged = new POST)
-  @tagged[SomeBodyTag](whenUntagged = new JsonBody)
-  @paramTag[RestParamTag](defaultTag = new Body)
-  @unmatched(RawRest.NotValidHttpMethod)
-  bodyMethods: List[OpenApiBodyOperation[_]],
+  @multi @rpcMethodMetadata @tagged[BodyMethodTag](whenUntagged = new POST) @tagged[SomeBodyTag](whenUntagged =
+    new JsonBody
+  ) @paramTag[RestParamTag](defaultTag = new Body) @unmatched(RawRest.NotValidHttpMethod) bodyMethods: List[
+    OpenApiBodyOperation[_]
+  ],
 ) {
   val httpMethods: List[OpenApiOperation[_]] = (gets: List[OpenApiOperation[_]]) ++ customBodyMethods ++ bodyMethods
 
@@ -56,7 +50,7 @@ final case class OpenApiMetadata[T](
   lazy val openApiTags: List[Tag] = {
     def createTag(method: OpenApiMethod[_]): Opt[Tag] =
       method.groupAnnot.map { group =>
-        method.tagAdjusters.foldLeft(Tag(group.groupName))({ case (tag, adjuster) => adjuster.adjustTag(tag) })
+        method.tagAdjusters.foldLeft(Tag(group.groupName)) { case (tag, adjuster) => adjuster.adjustTag(tag) }
       }
 
     (prefixes.iterator.flatMap(prefix => createTag(prefix).iterator ++ prefix.result.value.openApiTags.iterator) ++
@@ -64,36 +58,40 @@ final case class OpenApiMetadata[T](
   }
 
   def operations(resolver: SchemaResolver): Iterator[PathOperation] =
-    prefixes.iterator.flatMap(_.operations(resolver)) ++
-      httpMethods.iterator.map(_.pathOperation(resolver))
+    prefixes.iterator.flatMap(_.operations(resolver)) ++ httpMethods.iterator.map(_.pathOperation(resolver))
 
   def paths(resolver: SchemaResolver): Paths = {
     val operationIds = new MHashSet[String]
     val pathsMap = new MLinkedHashMap[String, MHashMap[HttpMethod, Operation]]
     // linked set to remove possible duplicates from prefix methods but to retain order
     val pathAdjustersMap = new MHashMap[String, MLinkedHashSet[PathItemAdjuster]]
-    operations(resolver).foreach {
-      case PathOperation(path, httpMethod, operation, pathAdjusters) =>
-        val opsMap = pathsMap.getOrElseUpdate(path, new MHashMap)
-        pathAdjustersMap.getOrElseUpdate(path, new MLinkedHashSet) ++= pathAdjusters
-        opsMap(httpMethod) = operation
-        operation.operationId.foreach { opid =>
-          if (!operationIds.add(opid)) {
-            throw new IllegalArgumentException(s"Duplicate operation ID: $opid. " +
-              s"You can disambiguate with @operationIdPrefix and @operationId annotations.")
-          }
+    operations(resolver).foreach { case PathOperation(path, httpMethod, operation, pathAdjusters) =>
+      val opsMap = pathsMap.getOrElseUpdate(path, new MHashMap)
+      pathAdjustersMap.getOrElseUpdate(path, new MLinkedHashSet) ++= pathAdjusters
+      opsMap(httpMethod) = operation
+      operation.operationId.foreach { opid =>
+        if (!operationIds.add(opid)) {
+          throw new IllegalArgumentException(
+            s"Duplicate operation ID: $opid. " +
+              s"You can disambiguate with @operationIdPrefix and @operationId annotations."
+          )
         }
+      }
     }
-    Paths(pathsMap.iterator.map { case (path, ops) =>
-      val pathItem = PathItem(
-        get = ops.getOpt(HttpMethod.GET).toOptArg,
-        put = ops.getOpt(HttpMethod.PUT).toOptArg,
-        post = ops.getOpt(HttpMethod.POST).toOptArg,
-        patch = ops.getOpt(HttpMethod.PATCH).toOptArg,
-        delete = ops.getOpt(HttpMethod.DELETE).toOptArg,
-      )
-      (path, RefOr(pathAdjustersMap(path).foldRight(pathItem)(_ adjustPathItem _)))
-    }.intoMap[ITreeMap])
+    Paths(
+      pathsMap.iterator
+        .map { case (path, ops) =>
+          val pathItem = PathItem(
+            get = ops.getOpt(HttpMethod.GET).toOptArg,
+            put = ops.getOpt(HttpMethod.PUT).toOptArg,
+            post = ops.getOpt(HttpMethod.POST).toOptArg,
+            patch = ops.getOpt(HttpMethod.PATCH).toOptArg,
+            delete = ops.getOpt(HttpMethod.DELETE).toOptArg,
+          )
+          (path, RefOr(pathAdjustersMap(path).foldRight(pathItem)(_ adjustPathItem _)))
+        }
+        .intoMap[ITreeMap]
+    )
   }
 
   def openapi(
@@ -118,12 +116,12 @@ final case class OpenApiMetadata[T](
   }
 }
 object OpenApiMetadata extends RpcMetadataCompanion[OpenApiMetadata] {
-  /**
-   * Materializes [[OpenApiMetadata]] for an arbitrary type - usually a class that implements REST API directly,
-   * without a base trait. All public methods of this type are scanned and interpreted as REST methods
-   * (as opposed to REST traits which only have their abstract methods scanned).
-   * You can exclude methods using the [[com.avsystem.commons.meta.ignore ignore]] annotation.
-   */
+
+  /** Materializes [[OpenApiMetadata]] for an arbitrary type - usually a class that implements REST API directly,
+    * without a base trait. All public methods of this type are scanned and interpreted as REST methods (as opposed to
+    * REST traits which only have their abstract methods scanned). You can exclude methods using the
+    * [[com.avsystem.commons.meta.ignore ignore]] annotation.
+    */
   def materializeForImpl[Real]: OpenApiMetadata[Real] = macro RestMacros.materializeImplOpenApiMetadata[Real]
 }
 
@@ -137,11 +135,18 @@ final case class PathOperation(
 sealed trait OpenApiMethod[T] extends TypedMetadata[T] {
   @reifyName(useRawName = true) def name: String
   @reifyAnnot def methodTag: RestMethodTag
-  @multi @rpcParamMetadata @tagged[NonBodyTag] @allowOptional def parameters: List[OpenApiParameter[_]]
-  @multi @reifyAnnot def operationAdjusters: List[OperationAdjuster]
-  @multi @reifyAnnot def pathAdjusters: List[PathItemAdjuster]
-  @optional @reifyAnnot def groupAnnot: Opt[group]
-  @multi @reifyAnnot def tagAdjusters: List[TagAdjuster]
+  @multi
+  @rpcParamMetadata
+  @tagged[NonBodyTag]
+  @allowOptional def parameters: List[OpenApiParameter[_]]
+  @multi
+  @reifyAnnot def operationAdjusters: List[OperationAdjuster]
+  @multi
+  @reifyAnnot def pathAdjusters: List[PathItemAdjuster]
+  @optional
+  @reifyAnnot def groupAnnot: Opt[group]
+  @multi
+  @reifyAnnot def tagAdjusters: List[TagAdjuster]
 
   val pathPattern: String = {
     val pathParts = methodTag.path :: parameters.flatMap {
@@ -171,7 +176,7 @@ final case class OpenApiPrefix[T](
     result.value.operations(resolver).map { case PathOperation(path, httpMethod, operation, subAdjusters) =>
       val prefixedOperation = operation.copy(
         operationId = operation.operationId.toOpt.map(oid => s"$oidPrefix$oid").toOptArg,
-        parameters = prefixParams ++ operation.parameters
+        parameters = prefixParams ++ operation.parameters,
       )
       val adjustedOperation = operationAdjusters.foldRight(prefixedOperation)(_ adjustOperation _)
       val newPath = if (path == "/") pathPattern else if (pathPattern == "/") path else pathPattern + path
@@ -181,7 +186,8 @@ final case class OpenApiPrefix[T](
 }
 
 sealed trait OpenApiOperation[T] extends OpenApiMethod[T] {
-  @infer @checked def resultType: RestResultType[T]
+  @infer
+  @checked def resultType: RestResultType[T]
   def methodTag: HttpMethodTag
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]]
 
@@ -190,7 +196,7 @@ sealed trait OpenApiOperation[T] extends OpenApiMethod[T] {
       responses = resultType.responses(resolver),
       operationId = name,
       parameters = parameters.map(_.parameter(resolver)),
-      requestBody = requestBody(resolver).toOptArg
+      requestBody = requestBody(resolver).toOptArg,
     )
     operationAdjusters.foldRight(op)(_ adjustOperation _)
   }
@@ -221,7 +227,7 @@ final case class OpenApiCustomBodyOperation[T](
   tagAdjusters: List[TagAdjuster],
   parameters: List[OpenApiParameter[_]],
   @encoded @rpcParamMetadata @tagged[Body] @unmatched(RawRest.MissingBodyParam) singleBody: OpenApiBody[_],
-  resultType: RestResultType[T]
+  resultType: RestResultType[T],
 ) extends OpenApiOperation[T] {
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] =
     singleBody.requestBody(resolver)
@@ -241,7 +247,8 @@ final case class OpenApiBodyOperation[T](
 ) extends OpenApiOperation[T] {
 
   def requestBody(resolver: SchemaResolver): Opt[RefOr[RequestBody]] =
-    if (bodyFields.isEmpty) Opt.Empty else {
+    if (bodyFields.isEmpty) Opt.Empty
+    else {
       val fields = bodyFields.iterator.map(p => (p.info.name, p.schema(resolver))).toList
       val requiredFields = bodyFields.collect { case p if !p.info.isOptional => p.info.name }
       val schema = Schema(`type` = DataType.Object, properties = IListMap(fields: _*), required = requiredFields)
@@ -274,7 +281,10 @@ final case class OpenApiParamInfo[T](
     resolver.resolve(restSchema) |> (s => if (withDefaultValue) s.withDefaultValue(whenAbsentValue) else s)
 
   @bincompat private[rest] def this(
-    name: String, whenAbsentInfo: Opt[WhenAbsentInfo[T]], flags: ParamFlags, restSchema: RestSchema[T]
+    name: String,
+    whenAbsentInfo: Opt[WhenAbsentInfo[T]],
+    flags: ParamFlags,
+    restSchema: RestSchema[T],
   ) = this(name, whenAbsentInfo, optional = false, flags, restSchema)
 }
 
@@ -293,12 +303,14 @@ final case class OpenApiParameter[T](
     }
     val pathParam = in == Location.Path
     val urlEncodeName = in == Location.Query || in == Location.Cookie
-    val name = if(urlEncodeName) URLEncoder.encode(info.name, spaceAsPlus = true) else info.name
-    val param = Parameter(name, in,
+    val name = if (urlEncodeName) URLEncoder.encode(info.name, spaceAsPlus = true) else info.name
+    val param = Parameter(
+      name,
+      in,
       required = pathParam || !info.isOptional,
       schema = info.schema(resolver, withDefaultValue = !pathParam),
       // repeated query/cookie/header params are not supported for now so ensure `explode` is never assumed to be true
-      explode = if (in.defaultStyle.explodeByDefault) OptArg(false) else OptArg.Empty
+      explode = if (in.defaultStyle.explodeByDefault) OptArg(false) else OptArg.Empty,
     )
     RefOr(adjusters.foldRight(param)(_ adjustParameter _))
   }

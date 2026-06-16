@@ -4,8 +4,7 @@ import io.udash.web.homepage.styles.partials.ButtonsStyle
 
 import scalatags.JsDom.all._
 
-/**
-  * Created by malchik on 2016-04-04.
+/** Created by malchik on 2016-04-04.
   */
 object Buttons {
   import io.udash.css.CssView._

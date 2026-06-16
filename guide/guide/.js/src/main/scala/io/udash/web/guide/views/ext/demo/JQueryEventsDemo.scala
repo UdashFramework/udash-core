@@ -25,20 +25,17 @@ object JQueryEventsDemo extends AutoDemo with CssView {
       br,
       UdashButtonGroup()(
         UdashButton(componentId = ComponentId("click"))(_ => "Click me").render,
-        UdashButton(componentId = ComponentId("off"))(_ => Seq[Modifier](
-          onclick :+= ((_: Event) =>
-            jQ("#jquery-events-demo #click")
-              .off("click", onCallback)
-              .off("click", oneCallback)
-            ),
-          "Off"
-        )).render
-      ).render
+        UdashButton(componentId = ComponentId("off"))(_ =>
+          Seq[Modifier](
+            onclick :+=
+              ((_: Event) => jQ("#jquery-events-demo #click").off("click", onCallback).off("click", oneCallback)),
+            "Off",
+          )
+        ).render,
+      ).render,
     ).render
 
-    jQ(content).find("#click")
-      .on("click", onCallback)
-      .one("click", oneCallback)
+    jQ(content).find("#click").on("click", onCallback).one("click", oneCallback)
 
     content
   }.withSourceCode
@@ -48,8 +45,8 @@ object JQueryEventsDemo extends AutoDemo with CssView {
       div(
         id := "jquery-events-demo",
         GuideStyles.frame,
-        GuideStyles.useBootstrap
+        GuideStyles.useBootstrap,
       )(rendered),
-      source
+      source,
     )
 }

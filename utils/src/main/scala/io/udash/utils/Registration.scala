@@ -4,6 +4,7 @@ import scala.collection.mutable
 
 /** Should be returned from every callback registration method in Udash. */
 trait Registration {
+
   /** Removes registered callback */
   def cancel(): Unit
 
@@ -15,7 +16,7 @@ trait Registration {
 }
 
 private[udash] class SetRegistration[ElementType](s: mutable.Set[ElementType], el: ElementType) extends Registration {
-  override def cancel(): Unit = s.synchronized { s -= el }
-  override def restart(): Unit = s.synchronized { s += el }
-  override def isActive: Boolean = s.synchronized { s.contains(el) }
+  override def cancel(): Unit = s.synchronized(s -= el)
+  override def restart(): Unit = s.synchronized(s += el)
+  override def isActive: Boolean = s.synchronized(s.contains(el))
 }

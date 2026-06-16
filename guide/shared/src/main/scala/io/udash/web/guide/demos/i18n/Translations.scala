@@ -2,7 +2,6 @@ package io.udash.web.guide.demos.i18n
 
 import io.udash.i18n.TranslationKey
 
-
 object Translations {
   import TranslationKey._
 

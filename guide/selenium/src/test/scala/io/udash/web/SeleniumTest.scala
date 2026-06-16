@@ -46,9 +46,16 @@ private final class InternalServerConfig extends ServerConfig {
   }
 }
 
-abstract class SeleniumTest extends AnyWordSpec
-  with Matchers with BeforeAndAfterAll with BeforeAndAfterEach with Eventually with StrictLogging with Inspectors {
-  override implicit val patienceConfig: PatienceConfig = PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(50, Millis)))
+abstract class SeleniumTest
+  extends AnyWordSpec
+    with Matchers
+    with BeforeAndAfterAll
+    with BeforeAndAfterEach
+    with Eventually
+    with StrictLogging
+    with Inspectors {
+  override implicit val patienceConfig: PatienceConfig =
+    PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(50, Millis)))
 
   logger.info("Setting up WebDriver")
   private val driverManager = WebDriverManager.firefoxdriver()

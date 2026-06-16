@@ -1,14 +1,14 @@
 package io.udash.i18n
 
-
 import scala.concurrent.Future
 import scala.util.Try
 
-/**
-  * TranslationProvider dedicated to frontend-only applications.
+/** TranslationProvider dedicated to frontend-only applications.
   *
-  * @param bundles `Bundle`s of translations for each language.
-  * @param missingTranslationError This text will be used in place of missing translations.
+  * @param bundles
+  *   `Bundle`s of translations for each language.
+  * @param missingTranslationError
+  *   This text will be used in place of missing translations.
   */
 class LocalTranslationProvider(bundles: Map[Lang, Bundle], missingTranslationError: String = "Missing translation")
   extends FrontendTranslationProvider {

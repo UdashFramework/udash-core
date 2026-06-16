@@ -37,35 +37,44 @@ class ExceptionsDemoComponent extends Component {
 
   class ExceptionsDemoPresenter(model: ModelProperty[ExceptionsDemoModel]) {
     def exceptionCall(): Unit = {
-      Context.serverRpc.demos.exceptions.example() onComplete {
+      Context.serverRpc.demos.exceptions.example().onComplete {
         case Success(_) => throw new RuntimeException("It should fail!")
-        case Failure(ex) => model.subProp(_.exception).set(ex match {
-          case ex: GuideExceptions.ExampleException =>
-            ex.printStackTrace()
-            s"ExampleException: ${ex.msg}"
-          case _ => s"UnknownException: ${ex.getMessage}"
-        })
+        case Failure(ex) =>
+          model
+            .subProp(_.exception)
+            .set(ex match {
+              case ex: GuideExceptions.ExampleException =>
+                ex.printStackTrace()
+                s"ExampleException: ${ex.msg}"
+              case _ => s"UnknownException: ${ex.getMessage}"
+            })
       }
     }
 
     def translatableExceptionCall(): Unit = {
-      Context.serverRpc.demos.exceptions.exampleWithTranslatableError() onComplete {
+      Context.serverRpc.demos.exceptions.exampleWithTranslatableError().onComplete {
         case Success(_) => throw new RuntimeException("It should fail!")
-        case Failure(ex) => model.subProp(_.translatableException).set(ex match {
-          case ex: GuideExceptions.TranslatableExampleException => ex.trKey
-          case _ => null
-        })
+        case Failure(ex) =>
+          model
+            .subProp(_.translatableException)
+            .set(ex match {
+              case ex: GuideExceptions.TranslatableExampleException => ex.trKey
+              case _ => null
+            })
       }
     }
 
     def unknownExceptionCall(): Unit = {
-      Context.serverRpc.demos.exceptions.unknownError() onComplete {
+      Context.serverRpc.demos.exceptions.unknownError().onComplete {
         case Success(_) => throw new RuntimeException("It should fail!")
-        case Failure(ex) => model.subProp(_.unknownException).set(ex match {
-          case ex: GuideExceptions.ExampleException => s"ExampleException: ${ex.msg}"
-          case ex: GuideExceptions.TranslatableExampleException => s"TranslatableExampleException: ${ex.trKey.key}"
-          case _ => s"UnknownException: ${ex.getMessage}"
-        })
+        case Failure(ex) =>
+          model
+            .subProp(_.unknownException)
+            .set(ex match {
+              case ex: GuideExceptions.ExampleException => s"ExampleException: ${ex.msg}"
+              case ex: GuideExceptions.TranslatableExampleException => s"TranslatableExampleException: ${ex.trKey.key}"
+              case _ => s"UnknownException: ${ex.getMessage}"
+            })
       }
     }
   }
@@ -73,66 +82,68 @@ class ExceptionsDemoComponent extends Component {
   class ExceptionsDemoView(model: ModelProperty[ExceptionsDemoModel], presenter: ExceptionsDemoPresenter) {
     import JsDom.all._
 
-    implicit val translationProvider: TranslationProvider = new RemoteTranslationProvider(serverRpc.demos.translations, Some(dom.window.localStorage), 6 hours)
+    implicit val translationProvider: TranslationProvider =
+      new RemoteTranslationProvider(serverRpc.demos.translations, Some(dom.window.localStorage), 6.hours)
     implicit val lang: Lang = Lang("en")
 
     private val exceptionButtonDisabled = Property(false)
     private val exceptionButton = UdashButton(
       disabled = exceptionButtonDisabled,
-      componentId = ComponentId("exception-demo")
+      componentId = ComponentId("exception-demo"),
     )(_ => "Call registered exception!")
 
     private val translatableExceptionButton = UdashButton(
       disabled = exceptionButtonDisabled,
-      componentId = ComponentId("translatable-exception-demo")
+      componentId = ComponentId("translatable-exception-demo"),
     )(_ => "Call registered translatable exception!")
 
     private val unknownExceptionButtonDisabled = Property(false)
     private val unknownExceptionButton = UdashButton(
       disabled = unknownExceptionButtonDisabled,
-      componentId = ComponentId("unknown-exception-demo")
+      componentId = ComponentId("unknown-exception-demo"),
     )(_ => "Call unknown exception!")
 
-    exceptionButton.listen {
-      case UdashButton.ButtonClickEvent(_, _) =>
-        exceptionButtonDisabled.set(true)
-        presenter.exceptionCall()
+    exceptionButton.listen { case UdashButton.ButtonClickEvent(_, _) =>
+      exceptionButtonDisabled.set(true)
+      presenter.exceptionCall()
     }
 
-    translatableExceptionButton.listen {
-      case UdashButton.ButtonClickEvent(_, _) =>
-        exceptionButtonDisabled.set(true)
-        presenter.translatableExceptionCall()
+    translatableExceptionButton.listen { case UdashButton.ButtonClickEvent(_, _) =>
+      exceptionButtonDisabled.set(true)
+      presenter.translatableExceptionCall()
     }
 
-    unknownExceptionButton.listen {
-      case UdashButton.ButtonClickEvent(_, _) =>
-        unknownExceptionButtonDisabled.set(true)
-        presenter.unknownExceptionCall()
+    unknownExceptionButton.listen { case UdashButton.ButtonClickEvent(_, _) =>
+      unknownExceptionButtonDisabled.set(true)
+      presenter.unknownExceptionCall()
     }
 
     def render: Modifier = span(GuideStyles.frame, GuideStyles.useBootstrap)(
       UdashInputGroup()(
         UdashInputGroup.prependText(
           "Result: ",
-          produce(model.subProp(_.exception))(v => span(id := "exception-demo-response", v).render)
+          produce(model.subProp(_.exception))(v => span(id := "exception-demo-response", v).render),
         ),
-        exceptionButton.render
-      ).render, br,
+        exceptionButton.render,
+      ).render,
+      br,
       UdashInputGroup()(
         UdashInputGroup.prependText(
           "Result: ",
-          produce(model.subProp(_.translatableException))(v => span(id := "translatable-exception-demo-response")(v.translated()).render)
+          produce(model.subProp(_.translatableException))(v =>
+            span(id := "translatable-exception-demo-response")(v.translated()).render
+          ),
         ),
-        translatableExceptionButton.render
-      ).render, br,
+        translatableExceptionButton.render,
+      ).render,
+      br,
       UdashInputGroup()(
         UdashInputGroup.prependText(
           "Result: ",
-          produce(model.subProp(_.unknownException))(v => span(id := "unknown-exception-demo-response", v).render)
+          produce(model.subProp(_.unknownException))(v => span(id := "unknown-exception-demo-response", v).render),
         ),
-        unknownExceptionButton.render
-      ).render
+        unknownExceptionButton.render,
+      ).render,
     )
   }
 }

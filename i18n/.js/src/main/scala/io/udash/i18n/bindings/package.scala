@@ -16,5 +16,6 @@ package object bindings {
         (0 until children.length).map(children.item)
       case Success(_) | Failure(JavaScriptException(_: SyntaxError)) =>
         Seq(document.createTextNode(text))
-    } else Seq(document.createTextNode(text))
+    }
+    else Seq(document.createTextNode(text))
 }

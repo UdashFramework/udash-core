@@ -11,7 +11,7 @@ import javax.servlet.ServletConfig
 class DefaultAtmosphereFramework(
   config: AtmosphereServiceConfig[_],
   exceptionsRegistry: ExceptionCodecRegistry = new DefaultExceptionCodecRegistry,
-  onRequestHandlingFailure: (Throwable, Logger) => Unit = (ex, logger) => logger.error("RPC request handling failed", ex)
+  onRequestHandlingFailure: (Throwable, Logger) => Unit = (ex, logger) => logger.error("RPC request handling failed", ex),
 ) extends AtmosphereFramework {
   addInitParameter(ApplicationConfig.WEBSOCKET_SUPPORT, "true")
   addInitParameter(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true")
@@ -27,6 +27,9 @@ class DefaultAtmosphereFramework(
 
   override def init(sc: ServletConfig): AtmosphereFramework = {
     super.init(sc)
-    addAtmosphereHandler("/*", new AtmosphereService(config, exceptionsRegistry, onRequestHandlingFailure = onRequestHandlingFailure))
+    addAtmosphereHandler(
+      "/*",
+      new AtmosphereService(config, exceptionsRegistry, onRequestHandlingFailure = onRequestHandlingFailure),
+    )
   }
 };

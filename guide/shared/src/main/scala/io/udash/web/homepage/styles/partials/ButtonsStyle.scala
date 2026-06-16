@@ -21,30 +21,30 @@ object ButtonsStyle extends CssBase {
 
     &.hover {
       textDecoration := none
-    }
+    },
   )
 
   private val btnDefaultLine = mixin(
     content.string(" "),
     position.absolute,
-    backgroundColor.white
+    backgroundColor.white,
   )
 
   private val btnDefaultLineHor = mixin(
     CommonStyleUtils.transition(),
     left(`0`),
     width(100 %%),
-    height(2 px),
-    transform := "scaleX(0)"
+    height(2.px),
+    transform := "scaleX(0)",
   )
 
   private val btnDefaultLineVert = mixin(
     CommonStyleUtils.transition(),
-    transitionDelay(250 milliseconds),
-    width(2 px),
+    transitionDelay(250.milliseconds),
+    width(2.px),
     height(100 %%),
     top(`0`),
-    transform := "scaleY(0)"
+    transform := "scaleY(0)",
   )
 
   val btnDefault: CssStyle = style(
@@ -52,92 +52,92 @@ object ButtonsStyle extends CssBase {
     UdashFonts.roboto(FontWeight.Bold),
     display.inlineBlock,
     color.white,
-    fontSize(1.75 rem),
+    fontSize(1.75.rem),
     color.white,
     backgroundColor(StyleConstants.Colors.Red),
 
-    &.before (
+    &.before(
       btnDefaultLine,
       btnDefaultLineHor,
       top(`0`),
-      transformOrigin := "0 50%"
+      transformOrigin := "0 50%",
     ),
 
-    &.after (
+    &.after(
       btnDefaultLine,
       btnDefaultLineHor,
       bottom(`0`),
-      transformOrigin := "100% 50%"
+      transformOrigin := "100% 50%",
     ),
 
     MediaQueries.desktop(
       &.hover(
-        &.before (
+        &.before(
           transform := "scaleX(1)"
         ),
 
-        &.after (
+        &.after(
           transform := "scaleX(1)"
         ),
 
-        unsafeChild(s".${btnDefaultInner.className}") (
-          &.before (
+        unsafeChild(s".${btnDefaultInner.className}")(
+          &.before(
             transform := "scaleY(1)"
           ),
 
-          &.after (
+          &.after(
             transform := "scaleY(1)"
-          )
-        )
+          ),
+        ),
       )
     ),
 
     MediaQueries.phone(
       width(100 %%),
-      textAlign.center
-    )
+      textAlign.center,
+    ),
   )
 
   lazy val btnDefaultInner: CssStyle = style(
-    padding(.625 rem, 3.125 rem,.8125 rem, 3.125 rem),
+    padding(.625.rem, 3.125.rem, .8125.rem, 3.125.rem),
     transform := "translate3d(0,0,0)",
-    &.before (
+    &.before(
       btnDefaultLine,
       btnDefaultLineVert,
       left(`0`),
-      transformOrigin := "50% 100%"
+      transformOrigin := "50% 100%",
     ),
 
-    &.after (
+    &.after(
       btnDefaultLine,
       btnDefaultLineVert,
       right(`0`),
-      transformOrigin := "50% 0"
+      transformOrigin := "50% 0",
     ),
 
     MediaQueries.phone(
       paddingLeft(`0`),
-      paddingRight(`0`)
-    )
+      paddingRight(`0`),
+    ),
   )
 
   val btnDefaultBlack: CssStyle = style(
-    &.before (
+    &.before(
       backgroundColor.black
     ),
 
-    &.after (
+    &.after(
       backgroundColor.black
-    )
+    ),
   )
 
   val btnDefaultInnerBlack: CssStyle = style(
-    &.before (
+    &.before(
       backgroundColor.black
     ),
 
-    &.after (
+    &.after(
       backgroundColor.black
-    )
+    ),
   )
 }

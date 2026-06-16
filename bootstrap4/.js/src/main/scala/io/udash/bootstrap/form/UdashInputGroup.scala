@@ -6,39 +6,45 @@ import io.udash.bootstrap.utils.{BootstrapStyles, UdashBootstrapComponent}
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
-final class UdashInputGroup private(
+final class UdashInputGroup private (
   groupSize: ReadableProperty[Option[BootstrapStyles.Size]],
-  override val componentId: ComponentId
-)(content: Modifier*) extends UdashBootstrapComponent {
+  override val componentId: ComponentId,
+)(
+  content: Modifier*
+) extends UdashBootstrapComponent {
 
   import io.udash.css.CssView._
 
   override val render: Element =
     div(
       BootstrapStyles.InputGroup.inputGroup,
-      nestedInterceptor((BootstrapStyles.InputGroup.size _).reactiveOptionApply(groupSize))
+      nestedInterceptor((BootstrapStyles.InputGroup.size _).reactiveOptionApply(groupSize)),
     )(content).render
 }
 
 object UdashInputGroup {
   import io.udash.css.CssView._
 
-  /**
-    * Creates an inputs group.
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/input-group/">Bootstrap Docs</a>.
+  /** Creates an inputs group. More: <a href="http://getbootstrap.com/docs/4.1/components/input-group/">Bootstrap
+    * Docs</a>.
     *
-    * @param groupSize   A size of the inputs in group. One of standard bootstrap values: `BootstrapStyles.Size`.
-    * @param componentId An id of the root DOM node.
-    * @param content     The group content. The elements usually need to be wrapped with methods like:
-    *                    `UdashInputGroup.input`, `UdashInputGroup.select`, `UdashInputGroup.prepend`, `UdashInputGroup.append`, etc.
-    * @return A `UdashInputGroup` component, call `render` to create a DOM element.
+    * @param groupSize
+    *   A size of the inputs in group. One of standard bootstrap values: `BootstrapStyles.Size`.
+    * @param componentId
+    *   An id of the root DOM node.
+    * @param content
+    *   The group content. The elements usually need to be wrapped with methods like: `UdashInputGroup.input`,
+    *   `UdashInputGroup.select`, `UdashInputGroup.prepend`, `UdashInputGroup.append`, etc.
+    * @return
+    *   A `UdashInputGroup` component, call `render` to create a DOM element.
     */
   def apply(
     groupSize: ReadableProperty[Option[BootstrapStyles.Size]] = UdashBootstrap.None,
-    componentId: ComponentId = ComponentId.generate()
-  )(content: Modifier*): UdashInputGroup = {
+    componentId: ComponentId = ComponentId.generate(),
+  )(
+    content: Modifier*
+  ): UdashInputGroup =
     new UdashInputGroup(groupSize, componentId)(content)
-  }
 
   /** Adds `form-control` style to provided element. It's required to properly display input as part of group. */
   def input(el: Element): Element =

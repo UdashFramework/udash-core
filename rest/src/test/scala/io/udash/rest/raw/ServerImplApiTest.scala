@@ -25,8 +25,9 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
     request: RestRequest,
     expectedCode: Int,
     expectedContentType: Option[String] = None,
-    verifyBody: Observable[_] => Boolean = _ => true
-  )(implicit pos: Position): Unit = {
+    verifyBody: Observable[_] => Boolean = _ => true,
+  )(implicit pos: Position
+  ): Unit = {
     val future = serverHandleStreaming(request).runToFuture
     val response = future.futureValue
 
@@ -40,8 +41,10 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
         case nonEmpty: StreamedBody.NonEmpty => nonEmpty.contentType
         case _ => ""
       }
-      assert(actualContentType.startsWith(contentType),
-        s"Expected content type starting with $contentType but got $actualContentType")
+      assert(
+        actualContentType.startsWith(contentType),
+        s"Expected content type starting with $contentType but got $actualContentType",
+      )
     }
 
     streamedResp.body match {
@@ -63,7 +66,7 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
   test("simple GET call") {
     val params = RestParameters(
       path = PlainValue.decodePath("/thingy"),
-      query = Mapping.create("param" -> PlainValue("42"))
+      query = Mapping.create("param" -> PlainValue("42")),
     )
     val request = RestRequest(HttpMethod.GET, params, HttpBody.Empty)
     val response = RestResponse(200, IMapping.empty, HttpBody.json(JsonValue("\"41\"")))
@@ -72,7 +75,7 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
 
   test("subapi POST call") {
     val params = RestParameters(
-      path = PlainValue.decodePath("/subapi/yeet"),
+      path = PlainValue.decodePath("/subapi/yeet")
     )
     val body = HttpBody.createJsonBody(Mapping.create("data" -> JsonValue(JsonStringOutput.write("foo"))))
     val request = RestRequest(HttpMethod.POST, params, body)
@@ -84,8 +87,7 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
     val openapi = SomeServerApiImpl.openapiMetadata.openapi(Info("Test API", "0.1"))
     val json = JsonStringOutput.writePretty(openapi)
 
-    assert(json ==
-      """{
+    assert(json == """{
         |  "openapi": "3.0.2",
         |  "info": {
         |    "title": "Test API",
@@ -288,7 +290,7 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
   test("streaming GET with JSON response") {
     val params = RestParameters(
       path = PlainValue.decodePath("/streamingNumbers"),
-      query = Mapping.create("count" -> PlainValue("5"))
+      query = Mapping.create("count" -> PlainValue("5")),
     )
     val request = RestRequest(HttpMethod.GET, params, HttpBody.Empty)
 
@@ -297,17 +299,16 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
       expectedCode = 200,
       expectedContentType = Some(HttpBody.JsonType),
       verifyBody = obs => {
-        val valuesFuture = obs.asInstanceOf[Observable[JsonValue]]
-          .map(json => json.value.trim.toInt)
-          .toListL.runToFuture
+        val valuesFuture =
+          obs.asInstanceOf[Observable[JsonValue]].map(json => json.value.trim.toInt).toListL.runToFuture
         valuesFuture.futureValue == List(1, 2, 3, 4, 5)
-      }
+      },
     )
   }
 
   test("streaming POST with JSON body and streamed response") {
     val params = RestParameters(
-      path = PlainValue.decodePath("/streamEcho"),
+      path = PlainValue.decodePath("/streamEcho")
     )
     val body = HttpBody.createJsonBody(Mapping.create("values" -> JsonValue("[1,2,3,4,5]")))
     val request = RestRequest(HttpMethod.POST, params, body)
@@ -317,18 +318,17 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
       expectedCode = 200,
       expectedContentType = Some(HttpBody.JsonType),
       verifyBody = obs => {
-        val valuesFuture = obs.asInstanceOf[Observable[JsonValue]]
-          .map(json => json.value.trim.toInt)
-          .toListL.runToFuture
+        val valuesFuture =
+          obs.asInstanceOf[Observable[JsonValue]].map(json => json.value.trim.toInt).toListL.runToFuture
         valuesFuture.futureValue == List(1, 2, 3, 4, 5)
-      }
+      },
     )
   }
 
   test("streaming binary data") {
     val params = RestParameters(
       path = PlainValue.decodePath("/streamBinary"),
-      query = Mapping.create("chunkSize" -> PlainValue("3"))
+      query = Mapping.create("chunkSize" -> PlainValue("3")),
     )
     val request = RestRequest(HttpMethod.GET, params, HttpBody.Empty)
 
@@ -337,12 +337,10 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
       expectedCode = 200,
       expectedContentType = Some(HttpBody.OctetStreamType),
       verifyBody = obs => {
-        val chunksFuture = obs.asInstanceOf[Observable[Array[Byte]]]
-          .map(bytes => new String(bytes))
-          .toListL.runToFuture
+        val chunksFuture = obs.asInstanceOf[Observable[Array[Byte]]].map(bytes => new String(bytes)).toListL.runToFuture
 
         chunksFuture.futureValue.mkString("") == "HelloWorld" * 100
-      }
+      },
     )
   }
 
@@ -354,14 +352,14 @@ class ServerImplApiTest extends AnyFunSuite with ScalaFutures {
 
     assertStreamingExchange(
       request = request,
-      expectedCode = 200
+      expectedCode = 200,
     )
   }
 
   test("streaming GET call to non-streaming endpoint") {
     val params = RestParameters(
       path = PlainValue.decodePath("/streamingNumbers"),
-      query = Mapping.create("count" -> PlainValue("5"))
+      query = Mapping.create("count" -> PlainValue("5")),
     )
     val request = RestRequest(HttpMethod.GET, params, HttpBody.Empty)
     val response = RestResponse(200, IMapping.empty, HttpBody.json(JsonValue("[1,2,3,4,5]")))

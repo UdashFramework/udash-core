@@ -6,14 +6,11 @@ import io.udash.rest.{RestApiTestScenarios, ServletBasedRestApiTest, StreamingRe
 import org.eclipse.jetty.client.HttpClient
 
 final class JettyRestCallTest
-  extends ServletBasedRestApiTest
-    with RestApiTestScenarios
-    with StreamingRestApiTestScenarios {
+  extends ServletBasedRestApiTest with RestApiTestScenarios with StreamingRestApiTestScenarios {
 
-  /**
-   * Similar to the default HttpClient, but with a connection timeout
-   * significantly exceeding the value of the CallTimeout
-   */
+  /** Similar to the default HttpClient, but with a connection timeout significantly exceeding the value of the
+    * CallTimeout
+    */
   val client: HttpClient = new HttpClient() {
     setMaxConnectionsPerDestination(MaxConnections)
     setIdleTimeout(IdleTimout.toMillis)

@@ -23,17 +23,17 @@ object BadgesDemo extends AutoDemo with CssView {
       UdashButton(
         options = UdashButtonOptions(
           color = Color.Primary.opt,
-          size = Size.Large.opt
+          size = Size.Large.opt,
         )
-      )(_ => Seq[Modifier](
-        "Button ",
-        UdashBadge()(nested => nested(bind(counter))
-        ).render
-      ))
+      )(_ =>
+        Seq[Modifier](
+          "Button ",
+          UdashBadge()(nested => nested(bind(counter))).render,
+        )
+      )
     ).render
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, String) =
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
 }
-

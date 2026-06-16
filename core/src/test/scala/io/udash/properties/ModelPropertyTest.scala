@@ -284,7 +284,12 @@ class ModelPropertyTest extends UdashCoreTest {
       i.set(Seq(SimpleSeq(Seq(), SimpleSeq(Seq(SimpleSeq(Seq(), null)), null))))
       val s = p.subModel(_.s)
       s.set(SimpleSeq(Seq(), SimpleSeq(Seq(), null)))
-      p.get should be(SimpleSeq(Seq(SimpleSeq(Seq(), SimpleSeq(Seq(SimpleSeq(Seq(), null)), null))), SimpleSeq(Seq(), SimpleSeq(Seq(), null))))
+      p.get should be(
+        SimpleSeq(
+          Seq(SimpleSeq(Seq(), SimpleSeq(Seq(SimpleSeq(Seq(), null)), null))),
+          SimpleSeq(Seq(), SimpleSeq(Seq(), null)),
+        )
+      )
       s.subProp(_.i).get should be(Seq())
       s.subProp(_.s.i).get should be(Seq())
       i.elemProperties.isEmpty should be(false)
@@ -294,7 +299,8 @@ class ModelPropertyTest extends UdashCoreTest {
       case class CCWithRequire(a: Int, b: Int) {
         require((a > 0 && b > 0) || (a < 0 && b < 0))
       }
-      implicit val propertyCreatorCC: ModelPropertyCreator[CCWithRequire] = ModelPropertyCreator.materialize[CCWithRequire]
+      implicit val propertyCreatorCC: ModelPropertyCreator[CCWithRequire] =
+        ModelPropertyCreator.materialize[CCWithRequire]
       case class TopModel(child: CCWithRequire)
       implicit val propertyCreator: ModelPropertyCreator[TopModel] = ModelPropertyCreator.materialize[TopModel]
 
@@ -317,12 +323,14 @@ class ModelPropertyTest extends UdashCoreTest {
         def x: Int
         def y: Int = 5
       }
-      implicit val propertyCreator: ModelPropertyCreator[ModelWithImplDef] = ModelPropertyCreator.materialize[ModelWithImplDef]
+      implicit val propertyCreator: ModelPropertyCreator[ModelWithImplDef] =
+        ModelPropertyCreator.materialize[ModelWithImplDef]
       trait ModelWithImplVal {
         val x: Int
         val y: Int = 5
       }
-      implicit val propertyCreatorVal: ModelPropertyCreator[ModelWithImplVal] = ModelPropertyCreator.materialize[ModelWithImplVal]
+      implicit val propertyCreatorVal: ModelPropertyCreator[ModelWithImplVal] =
+        ModelPropertyCreator.materialize[ModelWithImplVal]
 
       val p1 = ModelProperty(null: ModelWithImplDef)
       val p2 = ModelProperty(null: ModelWithImplVal)
@@ -414,7 +422,8 @@ class ModelPropertyTest extends UdashCoreTest {
         }
       }
 
-      implicit val mpc: ModelPropertyCreator[(Outer.Bla[Outer.Bla[Int]], Int, String)] = ModelPropertyCreator.materialize
+      implicit val mpc: ModelPropertyCreator[(Outer.Bla[Outer.Bla[Int]], Int, String)] =
+        ModelPropertyCreator.materialize
       val s = SeqProperty(Seq.tabulate(10)(_ => (Outer.Bla(5, "asd2", Outer.Bla(7, "qwe", 1)), 8, "asd")))
       s.elemProperties.foreach { v =>
         val p = v.asModel
@@ -443,12 +452,12 @@ class ModelPropertyTest extends UdashCoreTest {
       val p = ModelProperty(null: TT)
       p.set(newTT(5, Some("s"), new C(123, "asd"), Seq('a', 'b', 'c')))
 
-      p.subProp(_.i) should be theSameInstanceAs p.subProp(_.i)
-      p.subProp(_.s) should be theSameInstanceAs p.subProp(_.s)
-      p.subModel(_.t) should be theSameInstanceAs p.subModel(_.t)
-      p.subModel(_.t) should be theSameInstanceAs p.subProp(_.t)
-      p.subSeq(_.t.s) should be theSameInstanceAs p.subSeq(_.t.s)
-      p.subSeq(_.t.s) should be theSameInstanceAs p.subProp(_.t.s)
+      (p.subProp(_.i) should be).theSameInstanceAs(p.subProp(_.i))
+      (p.subProp(_.s) should be).theSameInstanceAs(p.subProp(_.s))
+      (p.subModel(_.t) should be).theSameInstanceAs(p.subModel(_.t))
+      (p.subModel(_.t) should be).theSameInstanceAs(p.subProp(_.t))
+      (p.subSeq(_.t.s) should be).theSameInstanceAs(p.subSeq(_.t.s))
+      (p.subSeq(_.t.s) should be).theSameInstanceAs(p.subProp(_.t.s))
     }
 
     "work with generic wildcard" in {
@@ -518,7 +527,7 @@ class ModelPropertyTest extends UdashCoreTest {
     s1: SeqAlias[String],
     s2: VectorAlias[String],
     s3: IntSeq[String],
-    s4: WeirdSeq[Int, String]
+    s4: WeirdSeq[Int, String],
   )
   object AliasedSeqModel extends HasModelPropertyCreator[AliasedSeqModel]
 }

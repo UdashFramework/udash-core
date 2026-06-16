@@ -34,9 +34,10 @@ object TableDemo extends AutoDemo with CssView {
     val items = SeqProperty(Seq.fill(7, 3)(Random.nextDouble()))
     val table = UdashTable(items, responsive, dark, striped, bordered, hover, small)(
       headerFactory = Some(_ => tr(Seq("x", "y", "z").map(header => th(b(header)))).render),
-      rowFactory = (el, nested) => tr(
-        nested(produce(el)(_.map(td(_).render)))
-      ).render
+      rowFactory = (el, nested) =>
+        tr(
+          nested(produce(el)(_.map(td(_).render)))
+        ).render,
     )
 
     div(
@@ -45,13 +46,12 @@ object TableDemo extends AutoDemo with CssView {
         stripedButton.render,
         borderedButton.render,
         hoverButton.render,
-        smallButton.render
+        smallButton.render,
       ),
-      table
+      table,
     ).render
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, String) =
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
 }
-

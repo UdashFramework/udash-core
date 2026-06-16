@@ -21,18 +21,19 @@ import java.nio.charset.Charset
 import scala.concurrent.CancellationException
 import scala.concurrent.duration.*
 
-/**
- * A REST client implementation based on the Eclipse Jetty HTTP client library.
- * Supports both standard request/response interactions and handling of streamed responses.
- *
- * Streaming responses allow processing large amounts of data without buffering the entire
- * response body in memory. This client activates streaming mode *only* when the server's
- * response headers *do not* include a `Content-Length`.
- *
- * @param client                   The configured Jetty `HttpClient` instance.
- * @param defaultMaxResponseLength Default maximum size (in bytes) for buffering non-streamed responses.
- * @param defaultTimeout           Default timeout for requests.
- */
+/** A REST client implementation based on the Eclipse Jetty HTTP client library. Supports both standard request/response
+  * interactions and handling of streamed responses.
+  *
+  * Streaming responses allow processing large amounts of data without buffering the entire response body in memory.
+  * This client activates streaming mode *only* when the server's response headers *do not* include a `Content-Length`.
+  *
+  * @param client
+  *   The configured Jetty `HttpClient` instance.
+  * @param defaultMaxResponseLength
+  *   Default maximum size (in bytes) for buffering non-streamed responses.
+  * @param defaultTimeout
+  *   Default timeout for requests.
+  */
 final class JettyRestClient(
   client: HttpClient,
   defaultMaxResponseLength: Int = JettyRestClient.DefaultMaxResponseLength,
@@ -40,7 +41,7 @@ final class JettyRestClient(
 ) extends LazyLogging {
 
   @explicitGenerics
-  def create[RestApi: RawRest.AsRealRpc : RestMetadata](
+  def create[RestApi: RawRest.AsRealRpc: RestMetadata](
     baseUri: String,
     customMaxResponseLength: OptArg[Int] = OptArg.Empty,
     customTimeout: OptArg[Duration] = OptArg.Empty,
@@ -49,16 +50,19 @@ final class JettyRestClient(
       asHandleRequestWithStreaming(baseUri, customMaxResponseLength, customTimeout)
     )
 
-  /**
-   * Creates a request handler with streaming support that can be used to make REST calls.
-   * The handler supports both regular responses and streaming responses, allowing for
-   * incremental processing of large payloads through Observable streams.
-   *
-   * @param baseUrl                 Base URL for the REST service
-   * @param customMaxResponseLength Optional maximum response length override for non-streamed responses
-   * @param customTimeout           Optional timeout override
-   * @return A handler that can process REST requests with streaming capabilities
-   */
+  /** Creates a request handler with streaming support that can be used to make REST calls. The handler supports both
+    * regular responses and streaming responses, allowing for incremental processing of large payloads through
+    * Observable streams.
+    *
+    * @param baseUrl
+    *   Base URL for the REST service
+    * @param customMaxResponseLength
+    *   Optional maximum response length override for non-streamed responses
+    * @param customTimeout
+    *   Optional timeout override
+    * @return
+    *   A handler that can process REST requests with streaming capabilities
+    */
   def asHandleRequestWithStreaming(
     baseUrl: String,
     customMaxResponseLength: OptArg[Int] = OptArg.Empty,
@@ -101,7 +105,9 @@ final class JettyRestClient(
                         .flatMap { jsonStr =>
                           val input = new JsonStringInput(new JsonReader(jsonStr))
                           Observable
-                            .fromIterator(Task.eval(input.readList().iterator(_.asInstanceOf[JsonStringInput].readRawJson())))
+                            .fromIterator(
+                              Task.eval(input.readList().iterator(_.asInstanceOf[JsonStringInput].readRawJson()))
+                            )
                             .map(JsonValue(_))
                         }
                         .doOnSubscriptionCancel(cancelRequest)
@@ -115,9 +121,7 @@ final class JettyRestClient(
                     )
                 }
                 bodyOpt.mapOr(
-                  {
-                    callback(Failure(JettyRestClient.unsupportedContentTypeError(contentTypeOpt)))
-                  },
+                  callback(Failure(JettyRestClient.unsupportedContentTypeError(contentTypeOpt))),
                   body => {
                     this.collectToBuffer = false
                     val restResponse = StreamedRestResponse(
@@ -126,7 +130,7 @@ final class JettyRestClient(
                       body = body,
                     )
                     callback(Success(restResponse))
-                  }
+                  },
                 )
               }
             }
@@ -144,7 +148,7 @@ final class JettyRestClient(
                   .flatMapNow(_ => rawContentSubject.onNext(arr))
                   .mapNow {
                     case Ack.Continue => demander.run()
-                    case Ack.Stop     => ()
+                    case Ack.Stop => ()
                   }
                   .onCompleteNow {
                     case Failure(ex) =>
@@ -180,15 +184,18 @@ final class JettyRestClient(
       }
   }
 
-  /**
-   * Creates a [[RawRest.HandleRequest]] which handles standard REST requests by buffering the entire response.
-   * This does <b>not</b> support streaming responses.
-   *
-   * @param baseUrl                 The base URL for the REST service.
-   * @param customMaxResponseLength Optional override for the maximum response length.
-   * @param customTimeout           Optional override for the request timeout.
-   * @return A `RawRest.HandleRequest` that buffers responses.
-   */
+  /** Creates a [[RawRest.HandleRequest]] which handles standard REST requests by buffering the entire response. This
+    * does <b>not</b> support streaming responses.
+    *
+    * @param baseUrl
+    *   The base URL for the REST service.
+    * @param customMaxResponseLength
+    *   Optional override for the maximum response length.
+    * @param customTimeout
+    *   Optional override for the request timeout.
+    * @return
+    *   A `RawRest.HandleRequest` that buffers responses.
+    */
   def asHandleRequest(
     baseUrl: String,
     customMaxResponseLength: OptArg[Int] = OptArg.Empty,
@@ -208,15 +215,18 @@ final class JettyRestClient(
       val path = baseUrl + PlainValue.encodePath(request.parameters.path)
 
       httpReq.path(path)
-      request.parameters.query.entries.foreach {
-        case (name, PlainValue(value)) => httpReq.param(name, value)
+      request.parameters.query.entries.foreach { case (name, PlainValue(value)) =>
+        httpReq.param(name, value)
       }
-      request.parameters.headers.entries.foreach {
-        case (name, PlainValue(value)) => httpReq.headers(headers => headers.add(name, value))
+      request.parameters.headers.entries.foreach { case (name, PlainValue(value)) =>
+        httpReq.headers(headers => headers.add(name, value))
       }
-      request.parameters.cookies.entries.foreach {
-        case (name, PlainValue(value)) => httpReq.cookie(HttpCookie.build(
-          URLEncoder.encode(name, spaceAsPlus = true), URLEncoder.encode(value, spaceAsPlus = true)).build())
+      request.parameters.cookies.entries.foreach { case (name, PlainValue(value)) =>
+        httpReq.cookie(
+          HttpCookie
+            .build(URLEncoder.encode(name, spaceAsPlus = true), URLEncoder.encode(value, spaceAsPlus = true))
+            .build()
+        )
       }
 
       request.body match {
@@ -235,7 +245,8 @@ final class JettyRestClient(
     }
 
   private def sendRequest(httpReq: Request, maxResponseLength: Int): Task[RestResponse] =
-    Task.async { (callback: Callback[Throwable, RestResponse]) =>
+    Task
+      .async { (callback: Callback[Throwable, RestResponse]) =>
         httpReq.send(new BufferingResponseListener(maxResponseLength) {
           override def onComplete(result: Result): Unit =
             if (result.isSucceeded) {
@@ -287,7 +298,7 @@ object JettyRestClient {
     )
 
   @explicitGenerics
-  def apply[RestApi: RawRest.AsRealRpc : RestMetadata](
+  def apply[RestApi: RawRest.AsRealRpc: RestMetadata](
     client: HttpClient,
     baseUri: String,
     maxResponseLength: Int = DefaultMaxResponseLength,
