@@ -39,11 +39,20 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
       val caseSchemas = cases.map { c =>
         val baseSchema = resolver.resolve(c.caseSchema(caseFieldOpt))
         if (caseFieldOpt.nonEmpty) baseSchema
-        else RefOr(Schema(
-          `type` = DataType.Object,
-          properties = IListMap(c.info.rawName -> baseSchema),
-          required = List(c.info.rawName)
-        ))
+        else {
+          val adjustedBase = baseSchema match {
+            case RefOr.Value(s) if s.`type`.contains(DataType.Object) && s.additionalProperties == AdditionalProperties.Flag(value = true) =>
+              RefOr(s.copy(additionalProperties = AdditionalProperties.Flag(value = false)))
+            case other => other
+          }
+          RefOr(Schema(
+            `type` = DataType.Object,
+            title = c.info.rawName,
+            properties = IListMap(c.info.rawName -> adjustedBase),
+            additionalProperties = AdditionalProperties.Flag(value = false),
+            required = List(c.info.rawName),
+          ))
+        }
       }
       val disc = caseFieldOpt.map { caseFieldName =>
         val mapping = IListMap((cases zip caseSchemas).collect {
