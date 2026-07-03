@@ -5,7 +5,12 @@ import com.avsystem.commons.misc.Opt
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization.{GenCodec, Input, InputWrapper, ObjectInput}
 
-/** TODO doc */
+/**
+ * Builds a `GenCodec[T]` for a single case `T` of a `@flatten` (flat) sealed hierarchy rooted at `R`. It
+ * delegates reading/writing to the root codec but, on read, additionally rejects objects whose
+ * discriminator field (`caseFieldName`) does not equal the expected `caseName` - see
+ * [[CaseNameValidatingInput]].
+ */
 object CaseNameValidatingCodec {
   // `caseName` is a by-name parameter to avoid recursive access problem
   def apply[T, R >: T](rootCodec: GenCodec[R], caseFieldName: String, caseName: => String): GenCodec[T] =

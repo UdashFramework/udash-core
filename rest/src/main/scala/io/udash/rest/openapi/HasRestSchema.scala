@@ -1,5 +1,8 @@
 package io.udash.rest.openapi
 
+/**
+ * Minimal capability trait for something that provides a [[RestSchema]] for type `T`.
+ */
 trait HasRestSchema[T] {
   def restSchema: RestSchema[T]
 }

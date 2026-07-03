@@ -8,24 +8,50 @@ import io.udash.rest.util.CaseNameValidatingCodec
 
 import scala.reflect.ClassTag
 
+/**
+ * [[CodecWithStructure]] analogue for a single-parameter generic type `C[_]`.
+ *
+ * @see [[ApiDataWithCustomImplicits.PolyApiDataCompanion]])
+ */
 trait PolyCodecWithStructure[C[_]] {
   def codec[T: GenCodec]: GenCodec[C[T]]
   def structure[T: RestSchema]: RestStructure[C[T]]
 }
 
+/**
+ * Like [[PolyCodecWithStructure]] but yielding a [[GenObjectCodec]].
+ *
+ * @see [[ApiDataWithCustomImplicits.PolyObjectApiDataCompanion]])
+ */
 trait PolyObjectCodecWithStructure[C[_]] {
   def codec[T: GenCodec]: GenObjectCodec[C[T]]
   def structure[T: RestSchema]: RestStructure[C[T]]
 }
 
+/**
+ * [[CodecWithStructure]] analogue for a two-parameter generic type `C[_, _]`.
+ *
+ * @see [[ApiDataWithCustomImplicits.Poly2ApiDataCompanion]])
+ */
 trait Poly2CodecWithStructure[C[_, _]] {
   def codec[T1: GenCodec, T2: GenCodec]: GenCodec[C[T1, T2]]
   def structure[T1: RestSchema, T2: RestSchema]: RestStructure[C[T1, T2]]
 }
 
-/** TODO doc */
+/**
+ * Bundles all data-type companion base classes (for case classes, sealed hierarchies, enums and generic
+ * types used as parameters or results of REST APIs) pre-bound to a custom `Implicits` bundle. It is the
+ * generalization of the [[RestDataCompanion]] family: whereas `RestDataCompanion` and friends fix the
+ * implicits to [[DefaultRestImplicits]], here the `Implicits` type parameter (typically an object extending
+ * `DefaultRestImplicits` with extra serialization/schema instances) is injected into macro materialization,
+ * so custom serialization for your own types is picked up automatically.
+ *
+ * Extended by [[AbstractRestApisWithCustomImplicits]] and the contextual API bases, but can also be used on
+ * its own for defining only data-type companions - see [[ApiDataWithCustomImplicits.ApiDataCompanion]].
+ */
 trait ApiDataWithCustomImplicits[Implicits] {
 
+  /** The bundle of implicits injected into macro materialization of every companion defined here. */
   protected def implicits: Implicits
 
   /**
@@ -56,7 +82,7 @@ trait ApiDataWithCustomImplicits[Implicits] {
    * Companion for generic case classes and sealed hierarchies used in REST APIs.
    * This only works with types that have exactly one, unbounded type parameter.
    * However, you can relatively easily create a similar base companion class for any other parameterization
-   * scheme (e.g. two or more generics with possible bounds etc).
+   * scheme (e.g. two or more generics with possible bounds etc.).
    */
   abstract class PolyApiDataCompanion[C[_]](implicit instances: MacroInstances[Implicits, PolyCodecWithStructure[C]]) {
     implicit def codec[T: GenCodec]: GenCodec[C[T]] = instances(implicits, this).codec
@@ -64,12 +90,14 @@ trait ApiDataWithCustomImplicits[Implicits] {
     implicit def restSchema[T: RestSchema]: RestSchema[C[T]] = restStructure[T].standaloneSchema.unnamed
   }
 
+  /** Like [[PolyApiDataCompanion]] but derives a [[GenObjectCodec]] (i.e. the wrapped type is always an object). */
   abstract class PolyObjectApiDataCompanion[C[_]](implicit instances: MacroInstances[Implicits, PolyObjectCodecWithStructure[C]]) {
     implicit def codec[T: GenCodec]: GenObjectCodec[C[T]] = instances(implicits, this).codec
     implicit def restStructure[T: RestSchema]: RestStructure[C[T]] = instances(implicits, this).structure
     implicit def restSchema[T: RestSchema]: RestSchema[C[T]] = restStructure[T].standaloneSchema.unnamed
   }
 
+  /** Like [[PolyApiDataCompanion]] but for generic types with exactly two unbounded type parameters. */
   abstract class Poly2ApiDataCompanion[C[_, _]](implicit instances: MacroInstances[Implicits, Poly2CodecWithStructure[C]]) {
     implicit def codec[T1: GenCodec, T2: GenCodec]: GenCodec[C[T1, T2]] = instances(implicits, this).codec
     implicit def restStructure[T1: RestSchema, T2: RestSchema]: RestStructure[C[T1, T2]] = instances(implicits, this).structure
@@ -97,7 +125,13 @@ trait ApiDataWithCustomImplicits[Implicits] {
     private def caseName: String = structure.info.rawName
   }
 
-  /** TODO doc */
+  /**
+   * Use this as base for companions of an intermediate node in a sealed hierarchy (a sealed sub-trait `T`
+   * of the root `R`) when you want a [[GenCodec]] / [[RestSchema]] for that sub-hierarchy on its own.
+   * The codec delegates to the root codec, narrowing to the subclass `T`.
+   *
+   * @see [[ApiSealedCaseCompanion]] for a single case of a flat hierarchy.
+   */
   abstract class ApiSealedSubHierarchyCompanion[T: ClassTag, R >: T](
     implicit rootCodec: GenCodec[R],
     instances: MacroInstances[Implicits, () => RestStructure[T]],

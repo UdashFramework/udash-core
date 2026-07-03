@@ -2,7 +2,23 @@ package io.udash.rest
 
 import com.avsystem.commons.meta.MacroInstances
 
-/** TODO doc: why trait: allow client apps to create more custom companions */
+/**
+ * Bundles all REST API-trait companion base classes ([[ApiCompanion]], [[NoDocApiCompanion]],
+ * [[ServerApiCompanion]], [[ClientApiCompanion]]) pre-bound to a custom `Implicits` bundle. This is the
+ * packaged, reusable form of the "convenience companion base class" pattern described in the Udash REST
+ * guide (section *Plugging in entirely custom serialization*): instead of hand-writing one base class per
+ * companion shape, you instantiate this once (see [[RestApisWithCustomImplicits]]) and get every shape as
+ * an inner class, all sharing the same injected implicits.
+ *
+ * The `Implicits` type parameter (typically an object extending [[DefaultRestImplicits]] with extra
+ * serialization/schema instances) is threaded into macro materialization, so custom serialization for your
+ * own types is picked up automatically without explicit imports.
+ *
+ * Also provides the data-type companions from [[ApiDataWithCustomImplicits]] (for the ADTs used by these
+ * APIs). Defined as a `trait` so applications may mix it into their own base and add further companions.
+ *
+ * @see [[DefaultRestApiCompanion]] and friends for the equivalents pre-bound to [[DefaultRestImplicits]].
+ */
 trait AbstractRestApisWithCustomImplicits[Implicits] extends ApiDataWithCustomImplicits[Implicits] {
 
   /**
@@ -38,6 +54,16 @@ trait AbstractRestApisWithCustomImplicits[Implicits] extends ApiDataWithCustomIm
     extends RestClientApiCompanion[Implicits, Real](implicits)
 }
 
-/** TODO doc */
+/**
+ * Ready-to-use entry point for [[AbstractRestApisWithCustomImplicits]]. Extend it with an `object`,
+ * fixing the implicits bundle, e.g.
+ * {{{
+ *   object MyImplicits extends DefaultRestImplicits
+ *   object MyRestApis extends RestApisWithCustomImplicits[MyImplicits.type](MyImplicits)
+ *
+ *   trait MyApi { ... }
+ *   object MyApi extends MyRestApis.ApiCompanion[MyApi]
+ * }}}
+ */
 abstract class RestApisWithCustomImplicits[Implicits](override protected val implicits: Implicits)
   extends AbstractRestApisWithCustomImplicits[Implicits]
