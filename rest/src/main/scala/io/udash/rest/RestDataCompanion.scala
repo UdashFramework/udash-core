@@ -4,7 +4,7 @@ package rest
 import com.avsystem.commons.annotation.bincompat
 import com.avsystem.commons.meta.MacroInstances
 import com.avsystem.commons.misc
-import com.avsystem.commons.misc.{AbstractValueEnumCompanion, ValueEnum}
+import com.avsystem.commons.misc.{AbstractValueEnumCompanion, NamedEnum, NamedEnumCompanion, ValueEnum}
 import com.avsystem.commons.rpc.{AsRaw, AsReal}
 import com.avsystem.commons.serialization.{GenCodec, TransparentWrapperCompanion, TransparentWrapping}
 import io.udash.rest.openapi.*
@@ -168,6 +168,14 @@ abstract class RestDataWrapperCompanion[Wrapped, T](implicit
 abstract class RestValueEnumCompanion[E <: ValueEnum](implicit
   instances: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[E]]
 ) extends AbstractValueEnumCompanion[E] {
+  implicit lazy val restSchema: RestSchema[E] =
+    instances(DefaultRestImplicits, this).apply().restSchema(RestSchema.namedEnumSchema)
+}
+
+/** TODO doc */
+abstract class RestNamedValueEnumCompanion[E <: NamedEnum](
+  implicit instances: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[E]]
+) extends NamedEnumCompanion[E] {
   implicit lazy val restSchema: RestSchema[E] =
     instances(DefaultRestImplicits, this).apply().restSchema(RestSchema.namedEnumSchema)
 }
