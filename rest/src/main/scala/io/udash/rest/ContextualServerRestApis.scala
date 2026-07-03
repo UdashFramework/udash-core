@@ -49,6 +49,17 @@ trait AbstractContextualServerRestApis[Implicits, Ctx] extends ApiDataWithCustom
       real => WithCtx(implicit ctx => restAsRaw.asRaw(real))
   }
 
+  /** Like [[ServerApiCompanion]], but without OpenAPI generation. */
+  abstract class ServerNoDocApiCompanion[Real](
+    implicit inst: MacroInstances[Implicits, CtxServerApiInstances[Ctx, Real]]
+  ) {
+    implicit lazy val restMetadata: RestMetadata[Real] = inst(implicits, this).metadata
+    implicit def restAsRaw(implicit ctx: Ctx): AsRaw[RawRest, Real] = inst(implicits, this).asRaw
+
+    implicit lazy val restAsContextualRaw: AsRaw[WithCtx[Ctx, RawRest], Real] =
+      real => WithCtx(implicit ctx => restAsRaw.asRaw(real))
+  }
+
   /**
    * Like [[ServerApiCompanion]], but for contextual REST API *implementation classes* that have their
    * methods already implemented (no separate API trait). Fewer macro-generated implicits are required.

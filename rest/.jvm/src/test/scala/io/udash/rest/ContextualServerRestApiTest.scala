@@ -26,6 +26,17 @@ class CtxPingImpl {
 }
 object CtxPingImpl extends CtxRestApis.ServerApiImplCompanion[CtxPingImpl]
 
+// Server-only contextual API without OpenAPI generation.
+trait CtxGreetNoDocApi {
+  @GET def greet(@Query tag: Tag): CtxRestApis.CtxTask[String]
+}
+object CtxGreetNoDocApi extends CtxRestApis.ServerNoDocApiCompanion[CtxGreetNoDocApi]
+
+class CtxGreetNoDocApiImpl extends CtxGreetNoDocApi {
+  def greet(tag: Tag): CtxRestApis.CtxTask[String] =
+    CtxRestApis.CtxTask { ctx => Task.now(s"nodoc-${ctx.user}:${tag.value}") }
+}
+
 class ContextualServerRestApiTest extends AnyFunSuite with ScalaFutures with Matchers {
   implicit def scheduler: Scheduler = Scheduler.global
   implicit val ctx: UserCtx = UserCtx("alice")
@@ -49,5 +60,12 @@ class ContextualServerRestApiTest extends AnyFunSuite with ScalaFutures with Mat
     val resp = getTag(handle, "ping", "tag:world")
     resp.code shouldBe 200
     resp.body.textualContentOpt.get shouldBe "\"pong-alice-world\""
+  }
+
+  test("ServerNoDocApiCompanion: same behavior without OpenAPI generation") {
+    val handle = RawRest.asHandleRequest[CtxGreetNoDocApi](new CtxGreetNoDocApiImpl)
+    val resp = getTag(handle, "greet", "tag:hello")
+    resp.code shouldBe 200
+    resp.body.textualContentOpt.get shouldBe "\"nodoc-alice:hello\""
   }
 }

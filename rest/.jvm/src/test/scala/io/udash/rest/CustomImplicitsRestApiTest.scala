@@ -20,6 +20,16 @@ class EchoApiImpl extends EchoApi {
   def echo(tag: Tag): Task[String] = Task.now(s"got:${tag.value}")
 }
 
+// Same, but without OpenAPI generation.
+trait EchoNoDocApi {
+  @GET def echo(@Query tag: Tag): Task[String]
+}
+object EchoNoDocApi extends CustomRestApis.NoDocApiCompanion[EchoNoDocApi]
+
+class EchoNoDocApiImpl extends EchoNoDocApi {
+  def echo(tag: Tag): Task[String] = Task.now(s"nodoc:${tag.value}")
+}
+
 class CustomImplicitsRestApiTest extends AnyFunSuite with ScalaFutures with Matchers {
   implicit def scheduler: Scheduler = Scheduler.global
 
@@ -48,5 +58,20 @@ class CustomImplicitsRestApiTest extends AnyFunSuite with ScalaFutures with Matc
     val json = JsonStringOutput.writePretty(openapi)
     json should include("/echo")
     json should include("tag")
+  }
+
+  test("NoDocApiCompanion round-trips (client + server, no OpenAPI)") {
+    @volatile var lastRequest: RestRequest = null
+    val serverHandle: RawRest.HandleRequest = { req =>
+      lastRequest = req
+      RawRest.asHandleRequest[EchoNoDocApi](new EchoNoDocApiImpl).apply(req)
+    }
+    val client: EchoNoDocApi = RawRest.fromHandleRequest[EchoNoDocApi](serverHandle)
+
+    client.echo(Tag("hi")).runToFuture.futureValue shouldBe "nodoc:hi"
+
+    lastRequest.parameters.query.entries.collectFirst {
+      case (k, PlainValue(v)) if k == "tag" => v
+    } shouldBe Some("tag:hi")
   }
 }

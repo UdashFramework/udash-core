@@ -28,9 +28,7 @@ trait AbstractRestApisWithCustomImplicits[Implicits] extends ApiDataWithCustomIm
   abstract class ApiCompanion[Real](implicit inst: MacroInstances[Implicits, OpenApiFullInstances[Real]])
     extends RestOpenApiCompanion[Implicits, Real](implicits)
 
-  /**
-   * Like [[ApiCompanion]] but without OpenAPI generation.
-   */
+  /** Like [[ApiCompanion]] but without OpenAPI generation. */
   abstract class NoDocApiCompanion[Real](implicit inst: MacroInstances[Implicits, FullInstances[Real]])
     extends RestApiCompanion[Implicits, Real](implicits)
 

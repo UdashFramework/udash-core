@@ -18,6 +18,16 @@ class GreetSharedApiImpl extends GreetSharedApi[UserCtx] {
   def greet(tag: Tag): CtxTask[String] = CtxTask { ctx => Task.now(s"${ctx.user}:${tag.value}") }
 }
 
+// Same, but without OpenAPI generation.
+trait GreetSharedNoDocApi[Ctx] extends CtxSharedRestApis.Api[Ctx] {
+  @GET def greet(@Query tag: Tag): CtxTask[String]
+}
+object GreetSharedNoDocApi extends CtxSharedRestApis.NoDocApiCompanion[GreetSharedNoDocApi]
+
+class GreetSharedNoDocApiImpl extends GreetSharedNoDocApi[UserCtx] {
+  def greet(tag: Tag): CtxTask[String] = CtxTask { ctx => Task.now(s"nodoc-${ctx.user}:${tag.value}") }
+}
+
 class ContextualServerAndClientRestApiTest extends AnyFunSuite with ScalaFutures with Matchers {
   implicit def scheduler: Scheduler = Scheduler.global
 
@@ -31,5 +41,16 @@ class ContextualServerAndClientRestApiTest extends AnyFunSuite with ScalaFutures
 
     // .result resolves the NoCtx context implicitly, then the task fires the request through serverHandle
     client.greet(Tag("hi")).result.runToFuture.futureValue shouldBe "bob:hi"
+  }
+
+  test("NoDocApiCompanion: same round-trip without OpenAPI generation") {
+    implicit val ctx: UserCtx = UserCtx("bob")
+    val serverHandle: RawRest.HandleRequest =
+      RawRest.asHandleRequest[GreetSharedNoDocApi[UserCtx]](new GreetSharedNoDocApiImpl)
+
+    val client: GreetSharedNoDocApi.Client =
+      RawRest.fromHandleRequest[GreetSharedNoDocApi.Client](serverHandle)
+
+    client.greet(Tag("hi")).result.runToFuture.futureValue shouldBe "nodoc-bob:hi"
   }
 }
