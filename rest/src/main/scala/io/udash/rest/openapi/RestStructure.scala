@@ -1,14 +1,13 @@
 package io.udash
 package rest.openapi
 
-import com.avsystem.commons._
+import com.avsystem.commons.*
 import com.avsystem.commons.annotation.positioned
-import com.avsystem.commons.meta._
-import com.avsystem.commons.misc.ValueOf
+import com.avsystem.commons.meta.*
 import com.avsystem.commons.rpc.AsRaw
-import com.avsystem.commons.serialization._
-import io.udash.rest.openapi.adjusters._
-import io.udash.rest.raw._
+import com.avsystem.commons.serialization.*
+import io.udash.rest.openapi.adjusters.*
+import io.udash.rest.raw.*
 
 sealed trait RestStructure[T] extends TypedMetadata[T] {
   def schemaAdjusters: List[SchemaAdjuster]
@@ -177,7 +176,7 @@ object RestStructure extends AdtMetadataCompanion[RestStructure] {
    */
   @positioned(positioned.here) final case class Singleton[T](
     @multi @reifyAnnot schemaAdjusters: List[SchemaAdjuster],
-    @infer @checked value: ValueOf[T],
+    @infer @checked value: scala.ValueOf[T],
     @infer schemaName: GeneratedSchemaName[T],
     @composite info: GenCaseInfo[T],
   ) extends RestStructure[T] with Case[T] {
