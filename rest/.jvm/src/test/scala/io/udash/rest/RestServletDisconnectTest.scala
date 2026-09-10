@@ -1,10 +1,11 @@
 package io.udash
 package rest
 
-import io.udash.rest.raw.{AbstractRestResponse, HttpBody, IMapping, RawRest, RestResponse}
+import io.udash.rest.raw.{AbstractRestResponse, HttpBody, IMapping, RawRest, RestResponse, StreamedBody, StreamedRestResponse}
 import io.udash.testing.UdashSharedTest
 import monix.eval.Task
 import monix.execution.{ExecutionModel, Scheduler, UncaughtExceptionReporter}
+import monix.reactive.Observable
 import org.eclipse.jetty.ee8.nested.{ErrorHandler, Request as JettyRequest}
 import org.eclipse.jetty.ee8.servlet.{ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
@@ -47,23 +48,35 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
   private def latch(latches: ConcurrentHashMap[String, CountDownLatch], scenario: String): CountDownLatch =
     latches.computeIfAbsent(scenario, _ => new CountDownLatch(1))
 
-  // The path is "<behaviour>/<scenario>": "ping" answers immediately, "uncancelable" answers with a non-empty
-  // body after the client is already gone, anything else hangs until cancelled. Each scenario reports its
-  // progress through latches.
+  // The path is "<behaviour>/<scenario>": "ping" answers immediately, "finishing" answers with a non-empty body
+  // a second later, "uncancelable" does the same but ignores cancellation, "stream" streams chunks until stopped
+  // and anything else hangs until cancelled. Each scenario reports its progress through latches.
   private val handleRequest: RawRest.HandleRequestWithStreaming = request => {
     val path = request.parameters.path.map(_.value)
     val scenario = path.last
-    latch(started, scenario).countDown()
+    def report(latches: ConcurrentHashMap[String, CountDownLatch]): Task[Unit] =
+      Task(latch(latches, scenario).countDown())
+    def lateResponse: Task[AbstractRestResponse] =
+      Task.sleep(1.second)
+        .map(_ => RestResponse(200, IMapping.empty, HttpBody.plain("finished after the client left")))
+        .doOnFinish(_ => report(finished))
+        .doOnCancel(report(cancelled))
     path.headOption match {
       case Some("ping") =>
-        Task.now(RestResponse(204, IMapping.empty, HttpBody.Empty))
+        report(started).map(_ => RestResponse(204, IMapping.empty, HttpBody.Empty))
+      case Some("finishing") =>
+        report(started).flatMap(_ => lateResponse)
       case Some("uncancelable") =>
-        Task.sleep(1.second)
-          .map(_ => RestResponse(200, IMapping.empty, HttpBody.plain("finished after the client left")): AbstractRestResponse)
-          .doOnFinish(_ => Task(latch(finished, scenario).countDown()))
-          .uncancelable
+        report(started).flatMap(_ => lateResponse.uncancelable)
+      case Some("stream") =>
+        // "started" fires with the first chunk written, so the abort lands mid-stream
+        val chunks = Observable.intervalAtFixedRate(20.millis)
+          .map(_ => Array.fill[Byte](64)('x'))
+          .doOnStart(_ => report(started))
+          .guaranteeCase(_ => report(finished))
+        Task.now(StreamedRestResponse(200, IMapping.empty, StreamedBody.RawBinary(chunks, "application/octet-stream")))
       case _ =>
-        Task.never[AbstractRestResponse].doOnCancel(Task(latch(cancelled, scenario).countDown()))
+        report(started).flatMap(_ => Task.never[AbstractRestResponse].doOnCancel(report(cancelled)))
     }
   }
 
@@ -121,11 +134,16 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
     } finally socket.close()
   }
 
-  private def assertNoFailures(): Unit = {
+  private def assertNoFailures(minLevel: Level = Level.WARN): Unit = {
     val errors = uncaughtErrors.asScala.toList
     assert(errors.isEmpty, errors.map(e => s"${e.getClass.getName}: ${e.getMessage}").mkString(", "))
-    val problems = logEvents.asScala.filter(e => e.getLevel == Level.WARN || e.getLevel == Level.ERROR).toList
+    val problems = logEvents.asScala.filter(_.getLevel.toInt >= minLevel.toInt).toList
     assert(problems.isEmpty, problems.map(e => s"${e.getLevel} ${e.getMessage}: ${e.getThrowable}").mkString(", "))
+  }
+
+  private def resetFailures(): Unit = {
+    uncaughtErrors.clear()
+    logEvents.clear()
   }
 
   // Lets the servlet's own completion, which follows the handler's, run before inspecting side effects
@@ -137,9 +155,13 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
       assert(latch(cancelled, "h2-abort").await(4, TimeUnit.SECONDS))
     }
 
-    "not cancel the handler task when cancelOnDisconnect is disabled" in {
-      abortHttp2Request("no-cancel-api/hanging/h2-abort-disabled")
-      assert(!latch(cancelled, "h2-abort-disabled").await(2, TimeUnit.SECONDS))
+    "let the handler task finish when cancelOnDisconnect is disabled" in {
+      resetFailures()
+      abortHttp2Request("no-cancel-api/finishing/h2-abort-disabled")
+      assert(latch(finished, "h2-abort-disabled").await(4, TimeUnit.SECONDS), "handler never finished")
+      assert(!latch(cancelled, "h2-abort-disabled").await(0, TimeUnit.SECONDS), "handler was cancelled")
+      settle()
+      assertNoFailures()
     }
 
     "complete the aborted request itself instead of leaving it to the container's error dispatch" in {
@@ -151,21 +173,28 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
     }
 
     "not write into or complete the recycled request when an uncancelable handler finishes after the abort" in {
-      uncaughtErrors.clear()
-      logEvents.clear()
+      resetFailures()
       abortHttp2Request("api/uncancelable/late-response")
       assert(latch(finished, "late-response").await(4, TimeUnit.SECONDS), "handler never finished")
       settle()
       assertNoFailures()
     }
 
-    "not write into or complete the recycled request when cancelOnDisconnect is disabled and the handler finishes after the abort" in {
-      uncaughtErrors.clear()
-      logEvents.clear()
-      abortHttp2Request("no-cancel-api/uncancelable/late-response-disabled")
-      assert(latch(finished, "late-response-disabled").await(4, TimeUnit.SECONDS), "handler never finished")
+    "stop a streamed response when the client aborts" in {
+      resetFailures()
+      abortHttp2Request("api/stream/h2-abort-stream")
+      assert(latch(finished, "h2-abort-stream").await(4, TimeUnit.SECONDS), "stream was never stopped")
       settle()
-      assertNoFailures()
+      // a chunk write racing the abort is reported at warn, which is expected
+      assertNoFailures(minLevel = Level.ERROR)
+    }
+
+    "stop a streamed response when the client aborts and cancelOnDisconnect is disabled" in {
+      resetFailures()
+      abortHttp2Request("no-cancel-api/stream/h2-abort-stream-disabled")
+      assert(latch(finished, "h2-abort-stream-disabled").await(4, TimeUnit.SECONDS), "stream was never stopped")
+      settle()
+      assertNoFailures(minLevel = Level.ERROR)
     }
 
     // Jetty does not read an HTTP/1.1 connection while the async cycle is idle, so the abort itself goes
