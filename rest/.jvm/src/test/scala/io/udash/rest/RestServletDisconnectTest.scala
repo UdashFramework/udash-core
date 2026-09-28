@@ -1,7 +1,7 @@
 package io.udash
 package rest
 
-import io.udash.rest.raw.{AbstractRestResponse, HttpBody, IMapping, RawRest, RestResponse, StreamedBody, StreamedRestResponse}
+import io.udash.rest.raw.{AbstractRestResponse, HttpBody, HttpErrorException, IMapping, RawRest, RestResponse, StreamedBody, StreamedRestResponse}
 import io.udash.testing.UdashSharedTest
 import monix.eval.Task
 import monix.execution.{ExecutionModel, Scheduler, UncaughtExceptionReporter}
@@ -17,6 +17,7 @@ import org.eclipse.jetty.server.{HttpConnectionFactory, Server, ServerConnector}
 import org.slf4j.event.{Level, SubstituteLoggingEvent}
 import org.slf4j.helpers.SubstituteLogger
 
+import java.io.EOFException
 import java.net.http.{HttpClient, HttpRequest, HttpResponse}
 import java.net.{Socket, URI}
 import java.util.concurrent.{ConcurrentHashMap, ConcurrentLinkedQueue, CountDownLatch, TimeUnit}
@@ -53,7 +54,8 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
     latches.computeIfAbsent(scenario, _ => new CountDownLatch(1))
 
   // The path is "<behaviour>/<scenario>": "ping" answers immediately, "finishing" answers with a non-empty body
-  // a second later, "uncancelable" does the same but ignores cancellation, "stream" streams chunks until stopped
+  // a second later, "uncancelable" does the same but ignores cancellation, "stream" streams chunks until stopped,
+  // "uncancelable-stream" starts streaming a second later ignoring cancellation, "eof" and "bad-status" fail
   // and anything else hangs until cancelled. Each scenario reports its progress through latches.
   private val handleRequest: RawRest.HandleRequestWithStreaming = request => {
     val path = request.parameters.path.map(_.value)
@@ -65,6 +67,13 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
         .map(_ => RestResponse(200, IMapping.empty, HttpBody.plain("finished after the client left")))
         .doOnFinish(_ => report(finished))
         .doOnCancel(report(cancelled))
+    // "started" fires with the first chunk written, so an abort lands mid-stream
+    def chunks: Observable[Array[Byte]] = Observable.intervalAtFixedRate(20.millis)
+      .map(_ => Array.fill[Byte](64)('x'))
+      .doOnStart(_ => report(started))
+      .guaranteeCase(_ => report(finished))
+    def streamed: AbstractRestResponse =
+      StreamedRestResponse(200, IMapping.empty, StreamedBody.RawBinary(chunks, "application/octet-stream"))
     path.headOption match {
       case Some("ping") =>
         report(started).map(_ => RestResponse(204, IMapping.empty, HttpBody.Empty))
@@ -73,12 +82,13 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
       case Some("uncancelable") =>
         report(started).flatMap(_ => lateResponse.uncancelable)
       case Some("stream") =>
-        // "started" fires with the first chunk written, so the abort lands mid-stream
-        val chunks = Observable.intervalAtFixedRate(20.millis)
-          .map(_ => Array.fill[Byte](64)('x'))
-          .doOnStart(_ => report(started))
-          .guaranteeCase(_ => report(finished))
-        Task.now(StreamedRestResponse(200, IMapping.empty, StreamedBody.RawBinary(chunks, "application/octet-stream")))
+        Task.now(streamed)
+      case Some("uncancelable-stream") =>
+        report(started).flatMap(_ => Task.sleep(1.second).map(_ => streamed).uncancelable)
+      case Some("eof") =>
+        Task.raiseError(new EOFException("downstream service closed the connection"))
+      case Some("bad-status") =>
+        Task.raiseError(HttpErrorException.plain(1000, "not a status code"))
       case _ =>
         report(started).flatMap(_ => Task.never[AbstractRestResponse].doOnCancel(report(cancelled)))
     }
@@ -232,6 +242,39 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
       assert(latch(finished, "h2-abort-stream-disabled").await(4, TimeUnit.SECONDS), "stream was never stopped")
       settle()
       assertNoFailures(minLevel = Level.ERROR)
+    }
+
+    "run the finalizers of a stream returned after the abort without writing it" in {
+      resetFailures()
+      abortHttp2Request("api/uncancelable-stream/late-stream")
+      assert(latch(finished, "late-stream").await(4, TimeUnit.SECONDS), "stream finalizer never ran")
+      settle()
+      assertNoFailures()
+    }
+
+    "end a streamed response cut by handleTimeout instead of leaving the connection hanging" in {
+      resetFailures()
+      val response = http2Client
+        .sendAsync(http2Request("short-timeout-api/stream/h2-timeout-stream"), HttpResponse.BodyHandlers.ofByteArray())
+        .get(4, TimeUnit.SECONDS)
+      assert(response.statusCode() == 200)
+      assert(response.body().nonEmpty, "no chunk reached the client")
+      assert(latch(finished, "h2-timeout-stream").await(4, TimeUnit.SECONDS), "stream was never stopped")
+      settle()
+      assertNoFailures(minLevel = Level.ERROR)
+      val cutShort = logEvents.asScala.filter(e => e.getLevel == Level.WARN && e.getMessage.contains("cut short"))
+      assert(cutShort.size == 1, logEvents.asScala.map(e => s"${e.getLevel} ${e.getMessage}").mkString(", "))
+    }
+
+    "answer with 500 when the handler itself fails with EOFException" in {
+      val response = http2Client.send(http2Request("api/eof/handler-eof"), HttpResponse.BodyHandlers.ofString())
+      assert(response.statusCode() == 500)
+      assert(response.body() == "downstream service closed the connection")
+    }
+
+    "answer with 500 when the error status is not a valid HTTP status" in {
+      val response = http2Client.send(http2Request("api/bad-status/status-1000"), HttpResponse.BodyHandlers.ofString())
+      assert(response.statusCode() == 500)
     }
 
     // Jetty does not read an HTTP/1.1 connection while the async cycle is idle, so the abort itself goes
