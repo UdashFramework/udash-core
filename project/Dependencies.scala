@@ -35,10 +35,10 @@ object Dependencies {
   val scalaJsSecureRandomVersion = "1.0.0" // Tests only
   val bootstrap4Version = "4.1.3"
   val bootstrap4DatepickerVersion = "5.39.0"
-  val momentJsVersion = "2.30.1"
+  val momentJsVersion = "2.31.0"
 
   val seleniumVersion = "4.49.0"
-  val webDriverManagerVersion = "6.3.4"
+  val webDriverManagerVersion = "6.4.0"
   val scalaJsBenchmarkVersion = "0.10.0"
 
   val compilerPlugins = Def.setting(Seq(
