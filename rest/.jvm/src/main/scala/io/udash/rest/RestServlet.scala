@@ -13,7 +13,8 @@ import monix.execution.cancelables.SingleAssignCancelable
 import monix.reactive.{Consumer, Observable}
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.io.{ByteArrayOutputStream, EOFException}
+import java.io.{ByteArrayOutputStream, EOFException, IOException}
+import java.nio.channels.ClosedChannelException
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import javax.servlet.{AsyncEvent, AsyncListener}
@@ -29,6 +30,14 @@ object RestServlet {
   final val DefaultCancelOnDisconnect = false
   private final val BufferSize = 8192
 
+  // Walks the cause chain like Jetty's QuietException.isQuiet, so this does not depend on how the container wraps
+  // the failure of a reset stream or a dropped connection
+  @tailrec private def isClientGone(t: Throwable): Boolean = t match {
+    case null => false
+    case _: EOFException | _: ClosedChannelException => true
+    case _ => isClientGone(t.getCause)
+  }
+
   /**
    * Wraps an implementation of some REST API trait into a Java Servlet.
    *
@@ -38,8 +47,7 @@ object RestServlet {
    *                                  if exceeded, `413 Payload Too Large` response will be sent back
    * @param defaultStreamingBatchSize default batch when streaming [[StreamedBody.JsonList]]
    * @param cancelOnDisconnect        whether to cancel the handler `Task` when the container reports that the
-   *                                  request failed asynchronously, most importantly because the client is gone;
-   *                                  see [[RestServlet.cancelOnDisconnect]]
+   *                                  client went away; see [[RestServlet.cancelOnDisconnect]]
    */
   @explicitGenerics def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
     apiImpl: RestApi,
@@ -72,7 +80,7 @@ object RestServlet {
     cancelOnDisconnect = DefaultCancelOnDisconnect,
   )
 
-  @bincompat private[rest] def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
+  @bincompat def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
     apiImpl: RestApi,
     handleTimeout: FiniteDuration,
     maxPayloadSize: Long,
@@ -89,17 +97,17 @@ object RestServlet {
 }
 
 /**
- * @param cancelOnDisconnect cancel the handler `Task` when the container reports that the request failed
- *                           asynchronously, most importantly because the client went away, instead of letting it
- *                           run to completion. Off by default: an ordinary client abort (browser navigation, a
- *                           client-side timeout, a load balancer reset) would otherwise interrupt a side-effecting
- *                           handler mid-flight, so enable it once handlers are known to be cancellation-safe. Note
- *                           that detection is transport dependent: `AsyncListener.onError` is only raised for
- *                           protocols where the client's abort reaches the server on a connection it is already
- *                           reading, e.g. HTTP/2 `RST_STREAM`. An aborted HTTP/1.1 request is not reported while
- *                           the async cycle is idle, so it is still only bounded by `handleTimeout`. Independently
- *                           of this setting, nothing is written into a request the container has already
- *                           completed, so a streamed response is abandoned at the next chunk.
+ * @param cancelOnDisconnect cancel the handler `Task` when the container reports that the client went away, instead
+ *                           of letting it run to completion. Other asynchronous failures never cancel it. Off by
+ *                           default: an ordinary client abort (browser navigation, a client-side timeout, a load
+ *                           balancer reset) would otherwise interrupt a side-effecting handler mid-flight, so enable
+ *                           it once handlers are known to be cancellation-safe. Note that detection is transport
+ *                           dependent: `AsyncListener.onError` is only raised for protocols where the client's abort
+ *                           reaches the server on a connection it is already reading, e.g. HTTP/2 `RST_STREAM`. An
+ *                           aborted HTTP/1.1 request is not reported while the async cycle is idle, so it is still
+ *                           only bounded by `handleTimeout`. Independently of this setting, nothing is written into a
+ *                           request the container has already completed, so a streamed response is abandoned at the
+ *                           next chunk.
  */
 class RestServlet(
   handleRequest: RawRest.HandleRequestWithStreaming,
@@ -145,7 +153,8 @@ class RestServlet(
       if (!completed.getAndSet(true)) {
         try code
         catch {
-          case NonFatal(e) => logger.warn("Failed to write REST response", e)
+          case e @ (_: IOException | _: IllegalStateException) => logger.warn("Failed to write REST response", e)
+          case NonFatal(e) => logger.error("Failed to write REST response", e)
         } finally {
           try asyncContext.complete()
           catch {
@@ -165,17 +174,17 @@ class RestServlet(
         completeWith(writeFailure(response, s"server operation timed out after $handleTimeout".opt))
       }
       def onError(event: AsyncEvent): Unit = {
-        if (cancelOnDisconnect) cancelable.cancel()
-        event.getThrowable match {
-          case e: EOFException =>
-            // The client is gone, so completing here keeps the container from running its default error dispatch
-            // (a 500 through the error handler) for what is not an application failure.
-            logger.debug("REST request was aborted by the client", e)
-            completeWith(())
-          case e =>
-            // Any other async failure is left to the container's error dispatch; only stop writing here.
-            logger.warn("REST request failed asynchronously", e)
-            completed.set(true)
+        val failure = event.getThrowable
+        if (isClientGone(failure)) {
+          // The client is gone, so completing here keeps the container from running its default error dispatch
+          // (a 500 through the error handler) for what is not an application failure.
+          logger.debug("REST request was aborted by the client", failure)
+          if (cancelOnDisconnect) cancelable.cancel()
+          completeWith(())
+        } else {
+          // Any other async failure is left to the container's error dispatch; only stop writing here.
+          logger.warn("REST request failed asynchronously", failure)
+          completed.set(true)
         }
       }
       def onStartAsync(event: AsyncEvent): Unit = ()
@@ -273,6 +282,9 @@ class RestServlet(
   }.onErrorHandle {
     case _: EOFException =>
       logger.warn("Request was cancelled by the client during streaming REST response")
+    case ex if completed.get =>
+      // the output stream may already belong to the next request on the connection, so it must not be closed
+      logger.warn("Streaming REST response failed after the request had already been completed", ex)
     case ex =>
       // When an error occurs during streaming, we immediately close the connection rather than
       // attempting to send an error response. This is intentional because:

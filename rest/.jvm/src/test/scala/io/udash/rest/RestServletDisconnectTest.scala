@@ -8,7 +8,11 @@ import monix.execution.{ExecutionModel, Scheduler, UncaughtExceptionReporter}
 import monix.reactive.Observable
 import org.eclipse.jetty.ee8.nested.{ErrorHandler, Request as JettyRequest}
 import org.eclipse.jetty.ee8.servlet.{ServletContextHandler, ServletHolder}
+import org.eclipse.jetty.http.{HttpFields, HttpURI, HttpVersion, MetaData}
+import org.eclipse.jetty.http2.frames.{HeadersFrame, PrefaceFrame, SettingsFrame}
+import org.eclipse.jetty.http2.generator.Generator
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
+import org.eclipse.jetty.io.{ByteBufferPool, RetainableByteBuffer}
 import org.eclipse.jetty.server.{HttpConnectionFactory, Server, ServerConnector}
 import org.slf4j.event.{Level, SubstituteLoggingEvent}
 import org.slf4j.helpers.SubstituteLogger
@@ -122,6 +126,28 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
     assert(response.cancel(true), "request already completed, nothing was aborted")
   }
 
+  /**
+   * Starts a request on an HTTP/2 connection opened with prior knowledge, waits for the handler, then shuts down the
+   * client's output. The socket stays open while `check` runs, since closing it with the server's frames unread would
+   * reset the connection instead of closing it.
+   */
+  private def dropHttp2Connection(path: String)(check: => Unit): Unit = {
+    val generator = new Generator(new ByteBufferPool.NonPooling)
+    val frames = new RetainableByteBuffer.DynamicCapacity()
+    generator.control(frames, new PrefaceFrame)
+    generator.control(frames, new SettingsFrame(new java.util.HashMap, false))
+    val request = new MetaData.Request("GET", HttpURI.from(s"$baseUrl/$path"), HttpVersion.HTTP_2, HttpFields.EMPTY)
+    generator.control(frames, new HeadersFrame(1, request, null, true))
+    val socket = new Socket("localhost", port)
+    try {
+      socket.getOutputStream.write(frames.takeByteArray())
+      socket.getOutputStream.flush()
+      awaitStarted(path)
+      socket.shutdownOutput()
+      check
+    } finally socket.close()
+  }
+
   /** Sends a request over HTTP/1.1, waits for the handler to start, then closes the socket abruptly (TCP RST). */
   private def abortHttp1Request(path: String): Unit = {
     val socket = new Socket("localhost", port)
@@ -170,6 +196,17 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
       assert(latch(cancelled, "h2-abort-no-error-page").await(4, TimeUnit.SECONDS))
       settle()
       assert(errorDispatches.isEmpty, errorDispatches.asScala.mkString(", "))
+    }
+
+    "cancel the handler task and complete the request itself when the HTTP/2 connection is dropped" in {
+      resetFailures()
+      errorDispatches.clear()
+      dropHttp2Connection("api/hanging/h2-drop") {
+        assert(latch(cancelled, "h2-drop").await(4, TimeUnit.SECONDS))
+        settle()
+      }
+      assert(errorDispatches.isEmpty, errorDispatches.asScala.mkString(", "))
+      assertNoFailures()
     }
 
     "not write into or complete the recycled request when an uncancelable handler finishes after the abort" in {
