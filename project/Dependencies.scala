@@ -19,7 +19,7 @@ object Dependencies {
   val atmosphereJSVersion = "3.1.3"
   val atmosphereVersion = "2.7.16"
 
-  val monixVersion = "3.4.1" // udash-rest only
+  val monixVersion = "3.5.0" // udash-rest only
 
   val sttpVersion = "3.11.0"
 
