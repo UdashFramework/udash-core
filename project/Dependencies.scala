@@ -99,6 +99,7 @@ object Dependencies {
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
     "org.eclipse.jetty" % "jetty-server" % jettyVersion % Test,
     "org.eclipse.jetty.ee8" % "jetty-ee8-servlet" % jettyVersion % Test,
+    "org.eclipse.jetty.http2" % "jetty-http2-server" % jettyVersion % Test,
   ))
 
   val restSjsDeps = restCrossDeps

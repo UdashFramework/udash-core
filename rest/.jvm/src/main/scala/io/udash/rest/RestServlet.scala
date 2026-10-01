@@ -9,22 +9,43 @@ import io.udash.rest.raw.*
 import io.udash.utils.URLEncoder
 import monix.eval.Task
 import monix.execution.Scheduler
+import monix.execution.cancelables.SingleAssignCancelable
 import monix.reactive.{Consumer, Observable}
 import org.slf4j.{Logger, LoggerFactory}
 
-import java.io.{ByteArrayOutputStream, EOFException}
+import java.io.{ByteArrayOutputStream, EOFException, IOException}
+import java.nio.channels.ClosedChannelException
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import javax.servlet.{AsyncEvent, AsyncListener}
 import scala.annotation.tailrec
 import scala.concurrent.duration.*
+import scala.util.control.NonFatal
 
 object RestServlet {
   final val DefaultHandleTimeout = 30.seconds
   final val DefaultMaxPayloadSize = 16 * 1024 * 1024L // 16MB
   final val CookieHeader = "Cookie"
   final val DefaultStreamingBatchSize = 100
+  final val DefaultCancelOnDisconnect = false
+  // Recorded on a request its client abandoned, as nginx does, so that it is not logged as a success
+  final val ClientClosedRequestStatus = 499
   private final val BufferSize = 8192
+
+  // Walks the cause chain like Jetty's QuietException.isQuiet, so this does not depend on how the container wraps
+  // the failure of a reset stream or a dropped connection
+  @tailrec private def isClientGone(t: Throwable): Boolean = t match {
+    case null => false
+    case _: EOFException | _: ClosedChannelException => true
+    case _ => isClientGone(t.getCause)
+  }
+
+  // Raised only by a write into the container, so that a client going away mid-write is told apart from an
+  // EOFException raised by the handler or its stream, which is a server failure and must stay a 500
+  private final class ClientGoneException(cause: Throwable) extends IOException(cause)
+
+  private def write(op: => Unit): Unit =
+    try op catch { case NonFatal(e) if isClientGone(e) => throw new ClientGoneException(e) }
 
   /**
    * Wraps an implementation of some REST API trait into a Java Servlet.
@@ -34,12 +55,15 @@ object RestServlet {
    * @param maxPayloadSize            maximum acceptable incoming payload size, in bytes;
    *                                  if exceeded, `413 Payload Too Large` response will be sent back
    * @param defaultStreamingBatchSize default batch when streaming [[StreamedBody.JsonList]]
+   * @param cancelOnDisconnect        whether to cancel the handler `Task` when the container reports that the
+   *                                  client went away; see [[RestServlet.cancelOnDisconnect]]
    */
   @explicitGenerics def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
     apiImpl: RestApi,
     handleTimeout: FiniteDuration = DefaultHandleTimeout,
     maxPayloadSize: Long = DefaultMaxPayloadSize,
     defaultStreamingBatchSize: Int = DefaultStreamingBatchSize,
+    cancelOnDisconnect: Boolean = DefaultCancelOnDisconnect,
   )(implicit
     scheduler: Scheduler
   ): RestServlet =
@@ -48,6 +72,7 @@ object RestServlet {
       handleTimeout = handleTimeout,
       maxPayloadSize = maxPayloadSize,
       defaultStreamingBatchSize = defaultStreamingBatchSize,
+      cancelOnDisconnect = cancelOnDisconnect,
     )
 
   @bincompat private[rest] def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
@@ -61,66 +86,162 @@ object RestServlet {
     handleTimeout = handleTimeout,
     maxPayloadSize = maxPayloadSize,
     defaultStreamingBatchSize = DefaultStreamingBatchSize,
+    cancelOnDisconnect = DefaultCancelOnDisconnect,
+  )
+
+  @bincompat def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
+    apiImpl: RestApi,
+    handleTimeout: FiniteDuration,
+    maxPayloadSize: Long,
+    defaultStreamingBatchSize: Int,
+  )(implicit
+    scheduler: Scheduler
+  ): RestServlet = apply[RestApi](
+    apiImpl,
+    handleTimeout = handleTimeout,
+    maxPayloadSize = maxPayloadSize,
+    defaultStreamingBatchSize = defaultStreamingBatchSize,
+    cancelOnDisconnect = DefaultCancelOnDisconnect,
   )
 }
 
+/**
+ * @param cancelOnDisconnect cancel the handler `Task` when the container reports that the client went away, instead
+ *                           of letting it run to completion. Other asynchronous failures never cancel it. Off by
+ *                           default: an ordinary client abort (browser navigation, a client-side timeout, a load
+ *                           balancer reset) would otherwise interrupt a side-effecting handler mid-flight, so enable
+ *                           it once handlers are known to be cancellation-safe. Note that detection is transport
+ *                           dependent: `AsyncListener.onError` is only raised for protocols where the client's abort
+ *                           reaches the server on a connection it is already reading, e.g. HTTP/2 `RST_STREAM`. An
+ *                           aborted HTTP/1.1 request is not reported while the async cycle is idle, so it is still
+ *                           only bounded by `handleTimeout`. Independently of this setting, nothing is written into a
+ *                           request the container has already completed, so a streamed response is abandoned at the
+ *                           next chunk.
+ */
 class RestServlet(
   handleRequest: RawRest.HandleRequestWithStreaming,
   handleTimeout: FiniteDuration = DefaultHandleTimeout,
   maxPayloadSize: Long = DefaultMaxPayloadSize,
   defaultStreamingBatchSize: Int = DefaultStreamingBatchSize,
   customLogger: OptArg[Logger] = OptArg.Empty,
+  cancelOnDisconnect: Boolean = DefaultCancelOnDisconnect,
 )(implicit
   scheduler: Scheduler
 ) extends HttpServlet with LazyLogging {
 
   import RestServlet.*
 
+  @bincompat private[rest] def this(
+    handleRequest: RawRest.HandleRequestWithStreaming,
+    handleTimeout: FiniteDuration,
+    maxPayloadSize: Long,
+    defaultStreamingBatchSize: Int,
+    customLogger: OptArg[Logger],
+  )(implicit
+    scheduler: Scheduler
+  ) = this(
+    handleRequest,
+    handleTimeout,
+    maxPayloadSize,
+    defaultStreamingBatchSize,
+    customLogger,
+    cancelOnDisconnect = DefaultCancelOnDisconnect,
+  )
+
   override protected lazy val logger: ScalaLogger =
     ScalaLogger(customLogger.getOrElse(LoggerFactory.getLogger(getClass.getName)))
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val asyncContext = request.startAsync()
+    // Set once the response no longer belongs to this servlet, whether completed here or by the container; past
+    // that point Jetty may have recycled the request for the next one on the connection (https://stackoverflow.com/a/27744537)
     val completed = new AtomicBoolean(false)
+    val cancelable = SingleAssignCancelable()
+    val completion = new Object
 
-    // Need to protect asyncContext from being completed twice because after a timeout the
-    // servlet may recycle the same context instance between subsequent requests (not cool)
-    // https://stackoverflow.com/a/27744537
-    def completeWith(code: => Unit): Unit =
-      if (!completed.getAndSet(true)) {
-        code
-        asyncContext.complete()
+    // Returns whether this call claimed the completion. Serialized with onTimeout: the container rejects complete()
+    // once it has started timing the request out, and only the timeout listener may complete it from then on.
+    def completeWith(code: => Unit): Boolean = completion.synchronized {
+      val claimed = !completed.getAndSet(true)
+      if (claimed) {
+        try code
+        catch {
+          case e @ (_: IOException | _: IllegalStateException) => logger.warn("Failed to write REST response", e)
+          case NonFatal(e) =>
+            logger.error("Failed to write REST response", e)
+            if (!response.isCommitted) replaceWithFailure(response, e)
+        } finally {
+          try asyncContext.complete()
+          catch {
+            // the container is completing the cycle itself: it recycled the request or is timing it out
+            case e: IllegalStateException => logger.debug("REST request completion was rejected by the container", e)
+          }
+        }
       }
+      claimed
+    }
+
+    // Registered before the handler starts: a fast handler could otherwise complete the cycle first, and a
+    // disconnect arriving before registration would reach no listener.
+    asyncContext.setTimeout(handleTimeout.toMillis)
+    asyncContext.addListener(new AsyncListener {
+      def onComplete(event: AsyncEvent): Unit = completed.set(true)
+      // Both listeners complete before they cancel: a write failing in between then still reaches the task's error
+      // path instead of the scheduler's uncaught reporter.
+      def onTimeout(event: AsyncEvent): Unit = {
+        val claimed = completeWith {
+          // the servlet API offers no way to abort a committed response, so a streamed one ends as if it had finished
+          if (response.isCommitted) logger.warn(s"REST response was cut short by the $handleTimeout handle timeout")
+          else writeFailure(response, s"server operation timed out after $handleTimeout".opt)
+        }
+        // the handler claimed the completion after the container had started timing out, so its complete() was rejected
+        if (!claimed) asyncContext.complete()
+        cancelable.cancel()
+      }
+      def onError(event: AsyncEvent): Unit = {
+        val failure = event.getThrowable
+        if (isClientGone(failure)) {
+          // The client is gone, so completing here keeps the container from running its default error dispatch
+          // (a 500 through the error handler) for what is not an application failure.
+          logger.debug("REST request was aborted by the client", failure)
+          completeWith(response.setStatus(ClientClosedRequestStatus))
+          if (cancelOnDisconnect) cancelable.cancel()
+        } else {
+          // Any other async failure is left to the container's error dispatch; only stop writing here.
+          logger.warn("REST request failed asynchronously", failure)
+          completed.set(true)
+        }
+      }
+      def onStartAsync(event: AsyncEvent): Unit = ()
+    })
 
     // readRequest must execute in Jetty thread but we want exceptions to be handled uniformly, hence the Try
     val udashRequest = Try(readRequest(request))
-    val cancelable =
-      (for {
-        restRequest <- Task.fromTry(udashRequest)
-        restResponse <- handleRequest(restRequest)
-        _ <- Task(setResponseHeaders(response, restResponse.code, restResponse.headers))
-        _ <- writeResponseBody(response, restResponse)
-      } yield ()).executeAsync.runAsync {
-        case Right(_) =>
-          asyncContext.complete()
-        case Left(e: HttpErrorException) =>
-          completeWith(writeResponse(response, e.toResponse))
-        case Left(e) =>
-          logger.error("Failed to handle REST request", e)
-          completeWith(writeFailure(response, e.getMessage.opt))
-      }
-
-    asyncContext.setTimeout(handleTimeout.toMillis)
-    asyncContext.addListener(new AsyncListener {
-      def onComplete(event: AsyncEvent): Unit = ()
-      def onTimeout(event: AsyncEvent): Unit = {
-        cancelable.cancel()
-        completeWith(writeFailure(response, s"server operation timed out after $handleTimeout".opt))
-      }
-      def onError(event: AsyncEvent): Unit = ()
-      def onStartAsync(event: AsyncEvent): Unit = ()
-    })
+    cancelable := (for {
+      restRequest <- Task.fromTry(udashRequest)
+      restResponse <- handleRequest(restRequest)
+      _ <- unlessCompleted(completed)(setResponseHeaders(response, restResponse.code, restResponse.headers))
+      _ <- writeResponseBody(response, restResponse, completed)
+    } yield ()).executeAsync.runAsync {
+      case Right(_) =>
+        completeWith(())
+      case Left(e: HttpErrorException) =>
+        completeWith(writeResponse(response, e.toResponse))
+      case Left(e: ClientGoneException) =>
+        logger.warn("Request was cancelled by the client during REST response", e.getCause)
+        completeWith(())
+      case Left(e) if completed.get =>
+        logger.warn("REST handler failed after the request had already been completed by a timeout or a disconnect", e)
+      case Left(e) =>
+        logger.error("Failed to handle REST request", e)
+        completeWith(writeFailure(response, e.getMessage.opt))
+    }
   }
+
+  // A handler may outlive its request, e.g. when uncancelable or blocking, and the response object is then already
+  // recycled for the next request on the connection
+  private def unlessCompleted(completed: AtomicBoolean)(write: => Unit): Task[Unit] =
+    Task(if (!completed.get) write)
 
   private def setResponseHeaders(response: HttpServletResponse, code: Int, headers: IMapping[PlainValue]): Unit = {
     response.setStatus(code)
@@ -133,55 +254,76 @@ class RestServlet(
     val bytes = body.bytes
     response.setContentType(body.contentType)
     response.setContentLength(bytes.length)
-    response.getOutputStream.write(bytes)
+    write(response.getOutputStream.write(bytes))
   }
+
+  // Nothing has reached the client yet, so it gets a 500 rather than the default 200 with whatever was staged
+  private def replaceWithFailure(response: HttpServletResponse, cause: Throwable): Unit =
+    try {
+      response.reset()
+      writeFailure(response, cause.getMessage.opt)
+    } catch {
+      case NonFatal(e) => logger.warn("Failed to write REST failure response", e)
+    }
 
   private def writeNonEmptyStreamedBody(
     response: HttpServletResponse,
     responseBody: StreamedBody.NonEmpty,
-  ): Task[Unit] = Task.defer {
+    completed: AtomicBoolean,
+  ): Task[Unit] = {
     // The Content-Length header is intentionally omitted for streams.
     // This signals to the client that the response body size is not predetermined and will be streamed.
     // Clients implementing the streaming part of the REST interface contract MUST be prepared
     // to handle responses without Content-Length by reading data incrementally until the stream completes.
+    // A stream is subscribed even once the request is completed, so that its finalizers run; takeWhile then
+    // stops it at the first element.
     responseBody match {
       case single: StreamedBody.Single =>
-        Task.eval(writeNonEmptyBody(response, single.body))
+        unlessCompleted(completed)(writeNonEmptyBody(response, single.body))
       case binary: StreamedBody.RawBinary =>
-        response.setContentType(binary.contentType)
-        binary.content
-          .foreachL { chunk =>
-            response.getOutputStream.write(chunk)
-            response.getOutputStream.flush()
-          }
+        unlessCompleted(completed)(response.setContentType(binary.contentType)) >>
+          binary.content
+            .takeWhile(_ => !completed.get)
+            .foreachL { chunk =>
+              write {
+                response.getOutputStream.write(chunk)
+                response.getOutputStream.flush()
+              }
+            }
       case jsonList: StreamedBody.JsonList =>
-        response.setContentType(jsonList.contentType)
-        jsonList.elements
-          .bufferTumbling(jsonList.customBatchSize.getOrElse(defaultStreamingBatchSize))
-          .switchIfEmpty(Observable(Seq.empty))
-          .zipWithIndex
-          .foreachL { case (batch, idx) =>
-            val firstBatch = idx == 0
-            if (firstBatch) {
-              response.getOutputStream.write("[".getBytes(jsonList.charset))
-              batch.iterator.zipWithIndex.foreach { case (e, idx) =>
-                if (idx != 0) {
-                  response.getOutputStream.write(",".getBytes(jsonList.charset))
-                }
-                response.getOutputStream.write(e.value.getBytes(jsonList.charset))
+        unlessCompleted(completed)(response.setContentType(jsonList.contentType)) >>
+          jsonList.elements
+            .bufferTumbling(jsonList.customBatchSize.getOrElse(defaultStreamingBatchSize))
+            .switchIfEmpty(Observable(Seq.empty))
+            .zipWithIndex
+            .takeWhile(_ => !completed.get)
+            .foreachL { case (batch, idx) =>
+              write {
+                val firstBatch = idx == 0
+                if (firstBatch) {
+                  response.getOutputStream.write("[".getBytes(jsonList.charset))
+                  batch.iterator.zipWithIndex.foreach { case (e, idx) =>
+                    if (idx != 0) {
+                      response.getOutputStream.write(",".getBytes(jsonList.charset))
+                    }
+                    response.getOutputStream.write(e.value.getBytes(jsonList.charset))
+                  }
+                } else
+                  batch.foreach { e =>
+                    response.getOutputStream.write(",".getBytes(jsonList.charset))
+                    response.getOutputStream.write(e.value.getBytes(jsonList.charset))
+                  }
+                response.getOutputStream.flush()
               }
-            } else
-              batch.foreach { e =>
-                response.getOutputStream.write(",".getBytes(jsonList.charset))
-                response.getOutputStream.write(e.value.getBytes(jsonList.charset))
-              }
-            response.getOutputStream.flush()
-          }
-          .map(_ => response.getOutputStream.write("]".getBytes(jsonList.charset)))
+            }
+            .flatMap(_ => unlessCompleted(completed)(write(response.getOutputStream.write("]".getBytes(jsonList.charset)))))
     }
   }.onErrorHandle {
-    case _: EOFException =>
-      logger.warn("Request was cancelled by the client during streaming REST response")
+    case e: ClientGoneException =>
+      logger.warn("Request was cancelled by the client during streaming REST response", e.getCause)
+    case ex if completed.get =>
+      // the output stream may already belong to the next request on the connection, so it must not be closed
+      logger.warn("Streaming REST response failed after the request had already been completed", ex)
     case ex =>
       // When an error occurs during streaming, we immediately close the connection rather than
       // attempting to send an error response. This is intentional because:
@@ -194,17 +336,18 @@ class RestServlet(
   private def writeResponseBody(
     response: HttpServletResponse,
     restResponse: AbstractRestResponse,
+    completed: AtomicBoolean,
   ): Task[Unit] =
     restResponse match {
       case resp: RestResponse =>
         resp.body match {
           case HttpBody.Empty => Task.unit
-          case neBody: HttpBody.NonEmpty => Task(writeNonEmptyBody(response, neBody))
+          case neBody: HttpBody.NonEmpty => unlessCompleted(completed)(writeNonEmptyBody(response, neBody))
         }
       case stream: StreamedRestResponse =>
         stream.body match {
           case StreamedBody.Empty => Task.unit
-          case neBody: StreamedBody.NonEmpty => writeNonEmptyStreamedBody(response, neBody)
+          case neBody: StreamedBody.NonEmpty => writeNonEmptyStreamedBody(response, neBody, completed)
         }
     }
 
