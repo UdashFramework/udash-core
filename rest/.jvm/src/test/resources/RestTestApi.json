@@ -805,17 +805,20 @@
         "oneOf": [
           {
             "type": "object",
+            "title": "RestEntity",
             "properties": {
               "RestEntity": {
                 "$ref": "#/components/schemas/RestEntity"
               }
             },
+            "additionalProperties": false,
             "required": [
               "RestEntity"
             ]
           },
           {
             "type": "object",
+            "title": "RestOtherEntity",
             "properties": {
               "RestOtherEntity": {
                 "type": "object",
@@ -830,23 +833,28 @@
                     }
                   }
                 },
+                "additionalProperties": false,
                 "required": [
                   "fuu",
                   "kek"
                 ]
               }
             },
+            "additionalProperties": false,
             "required": [
               "RestOtherEntity"
             ]
           },
           {
             "type": "object",
+            "title": "SingletonEntity",
             "properties": {
               "SingletonEntity": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false
               }
             },
+            "additionalProperties": false,
             "required": [
               "SingletonEntity"
             ]
