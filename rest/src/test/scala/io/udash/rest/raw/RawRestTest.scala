@@ -15,6 +15,8 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
+import scala.concurrent.duration.*
+
 final case class UserId(id: String) extends AnyVal {
   override def toString: String = id
 }
@@ -84,6 +86,27 @@ trait RootApi {
   @POST @CustomBody def echoHeaders(headers: Map[String, String]): Future[WithHeaders[Unit]]
 }
 object RootApi extends DefaultRestApiCompanion[RootApi]
+
+trait TimeoutLeafApi {
+  @timeout(3.seconds) def annotated: Future[Unit]
+  def plain: Future[Unit]
+  @GET @timeout(4.seconds) def fetch: Future[Unit]
+}
+object TimeoutLeafApi extends DefaultRestApiCompanion[TimeoutLeafApi]
+
+trait TimeoutInnerApi {
+  @timeout(2.seconds) def inner: TimeoutLeafApi
+  def innerBare: TimeoutLeafApi
+}
+object TimeoutInnerApi extends DefaultRestApiCompanion[TimeoutInnerApi]
+
+trait TimeoutRootApi {
+  @timeout(1.second) def outer: TimeoutInnerApi
+  def bare: TimeoutLeafApi
+  @timeout(5.seconds) def plainRoot: Future[Unit]
+  def untimed: Future[Unit]
+}
+object TimeoutRootApi extends DefaultRestApiCompanion[TimeoutRootApi]
 
 class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
   implicit def scheduler: Scheduler = Scheduler.global
@@ -514,5 +537,143 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
         }
       case _ => fail()
     }
+  }
+
+  class TimeoutApiImpl extends TimeoutRootApi with TimeoutInnerApi with TimeoutLeafApi {
+    @volatile var invoked: List[String] = Nil
+    private def invoke[T](name: String, result: T): T = {
+      invoked = invoked :+ name
+      result
+    }
+    def outer: TimeoutInnerApi = invoke("outer", this)
+    def bare: TimeoutLeafApi = invoke("bare", this)
+    def plainRoot: Future[Unit] = invoke("plainRoot", Future.unit)
+    def untimed: Future[Unit] = invoke("untimed", Future.unit)
+    def inner: TimeoutLeafApi = invoke("inner", this)
+    def innerBare: TimeoutLeafApi = invoke("innerBare", this)
+    def annotated: Future[Unit] = invoke("annotated", Future.unit)
+    def plain: Future[Unit] = invoke("plain", Future.unit)
+    def fetch: Future[Unit] = invoke("fetch", Future.unit)
+  }
+
+  private def timeoutRequest(method: HttpMethod, path: String): RestRequest =
+    RestRequest(method, RestParameters(PlainValue.decodePath(path)), HttpBody.Empty)
+
+  private def resolvedTimeout(method: HttpMethod, path: String): Opt[FiniteDuration] =
+    TimeoutRootApi.restMetadata.resolvePath(PlainValue.decodePath(path)).find(_.method == method)
+      .getOrElse(fail(s"$method $path not resolved")).timeout
+
+  private def resolve(handler: RawRest.HandleRequestWithStreaming, request: RestRequest)
+    : (Opt[FiniteDuration], Task[AbstractRestResponse]) = handler match {
+    case h: RawRest.ResolvingHandleRequest[AbstractRestResponse @unchecked] => h.resolve(request)
+    case _ => fail("the handler does not resolve calls")
+  }
+
+  test("@timeout is reified on HTTP and prefix methods") {
+    val metadata = TimeoutRootApi.restMetadata
+    metadata.httpMethodsByName("plainRoot").timeout.map(_.duration) shouldBe Opt(5.seconds)
+    metadata.httpMethodsByName("untimed").timeout shouldBe Opt.Empty
+    metadata.prefixesByName("outer").timeout.map(_.duration) shouldBe Opt(1.second)
+    metadata.prefixesByName("bare").timeout shouldBe Opt.Empty
+  }
+
+  test("a call's timeout comes from the method, else the innermost prefix that has one") {
+    resolvedTimeout(HttpMethod.POST, "outer/inner/annotated") shouldBe Opt(3.seconds)
+    resolvedTimeout(HttpMethod.POST, "outer/inner/plain") shouldBe Opt(2.seconds)
+    resolvedTimeout(HttpMethod.POST, "outer/innerBare/plain") shouldBe Opt(1.second)
+    resolvedTimeout(HttpMethod.POST, "bare/plain") shouldBe Opt.Empty
+    resolvedTimeout(HttpMethod.POST, "plainRoot") shouldBe Opt(5.seconds)
+    resolvedTimeout(HttpMethod.POST, "untimed") shouldBe Opt.Empty
+  }
+
+  test("resolving a request gives the call's timeout and a task that has not started") {
+    val impl = new TimeoutApiImpl
+    val handler = RawRest.asHandleRequestWithStreaming[TimeoutRootApi](impl)
+    val (timeout, task) = resolve(handler, timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
+    timeout shouldBe Opt(3.seconds)
+    impl.invoked shouldBe Nil
+    whenReady(task.runToFuture)(_ => impl.invoked shouldBe List("outer", "inner", "annotated"))
+  }
+
+  test("a HEAD request resolves to the GET method's timeout") {
+    val handler = RawRest.asHandleRequestWithStreaming[TimeoutRootApi](new TimeoutApiImpl)
+    resolve(handler, timeoutRequest(HttpMethod.HEAD, "bare/fetch"))._1 shouldBe Opt(4.seconds)
+    resolve(handler, timeoutRequest(HttpMethod.GET, "bare/missing"))._1 shouldBe Opt.Empty
+    resolve(handler, timeoutRequest(HttpMethod.OPTIONS, "bare/fetch"))._1 shouldBe Opt.Empty
+  }
+
+  test("a handler without streaming resolves the call's timeout and a task that has not started") {
+    val impl = new TimeoutApiImpl
+    val handler = RawRest.asHandleRequest[TimeoutRootApi](impl)
+    val (timeout, task) = resolve(handler, timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
+    timeout shouldBe Opt(3.seconds)
+    impl.invoked shouldBe Nil
+    whenReady(task.runToFuture)(_ => impl.invoked shouldBe List("outer", "inner", "annotated"))
+  }
+
+  test("applying a handler invokes the API methods at once, and its task invokes none again") {
+    val impl = new TimeoutApiImpl
+    val streamed = RawRest.asHandleRequestWithStreaming[TimeoutRootApi](impl).apply(timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
+    impl.invoked shouldBe List("outer", "inner", "annotated")
+    val plain = RawRest.asHandleRequest[TimeoutRootApi](impl).apply(timeoutRequest(HttpMethod.POST, "untimed"))
+    impl.invoked shouldBe List("outer", "inner", "annotated", "untimed")
+    whenReady((streamed >> plain).runToFuture)(_ => impl.invoked shouldBe List("outer", "inner", "annotated", "untimed"))
+  }
+
+  test("a resolved task invokes the API methods once however many times it runs") {
+    for (handler <- List[TimeoutApiImpl => RawRest.HandleRequestWithStreaming](
+      RawRest.asHandleRequestWithStreaming[TimeoutRootApi](_),
+      RawRest.asHandleRequest[TimeoutRootApi](_),
+    )) {
+      val impl = new TimeoutApiImpl
+      val (_, task) = resolve(handler(impl), timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
+      whenReady(task.flatMap(_ => task).runToFuture)(_ => impl.invoked shouldBe List("outer", "inner", "annotated"))
+    }
+  }
+
+  test("wrapHandleRequest keeps the resolution and applies the wrapper") {
+    val wrapper: (RestRequest, Task[AbstractRestResponse]) => Task[AbstractRestResponse] = (_, task) =>
+      task.map {
+        case resp: RestResponse => resp.header("X-Wrapped", "yes")
+        case other => other
+      }
+    val handler = RawRest.asHandleRequestWithStreaming[TimeoutRootApi](new TimeoutApiImpl)
+    val wrapped = RawRest.wrapHandleRequest(handler)(wrapper)
+    val (timeout, task) = resolve(wrapped, timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
+    timeout shouldBe Opt(3.seconds)
+    whenReady(task.runToFuture)(_.headers.lift("X-Wrapped") shouldBe Some(PlainValue("yes")))
+
+    val opaque = RawRest.wrapHandleRequest(_ => Task.now(RestResponse(204, IMapping.empty, HttpBody.Empty)))(wrapper)
+    opaque should not be a[RawRest.ResolvingHandleRequest[?]]
+    whenReady(opaque(timeoutRequest(HttpMethod.GET, "any")).runToFuture) {
+      _.headers.lift("X-Wrapped") shouldBe Some(PlainValue("yes"))
+    }
+  }
+
+  test("wrapHandleRequest runs the wrapper only when the task runs") {
+    val wrapperRuns = new java.util.concurrent.atomic.AtomicInteger
+    def wrap(handler: RawRest.HandleRequestWithStreaming) = RawRest.wrapHandleRequest(handler) { (_, task) =>
+      wrapperRuns.incrementAndGet()
+      task
+    }
+    val handler = RawRest.asHandleRequestWithStreaming[TimeoutRootApi](new TimeoutApiImpl)
+    val (_, task) = resolve(wrap(handler), timeoutRequest(HttpMethod.POST, "untimed"))
+    wrapperRuns.get shouldBe 0
+    whenReady(task.runToFuture)(_ => wrapperRuns.get shouldBe 1)
+
+    val opaque = wrap(_ => Task.now(RestResponse(204, IMapping.empty, HttpBody.Empty)))
+    val opaqueTask = opaque(timeoutRequest(HttpMethod.GET, "any"))
+    wrapperRuns.get shouldBe 1
+    whenReady(opaqueTask.runToFuture)(_ => wrapperRuns.get shouldBe 2)
+  }
+
+  test("wrapHandleRequest invokes a handler that does not resolve calls once however many times its task runs") {
+    val invocations = new java.util.concurrent.atomic.AtomicInteger
+    val opaque: RawRest.HandleRequestWithStreaming = _ => {
+      invocations.incrementAndGet()
+      Task.now(RestResponse(204, IMapping.empty, HttpBody.Empty))
+    }
+    val wrapped = RawRest.wrapHandleRequest(opaque)((_, task) => task.flatMap(_ => task))
+    whenReady(wrapped(timeoutRequest(HttpMethod.GET, "any")).runToFuture)(_ => invocations.get shouldBe 1)
   }
 }

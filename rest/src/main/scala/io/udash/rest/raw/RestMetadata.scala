@@ -58,6 +58,7 @@ final case class RestMetadata[T](
   private[this] lazy val valid: Unit = {
     ensureUnambiguousPaths()
     ensureUniqueParams(Nil)
+    ensureValidTimeouts()
   }
 
   def ensureValid(): Unit = valid
@@ -94,6 +95,21 @@ final case class RestMetadata[T](
       prefix.result.value.ensureUniqueParams(prefix :: prefixes)
     }
     httpMethods.foreach(ensureUniqueParams)
+  }
+
+  // Checked here rather than by the annotation, so that only a server rejects the API, naming the method
+  private def ensureValidTimeouts(): Unit = {
+    // RestServlet counts whole milliseconds
+    def ensureValidTimeout(name: String, annot: Opt[timeout]): Unit = annot.foreach { t =>
+      if (t.duration.toMillis <= 0)
+        throw new InvalidRestApiException(s"@timeout of $name must be at least 1 millisecond, got ${t.duration}")
+    }
+
+    prefixMethods.foreach { prefix =>
+      ensureValidTimeout(prefix.name, prefix.timeout)
+      prefix.result.value.ensureValidTimeouts()
+    }
+    httpMethods.foreach(method => ensureValidTimeout(method.name, method.timeout))
   }
 
   private def ensureUnambiguousPaths(): Unit = {
@@ -292,6 +308,7 @@ final case class PrefixMetadata[T](
   @multi @reifyAnnot responseAdjusters: List[ResponseAdjuster],
   @multi @reifyAnnot streamedResponseAdjusters: List[StreamedResponseAdjuster],
   @infer @checked result: RestMetadata.Lazy[T],
+  @optional @reifyAnnot timeout: Opt[timeout],
 ) extends RestMethodMetadata[T] {
 
   @bincompat private[rest] def this(
@@ -300,8 +317,18 @@ final case class PrefixMetadata[T](
     parametersMetadata: RestParametersMetadata,
     requestAdjusters: List[RequestAdjuster],
     responseAdjusters: List[ResponseAdjuster],
+    streamedResponseAdjusters: List[StreamedResponseAdjuster],
     result: RestMetadata.Lazy[T],
-  ) = this(name, methodTag, parametersMetadata, requestAdjusters, responseAdjusters, Nil, result)
+  ) = this(name, methodTag, parametersMetadata, requestAdjusters, responseAdjusters, streamedResponseAdjusters, result, Opt.Empty)
+
+  @bincompat private[rest] def this(
+    name: String,
+    methodTag: Prefix,
+    parametersMetadata: RestParametersMetadata,
+    requestAdjusters: List[RequestAdjuster],
+    responseAdjusters: List[ResponseAdjuster],
+    result: RestMetadata.Lazy[T],
+  ) = this(name, methodTag, parametersMetadata, requestAdjusters, responseAdjusters, Nil, result, Opt.Empty)
 
   def methodPath: List[PlainValue] = PlainValue.decodePath(methodTag.path)
 }
@@ -317,7 +344,33 @@ final case class HttpMethodMetadata[T](
   @multi @reifyAnnot responseAdjusters: List[ResponseAdjuster],
   @multi @reifyAnnot streamedResponseAdjusters: List[StreamedResponseAdjuster],
   @infer @checked responseType: HttpResponseType[T],
+  @optional @reifyAnnot timeout: Opt[timeout],
 ) extends RestMethodMetadata[T] {
+
+  @bincompat private[rest] def this(
+    name: String,
+    methodTag: HttpMethodTag,
+    bodyTypeTag: BodyTypeTag,
+    parametersMetadata: RestParametersMetadata,
+    bodyParams: List[ParamMetadata[_]],
+    formBody: Boolean,
+    requestAdjusters: List[RequestAdjuster],
+    responseAdjusters: List[ResponseAdjuster],
+    streamedResponseAdjusters: List[StreamedResponseAdjuster],
+    responseType: HttpResponseType[T],
+  ) = this(
+    name,
+    methodTag,
+    bodyTypeTag,
+    parametersMetadata,
+    bodyParams,
+    formBody,
+    requestAdjusters,
+    responseAdjusters,
+    streamedResponseAdjusters,
+    responseType,
+    Opt.Empty,
+  )
 
   @bincompat private[rest] def this(
     name: String,
@@ -339,7 +392,8 @@ final case class HttpMethodMetadata[T](
     requestAdjusters,
     responseAdjusters,
     Nil,
-    responseType
+    responseType,
+    Opt.Empty,
   )
 
   val method: HttpMethod = methodTag.method

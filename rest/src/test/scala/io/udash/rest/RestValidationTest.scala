@@ -5,6 +5,8 @@ import com.avsystem.commons._
 import io.udash.rest.raw.RestMetadata
 import org.scalatest.funsuite.AnyFunSuite
 
+import scala.concurrent.duration.*
+
 class RestValidationTest extends AnyFunSuite with DefaultRestImplicits {
 
   trait Api2 {
@@ -73,5 +75,33 @@ class RestValidationTest extends AnyFunSuite with DefaultRestImplicits {
     }
     assert(failure.getMessage ==
       "Query parameter lol of post collides with query parameter of the same name in prefix prefix")
+  }
+
+  trait TimeoutApi {
+    @timeout(0.seconds) def instant: Future[String]
+  }
+
+  trait TimeoutPrefixApi {
+    @timeout(1.millisecond) def prefix: TimeoutSuffixApi
+  }
+  trait TimeoutSuffixApi {
+    @timeout(500.micros) def post: Future[String]
+  }
+  object TimeoutSuffixApi {
+    implicit val metadata: RestMetadata[TimeoutSuffixApi] = RestMetadata.materialize
+  }
+
+  test("@timeout under a millisecond") {
+    // materializing does not throw, so clients of the API still work
+    val metadata = RestMetadata.materialize[TimeoutApi]
+    val failure = intercept[InvalidRestApiException](metadata.ensureValid())
+    assert(failure.getMessage == "@timeout of instant must be at least 1 millisecond, got 0 seconds")
+  }
+
+  test("@timeout under a millisecond behind a prefix") {
+    val failure = intercept[InvalidRestApiException] {
+      RestMetadata.materialize[TimeoutPrefixApi].ensureValid()
+    }
+    assert(failure.getMessage == "@timeout of post must be at least 1 millisecond, got 500 microseconds")
   }
 }
