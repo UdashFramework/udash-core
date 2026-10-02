@@ -238,4 +238,21 @@ trait StreamingRestApiTestScenarios extends RestApiTest {
         fail("Expected UnsupportedOperationException but operation succeeded")
     }
   }
+
+  "mid-stream server error propagates to client" in {
+    streamingProxy
+      .errorStream(immediate = false)
+      .toListL
+      .timeout(5.seconds)
+      .materialize
+      .runToFuture
+      .map {
+        case Failure(_: TimeoutException) =>
+          fail("Server did not terminate the response on mid-stream error (client hung waiting for data)")
+        case Failure(_) =>
+          succeed
+        case Success(list) =>
+          fail(s"Expected failure from mid-stream error, but stream completed successfully with: $list")
+      }
+  }
 }
