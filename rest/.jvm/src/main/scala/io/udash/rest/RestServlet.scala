@@ -266,6 +266,17 @@ class RestServlet(
       case NonFatal(e) => logger.warn("Failed to write REST failure response", e)
     }
 
+  // A failed write is passed down the stream as a value and stops it, instead of failing it: a disconnect fails the
+  // write in flight concurrently with cancelling the task, and an error the stream signals once the task is cancelled
+  // goes to the scheduler's uncaught failure reporter, while a value is dropped together with the task.
+  private def writeChunks[A](chunks: Observable[A], completed: AtomicBoolean)(writeChunk: A => Unit): Task[Unit] =
+    chunks
+      .takeWhile(_ => !completed.get)
+      .map(chunk => Try(write(writeChunk(chunk))))
+      .takeWhileInclusive(_.isSuccess)
+      .lastOptionL
+      .flatMap(_.fold(Task.unit)(Task.fromTry))
+
   private def writeNonEmptyStreamedBody(
     response: HttpServletResponse,
     responseBody: StreamedBody.NonEmpty,
@@ -282,41 +293,35 @@ class RestServlet(
         unlessCompleted(completed)(writeNonEmptyBody(response, single.body))
       case binary: StreamedBody.RawBinary =>
         unlessCompleted(completed)(response.setContentType(binary.contentType)) >>
-          binary.content
-            .takeWhile(_ => !completed.get)
-            .foreachL { chunk =>
-              write {
-                response.getOutputStream.write(chunk)
-                response.getOutputStream.flush()
-              }
-            }
+          writeChunks(binary.content, completed) { chunk =>
+            response.getOutputStream.write(chunk)
+            response.getOutputStream.flush()
+          }
       case jsonList: StreamedBody.JsonList =>
         unlessCompleted(completed)(response.setContentType(jsonList.contentType)) >>
-          jsonList.elements
-            .bufferTumbling(jsonList.customBatchSize.getOrElse(defaultStreamingBatchSize))
-            .switchIfEmpty(Observable(Seq.empty))
-            .zipWithIndex
-            .takeWhile(_ => !completed.get)
-            .foreachL { case (batch, idx) =>
-              write {
-                val firstBatch = idx == 0
-                if (firstBatch) {
-                  response.getOutputStream.write("[".getBytes(jsonList.charset))
-                  batch.iterator.zipWithIndex.foreach { case (e, idx) =>
-                    if (idx != 0) {
-                      response.getOutputStream.write(",".getBytes(jsonList.charset))
-                    }
-                    response.getOutputStream.write(e.value.getBytes(jsonList.charset))
-                  }
-                } else
-                  batch.foreach { e =>
-                    response.getOutputStream.write(",".getBytes(jsonList.charset))
-                    response.getOutputStream.write(e.value.getBytes(jsonList.charset))
-                  }
-                response.getOutputStream.flush()
+          writeChunks(
+            jsonList.elements
+              .bufferTumbling(jsonList.customBatchSize.getOrElse(defaultStreamingBatchSize))
+              .switchIfEmpty(Observable(Seq.empty))
+              .zipWithIndex,
+            completed,
+          ) { case (batch, idx) =>
+            val firstBatch = idx == 0
+            if (firstBatch) {
+              response.getOutputStream.write("[".getBytes(jsonList.charset))
+              batch.iterator.zipWithIndex.foreach { case (e, idx) =>
+                if (idx != 0) {
+                  response.getOutputStream.write(",".getBytes(jsonList.charset))
+                }
+                response.getOutputStream.write(e.value.getBytes(jsonList.charset))
               }
-            }
-            .flatMap(_ => unlessCompleted(completed)(write(response.getOutputStream.write("]".getBytes(jsonList.charset)))))
+            } else
+              batch.foreach { e =>
+                response.getOutputStream.write(",".getBytes(jsonList.charset))
+                response.getOutputStream.write(e.value.getBytes(jsonList.charset))
+              }
+            response.getOutputStream.flush()
+          } >> unlessCompleted(completed)(write(response.getOutputStream.write("]".getBytes(jsonList.charset))))
     }
   }.onErrorHandle {
     case e: ClientGoneException =>
