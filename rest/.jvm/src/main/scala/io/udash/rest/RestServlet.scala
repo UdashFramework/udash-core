@@ -266,18 +266,36 @@ class RestServlet(
       case NonFatal(e) => logger.warn("Failed to write REST failure response", e)
     }
 
-  // A failure, whether of a write or of the stream itself, ends the stream as a value instead of an error: a disconnect
-  // cancels the task concurrently with failing the write in flight or the source closed by the cancellation, and an
-  // error the stream signals once the task is cancelled goes to the scheduler's uncaught failure reporter, while a
-  // value is dropped together with the task.
-  private def writeChunks[A](chunks: Observable[A], completed: AtomicBoolean)(writeChunk: A => Unit): Task[Unit] =
-    chunks
-      .takeWhile(_ => !completed.get)
-      .map(chunk => write(writeChunk(chunk)))
-      .completed
-      .onErrorHandleWith(Observable.now(_))
-      .firstOptionL
-      .flatMap(_.fold(Task.unit)(Task.raiseError))
+  private def handleStreamingFailure(response: HttpServletResponse, completed: AtomicBoolean)(failure: Throwable): Unit =
+    failure match {
+      case e: ClientGoneException =>
+        logger.warn("Request was cancelled by the client during streaming REST response", e.getCause)
+      case ex if completed.get =>
+        // the output stream may already belong to the next request on the connection, so it must not be closed
+        logger.warn("Streaming REST response failed after the request had already been completed", ex)
+      case ex =>
+        // When an error occurs during streaming, we immediately close the connection rather than
+        // attempting to send an error response. This is intentional because:
+        // The client has likely already received and started processing partial data
+        // for structured formats (like JSON arrays), the stream is now in an invalid state
+        logger.error("Failure during streaming REST response", ex)
+        response.getOutputStream.close()
+    }
+
+  // A failure, whether of a write or of the stream itself, is handled within the stream instead of failing the task: a
+  // disconnect cancels the task concurrently with failing the write in flight or the source closed by the
+  // cancellation, and once the task is cancelled an error it signals goes to the scheduler's uncaught failure
+  // reporter, while its result is dropped unlogged. `writeEnd` follows the last chunk unless the stream failed.
+  private def writeChunks[A](
+    response: HttpServletResponse,
+    chunks: Observable[A],
+    completed: AtomicBoolean,
+    writeEnd: => Unit = (),
+  )(writeChunk: A => Unit): Task[Unit] =
+    (chunks.takeWhile(_ => !completed.get).map(chunk => write(writeChunk(chunk))) ++
+      Observable.eval(if (!completed.get) write(writeEnd)))
+      .onErrorHandle(handleStreamingFailure(response, completed))
+      .completedL
 
   private def writeNonEmptyStreamedBody(
     response: HttpServletResponse,
@@ -295,18 +313,20 @@ class RestServlet(
         unlessCompleted(completed)(writeNonEmptyBody(response, single.body))
       case binary: StreamedBody.RawBinary =>
         unlessCompleted(completed)(response.setContentType(binary.contentType)) >>
-          writeChunks(binary.content, completed) { chunk =>
+          writeChunks(response, binary.content, completed) { chunk =>
             response.getOutputStream.write(chunk)
             response.getOutputStream.flush()
           }
       case jsonList: StreamedBody.JsonList =>
         unlessCompleted(completed)(response.setContentType(jsonList.contentType)) >>
           writeChunks(
+            response,
             jsonList.elements
               .bufferTumbling(jsonList.customBatchSize.getOrElse(defaultStreamingBatchSize))
               .switchIfEmpty(Observable(Seq.empty))
               .zipWithIndex,
             completed,
+            writeEnd = response.getOutputStream.write("]".getBytes(jsonList.charset)),
           ) { case (batch, idx) =>
             val firstBatch = idx == 0
             if (firstBatch) {
@@ -323,22 +343,9 @@ class RestServlet(
                 response.getOutputStream.write(e.value.getBytes(jsonList.charset))
               }
             response.getOutputStream.flush()
-          } >> unlessCompleted(completed)(write(response.getOutputStream.write("]".getBytes(jsonList.charset))))
+          }
     }
-  }.onErrorHandle {
-    case e: ClientGoneException =>
-      logger.warn("Request was cancelled by the client during streaming REST response", e.getCause)
-    case ex if completed.get =>
-      // the output stream may already belong to the next request on the connection, so it must not be closed
-      logger.warn("Streaming REST response failed after the request had already been completed", ex)
-    case ex =>
-      // When an error occurs during streaming, we immediately close the connection rather than
-      // attempting to send an error response. This is intentional because:
-      // The client has likely already received and started processing partial data
-      // for structured formats (like JSON arrays), the stream is now in an invalid state
-      logger.error("Failure during streaming REST response", ex)
-      response.getOutputStream.close()
-  }
+  }.onErrorHandle(handleStreamingFailure(response, completed))
 
   private def writeResponseBody(
     response: HttpServletResponse,

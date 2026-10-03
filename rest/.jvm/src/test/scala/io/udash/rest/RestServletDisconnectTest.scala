@@ -129,13 +129,14 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
   /**
    * Waits for the handler to start and for the container to return from dispatching the request. Jetty hands a failure
    * of the request to the `AsyncListener`s only once the dispatch has returned and drops one arriving before that, so
-   * an abort sent while the servlet is still in `service` would go unnoticed until `handleTimeout`.
+   * an abort sent while the servlet is still in `service` would go unnoticed until `handleTimeout`. Any state past
+   * `HANDLING` counts, since a short `handleTimeout` may already have woken the request again.
    */
   private def awaitStarted(path: String): Unit = {
     val scenario = path.split('/').last
     assert(latch(started, scenario).await(4, TimeUnit.SECONDS), s"handler for $path never started")
     val deadline = 4.seconds.fromNow
-    while (channelStates.get(scenario).getState != HttpChannelState.State.WAITING) {
+    while (channelStates.get(scenario).getState == HttpChannelState.State.HANDLING) {
       assert(deadline.hasTimeLeft(), s"dispatch of $path never returned")
       Thread.sleep(5)
     }
