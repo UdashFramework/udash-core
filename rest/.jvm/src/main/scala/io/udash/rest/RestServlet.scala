@@ -266,6 +266,43 @@ class RestServlet(
       case NonFatal(e) => logger.warn("Failed to write REST failure response", e)
     }
 
+  // Must not throw: within the stream, Monix would report the original failure as uncaught
+  private def handleStreamingFailure(response: HttpServletResponse, completed: AtomicBoolean)(failure: Throwable): Unit =
+    failure match {
+      case e: ClientGoneException =>
+        logger.warn("Request was cancelled by the client during streaming REST response", e.getCause)
+      case ex if completed.get =>
+        // the output stream may already belong to the next request on the connection, so it must not be closed
+        logger.warn("Streaming REST response failed after the request had already been completed", ex)
+      case ex =>
+        // When an error occurs during streaming, we immediately close the connection rather than
+        // attempting to send an error response. This is intentional because:
+        // The client has likely already received and started processing partial data
+        // for structured formats (like JSON arrays), the stream is now in an invalid state
+        logger.error("Failure during streaming REST response", ex)
+        try response.getOutputStream.close()
+        catch {
+          case NonFatal(e) => logger.warn("Failed to close the failed streaming REST response", e)
+        }
+    }
+
+  // A failure, whether of a write or of the stream itself, is handled within the stream instead of failing the task: a
+  // disconnect cancels the task concurrently with failing the write in flight or the source closed by the
+  // cancellation, and once the task is cancelled an error it signals goes to the scheduler's uncaught failure
+  // reporter, while its result is dropped unlogged. This covers a failure the source signals itself, not one of its
+  // asynchronous operators, e.g. mapEval, which reports a failure of a task completing after the cancellation on its
+  // own. `writeEnd` follows the last chunk unless the stream failed.
+  private def writeChunks[A](
+    response: HttpServletResponse,
+    chunks: Observable[A],
+    completed: AtomicBoolean,
+    writeEnd: => Unit = (),
+  )(writeChunk: A => Unit): Task[Unit] =
+    (chunks.takeWhile(_ => !completed.get).map(chunk => write(writeChunk(chunk))) ++
+      Observable.eval(if (!completed.get) write(writeEnd)))
+      .onErrorHandle(handleStreamingFailure(response, completed))
+      .completedL
+
   private def writeNonEmptyStreamedBody(
     response: HttpServletResponse,
     responseBody: StreamedBody.NonEmpty,
@@ -282,56 +319,39 @@ class RestServlet(
         unlessCompleted(completed)(writeNonEmptyBody(response, single.body))
       case binary: StreamedBody.RawBinary =>
         unlessCompleted(completed)(response.setContentType(binary.contentType)) >>
-          binary.content
-            .takeWhile(_ => !completed.get)
-            .foreachL { chunk =>
-              write {
-                response.getOutputStream.write(chunk)
-                response.getOutputStream.flush()
-              }
-            }
+          writeChunks(response, binary.content, completed) { chunk =>
+            response.getOutputStream.write(chunk)
+            response.getOutputStream.flush()
+          }
       case jsonList: StreamedBody.JsonList =>
         unlessCompleted(completed)(response.setContentType(jsonList.contentType)) >>
-          jsonList.elements
-            .bufferTumbling(jsonList.customBatchSize.getOrElse(defaultStreamingBatchSize))
-            .switchIfEmpty(Observable(Seq.empty))
-            .zipWithIndex
-            .takeWhile(_ => !completed.get)
-            .foreachL { case (batch, idx) =>
-              write {
-                val firstBatch = idx == 0
-                if (firstBatch) {
-                  response.getOutputStream.write("[".getBytes(jsonList.charset))
-                  batch.iterator.zipWithIndex.foreach { case (e, idx) =>
-                    if (idx != 0) {
-                      response.getOutputStream.write(",".getBytes(jsonList.charset))
-                    }
-                    response.getOutputStream.write(e.value.getBytes(jsonList.charset))
-                  }
-                } else
-                  batch.foreach { e =>
-                    response.getOutputStream.write(",".getBytes(jsonList.charset))
-                    response.getOutputStream.write(e.value.getBytes(jsonList.charset))
-                  }
-                response.getOutputStream.flush()
+          writeChunks(
+            response,
+            jsonList.elements
+              .bufferTumbling(jsonList.customBatchSize.getOrElse(defaultStreamingBatchSize))
+              .switchIfEmpty(Observable(Seq.empty))
+              .zipWithIndex,
+            completed,
+            writeEnd = response.getOutputStream.write("]".getBytes(jsonList.charset)),
+          ) { case (batch, idx) =>
+            val firstBatch = idx == 0
+            if (firstBatch) {
+              response.getOutputStream.write("[".getBytes(jsonList.charset))
+              batch.iterator.zipWithIndex.foreach { case (e, idx) =>
+                if (idx != 0) {
+                  response.getOutputStream.write(",".getBytes(jsonList.charset))
+                }
+                response.getOutputStream.write(e.value.getBytes(jsonList.charset))
               }
-            }
-            .flatMap(_ => unlessCompleted(completed)(write(response.getOutputStream.write("]".getBytes(jsonList.charset)))))
+            } else
+              batch.foreach { e =>
+                response.getOutputStream.write(",".getBytes(jsonList.charset))
+                response.getOutputStream.write(e.value.getBytes(jsonList.charset))
+              }
+            response.getOutputStream.flush()
+          }
     }
-  }.onErrorHandle {
-    case e: ClientGoneException =>
-      logger.warn("Request was cancelled by the client during streaming REST response", e.getCause)
-    case ex if completed.get =>
-      // the output stream may already belong to the next request on the connection, so it must not be closed
-      logger.warn("Streaming REST response failed after the request had already been completed", ex)
-    case ex =>
-      // When an error occurs during streaming, we immediately close the connection rather than
-      // attempting to send an error response. This is intentional because:
-      // The client has likely already received and started processing partial data
-      // for structured formats (like JSON arrays), the stream is now in an invalid state
-      logger.error("Failure during streaming REST response", ex)
-      response.getOutputStream.close()
-  }
+  }.onErrorHandle(handleStreamingFailure(response, completed))
 
   private def writeResponseBody(
     response: HttpServletResponse,
