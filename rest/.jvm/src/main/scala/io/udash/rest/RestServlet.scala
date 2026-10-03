@@ -266,16 +266,18 @@ class RestServlet(
       case NonFatal(e) => logger.warn("Failed to write REST failure response", e)
     }
 
-  // A failed write is passed down the stream as a value and stops it, instead of failing it: a disconnect fails the
-  // write in flight concurrently with cancelling the task, and an error the stream signals once the task is cancelled
-  // goes to the scheduler's uncaught failure reporter, while a value is dropped together with the task.
+  // A failure, whether of a write or of the stream itself, ends the stream as a value instead of an error: a disconnect
+  // cancels the task concurrently with failing the write in flight or the source closed by the cancellation, and an
+  // error the stream signals once the task is cancelled goes to the scheduler's uncaught failure reporter, while a
+  // value is dropped together with the task.
   private def writeChunks[A](chunks: Observable[A], completed: AtomicBoolean)(writeChunk: A => Unit): Task[Unit] =
     chunks
       .takeWhile(_ => !completed.get)
-      .map(chunk => Try(write(writeChunk(chunk))))
-      .takeWhileInclusive(_.isSuccess)
-      .lastOptionL
-      .flatMap(_.fold(Task.unit)(Task.fromTry))
+      .map(chunk => write(writeChunk(chunk)))
+      .completed
+      .onErrorHandleWith(Observable.now(_))
+      .firstOptionL
+      .flatMap(_.fold(Task.unit)(Task.raiseError))
 
   private def writeNonEmptyStreamedBody(
     response: HttpServletResponse,
