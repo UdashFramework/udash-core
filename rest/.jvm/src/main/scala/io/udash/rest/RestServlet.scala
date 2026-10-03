@@ -266,6 +266,7 @@ class RestServlet(
       case NonFatal(e) => logger.warn("Failed to write REST failure response", e)
     }
 
+  // Must not throw: within the stream, Monix would report the original failure as uncaught
   private def handleStreamingFailure(response: HttpServletResponse, completed: AtomicBoolean)(failure: Throwable): Unit =
     failure match {
       case e: ClientGoneException =>
@@ -279,13 +280,18 @@ class RestServlet(
         // The client has likely already received and started processing partial data
         // for structured formats (like JSON arrays), the stream is now in an invalid state
         logger.error("Failure during streaming REST response", ex)
-        response.getOutputStream.close()
+        try response.getOutputStream.close()
+        catch {
+          case NonFatal(e) => logger.warn("Failed to close the failed streaming REST response", e)
+        }
     }
 
   // A failure, whether of a write or of the stream itself, is handled within the stream instead of failing the task: a
   // disconnect cancels the task concurrently with failing the write in flight or the source closed by the
   // cancellation, and once the task is cancelled an error it signals goes to the scheduler's uncaught failure
-  // reporter, while its result is dropped unlogged. `writeEnd` follows the last chunk unless the stream failed.
+  // reporter, while its result is dropped unlogged. This covers a failure the source signals itself, not one of its
+  // asynchronous operators, e.g. mapEval, which reports a failure of a task completing after the cancellation on its
+  // own. `writeEnd` follows the last chunk unless the stream failed.
   private def writeChunks[A](
     response: HttpServletResponse,
     chunks: Observable[A],

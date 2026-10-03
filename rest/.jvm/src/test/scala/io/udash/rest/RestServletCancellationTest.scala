@@ -9,7 +9,7 @@ import monix.reactive.Observable
 import org.slf4j.event.{Level, SubstituteLoggingEvent}
 import org.slf4j.helpers.SubstituteLogger
 
-import java.io.EOFException
+import java.io.{EOFException, IOException}
 import java.lang.reflect.Proxy
 import java.util.{ArrayDeque, Collections}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -37,13 +37,15 @@ class RestServletCancellationTest extends UdashSharedTest {
     ).asInstanceOf[T]
 
   /**
-   * Serves `body` with the client disconnecting during the first write into the response: the container reports the
-   * disconnect to the servlet's listeners, which cancel the handler, and then fails the write as a reset stream does,
-   * unless `failFirstWrite` is off. Any later write fails. Asserts that nothing reached the uncaught failure reporter
-   * and returns what the servlet logged.
+   * Serves `body`, failing the first write into the response unless `failFirstWrite` is off, and any later write.
+   * With `disconnect`, the client disconnects during the first write: the container reports it to the servlet's
+   * listeners, which cancel the handler, and then fails the write as a reset stream does. Without it, writes fail as
+   * on a broken connection that the container has not reported. Closing the response fails either way. Asserts that
+   * nothing reached the uncaught failure reporter and returns what the servlet logged.
    */
-  private def disconnectDuringFirstWrite(
+  private def serveStreamed(
     body: StreamedBody.NonEmpty,
+    disconnect: Boolean = true,
     failFirstWrite: Boolean = true,
   ): Seq[SubstituteLoggingEvent] = {
     implicit val scheduler: TestScheduler = TestScheduler()
@@ -72,12 +74,14 @@ class RestServletCancellationTest extends UdashSharedTest {
       def write(b: Int): Unit = write(Array(b.toByte))
       override def write(b: Array[Byte], off: Int, len: Int): Unit = {
         writes += 1
-        if (writes == 1) {
-          val disconnect = new AsyncEvent(asyncContext, request, response, new EOFException("reset"))
-          listeners.foreach(_.onError(disconnect))
+        if (writes == 1 && disconnect) {
+          val event = new AsyncEvent(asyncContext, request, response, new EOFException("reset"))
+          listeners.foreach(_.onError(event))
         }
-        if (writes > 1 || failFirstWrite) throw new EOFException("reset")
+        if (writes > 1 || failFirstWrite) throw failure
       }
+      override def close(): Unit = throw new IOException("broken pipe")
+      private def failure: IOException = if (disconnect) new EOFException("reset") else new IOException("broken pipe")
     }
 
     val handleRequest: RawRest.HandleRequestWithStreaming = _ => Task.now(StreamedRestResponse(200, IMapping.empty, body))
@@ -92,21 +96,27 @@ class RestServletCancellationTest extends UdashSharedTest {
 
   private def assertLogged(events: Seq[SubstituteLoggingEvent], level: Level, message: String, failure: String): Unit =
     assert(
-      events.exists(e => e.getLevel == level && e.getMessage.contains(message) && e.getThrowable.getMessage.contains(failure)),
-      events.map(e => s"${e.getLevel} ${e.getMessage}: ${e.getThrowable}").mkString(", "),
+      events.exists(e =>
+        e.getLevel == level && e.getMessage.contains(message) &&
+          Option(e.getThrowable).flatMap(t => Option(t.getMessage)).exists(_.contains(failure))
+      ),
+      describe(events),
     )
+
+  private def describe(events: Seq[SubstituteLoggingEvent]): String =
+    events.map(e => s"${e.getLevel} ${e.getMessage}: ${e.getThrowable}").mkString(", ")
 
   private def binary(content: Observable[Array[Byte]]): StreamedBody.NonEmpty =
     StreamedBody.RawBinary(content, "application/octet-stream")
 
   "RestServlet" should {
     "log a binary chunk write failing after a disconnect cancelled the handler instead of reporting it as uncaught" in {
-      val events = disconnectDuringFirstWrite(binary(Observable.repeat(Array[Byte](1))))
+      val events = serveStreamed(binary(Observable.repeat(Array[Byte](1))))
       assertLogged(events, Level.WARN, "cancelled by the client", "reset")
     }
 
     "log a JSON list batch write failing after a disconnect cancelled the handler instead of reporting it as uncaught" in {
-      val events = disconnectDuringFirstWrite(StreamedBody.JsonList(Observable.repeat(JsonValue("1"))))
+      val events = serveStreamed(StreamedBody.JsonList(Observable.repeat(JsonValue("1"))))
       assertLogged(events, Level.WARN, "cancelled by the client", "reset")
     }
 
@@ -118,8 +128,14 @@ class RestServletCancellationTest extends UdashSharedTest {
         emitted = true
         chunk
       }
-      val events = disconnectDuringFirstWrite(binary(chunks), failFirstWrite = false)
+      val events = serveStreamed(binary(chunks), failFirstWrite = false)
       assertLogged(events, Level.WARN, "after the request had already been completed", "source closed")
+    }
+
+    "log a write failing on a broken connection once, without reporting it as uncaught, when closing fails too" in {
+      val events = serveStreamed(binary(Observable.repeat(Array[Byte](1))), disconnect = false)
+      assertLogged(events, Level.ERROR, "Failure during streaming REST response", "broken pipe")
+      assert(events.count(_.getLevel == Level.ERROR) == 1, describe(events))
     }
   }
 }
