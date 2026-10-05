@@ -114,7 +114,10 @@ object RestServlet {
  *                           dependent: `AsyncListener.onError` is only raised for protocols where the client's abort
  *                           reaches the server on a connection it is already reading, e.g. HTTP/2 `RST_STREAM`. An
  *                           aborted HTTP/1.1 request is not reported while the async cycle is idle, so it is still
- *                           only bounded by `handleTimeout`. Independently of this setting, nothing is written into a
+ *                           only bounded by `handleTimeout`. Neither is an abort arriving before the container's
+ *                           dispatch of the request has returned, i.e. while `service` or an enclosing filter is still
+ *                           running: the handler then runs until it finishes or a write fails, bounded by
+ *                           `handleTimeout`. Independently of this setting, nothing is written into a
  *                           request the container has already completed, so a streamed response is abandoned at the
  *                           next chunk.
  */

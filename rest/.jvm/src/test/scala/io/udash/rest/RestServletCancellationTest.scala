@@ -130,6 +130,8 @@ class RestServletCancellationTest extends UdashSharedTest {
       }
       val events = serveStreamed(binary(chunks), failFirstWrite = false)
       assertLogged(events, Level.WARN, "after the request had already been completed", "source closed")
+      // the response may already belong to the next request on the connection
+      assert(!events.exists(_.getMessage.contains("Failed to close")), describe(events))
     }
 
     "log a write failing on a broken connection once, without reporting it as uncaught, when closing fails too" in {
