@@ -6,8 +6,8 @@ import io.udash.testing.UdashSharedTest
 import monix.eval.Task
 import monix.execution.{ExecutionModel, Scheduler, UncaughtExceptionReporter}
 import monix.reactive.Observable
-import org.eclipse.jetty.ee8.nested.{ErrorHandler, Request as JettyRequest}
-import org.eclipse.jetty.ee8.servlet.{ServletContextHandler, ServletHolder}
+import org.eclipse.jetty.ee8.nested.{ErrorHandler, HttpChannelState, Request as JettyRequest}
+import org.eclipse.jetty.ee8.servlet.{FilterHolder, ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.http.{HttpFields, HttpURI, HttpVersion, MetaData}
 import org.eclipse.jetty.http2.frames.{HeadersFrame, PrefaceFrame, SettingsFrame}
 import org.eclipse.jetty.http2.generator.Generator
@@ -20,8 +20,10 @@ import org.slf4j.helpers.SubstituteLogger
 import java.io.EOFException
 import java.net.http.{HttpClient, HttpRequest, HttpResponse}
 import java.net.{Socket, URI}
+import java.util.EnumSet
 import java.util.concurrent.{ConcurrentHashMap, ConcurrentLinkedQueue, CountDownLatch, TimeUnit}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import javax.servlet.{DispatcherType, Filter, FilterChain, ServletRequest, ServletResponse}
 import scala.concurrent.duration.*
 import scala.jdk.CollectionConverters.*
 
@@ -43,6 +45,7 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
   private val uncaughtErrors = new ConcurrentLinkedQueue[Throwable]
   private val logEvents = new ConcurrentLinkedQueue[SubstituteLoggingEvent]
   private val errorDispatches = new ConcurrentLinkedQueue[String]
+  private val channelStates = new ConcurrentHashMap[String, HttpChannelState]
 
   private implicit val scheduler: Scheduler = Scheduler(
     Scheduler.global,
@@ -113,11 +116,31 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
     handler.addServlet(servlet(HandleTimeout, cancelOnDisconnect = true), "/api/*")
     handler.addServlet(servlet(HandleTimeout, cancelOnDisconnect = false), "/no-cancel-api/*")
     handler.addServlet(servlet(ShortHandleTimeout, cancelOnDisconnect = true), "/short-timeout-api/*")
+    handler.addFilter(new FilterHolder(new Filter {
+      def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain): Unit = {
+        val scenario = request.asInstanceOf[HttpServletRequest].getRequestURI.split('/').last
+        channelStates.put(scenario, JettyRequest.getBaseRequest(request).getHttpChannelState)
+        chain.doFilter(request, response)
+      }
+    }), "/*", EnumSet.of(DispatcherType.REQUEST))
     server.setHandler(handler)
   }
 
-  private def awaitStarted(path: String): Unit =
-    assert(latch(started, path.split('/').last).await(4, TimeUnit.SECONDS), s"handler for $path never started")
+  /**
+   * Waits for the handler to start and for the container to return from dispatching the request. Jetty hands a failure
+   * of the request to the `AsyncListener`s only once the dispatch has returned and drops one arriving before that, so
+   * an abort sent while the servlet is still in `service` would go unnoticed until `handleTimeout`. Any state past
+   * `HANDLING` counts, since a short `handleTimeout` may already have woken the request again.
+   */
+  private def awaitStarted(path: String): Unit = {
+    val scenario = path.split('/').last
+    assert(latch(started, scenario).await(4, TimeUnit.SECONDS), s"handler for $path never started")
+    val deadline = 4.seconds.fromNow
+    while (channelStates.get(scenario).getState == HttpChannelState.State.HANDLING) {
+      assert(deadline.hasTimeLeft(), s"dispatch of $path never returned")
+      Thread.sleep(5)
+    }
+  }
 
   private lazy val http2Client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_2).build()
 
