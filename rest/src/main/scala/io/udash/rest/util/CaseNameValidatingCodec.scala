@@ -1,0 +1,56 @@
+package io.udash.rest
+package util
+
+import com.avsystem.commons.misc.Opt
+import com.avsystem.commons.serialization.GenCodec.ReadFailure
+import com.avsystem.commons.serialization.{GenCodec, Input, InputWrapper, ObjectInput}
+
+import scala.reflect.{ClassTag, classTag}
+
+/**
+ * Builds a `GenCodec[T]` for a single case `T` of a `@flatten` (flat) sealed hierarchy rooted at `R`. It
+ * delegates reading/writing to the root codec but, on read, additionally rejects objects whose
+ * discriminator field (`caseFieldName`) does not equal the expected `caseName` - see
+ * [[CaseNameValidatingInput]]. The value read by the root codec is also checked to be an instance of `T`, as the root
+ * codec may return a different case when the discriminator is missing (e.g. for a hierarchy with a `@defaultCase`).
+ */
+object CaseNameValidatingCodec {
+  // `caseName` is a by-name parameter to avoid recursive access problem
+  def apply[T: ClassTag, R >: T](rootCodec: GenCodec[R], caseFieldName: String, caseName: => String): GenCodec[T] =
+    GenCodec.create(
+      input => rootCodec.read(new CaseNameValidatingInput(input, caseFieldName, caseName)) match {
+        case t: T => t
+        case null => null.asInstanceOf[T]
+        case v => throw new ReadFailure(s"$v is not an instance of ${classTag[T].runtimeClass}")
+      },
+      (output, value) => rootCodec.write(output, value),
+    )
+}
+
+/**
+ * Input that rejects objects with unexpected discriminator field value.
+ */
+final class CaseNameValidatingInput(
+  protected val wrapped: Input,
+  caseFieldName: String,
+  expectedCaseName: String,
+) extends InputWrapper {
+
+  override def readObject(): ObjectInput = {
+    val oi = super.readObject()
+    oi.peekField(caseFieldName) match {
+      case Opt(fi) =>
+        val actualCaseName = fi.readSimple().readString()
+        if (actualCaseName != expectedCaseName) {
+          throw new ReadFailure(s"Expected $caseFieldName to be equal to $expectedCaseName but got $actualCaseName")
+        }
+        oi
+      case Opt.Empty =>
+        // This means that either:
+        // * the discriminator field is completely missing - the sealed hierarchy codec either fails or reads
+        //   its @defaultCase, which is then validated against the expected type by CaseNameValidatingCodec
+        // * wrapped Input doesn't support peeking - in Udash REST this won't happen as it always uses JsonStringInput
+        oi
+    }
+  }
+}

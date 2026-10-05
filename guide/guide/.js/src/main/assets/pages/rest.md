@@ -847,6 +847,48 @@ trait MyRestApi { ... }
 object MyRestApi extends CirceRestApiCompanion[MyRestApi]
 ```
 
+Instead of hand-writing one convenience base class per companion shape, you can use
+`RestApisWithCustomImplicits`, which packages **all** the companion shapes at once, pre-bound to your
+implicits bundle. Create a single object parameterized by your implicits type and use its inner
+companions:
+
+```scala
+object CirceRestApis extends RestApisWithCustomImplicits[CirceRestImplicits.type](CirceRestImplicits)
+
+trait MyRestApi { ... }
+object MyRestApi extends CirceRestApis.ApiCompanion[MyRestApi] // client + server + OpenAPI
+```
+
+Its inner companions mirror the standard ones: `ApiCompanion` (client + server + OpenAPI),
+`NoDocApiCompanion` (no OpenAPI), `ServerApiCompanion` (server only) and `ClientApiCompanion`
+(client only).
+
+`RestApisWithCustomImplicits` also provides data-type companions (`ApiDataCompanion`,
+`ApiSealedCaseCompanion` and others) bound to your implicits - the custom-implicits counterpart of
+[`RestDataCompanion`](#restdatacompanion). They are also available on their own through
+`ApiDataWithCustomImplicits`. Note that these data companions are
+[`GenCodec`](https://github.com/AVSystem/scala-commons/blob/master/docs/GenCodec.md)-based: they derive a
+`GenCodec` and a `RestStructure` for your type, so they don't apply to a Circe-based bundle like the one above.
+Use them with a bundle that extends `DefaultRestImplicits`, adding serialization for your own types:
+
+```scala
+final case class Tag(value: String) // a type with no default serialization
+
+object MyRestImplicits extends DefaultRestImplicits {
+  implicit val tagCodec: GenCodec[Tag] = GenCodec.nonNullString(Tag(_), _.value)
+  implicit val tagSchema: RestSchema[Tag] = RestSchema.plain(Schema.String)
+}
+object MyRestApis extends RestApisWithCustomImplicits[MyRestImplicits.type](MyRestImplicits)
+
+final case class Item(name: String, tag: Tag)
+object Item extends MyRestApis.ApiDataCompanion[Item] // Tag's codec and schema come from MyRestImplicits
+
+trait MyRestApi {
+  @GET def item(name: String): Task[Item]
+}
+object MyRestApi extends MyRestApis.ApiCompanion[MyRestApi]
+```
+
 **WARNING**: if you also generate [OpenAPI documents](#generating-openapi-30-specifications) for your
 REST API, then along from custom serialization you must provide customized instances of
 [`RestSchema`](#restschema-typeclass) that will adequately describe your new serialization format.
@@ -883,7 +925,11 @@ of `AsTask[MyFavoriteIOMonad]` (for server side) and `FromTask[MyFavoriteIOMonad
 Just like when [providing serialization for third party type](#providing-serialization-for-third-party-type),
 you should put these implicits into a trait and inject them into REST API trait's companion object.
 
-Udash repository contains an [example implementation of Monix Task support in its test sources](https://github.com/UdashFramework/udash-core/blob/master/rest/src/test/scala/io/udash/rest/monix/MonixRestImplicits.scala).
+Note that `DefaultRestImplicits` already supports both Monix `Task` and `Future` out of the box - `Task`
+is the effect Udash REST uses internally, so no extra implicits are needed for it. To integrate a
+different effect type `F[_]`, provide implicit instances of `RawRest.AsTask[F]` (used on the server side)
+and `RawRest.FromTask[F]` (used on the client side) in your implicits trait and inject them through the
+companion object, exactly as with custom serialization.
 
 ## API evolution
 
@@ -916,6 +962,101 @@ Conversely, changes that would break your API include:
 - Adding or removing `@Path` parameters
 - Adding non-`@Path` parameters without giving them default value
 - Changing order of `@Path` parameters
+
+## Contextual REST APIs
+
+Sometimes the server-side implementation of a REST method needs access to some *request-scoped context*
+that must **not** appear in the client-facing interface - a typical example is the authenticated user,
+extracted from a session cookie or token by a lower layer (e.g. a servlet filter). Udash REST supports
+this through *contextual* APIs.
+
+The building block is `WithCtx[Ctx, R]` - simply a wrapper over a `Ctx => R` function. Contextual method
+results use the alias `CtxTask[T] = WithCtx[Ctx, Task[T]]`, i.e. a `Task` that still awaits the context.
+
+Contextual companions are parameterized with an implicits bundle, just like the
+[custom-serialization companions](#plugging-in-entirely-custom-serialization), so you get custom
+serialization at the same time. In the examples below `MyImplicits` could add serialization for your own
+types; here it is simply `DefaultRestImplicits`:
+
+```scala
+object MyImplicits extends DefaultRestImplicits
+```
+
+### Server-only contextual APIs
+
+If the API is consumed only by external clients (not written in Udash REST), use
+`ContextualServerRestApis`, which bakes in both the implicits bundle and the context type:
+
+```scala
+case class UserContext(userId: String)
+object MyCtxApis extends ContextualServerRestApis[MyImplicits.type, UserContext](MyImplicits)
+
+trait UserApi {
+  @GET def profile(id: String): MyCtxApis.CtxTask[String]
+}
+object UserApi extends MyCtxApis.ServerApiCompanion[UserApi]
+
+class UserApiImpl extends UserApi {
+  def profile(id: String): MyCtxApis.CtxTask[String] =
+    MyCtxApis.CtxTask { ctx => Task.now(s"profile $id requested by ${ctx.userId}") }
+}
+```
+
+The `CtxTask { ctx => ... }` builder gives the implementation access to the context. The context is
+supplied as an implicit when the implementation is turned into a raw REST handler, so it never appears on
+the wire. Use `ServerApiImplCompanion` instead of `ServerApiCompanion` if your API has its methods
+implemented directly in a class, without a separate trait.
+
+#### Supplying the context per request
+
+None of the Udash backends extracts the context for you - e.g. `RestServlet` takes a single, fixed
+handler. Since the context differs between requests, the handler must be built **per request**, with the
+context extracted from that request (e.g. from a header):
+
+```scala
+val impl = new UserApiImpl
+
+val handle: RawRest.HandleRequestWithStreaming = request => {
+  implicit val ctx: UserContext = extractUser(request.parameters.headers)
+  RawRest.asHandleRequestWithStreaming[UserApi](impl).apply(request)
+}
+val servlet = new RestServlet(handle)
+```
+
+Don't write `RestServlet[UserApi](impl)` with an implicit context in scope at startup: it compiles, but the
+handler is then built only once and **every** request runs with that one context.
+
+The context is found by a plain implicit search for the `Ctx` type, so always use a dedicated context type
+(like `UserContext` above) rather than a general-purpose one. With e.g. `Ctx = String`, any implicit
+`String` in scope would silently become the context.
+
+### Contextual APIs shared between server and client
+
+If the same API trait is used on both sides (typical for inter-service communication), use
+`ContextualServerAndClientRestApis`. The API trait is parameterized with the context type; the client
+uses `NoCtx`:
+
+```scala
+object MyRestApis extends ContextualServerAndClientRestApis[MyImplicits.type](MyImplicits)
+
+trait UserApi[Ctx] extends MyRestApis.Api[Ctx] {
+  @GET def profile(id: String): CtxTask[String]
+}
+object UserApi extends MyRestApis.ApiCompanion[UserApi]
+
+// server side - context is available in the implementation
+class UserApiImpl extends UserApi[UserContext] {
+  def profile(id: String): CtxTask[String] =
+    CtxTask { ctx => Task.now(s"profile $id requested by ${ctx.userId}") }
+}
+
+// client side - no context; UserApi.Client is an alias for UserApi[NoCtx]
+val client: UserApi.Client = ??? // e.g. JettyRestClient[UserApi.Client](...)
+val result: Task[String] = client.profile("42").result
+```
+
+On the client, a method returns a `CtxTask[String]` over `NoCtx`; calling `.result` resolves the empty
+context implicitly and yields the `Task` that performs the request.
 
 ## Implementing backends
 
