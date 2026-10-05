@@ -2,6 +2,7 @@ package io.udash
 package rest
 
 import com.avsystem.commons.rpc.AsRawReal
+import com.avsystem.commons.serialization.GenCodec
 import io.udash.rest.openapi.{RestSchema, Schema}
 import io.udash.rest.raw.PlainValue
 
@@ -14,13 +15,14 @@ import io.udash.rest.raw.PlainValue
 final case class Tag(value: String)
 
 /**
- * Custom implicits bundle: [[DefaultRestImplicits]] plus a bespoke, easily recognizable plain-value
+ * Custom implicits bundle: [[DefaultRestImplicits]] plus a bespoke, easily recognizable plain-value and JSON
  * serialization and schema for [[Tag]]. The `tag:` prefix on the wire is what proves the injected
  * implicit (rather than some default) was used.
  */
 trait TestRestImplicits extends DefaultRestImplicits {
   implicit val tagPlainAsRealRaw: AsRawReal[PlainValue, Tag] =
     AsRawReal.create(tag => PlainValue(s"tag:${tag.value}"), pv => Tag(pv.value.stripPrefix("tag:")))
+  implicit val tagCodec: GenCodec[Tag] = GenCodec.nonNullString(s => Tag(s.stripPrefix("tag:")), tag => s"tag:${tag.value}")
   implicit val tagSchema: RestSchema[Tag] = RestSchema.plain(Schema.String)
 }
 object TestRestImplicits extends TestRestImplicits

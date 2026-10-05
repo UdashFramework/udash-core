@@ -1,10 +1,10 @@
 package io.udash
 package rest
 
-import com.avsystem.commons.misc.NamedEnum
+import com.avsystem.commons.misc.{NamedEnum, Opt}
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
-import com.avsystem.commons.serialization.{GenCodec, GenObjectCodec, flatten}
+import com.avsystem.commons.serialization.{GenCodec, GenObjectCodec, defaultCase, flatten}
 import io.udash.rest.openapi.{InliningResolver, RestSchema, RestStructure}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -22,9 +22,23 @@ object SysEvent extends CustomRestApis.ApiSealedSubHierarchyCompanion[SysEvent, 
 final case class ShutdownEvent(reason: String) extends SysEvent
 object ShutdownEvent extends CustomRestApis.ApiSealedCaseCompanion[ShutdownEvent, AuditEvent]
 
-// NamedEnum whose named RestSchema is provided by RestNamedValueEnumCompanion.
+// Flat sealed hierarchy with a @defaultCase: a missing discriminator makes the root codec read the default case.
+@flatten("kind") sealed trait Animal
+object Animal extends CustomRestApis.ApiDataCompanion[Animal]
+
+@defaultCase final case class Cat(name: String) extends Animal
+object Cat extends CustomRestApis.ApiSealedCaseCompanion[Cat, Animal]
+
+final case class Dog(name: String) extends Animal
+object Dog extends CustomRestApis.ApiSealedCaseCompanion[Dog, Animal]
+
+// Case class using Tag, whose codec and schema exist only in the custom-implicits bundle.
+final case class Tagged(tag: Tag, n: Int)
+object Tagged extends CustomRestApis.ApiDataCompanion[Tagged]
+
+// NamedEnum whose named RestSchema is provided by RestNamedEnumCompanion.
 sealed trait TaskPriority extends NamedEnum
-object TaskPriority extends RestNamedValueEnumCompanion[TaskPriority] {
+object TaskPriority extends RestNamedEnumCompanion[TaskPriority] {
   case object Low extends TaskPriority { override val name: String = "Low" }
   case object High extends TaskPriority { override val name: String = "High" }
   override val values: List[TaskPriority] = caseObjects
@@ -43,26 +57,42 @@ object PolyPair extends CustomRestApis.Poly2ApiDataCompanion[PolyPair]
 // A type with NO default codec/schema; its instances are provided only by the deps object below.
 final case class Dep(n: Int)
 
-// Self-contained deps object (must extend DefaultRestImplicits, since ApiDataCompanionWithDeps
-// materializes solely from D) that additionally supplies serialization/schema for Dep.
-object HolderDeps extends DefaultRestImplicits {
+// Deps object supplying serialization/schema for Dep only; everything else (including Tag) comes from the
+// enclosing custom-implicits bundle.
+object HolderDeps {
   implicit val depCodec: GenCodec[Dep] = GenCodec.materialize[Dep]
   implicit val depSchema: RestSchema[Dep] = RestStructure.materialize[Dep].standaloneSchema
 }
 
-final case class Holder(dep: Dep, label: String)
+final case class Holder(dep: Dep, tag: Tag)
 object Holder extends CustomRestApis.ApiDataCompanionWithDeps[HolderDeps.type, Holder]
 
 class ApiDataCustomImplicitsSchemaTest extends AnyFunSuite with Matchers {
   private def schemaStr[T](implicit schema: RestSchema[T]): String =
     JsonStringOutput.writePretty(new InliningResolver().resolve(schema))
 
-  test("custom implicit schema is used for a type with no default schema") {
-    // Tag has no default RestSchema - the only instance comes from TestRestImplicits.
-    import TestRestImplicits.tagSchema
-    schemaStr[Tag] shouldBe
+  test("custom-implicits bundle reaches the derived codec and schema of a data type") {
+    // Tag has no default codec/schema - the only instances come from TestRestImplicits.
+    val json = JsonStringOutput.write(Tagged(Tag("x"), 1))
+    json shouldBe """{"tag":"tag:x","n":1}"""
+    JsonStringInput.read[Tagged](json) shouldBe Tagged(Tag("x"), 1)
+
+    schemaStr[Tagged] shouldBe
       """{
-        |  "type": "string"
+        |  "type": "object",
+        |  "properties": {
+        |    "tag": {
+        |      "type": "string"
+        |    },
+        |    "n": {
+        |      "type": "integer",
+        |      "format": "int32"
+        |    }
+        |  },
+        |  "required": [
+        |    "tag",
+        |    "n"
+        |  ]
         |}""".stripMargin
   }
 
@@ -74,6 +104,14 @@ class ApiDataCustomImplicitsSchemaTest extends AnyFunSuite with Matchers {
     intercept[ReadFailure] {
       JsonStringInput.read[LoginEvent]("""{"kind":"ShutdownEvent","reason":"x"}""")(LoginEvent.codec)
     }
+  }
+
+  test("ApiSealedCaseCompanion codec rejects a different default case instead of casting it") {
+    // no discriminator: the root codec falls back to the @defaultCase Cat, which is not a Dog
+    intercept[ReadFailure] {
+      JsonStringInput.read[Dog]("""{"name":"x"}""")(Dog.codec)
+    }
+    JsonStringInput.read[Cat]("""{"name":"x"}""")(Cat.codec) shouldBe Cat("x")
   }
 
   test("ApiSealedCaseCompanion schema carries the discriminator field") {
@@ -88,7 +126,8 @@ class ApiDataCustomImplicitsSchemaTest extends AnyFunSuite with Matchers {
     JsonStringInput.read[SysEvent](json)(SysEvent.codec) shouldBe ShutdownEvent("boom")
   }
 
-  test("RestNamedValueEnumCompanion produces a string enum schema") {
+  test("RestNamedEnumCompanion produces a named string enum schema") {
+    implicitly[RestSchema[TaskPriority]].name shouldBe Opt("TaskPriority")
     val schema = schemaStr[TaskPriority]
     schema should include(""""enum"""")
     schema should include("Low")
@@ -123,15 +162,36 @@ class ApiDataCustomImplicitsSchemaTest extends AnyFunSuite with Matchers {
     schema should include("second")
   }
 
-  test("ApiDataCompanionWithDeps derives codec and schema from the deps object") {
-    // Dep has no default codec/schema; Holder only works because HolderDeps supplies them.
+  test("ApiDataCompanionWithDeps derives codec and schema from the deps object and the bundle") {
+    // Dep's instances come only from HolderDeps, Tag's only from the enclosing TestRestImplicits bundle.
     val codec = implicitly[GenCodec[Holder]]
-    JsonStringOutput.write(Holder(Dep(7), "hi"))(codec) shouldBe """{"dep":{"n":7},"label":"hi"}"""
-    JsonStringInput.read[Holder]("""{"dep":{"n":7},"label":"hi"}""")(codec) shouldBe Holder(Dep(7), "hi")
+    JsonStringOutput.write(Holder(Dep(7), Tag("x")))(codec) shouldBe """{"dep":{"n":7},"tag":"tag:x"}"""
+    JsonStringInput.read[Holder]("""{"dep":{"n":7},"tag":"tag:x"}""")(codec) shouldBe Holder(Dep(7), Tag("x"))
 
-    val schema = schemaStr[Holder]
-    schema should include("dep")
-    schema should include("label")
-    schema should include("n") // the nested Dep schema, resolved via the deps object
+    schemaStr[Holder] shouldBe
+      """{
+        |  "type": "object",
+        |  "properties": {
+        |    "dep": {
+        |      "type": "object",
+        |      "properties": {
+        |        "n": {
+        |          "type": "integer",
+        |          "format": "int32"
+        |        }
+        |      },
+        |      "required": [
+        |        "n"
+        |      ]
+        |    },
+        |    "tag": {
+        |      "type": "string"
+        |    }
+        |  },
+        |  "required": [
+        |    "dep",
+        |    "tag"
+        |  ]
+        |}""".stripMargin
   }
 }

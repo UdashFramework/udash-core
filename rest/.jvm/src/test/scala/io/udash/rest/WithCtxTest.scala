@@ -26,7 +26,6 @@ class WithCtxTest extends AnyFunSuite with ScalaFutures with Matchers {
     CtxTask.sync(_.user).apply(alice).runToFuture.futureValue shouldBe "alice"
     CtxTask(ctx => Task.now(ctx.user + "!")).apply(alice).runToFuture.futureValue shouldBe "alice!"
     CtxTask.readCtx.apply(alice).runToFuture.futureValue shouldBe alice
-    CtxTask.readCtx(_.user).apply(alice).runToFuture.futureValue shouldBe "alice"
     CtxTask.unit.apply(alice).runToFuture.futureValue shouldBe (())
     CtxTask.defer(CtxTask.now(3)).apply(alice).runToFuture.futureValue shouldBe 3
     CtxTask.raiseError[Int](new RuntimeException("boom"))
@@ -34,7 +33,7 @@ class WithCtxTest extends AnyFunSuite with ScalaFutures with Matchers {
   }
 
   test("CtxTaskOps.map and flatMap thread the same context through") {
-    val base = CtxTask.readCtx(_.user) // yields ctx.user
+    val base = CtxTask.sync(_.user) // yields ctx.user
     base.map(_.length).apply(alice).runToFuture.futureValue shouldBe 5
     base.flatMap(u => CtxTask.now(u + "-x")).apply(alice).runToFuture.futureValue shouldBe "alice-x"
   }

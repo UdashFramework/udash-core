@@ -2,7 +2,7 @@ package io.udash.rest
 
 import com.avsystem.commons.rpc.{AsRaw, AsReal}
 import io.udash.rest.openapi.{OpenApiMetadata, RestResultType}
-import io.udash.rest.raw.{HttpResponseType, RawRest, RestMetadata, RestResponse}
+import io.udash.rest.raw.{HttpResponseType, RawRest, RestMetadata, RestResponse, StreamedRestResponse}
 import monix.eval.Task
 
 import scala.util.Try
@@ -63,6 +63,12 @@ object WithCtx {
   ): AsRaw[Task[RestResponse], Try[WithCtx[Ctx, R]]] =
     ctxFunTry => asResponseTask.asRaw(ctxFunTry.map(_.fun(ctx)))
 
+  implicit def withCtxAsStreamedResponse[Ctx, R](implicit
+    ctx: Ctx,
+    asResponseTask: AsRaw[Task[StreamedRestResponse], Try[R]],
+  ): AsRaw[Task[StreamedRestResponse], Try[WithCtx[Ctx, R]]] =
+    ctxFunTry => asResponseTask.asRaw(ctxFunTry.map(_.fun(ctx)))
+
   implicit def withCtxAsSubapi[Ctx, R](implicit
     ctx: Ctx,
     asSubapi: AsRaw[RawRest, R],
@@ -84,7 +90,7 @@ object WithCtx {
   implicit def withCtxResponseType[Ctx, R](implicit
     responseType: HttpResponseType[R],
   ): HttpResponseType[WithCtx[Ctx, R]] =
-    HttpResponseType()
+    responseType.asInstanceOf[HttpResponseType[WithCtx[Ctx, R]]]
 
   implicit def withCtxRestResultType[Ctx, R](implicit
     resultType: RestResultType[R],
@@ -96,6 +102,11 @@ object WithCtx {
   implicit def withNoCtxFromResponse[R](implicit
     asResponseTask: AsReal[Task[RestResponse], Try[R]],
   ): AsReal[Task[RestResponse], Try[WithCtx[NoCtx, R]]] =
+    respTask => asResponseTask.asReal(respTask).map(r => WithCtx(_ => r))
+
+  implicit def withNoCtxFromStreamedResponse[R](implicit
+    asResponseTask: AsReal[Task[StreamedRestResponse], Try[R]],
+  ): AsReal[Task[StreamedRestResponse], Try[WithCtx[NoCtx, R]]] =
     respTask => asResponseTask.asReal(respTask).map(r => WithCtx(_ => r))
 
   implicit def withNoCtxFromSubapi[R](implicit
@@ -158,10 +169,8 @@ final class CtxTaskCompanion[Ctx] {
   /** Defers construction of a `CtxTask` until it is run. */
   def defer[A](ctxTask: => CtxTask[A]): CtxTask[A] = WithCtx(c => Task.defer(ctxTask(c)))
 
-  /** A `CtxTask` that yields the context itself. */
+  /** A `CtxTask` that yields the context itself. Use [[sync]] for a value derived from the context. */
   def readCtx: CtxTask[Ctx] = WithCtx(Task.now)
-  /** A `CtxTask` that yields a value derived from the context. */
-  def readCtx[A](f: Ctx => A): CtxTask[A] = WithCtx(ctx => Task(f(ctx)))
 }
 object CtxTaskCompanion {
   private val reusable = new CtxTaskCompanion[Any]

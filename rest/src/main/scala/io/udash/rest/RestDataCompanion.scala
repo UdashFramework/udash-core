@@ -166,8 +166,7 @@ abstract class RestDataWrapperCompanion[Wrapped, T](implicit
 abstract class RestValueEnumCompanion[E <: ValueEnum](implicit
   instances: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[E]]
 ) extends AbstractValueEnumCompanion[E] {
-  implicit lazy val restSchema: RestSchema[E] =
-    instances(DefaultRestImplicits, this).apply().restSchema(RestSchema.namedEnumSchema)
+  implicit lazy val restSchema: RestSchema[E] = RestNamedEnumCompanion.namedRestSchema(instances, this)
 }
 
 /**
@@ -177,9 +176,15 @@ abstract class RestValueEnumCompanion[E <: ValueEnum](implicit
  *
  * @see [[RestValueEnumCompanion]]
  */
-abstract class RestNamedValueEnumCompanion[E <: NamedEnum](
+abstract class RestNamedEnumCompanion[E <: NamedEnum](
   implicit instances: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[E]]
 ) extends NamedEnumCompanion[E] {
-  implicit lazy val restSchema: RestSchema[E] =
-    instances(DefaultRestImplicits, this).apply().restSchema(RestSchema.namedEnumSchema)
+  implicit lazy val restSchema: RestSchema[E] = RestNamedEnumCompanion.namedRestSchema(instances, this)
+}
+private object RestNamedEnumCompanion {
+  def namedRestSchema[E <: NamedEnum](
+    instances: MacroInstances[DefaultRestImplicits, () => NameAndAdjusters[E]],
+    companion: NamedEnumCompanion[E],
+  ): RestSchema[E] =
+    instances(DefaultRestImplicits, companion).apply().restSchema(RestSchema.namedEnumSchema(companion))
 }

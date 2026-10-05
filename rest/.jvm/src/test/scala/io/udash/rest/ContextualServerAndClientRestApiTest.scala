@@ -1,9 +1,10 @@
 package io.udash
 package rest
 
-import io.udash.rest.raw.RawRest
+import io.udash.rest.raw.{RawRest, RestRequest, RestResponse, StreamedRestResponse}
 import monix.eval.Task
 import monix.execution.Scheduler
+import monix.reactive.Observable
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -26,6 +27,17 @@ object GreetSharedNoDocApi extends CtxSharedRestApis.NoDocApiCompanion[GreetShar
 
 class GreetSharedNoDocApiImpl extends GreetSharedNoDocApi[UserCtx] {
   def greet(tag: Tag): CtxTask[String] = CtxTask { ctx => Task.now(s"nodoc-${ctx.user}:${tag.value}") }
+}
+
+// Shared contextual API with a streamed result.
+trait StreamSharedApi[Ctx] extends CtxSharedRestApis.Api[Ctx] {
+  @GET def numbers(@Query n: Int): CtxTask[Observable[String]]
+}
+object StreamSharedApi extends CtxSharedRestApis.ApiCompanion[StreamSharedApi]
+
+class StreamSharedApiImpl extends StreamSharedApi[UserCtx] {
+  def numbers(n: Int): CtxTask[Observable[String]] =
+    CtxTask.sync(ctx => Observable.range(0, n).map(i => s"${ctx.user}-$i"))
 }
 
 class ContextualServerAndClientRestApiTest extends AnyFunSuite with ScalaFutures with Matchers {
@@ -52,5 +64,21 @@ class ContextualServerAndClientRestApiTest extends AnyFunSuite with ScalaFutures
       RawRest.fromHandleRequest[GreetSharedNoDocApi.Client](serverHandle)
 
     client.greet(Tag("hi")).result.runToFuture.futureValue shouldBe "nodoc-bob:hi"
+  }
+
+  test("contextual method can stream its result to the client") {
+    implicit val ctx: UserCtx = UserCtx("bob")
+    val serverHandle: RawRest.HandleRequestWithStreaming =
+      RawRest.asHandleRequestWithStreaming[StreamSharedApi[UserCtx]](new StreamSharedApiImpl)
+
+    val client: StreamSharedApi.Client =
+      RawRest.fromHandleRequestWithStreaming[StreamSharedApi.Client](new RawRest.RestRequestHandler {
+        def handleRequest(request: RestRequest): Task[RestResponse] =
+          serverHandle(request).map(_.asInstanceOf[RestResponse])
+        def handleRequestStream(request: RestRequest): Task[StreamedRestResponse] =
+          serverHandle(request).map(_.asInstanceOf[StreamedRestResponse])
+      })
+
+    client.numbers(3).result.flatMap(_.toListL).runToFuture.futureValue shouldBe List("bob-0", "bob-1", "bob-2")
   }
 }

@@ -3,7 +3,7 @@ package io.udash.rest
 import com.avsystem.commons.meta.MacroInstances
 import com.avsystem.commons.misc.AnnotationOf
 import com.avsystem.commons.serialization.{GenCodec, GenObjectCodec, flatten}
-import io.udash.rest.openapi.{HasRestSchema, RestFlattenedStructure, RestSchema, RestStructure}
+import io.udash.rest.openapi.{RestFlattenedStructure, RestSchema, RestStructure}
 import io.udash.rest.util.CaseNameValidatingCodec
 
 import scala.reflect.ClassTag
@@ -11,7 +11,7 @@ import scala.reflect.ClassTag
 /**
  * [[CodecWithStructure]] analogue for a single-parameter generic type `C[_]`.
  *
- * @see [[ApiDataWithCustomImplicits.PolyApiDataCompanion]])
+ * @see [[AbstractApiDataWithCustomImplicits.PolyApiDataCompanion]]
  */
 trait PolyCodecWithStructure[C[_]] {
   def codec[T: GenCodec]: GenCodec[C[T]]
@@ -21,7 +21,7 @@ trait PolyCodecWithStructure[C[_]] {
 /**
  * Like [[PolyCodecWithStructure]] but yielding a [[GenObjectCodec]].
  *
- * @see [[ApiDataWithCustomImplicits.PolyObjectApiDataCompanion]])
+ * @see [[AbstractApiDataWithCustomImplicits.PolyObjectApiDataCompanion]]
  */
 trait PolyObjectCodecWithStructure[C[_]] {
   def codec[T: GenCodec]: GenObjectCodec[C[T]]
@@ -31,7 +31,7 @@ trait PolyObjectCodecWithStructure[C[_]] {
 /**
  * [[CodecWithStructure]] analogue for a two-parameter generic type `C[_, _]`.
  *
- * @see [[ApiDataWithCustomImplicits.Poly2ApiDataCompanion]])
+ * @see [[AbstractApiDataWithCustomImplicits.Poly2ApiDataCompanion]]
  */
 trait Poly2CodecWithStructure[C[_, _]] {
   def codec[T1: GenCodec, T2: GenCodec]: GenCodec[C[T1, T2]]
@@ -39,17 +39,21 @@ trait Poly2CodecWithStructure[C[_, _]] {
 }
 
 /**
- * Bundles all data-type companion base classes (for case classes, sealed hierarchies, enums and generic
- * types used as parameters or results of REST APIs) pre-bound to a custom `Implicits` bundle. It is the
- * generalization of the [[RestDataCompanion]] family: whereas `RestDataCompanion` and friends fix the
- * implicits to [[DefaultRestImplicits]], here the `Implicits` type parameter (typically an object extending
+ * Bundles data-type companion base classes (for case classes, sealed hierarchies and generic types used as
+ * parameters or results of REST APIs) pre-bound to a custom `Implicits` bundle. It is the generalization of
+ * the [[RestDataCompanion]] family: whereas `RestDataCompanion` and friends fix the implicits to
+ * [[DefaultRestImplicits]], here the `Implicits` type parameter (typically an object extending
  * `DefaultRestImplicits` with extra serialization/schema instances) is injected into macro materialization,
  * so custom serialization for your own types is picked up automatically.
  *
- * Extended by [[AbstractRestApisWithCustomImplicits]] and the contextual API bases, but can also be used on
- * its own for defining only data-type companions - see [[ApiDataWithCustomImplicits.ApiDataCompanion]].
+ * All companions defined here derive a `GenCodec` and a `RestStructure`, so the `Implicits` bundle must
+ * provide `GenCodec`-based serialization (e.g. by extending [[DefaultRestImplicits]]).
+ *
+ * This is a `trait` so that applications may mix it into their own base and layer additional custom
+ * companions on top. Extended by [[AbstractRestApisWithCustomImplicits]] and the contextual API bases;
+ * use [[ApiDataWithCustomImplicits]] for defining only data-type companions.
  */
-trait ApiDataWithCustomImplicits[Implicits] {
+trait AbstractApiDataWithCustomImplicits[Implicits] {
 
   /** The bundle of implicits injected into macro materialization of every companion defined here. */
   protected def implicits: Implicits
@@ -59,24 +63,17 @@ trait ApiDataWithCustomImplicits[Implicits] {
    */
   abstract class ApiDataCompanion[T](
     implicit instances: MacroInstances[Implicits, CodecWithStructure[T]]
-  ) extends HasRestSchema[T] {
-    implicit lazy val codec: GenCodec[T] = instances(implicits, this).codec
-    implicit lazy val restStructure: RestStructure[T] = instances(implicits, this).structure
-    implicit lazy val restSchema: RestSchema[T] = RestSchema.lazySchema(restStructure.standaloneSchema)
-  }
+  ) extends AbstractRestDataCompanion[Implicits, T](implicits)
 
   /**
-   * A version of [[ApiDataCompanion]] which injects additional implicits into macro materialization. Implicits are imported
-   * from an object specified with type parameter `D`. It must be a singleton object type, i.e. `SomeObject.type`.
+   * A version of [[ApiDataCompanion]] which injects additional implicits into macro materialization. Implicits are
+   * imported from the enclosing `implicits` bundle and from an object specified with type parameter `D`.
+   * It must be a singleton object type, i.e. `SomeObject.type`.
    */
   abstract class ApiDataCompanionWithDeps[D, T](
-    implicit deps: ValueOf[D],
-    instances: MacroInstances[D, CodecWithStructure[T]],
-  ) extends HasRestSchema[T] {
-    implicit val codec: GenCodec[T] = instances(deps.value, this).codec
-    implicit lazy val restStructure: RestStructure[T] = instances(deps.value, this).structure
-    implicit lazy val restSchema: RestSchema[T] = RestSchema.lazySchema(restStructure.standaloneSchema)
-  }
+    implicit instances: MacroInstances[(Implicits, D), CodecWithStructure[T]],
+    deps: ValueOf[D],
+  ) extends AbstractRestDataCompanion[(Implicits, D), T]((implicits, deps.value))
 
   /**
    * Companion for generic case classes and sealed hierarchies used in REST APIs.
@@ -85,22 +82,25 @@ trait ApiDataWithCustomImplicits[Implicits] {
    * scheme (e.g. two or more generics with possible bounds etc.).
    */
   abstract class PolyApiDataCompanion[C[_]](implicit instances: MacroInstances[Implicits, PolyCodecWithStructure[C]]) {
-    implicit def codec[T: GenCodec]: GenCodec[C[T]] = instances(implicits, this).codec
-    implicit def restStructure[T: RestSchema]: RestStructure[C[T]] = instances(implicits, this).structure
+    private lazy val inst = instances(implicits, this)
+    implicit def codec[T: GenCodec]: GenCodec[C[T]] = inst.codec
+    implicit def restStructure[T: RestSchema]: RestStructure[C[T]] = inst.structure
     implicit def restSchema[T: RestSchema]: RestSchema[C[T]] = restStructure[T].standaloneSchema.unnamed
   }
 
   /** Like [[PolyApiDataCompanion]] but derives a [[GenObjectCodec]] (i.e. the wrapped type is always an object). */
   abstract class PolyObjectApiDataCompanion[C[_]](implicit instances: MacroInstances[Implicits, PolyObjectCodecWithStructure[C]]) {
-    implicit def codec[T: GenCodec]: GenObjectCodec[C[T]] = instances(implicits, this).codec
-    implicit def restStructure[T: RestSchema]: RestStructure[C[T]] = instances(implicits, this).structure
+    private lazy val inst = instances(implicits, this)
+    implicit def codec[T: GenCodec]: GenObjectCodec[C[T]] = inst.codec
+    implicit def restStructure[T: RestSchema]: RestStructure[C[T]] = inst.structure
     implicit def restSchema[T: RestSchema]: RestSchema[C[T]] = restStructure[T].standaloneSchema.unnamed
   }
 
   /** Like [[PolyApiDataCompanion]] but for generic types with exactly two unbounded type parameters. */
   abstract class Poly2ApiDataCompanion[C[_, _]](implicit instances: MacroInstances[Implicits, Poly2CodecWithStructure[C]]) {
-    implicit def codec[T1: GenCodec, T2: GenCodec]: GenCodec[C[T1, T2]] = instances(implicits, this).codec
-    implicit def restStructure[T1: RestSchema, T2: RestSchema]: RestStructure[C[T1, T2]] = instances(implicits, this).structure
+    private lazy val inst = instances(implicits, this)
+    implicit def codec[T1: GenCodec, T2: GenCodec]: GenCodec[C[T1, T2]] = inst.codec
+    implicit def restStructure[T1: RestSchema, T2: RestSchema]: RestStructure[C[T1, T2]] = inst.structure
     implicit def restSchema[T1: RestSchema, T2: RestSchema]: RestSchema[C[T1, T2]] = restStructure[T1, T2].standaloneSchema.unnamed
   }
 
@@ -109,11 +109,11 @@ trait ApiDataWithCustomImplicits[Implicits] {
    * a discriminator field specified with [[flatten]] annotation) if you want the codec and schema for the case class
    * _itself_ to include the discriminator field as well.
    */
-  abstract class ApiSealedCaseCompanion[T, R >: T](
+  abstract class ApiSealedCaseCompanion[T: ClassTag, R >: T](
     implicit rootCodec: GenCodec[R],
     rootFlattenAnnot: AnnotationOf[flatten, R],
     instances: MacroInstances[Implicits, () => RestStructure[T]],
-  ) extends HasRestSchema[T] {
+  ) {
     private lazy val structure = instances(implicits, this).apply()
 
     implicit lazy val codec: GenCodec[T] =
@@ -135,9 +135,23 @@ trait ApiDataWithCustomImplicits[Implicits] {
   abstract class ApiSealedSubHierarchyCompanion[T: ClassTag, R >: T](
     implicit rootCodec: GenCodec[R],
     instances: MacroInstances[Implicits, () => RestStructure[T]],
-  ) extends HasRestSchema[T] {
+  ) {
     implicit lazy val codec: GenCodec[T] = new GenCodec.SubclassCodec[T, R](nullable = true)
     implicit lazy val restStructure: RestStructure[T] = instances(implicits, this).apply()
     implicit lazy val restSchema: RestSchema[T] = RestSchema.lazySchema(restStructure.standaloneSchema)
   }
 }
+
+/**
+ * Ready-to-use entry point for [[AbstractApiDataWithCustomImplicits]]. Extend it with an `object`, fixing
+ * the implicits bundle, e.g.
+ * {{{
+ *   object MyImplicits extends DefaultRestImplicits
+ *   object MyApiData extends ApiDataWithCustomImplicits[MyImplicits.type](MyImplicits)
+ *
+ *   case class MyData(...)
+ *   object MyData extends MyApiData.ApiDataCompanion[MyData]
+ * }}}
+ */
+abstract class ApiDataWithCustomImplicits[Implicits](override protected val implicits: Implicits)
+  extends AbstractApiDataWithCustomImplicits[Implicits]

@@ -2,7 +2,7 @@ package io.udash
 package rest
 
 import com.avsystem.commons.serialization.json.JsonStringOutput
-import io.udash.rest.openapi.Info
+import io.udash.rest.openapi.{Info, RefOr}
 import io.udash.rest.raw.{PlainValue, RawRest, RestRequest}
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -52,12 +52,24 @@ class CustomImplicitsRestApiTest extends AnyFunSuite with ScalaFutures with Matc
   }
 
   test("OpenAPI is generated from the injected Tag schema") {
-    // `object EchoApi extends CustomRestApis.ApiCompanion[EchoApi]` already requires a RestSchema[Tag]
-    // from the injected bundle to compile; here we just confirm the document renders.
     val openapi = EchoApi.openapiMetadata.openapi(Info("Echo", "1.0"))
-    val json = JsonStringOutput.writePretty(openapi)
-    json should include("/echo")
-    json should include("tag")
+    val parameters = openapi.paths.paths("/echo") match {
+      case RefOr.Value(pathItem) => pathItem.get.get.parameters
+      case ref => fail(s"expected an inline path item, got $ref")
+    }
+    // the parameter schema is the injected RestSchema[Tag] (a plain string)
+    JsonStringOutput.writePretty(parameters) shouldBe
+      """[
+        |  {
+        |    "name": "tag",
+        |    "in": "query",
+        |    "required": true,
+        |    "explode": false,
+        |    "schema": {
+        |      "type": "string"
+        |    }
+        |  }
+        |]""".stripMargin
   }
 
   test("NoDocApiCompanion round-trips (client + server, no OpenAPI)") {

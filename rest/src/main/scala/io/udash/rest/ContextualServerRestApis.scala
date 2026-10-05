@@ -22,12 +22,10 @@ import monix.eval.Task
  *
  * @see [[ContextualServerAndClientRestApis]] for APIs shared between server and client.
  */
-trait AbstractContextualServerRestApis[Implicits, Ctx] extends ApiDataWithCustomImplicits[Implicits] {
+trait AbstractContextualServerRestApis[Implicits, Ctx] extends AbstractApiDataWithCustomImplicits[Implicits] {
 
   /** Result type of contextual server method: a [[monix.eval.Task Task]] awaiting the context `Ctx`. */
   type CtxTask[+T] = WithCtx[Ctx, Task[T]]
-  /** Bare context-consuming, task-returning function underlying [[CtxTask]]. */
-  type InCtx[+T] = Ctx => Task[T]
 
   /** Factory for [[CtxTask]] values for this API's context type. */
   def CtxTask: CtxTaskCompanion[Ctx] = CtxTaskCompanion[Ctx]
@@ -41,9 +39,10 @@ trait AbstractContextualServerRestApis[Implicits, Ctx] extends ApiDataWithCustom
   abstract class ServerApiCompanion[Real](
     implicit inst: MacroInstances[Implicits, CtxServerOpenApiInstances[Ctx, Real]]
   ) {
-    implicit lazy val restMetadata: RestMetadata[Real] = inst(implicits, this).metadata
-    implicit def restAsRaw(implicit ctx: Ctx): AsRaw[RawRest, Real] = inst(implicits, this).asRaw
-    implicit lazy val openapiMetadata: OpenApiMetadata[Real] = inst(implicits, this).openapiMetadata
+    private lazy val instances = inst(implicits, this)
+    implicit lazy val restMetadata: RestMetadata[Real] = instances.metadata
+    implicit def restAsRaw(implicit ctx: Ctx): AsRaw[RawRest, Real] = instances.asRaw
+    implicit lazy val openapiMetadata: OpenApiMetadata[Real] = instances.openapiMetadata
 
     implicit lazy val restAsContextualRaw: AsRaw[WithCtx[Ctx, RawRest], Real] =
       real => WithCtx(implicit ctx => restAsRaw.asRaw(real))
@@ -53,8 +52,9 @@ trait AbstractContextualServerRestApis[Implicits, Ctx] extends ApiDataWithCustom
   abstract class ServerNoDocApiCompanion[Real](
     implicit inst: MacroInstances[Implicits, CtxServerApiInstances[Ctx, Real]]
   ) {
-    implicit lazy val restMetadata: RestMetadata[Real] = inst(implicits, this).metadata
-    implicit def restAsRaw(implicit ctx: Ctx): AsRaw[RawRest, Real] = inst(implicits, this).asRaw
+    private lazy val instances = inst(implicits, this)
+    implicit lazy val restMetadata: RestMetadata[Real] = instances.metadata
+    implicit def restAsRaw(implicit ctx: Ctx): AsRaw[RawRest, Real] = instances.asRaw
 
     implicit lazy val restAsContextualRaw: AsRaw[WithCtx[Ctx, RawRest], Real] =
       real => WithCtx(implicit ctx => restAsRaw.asRaw(real))
@@ -67,9 +67,10 @@ trait AbstractContextualServerRestApis[Implicits, Ctx] extends ApiDataWithCustom
   abstract class ServerApiImplCompanion[Real](
     implicit inst: MacroInstances[Implicits, CtxOpenApiServerImplInstances[Ctx, Real]]
   ) {
-    implicit lazy val restMetadata: RestMetadata[Real] = inst(implicits, this).metadata
-    implicit def restAsRaw(implicit ctx: Ctx): AsRaw[RawRest, Real] = inst(implicits, this).asRaw
-    implicit lazy val openapiMetadata: OpenApiMetadata[Real] = inst(implicits, this).openapiMetadata
+    private lazy val instances = inst(implicits, this)
+    implicit lazy val restMetadata: RestMetadata[Real] = instances.metadata
+    implicit def restAsRaw(implicit ctx: Ctx): AsRaw[RawRest, Real] = instances.asRaw
+    implicit lazy val openapiMetadata: OpenApiMetadata[Real] = instances.openapiMetadata
 
     implicit lazy val restAsContextualRaw: AsRaw[WithCtx[Ctx, RawRest], Real] =
       real => WithCtx(implicit ctx => restAsRaw.asRaw(real))
@@ -88,13 +89,16 @@ trait AbstractContextualServerRestApis[Implicits, Ctx] extends ApiDataWithCustom
 abstract class ContextualServerRestApis[Implicits, Ctx](override protected val implicits: Implicits)
   extends AbstractContextualServerRestApis[Implicits, Ctx]
 
-/** Instances required by [[AbstractContextualServerRestApis.ServerApiCompanion]] for an API trait. */
+/** Instances required by [[AbstractContextualServerRestApis.ServerNoDocApiCompanion]] for an API trait. */
 trait CtxServerApiInstances[Ctx, Real] {
   def asRaw(implicit ctx: Ctx): RawRest.AsRawRpc[Real]
   def metadata: RestMetadata[Real]
 }
 
-/** [[CtxServerApiInstances]] extended with OpenAPI metadata. */
+/**
+ * [[CtxServerApiInstances]] extended with OpenAPI metadata, required by
+ * [[AbstractContextualServerRestApis.ServerApiCompanion]].
+ */
 trait CtxServerOpenApiInstances[Ctx, Real] extends CtxServerApiInstances[Ctx, Real] with OpenApiInstances[Real]
 
 /** Like [[CtxServerApiInstances]] but for an already-implemented class (materialized via `@materializeWith`). */
@@ -105,5 +109,8 @@ trait CtxServerImplInstances[Ctx, Real] {
   def metadata: RestMetadata[Real]
 }
 
-/** [[CtxServerImplInstances]] extended with OpenAPI metadata for an already-implemented class. */
+/**
+ * [[CtxServerImplInstances]] extended with OpenAPI metadata for an already-implemented class, required by
+ * [[AbstractContextualServerRestApis.ServerApiImplCompanion]].
+ */
 trait CtxOpenApiServerImplInstances[Ctx, Real] extends CtxServerImplInstances[Ctx, Real] with OpenApiImplInstances[Real]

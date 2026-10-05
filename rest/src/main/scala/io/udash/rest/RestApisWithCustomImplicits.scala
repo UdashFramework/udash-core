@@ -14,12 +14,12 @@ import com.avsystem.commons.meta.MacroInstances
  * serialization/schema instances) is threaded into macro materialization, so custom serialization for your
  * own types is picked up automatically without explicit imports.
  *
- * Also provides the data-type companions from [[ApiDataWithCustomImplicits]] (for the ADTs used by these
+ * Also provides the data-type companions from [[AbstractApiDataWithCustomImplicits]] (for the ADTs used by these
  * APIs). Defined as a `trait` so applications may mix it into their own base and add further companions.
  *
  * @see [[DefaultRestApiCompanion]] and friends for the equivalents pre-bound to [[DefaultRestImplicits]].
  */
-trait AbstractRestApisWithCustomImplicits[Implicits] extends ApiDataWithCustomImplicits[Implicits] {
+trait AbstractRestApisWithCustomImplicits[Implicits] extends AbstractApiDataWithCustomImplicits[Implicits] {
 
   /**
    * Companion for REST API traits that are used both on server and client.
