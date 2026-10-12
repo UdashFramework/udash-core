@@ -73,7 +73,10 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
         .doOnFinish(_ => report(finished))
         .doOnCancel(report(cancelled))
     def chunk(size: Int): Array[Byte] = Array.fill[Byte](size)('x')
-    def chunks(size: Int): Observable[Array[Byte]] = Observable.intervalAtFixedRate(20.millis).map(_ => chunk(size))
+    def chunks(size: Int): Observable[Array[Byte]] = {
+      val bytes = chunk(size)
+      Observable.intervalAtFixedRate(20.millis).map(_ => bytes)
+    }
     // "started" fires with the first chunk written, so an abort lands mid-stream
     def streamed(chunks: Observable[Array[Byte]]): AbstractRestResponse = {
       val reported = chunks.doOnStart(_ => report(started)).guaranteeCase(_ => report(finished))
@@ -89,7 +92,7 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
       case Some("stream") =>
         Task.now(streamed(chunks(64)))
       case Some("large-stream") =>
-        Task.now(streamed(chunks(1024 * 1024)))
+        Task.now(streamed(chunks(4 * 1024 * 1024)))
       case Some("stalled-stream") =>
         Task.now(streamed(Observable.now(chunk(64)) ++ Observable.never))
       case Some("uncancelable-stream") =>
@@ -305,12 +308,16 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
     "reset a streamed response cut by handleTimeout while a chunk write is blocked" in {
       resetFailures()
       val response = http2Client
-        .send(http2Request("short-timeout-api/large-stream/h2-timeout-blocked-stream"), HttpResponse.BodyHandlers.ofInputStream())
-      assert(response.statusCode() == 200)
-      assert(latch(finished, "h2-timeout-blocked-stream").await(4, TimeUnit.SECONDS), "stream was never stopped")
-      val body = CompletableFuture.supplyAsync(() => response.body().readAllBytes())
-      val failure = intercept[ExecutionException](body.get(4, TimeUnit.SECONDS))
-      assert(failure.getCause.isInstanceOf[IOException], failure.getCause)
+        .sendAsync(http2Request("short-timeout-api/large-stream/h2-timeout-blocked-stream"), HttpResponse.BodyHandlers.ofInputStream())
+        .get(4, TimeUnit.SECONDS)
+      // closed in any case, so that a failure does not leave unread data taking up the shared connection's window
+      try {
+        assert(response.statusCode() == 200)
+        assert(latch(finished, "h2-timeout-blocked-stream").await(4, TimeUnit.SECONDS), "stream was never stopped")
+        val body = CompletableFuture.supplyAsync(() => response.body().readAllBytes())
+        val failure = intercept[ExecutionException](body.get(4, TimeUnit.SECONDS))
+        assert(failure.getCause.isInstanceOf[IOException], failure.getCause)
+      } finally response.body().close()
       settle()
       // the blocked write failing is reported at warn, which is expected
       assertNoFailures(minLevel = Level.ERROR)
