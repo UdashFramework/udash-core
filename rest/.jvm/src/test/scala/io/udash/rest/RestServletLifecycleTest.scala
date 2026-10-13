@@ -10,13 +10,13 @@ import org.eclipse.jetty.server.{Server, ServerConnector}
 
 import java.net.URI
 import java.net.http.{HttpClient, HttpRequest, HttpResponse}
+import java.util.concurrent.TimeUnit
 import javax.servlet.http.{HttpServletResponse, HttpServletResponseWrapper}
 import javax.servlet.{DispatcherType, Filter, FilterChain, ServletRequest, ServletResponse}
 import scala.concurrent.duration.*
 
 trait LifecycleApi {
-  @timeout(200.millis) def quickHang: Task[Unit]
-  @timeout(1.minute) def slowHang: Task[Unit]
+  @timeout(3.seconds) def hang: Task[Unit]
 }
 object LifecycleApi extends DefaultRestApiCompanion[LifecycleApi]
 
@@ -47,10 +47,9 @@ class RestServletLifecycleTest extends UdashSharedTest {
       } finally server.stop()
     }
 
-    "drop its pending timeouts and end their thread when destroyed" in {
+    "still time out a call in flight when destroyed, then end its timer thread" in {
       val servlet = RestServlet[LifecycleApi](new LifecycleApi {
-        def quickHang: Task[Unit] = Task.never
-        def slowHang: Task[Unit] = Task.never
+        def hang: Task[Unit] = Task.never
       })
       @volatile var timerThread: Thread = null
       // records the thread that answers with the timeout's 500
@@ -72,14 +71,14 @@ class RestServletLifecycleTest extends UdashSharedTest {
       def post(path: String): HttpRequest = request(server, path).POST(HttpRequest.BodyPublishers.noBody()).build()
       try {
         server.start()
-        client.sendAsync(post("slowHang"), HttpResponse.BodyHandlers.discarding())
-        val deadline = 4.seconds.fromNow
+        val answer = client.sendAsync(post("hang"), HttpResponse.BodyHandlers.discarding())
+        val deadline = 2.seconds.fromNow
         while (servlet.pendingTimeouts == 0 && deadline.hasTimeLeft()) Thread.sleep(10)
         assert(servlet.pendingTimeouts == 1)
-        assert(client.send(post("quickHang"), HttpResponse.BodyHandlers.discarding()).statusCode() == 500)
+        servlet.destroy()
+        assert(answer.get(8, TimeUnit.SECONDS).statusCode() == 500)
         assert(timerThread.getName == "udash-rest-servlet-timer")
       } finally server.stop()
-      assert(servlet.pendingTimeouts == 0)
       timerThread.join(3000)
       assert(!timerThread.isAlive, "the timer thread outlived the servlet")
     }

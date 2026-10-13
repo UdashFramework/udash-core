@@ -213,14 +213,13 @@ class RestServlet(
     executor.allowCoreThreadTimeOut(true)
     // a cancelled timer would otherwise keep its request reachable until it was due
     executor.setRemoveOnCancelPolicy(true)
-    // so that shutdown() drops the pending timers instead of running them against a destroyed servlet
-    executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false)
     executor
   }
 
   private[rest] def pendingTimeouts: Int = timerRef.get.opt.fold(0)(_.getQueue.size)
 
   override def destroy(): Unit = {
+    // the pending timeouts still run, as they are all that bounds the calls in flight; the thread ends after the last
     timerRef.getAndSet(null).opt.foreach(_.shutdown())
     super.destroy()
   }
