@@ -229,6 +229,7 @@ object RawRest extends RawRpcCompanion[RawRest] {
   /**
    * A request handler that resolves a call before running it, so that the server can bound the call by its
    * [[io.udash.rest.timeout timeout]]. The handlers made by `asHandleRequest*` and [[wrapHandleRequest]] are such.
+   * Applied as a function, such a handler invokes the API methods at once; [[resolve]] defers them to its task.
    */
   trait ResolvingHandleRequest[+R <: AbstractRestResponse] extends (RestRequest => Task[R]) {
     /**
@@ -242,7 +243,7 @@ object RawRest extends RawRpcCompanion[RawRest] {
    * Wraps a server-side request handler, e.g. for authentication or logging. Unlike a plain function wrapping it,
    * the result still resolves calls when `handler` does, so that their [[io.udash.rest.timeout timeout]] still applies.
    *
-   * @param wrapper receives the request and the task that handles it, which does nothing until it runs
+   * @param wrapper receives the request and the task that handles it, and runs when the task it returns does
    */
   def wrapHandleRequest(handler: HandleRequestWithStreaming)(
     wrapper: (RestRequest, Task[AbstractRestResponse]) => Task[AbstractRestResponse]
@@ -253,9 +254,14 @@ object RawRest extends RawRpcCompanion[RawRest] {
           val (timeout, response) = resolving.resolve(request)
           (timeout, Task.defer(wrapper(request, response)))
         }
-        def apply(request: RestRequest): Task[AbstractRestResponse] = resolve(request)._2
+        def apply(request: RestRequest): Task[AbstractRestResponse] = {
+          val response = resolving(request)
+          Task.defer(wrapper(request, response))
+        }
       }
-    case _ => request => Task.defer(wrapper(request, invokedOnFirstRun(handler(request))))
+    case _ => request =>
+      val response = handler(request)
+      Task.defer(wrapper(request, response))
   }
 
   // Invokes on the first run only, so that a re-run awaits the same invocation, as it does with an eager handler

@@ -667,6 +667,22 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
     whenReady(opaqueTask.runToFuture)(_ => wrapperRuns.get shouldBe 2)
   }
 
+  test("applying a wrapped handler invokes the API methods at once, as the handler it wraps does") {
+    val impl = new TimeoutApiImpl
+    val wrapperRuns = new java.util.concurrent.atomic.AtomicInteger
+    val wrapped = RawRest.wrapHandleRequest(RawRest.asHandleRequestWithStreaming[TimeoutRootApi](impl)) { (_, task) =>
+      wrapperRuns.incrementAndGet()
+      task
+    }
+    val task = wrapped(timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
+    impl.invoked shouldBe List("outer", "inner", "annotated")
+    wrapperRuns.get shouldBe 0
+    whenReady(task.runToFuture) { _ =>
+      impl.invoked shouldBe List("outer", "inner", "annotated")
+      wrapperRuns.get shouldBe 1
+    }
+  }
+
   test("wrapHandleRequest invokes a handler that does not resolve calls once however many times its task runs") {
     val invocations = new java.util.concurrent.atomic.AtomicInteger
     val opaque: RawRest.HandleRequestWithStreaming = _ => {

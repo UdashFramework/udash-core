@@ -16,6 +16,7 @@ import org.slf4j.{Logger, LoggerFactory}
 
 import java.io.{ByteArrayOutputStream, EOFException, IOException}
 import java.nio.channels.ClosedChannelException
+import java.util.Locale
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.{ScheduledThreadPoolExecutor, TimeUnit}
@@ -180,9 +181,13 @@ class RestServlet(
 
   private val defaultTimeout: Opt[FiniteDuration] = handleTimeoutBound(handleTimeout)
 
-  if (!handleRequest.isInstanceOf[RawRest.ResolvingHandleRequest[?]])
-    logger.info("RestServlet's handler does not resolve calls, so @timeout does not apply to them. " +
-      "Wrap it with RawRest.wrapHandleRequest rather than a function for @timeout to apply.")
+  private val resolve: RestRequest => (Opt[FiniteDuration], Task[AbstractRestResponse]) = handleRequest match {
+    case resolving: RawRest.ResolvingHandleRequest[AbstractRestResponse] => resolving.resolve
+    case _ =>
+      logger.info("RestServlet's handler does not resolve calls, so @timeout does not apply to them. " +
+        "Wrap it with RawRest.wrapHandleRequest rather than a function for @timeout to apply.")
+      request => (Opt.Empty, Task.defer(handleRequest(request)))
+  }
 
   private val timerRef = new AtomicReference[ScheduledThreadPoolExecutor]
 
@@ -288,14 +293,8 @@ class RestServlet(
 
     // readRequest must execute in Jetty thread but we want exceptions to be handled uniformly, hence the Try
     val (timeout, handle) = Try {
-      val restRequest = readRequest(request)
-      handleRequest match {
-        case resolving: RawRest.ResolvingHandleRequest[AbstractRestResponse] =>
-          val (callTimeout, response) = resolving.resolve(restRequest)
-          (callTimeout.orElse(defaultTimeout), response)
-        case _ =>
-          (defaultTimeout, Task.defer(handleRequest(restRequest)))
-      }
+      val (callTimeout, response) = resolve(readRequest(request))
+      (callTimeout.orElse(defaultTimeout), response)
     }.fold(e => (defaultTimeout, Task.raiseError(e)), identity)
 
     def timeOut(timeout: FiniteDuration): Runnable = () =>
@@ -358,20 +357,21 @@ class RestServlet(
   private def unlessCompleted(completed: AtomicBoolean)(write: => Unit): Task[Unit] =
     Task(if (!completed.get) write)
 
-  // Async, as the idle bound's check would otherwise wait out a slow write holding a scheduler thread. Once the request
-  // is completed the task may be cancelled, so a failure then ends the stream here instead of going uncaught; it is
-  // caught within the write, as a cancelled task reports an error it signals to the uncaught failure reporter.
-  private def writeAsync(completed: AtomicBoolean)(op: => Unit): Task[Boolean] =
-    Task.evalAsync {
+  // Async under an idle bound, as its check would otherwise wait out a slow write holding a scheduler thread. A write
+  // the client cut short or one failing after completion ends the stream here: escaping, it can race a cancellation.
+  private def writeStep(completed: AtomicBoolean, async: Boolean)(op: => Unit): Task[Boolean] = {
+    val step = Task.eval {
       try {
         write(op)
         true
       } catch {
-        case NonFatal(e) if completed.get =>
+        case NonFatal(e) if e.isInstanceOf[ClientGoneException] || completed.get =>
           logAbandonedStream(e)
           false
       }
     }
+    if (async) step.executeAsync else step
+  }
 
   private def logAbandonedStream(e: Throwable): Unit = e match {
     case e: ClientGoneException => logger.warn("Request was cancelled by the client during streaming REST response", e.getCause)
@@ -417,7 +417,7 @@ class RestServlet(
     response.resetBuffer()
     response.setContentType(null)
     response.setHeader("Content-Length", null)
-    headers.entries.groupBy(_._1.toLowerCase).foreach { case (_, staged) =>
+    headers.entries.groupBy(_._1.toLowerCase(Locale.ROOT)).foreach { case (_, staged) =>
       val name = staged.head._1
       // setHeader clears every value of the name, and setResponseHeaders appended the staged ones after a filter's
       val kept = response.getHeaders(name).asScala.toList.dropRight(staged.size)
@@ -432,18 +432,18 @@ class RestServlet(
       case NonFatal(e) => logger.warn("Failed to close the failed streaming REST response", e)
     }
 
-  // `writeEnd` follows the last chunk unless the stream failed
+  // `writeEnd` follows the last chunk unless the stream failed or a write was abandoned
   private def writeChunks[A](
     chunks: Observable[A],
     completed: AtomicBoolean,
+    async: Boolean,
     writeEnd: => Unit = (),
   )(writeChunk: A => Unit): Task[Unit] =
     chunks
       .takeWhile(_ => !completed.get)
-      .mapEval(chunk => writeAsync(completed)(writeChunk(chunk)))
-      .takeWhile(identity)
-      .completedL
-      .flatMap(_ => unlessCompleted(completed)(write(writeEnd)))
+      .mapEval(chunk => writeStep(completed, async)(writeChunk(chunk)))
+      .foldWhileLeftL(true)((_, written) => if (written) Left(true) else Right(false))
+      .flatMap(allWritten => Task.when(allWritten && !completed.get)(writeStep(completed, async = false)(writeEnd).void))
 
   private def writeNonEmptyStreamedBody(
     response: HttpServletResponse,
@@ -453,6 +453,7 @@ class RestServlet(
     timeout: Opt[FiniteDuration],
   ): Task[Unit] = {
     def bounded[A](source: Observable[A]): Observable[A] = timeout.fold(source)(idleBounded(source, _))
+    val async = timeout.nonEmpty
     // The Content-Length header is intentionally omitted for streams.
     // This signals to the client that the response body size is not predetermined and will be streamed.
     // Clients implementing the streaming part of the REST interface contract MUST be prepared
@@ -464,7 +465,7 @@ class RestServlet(
         unlessCompleted(completed)(writeNonEmptyBody(response, single.body))
       case binary: StreamedBody.RawBinary =>
         unlessCompleted(completed)(response.setContentType(binary.contentType)) >>
-          writeChunks(bounded(binary.content), completed) { chunk =>
+          writeChunks(bounded(binary.content), completed, async) { chunk =>
             response.getOutputStream.write(chunk)
             response.getOutputStream.flush()
           }
@@ -476,6 +477,7 @@ class RestServlet(
               .switchIfEmpty(Observable(Seq.empty))
               .zipWithIndex,
             completed,
+            async,
             writeEnd = response.getOutputStream.write("]".getBytes(jsonList.charset)),
           ) { case (batch, idx) =>
             val firstBatch = idx == 0

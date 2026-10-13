@@ -9,12 +9,16 @@ import monix.reactive.Observable
 import org.eclipse.jetty.ee8.servlet.{ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
 import org.eclipse.jetty.server.{HttpConnectionFactory, Server, ServerConnector}
+import org.slf4j.event.SubstituteLoggingEvent
+import org.slf4j.helpers.SubstituteLogger
 
 import java.net.http.{HttpClient, HttpRequest, HttpResponse}
 import java.net.{Socket, URI}
 import java.nio.charset.StandardCharsets.UTF_8
-import java.util.concurrent.{CountDownLatch, TimeUnit}
+import java.util.concurrent.{ConcurrentLinkedQueue, CountDownLatch, TimeUnit}
 import scala.concurrent.duration.*
+import scala.jdk.CollectionConverters.*
+import scala.util.control.NonFatal
 
 /**
  * Pins what the servlet's own timeouts rely on: Jetty does not expire a request that is suspended without pending
@@ -30,6 +34,9 @@ class RestServletConnectorIdleTest extends UdashSharedTest with UsesHttpServer {
   private def chunk: Array[Byte] = Array.fill[Byte](64)('x')
 
   private val unreadStreamEnded = new CountDownLatch(1)
+
+  private val logEvents = new ConcurrentLinkedQueue[SubstituteLoggingEvent]
+  private val servletLogger = new SubstituteLogger(classOf[RestServlet].getName, logEvents, false)
 
   private val handleRequest: RawRest.HandleRequestWithStreaming = request =>
     request.parameters.path.map(_.value) match {
@@ -52,7 +59,7 @@ class RestServletConnectorIdleTest extends UdashSharedTest with UsesHttpServer {
     connector.addConnectionFactory(new HTTP2CServerConnectionFactory(httpConfig))
 
     val handler = new ServletContextHandler()
-    handler.addServlet(new ServletHolder(new RestServlet(handleRequest, 10.seconds)), "/api/*")
+    handler.addServlet(new ServletHolder(new RestServlet(handleRequest, 10.seconds, customLogger = servletLogger)), "/api/*")
     server.setHandler(handler)
   }
 
@@ -66,7 +73,14 @@ class RestServletConnectorIdleTest extends UdashSharedTest with UsesHttpServer {
     def request(path: String) = HttpRequest.newBuilder(URI.create(s"$baseUrl/api/$path")).GET().build()
     // a cleartext HTTP/2 connection starts as an HTTP/1.1 upgrade, so the request itself must find it upgraded
     if (protocol == "h2") client.send(request("ping"), HttpResponse.BodyHandlers.discarding())
-    val response = client.sendAsync(request(path), body).get(8, TimeUnit.SECONDS)
+    // a failure carries the servlet's log, which tells a reset by the container from a failed write
+    val response =
+      try client.sendAsync(request(path), body).get(8, TimeUnit.SECONDS)
+      catch {
+        case NonFatal(e) =>
+          val log = logEvents.asScala.map(event => s"${event.getLevel} ${event.getMessage}: ${event.getThrowable}")
+          throw new AssertionError(s"$path failed: $e; servlet log: ${log.mkString("[", ", ", "]")}", e)
+      }
     assert(response.version() == (if (protocol == "h2") HttpClient.Version.HTTP_2 else HttpClient.Version.HTTP_1_1))
     response
   }
