@@ -5,7 +5,7 @@ import sbt.*
 import sbt.Keys.scalaVersion
 
 object Dependencies {
-  val versionOfScala = "2.13.18" //run githubWorkflowGenerate
+  val versionOfScala = "3.9.0" //run githubWorkflowGenerate
 
   val jqueryWrapperVersion = "3.4.0"
 
