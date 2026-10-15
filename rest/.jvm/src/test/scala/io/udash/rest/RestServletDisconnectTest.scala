@@ -23,7 +23,7 @@ import java.net.http.{HttpClient, HttpRequest, HttpResponse}
 import java.net.{Socket, URI}
 import java.util.EnumSet
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.{ConcurrentHashMap, ConcurrentLinkedQueue, CountDownLatch, TimeUnit}
+import java.util.concurrent.{ConcurrentHashMap, ConcurrentLinkedQueue, CountDownLatch, ScheduledThreadPoolExecutor, TimeUnit}
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse, HttpServletResponseWrapper}
 import javax.servlet.{DispatcherType, Filter, FilterChain, ServletOutputStream, ServletRequest, ServletResponse, WriteListener}
 import scala.concurrent.duration.*
@@ -177,8 +177,8 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
     handler.addFilter(headerFilter, "/*", EnumSet.of(DispatcherType.REQUEST))
     handler.addServlet(new ServletHolder(slowWrites(new RestServlet(handleRequest, SlowWriteTimeout, customLogger = servletLogger))),
       "/slow-write-api/*")
-    handler.addServlet(new ServletHolder(new RestServlet(blockingHandler, ShortHandleTimeout, customLogger = servletLogger)(blockingScheduler)),
-      "/blocked-api/*")
+    handler.addServlet(new ServletHolder(new RestServlet(blockingHandler, ShortHandleTimeout, customLogger = servletLogger,
+      timer = Scheduler(blockedTimer))(blockingScheduler)), "/blocked-api/*")
     handler.addServlet(new ServletHolder(blockedCancelServlet), "/blocked-cancel-api/*")
     handler.addServlet(new ServletHolder(slowWrites(new RestServlet(handleRequest, SlowWriteTimeout, customLogger = servletLogger)(pooledScheduler))),
       "/pooled-slow-write-api/*")
@@ -230,11 +230,23 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
 
   private val blockingScheduler = Scheduler.singleThread("rest-servlet-test-blocked")
   private val pooledScheduler = Scheduler.fixedPool("rest-servlet-test-pooled", 2)
+  // dedicated, as the blocking handler takes the only thread of blockingScheduler
+  private val blockedTimer = timerExecutor()
+  private val blockedCancelTimer = timerExecutor()
+
+  private def timerExecutor(): ScheduledThreadPoolExecutor = {
+    val executor = new ScheduledThreadPoolExecutor(1)
+    // so that the queue holds only the pending timeouts
+    executor.setRemoveOnCancelPolicy(true)
+    executor
+  }
 
   override protected def afterAll(): Unit = {
     super.afterAll()
     blockingScheduler.shutdown()
     pooledScheduler.shutdown()
+    blockedTimer.shutdown()
+    blockedCancelTimer.shutdown()
   }
 
   // Blocks the only thread of its Scheduler for 4 seconds
@@ -247,7 +259,8 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
   }
 
   private lazy val blockedCancelServlet =
-    new RestServlet(blockingHandler, HandleTimeout, customLogger = servletLogger, cancelOnDisconnect = true)(blockingScheduler)
+    new RestServlet(blockingHandler, HandleTimeout, customLogger = servletLogger, cancelOnDisconnect = true,
+      timer = Scheduler(blockedCancelTimer))(blockingScheduler)
 
   /**
    * Waits for the handler to start and for the container to return from dispatching the request. Jetty hands a failure
@@ -564,12 +577,12 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
       val blocker = http1Client.sendAsync(http2Request("blocked-cancel-api/blocking/queue-blocker"), HttpResponse.BodyHandlers.discarding())
       awaitStarted("queue-blocker")
       val queued = http2Client.sendAsync(http2Request("blocked-cancel-api/blocking/queued"), HttpResponse.BodyHandlers.discarding())
-      awaitUntil("the queued call was never timed")(blockedCancelServlet.pendingTimeouts == 2)
+      awaitUntil("the queued call was never timed")(blockedCancelTimer.getQueue.size == 2)
       assert(queued.cancel(true), "request already completed, nothing was aborted")
       // well before the blocker ends, which drops its own timeout
-      awaitUntil("the abandoned call's timeout is still pending", within = 2.seconds)(blockedCancelServlet.pendingTimeouts == 1)
+      awaitUntil("the abandoned call's timeout is still pending", within = 2.seconds)(blockedCancelTimer.getQueue.size == 1)
       assert(blocker.get(8, TimeUnit.SECONDS).statusCode() == 204)
-      awaitUntil("a timeout outlived its call")(blockedCancelServlet.pendingTimeouts == 0)
+      awaitUntil("a timeout outlived its call")(blockedCancelTimer.getQueue.size == 0)
       assert(latch(started, "queued").getCount == 1, "the abandoned call started")
     }
 

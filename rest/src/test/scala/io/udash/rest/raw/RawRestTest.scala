@@ -692,4 +692,23 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
     val wrapped = RawRest.wrapHandleRequest(opaque)((_, task) => task.flatMap(_ => task))
     whenReady(wrapped(timeoutRequest(HttpMethod.GET, "any")).runToFuture)(_ => invocations.get shouldBe 1)
   }
+
+  test("withTimeouts resolves the timeout of the call a handler that does not resolve calls handles") {
+    val invocations = new java.util.concurrent.atomic.AtomicInteger
+    val opaque: RawRest.HandleRequestWithStreaming = _ => {
+      invocations.incrementAndGet()
+      Task.now(RestResponse(204, IMapping.empty, HttpBody.Empty))
+    }
+    val handler = RawRest.withTimeouts(TimeoutRootApi.restMetadata)(opaque)
+    def timeoutOf(method: HttpMethod, path: String) = resolve(handler, timeoutRequest(method, path))._1
+    timeoutOf(HttpMethod.POST, "outer/inner/annotated") shouldBe Opt(3.seconds)
+    timeoutOf(HttpMethod.POST, "outer/innerBare/plain") shouldBe Opt(1.second)
+    timeoutOf(HttpMethod.HEAD, "bare/fetch") shouldBe Opt(4.seconds)
+    timeoutOf(HttpMethod.GET, "bare/missing") shouldBe Opt.Empty
+    timeoutOf(HttpMethod.GET, "bare/plain") shouldBe Opt.Empty
+    timeoutOf(HttpMethod.OPTIONS, "bare/fetch") shouldBe Opt.Empty
+    invocations.get shouldBe 0
+    val (_, task) = resolve(handler, timeoutRequest(HttpMethod.POST, "untimed"))
+    whenReady(task.flatMap(_ => task).runToFuture)(_ => invocations.get shouldBe 1)
+  }
 }

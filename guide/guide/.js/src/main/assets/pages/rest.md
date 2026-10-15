@@ -135,8 +135,14 @@ notice. A JSON list is sent in batches of `defaultStreamingBatchSize` elements, 
 `@streamingResponseBatchSize(1)`.
 
 The limit applies to servlets created with `RestServlet[Api](...)` or from handlers made by `RawRest.asHandleRequest*`.
-Wrap such a handler (e.g. for authentication) with `RawRest.wrapHandleRequest`. A handler wrapped in a plain function
-gets `handleTimeout` for every call, which the servlet logs when created.
+Wrap such a handler (e.g. for authentication) with `RawRest.wrapHandleRequest`. Any other handler, such as one wrapped
+in a plain function, gets `handleTimeout` for every call unless `RawRest.withTimeouts(RestMetadata[Api])(handler)`
+looks the limit up for it. Apply `withTimeouts` outside any wrapper that rewrites the request, so that the limit is
+that of the call actually handled.
+
+The timeouts run on the servlet's `Scheduler`, so a call that times out while all of its threads are busy gets its
+`500` only once one frees up. If handlers may block them, pass the servlet a dedicated `timer`, e.g.
+`Scheduler.singleThread("rest-timeouts")`.
 
 Only the server enforces `@timeout`. `JettyRestClient` bounds the whole exchange by its own `timeout` (10 seconds by
 default, `Duration.Inf` allowed), so raise it for long calls and streams. It also reads a JSON list whole before

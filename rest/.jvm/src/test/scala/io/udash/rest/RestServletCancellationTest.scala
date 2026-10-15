@@ -43,7 +43,8 @@ class RestServletCancellationTest extends UdashSharedTest {
    * listeners, which cancel the handler, and then fails the write as a reset stream does. Without it, writes fail as
    * on a broken connection that the container has not reported. With `lateDisconnect`, writes fail as for a reset
    * stream, and the container reports that only once the task of the failed write has run, while the failure is on its
-   * way up. Closing the response fails either way. Asserts that nothing reached the uncaught failure reporter and
+   * way up. With `unreportedReset`, writes fail as for a reset stream that the container never reports. Closing the
+   * response fails either way. Asserts that nothing reached the uncaught failure reporter and
    * returns what the servlet logged.
    */
   private def serveStreamed(
@@ -51,8 +52,9 @@ class RestServletCancellationTest extends UdashSharedTest {
     disconnect: Boolean = true,
     failFirstWrite: Boolean = true,
     lateDisconnect: Boolean = false,
+    unreportedReset: Boolean = false,
   ): Seq[SubstituteLoggingEvent] =
-    serveStreamedWith(_ => body, disconnect, failFirstWrite, lateDisconnect)
+    serveStreamedWith(_ => body, disconnect, failFirstWrite, lateDisconnect, unreportedReset)
 
   /** As [[serveStreamed]], for a `body` that reports the disconnect itself when it is given the call that does. */
   private def serveStreamedWith(
@@ -60,6 +62,7 @@ class RestServletCancellationTest extends UdashSharedTest {
     disconnect: Boolean,
     failFirstWrite: Boolean,
     lateDisconnect: Boolean = false,
+    unreportedReset: Boolean = false,
   ): Seq[SubstituteLoggingEvent] = {
     implicit val scheduler: TestScheduler = TestScheduler()
     val logEvents = new ArrayDeque[SubstituteLoggingEvent]
@@ -96,7 +99,7 @@ class RestServletCancellationTest extends UdashSharedTest {
       }
       override def close(): Unit = throw new IOException("broken pipe")
       private def failure: IOException =
-        if (disconnect || lateDisconnect) new EOFException("reset") else new IOException("broken pipe")
+        if (disconnect || lateDisconnect || unreportedReset) new EOFException("reset") else new IOException("broken pipe")
     }
 
     val handleRequest: RawRest.HandleRequestWithStreaming = _ => Task.now(StreamedRestResponse(200, IMapping.empty, body(() => reportDisconnect())))
@@ -162,6 +165,12 @@ class RestServletCancellationTest extends UdashSharedTest {
 
     "log a JSON list batch write failing before its disconnect is reported once, without writing its end" in {
       val events = serveStreamed(StreamedBody.JsonList(Observable(JsonValue("1"))), disconnect = false, lateDisconnect = true)
+      assertLogged(events, Level.WARN, "cancelled by the client", "reset")
+      assert(events.count(_.getLevel == Level.WARN) == 1, describe(events))
+    }
+
+    "log a JSON list batch write failing on a reset stream that is never reported once, without writing its end" in {
+      val events = serveStreamed(StreamedBody.JsonList(Observable(JsonValue("1"))), disconnect = false, unreportedReset = true)
       assertLogged(events, Level.WARN, "cancelled by the client", "reset")
       assert(events.count(_.getLevel == Level.WARN) == 1, describe(events))
     }

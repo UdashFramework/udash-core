@@ -5,14 +5,12 @@ import io.udash.rest.raw.{HttpBody, IMapping, RestResponse}
 import io.udash.testing.UdashSharedTest
 import monix.eval.Task
 import monix.execution.Scheduler
-import org.eclipse.jetty.ee8.servlet.{FilterHolder, ServletContextHandler, ServletHolder}
+import org.eclipse.jetty.ee8.servlet.{ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.server.{Server, ServerConnector}
 
 import java.net.URI
 import java.net.http.{HttpClient, HttpRequest, HttpResponse}
-import java.util.concurrent.TimeUnit
-import javax.servlet.http.{HttpServletResponse, HttpServletResponseWrapper}
-import javax.servlet.{DispatcherType, Filter, FilterChain, ServletRequest, ServletResponse}
+import java.util.concurrent.{CountDownLatch, TimeUnit}
 import scala.concurrent.duration.*
 
 trait LifecycleApi {
@@ -47,40 +45,23 @@ class RestServletLifecycleTest extends UdashSharedTest {
       } finally server.stop()
     }
 
-    "still time out a call in flight when destroyed, then end its timer thread" in {
+    "still time out a call in flight when destroyed" in {
+      val started = new CountDownLatch(1)
       val servlet = RestServlet[LifecycleApi](new LifecycleApi {
-        def hang: Task[Unit] = Task.never
+        def hang: Task[Unit] = Task(started.countDown()) >> Task.never
       })
-      @volatile var timerThread: Thread = null
-      // records the thread that answers with the timeout's 500
-      val timerRecorder = new FilterHolder(new Filter {
-        def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain): Unit =
-          chain.doFilter(request, new HttpServletResponseWrapper(response.asInstanceOf[HttpServletResponse]) {
-            override def setStatus(sc: Int): Unit = {
-              if (sc == 500) timerThread = Thread.currentThread()
-              super.setStatus(sc)
-            }
-          })
-      })
-      timerRecorder.setAsyncSupported(true)
       val server = new Server(0)
       val handler = new ServletContextHandler()
-      handler.addFilter(timerRecorder, "/*", java.util.EnumSet.of(DispatcherType.REQUEST))
       handler.addServlet(new ServletHolder(servlet), "/*")
       server.setHandler(handler)
-      def post(path: String): HttpRequest = request(server, path).POST(HttpRequest.BodyPublishers.noBody()).build()
       try {
         server.start()
-        val answer = client.sendAsync(post("hang"), HttpResponse.BodyHandlers.discarding())
-        val deadline = 2.seconds.fromNow
-        while (servlet.pendingTimeouts == 0 && deadline.hasTimeLeft()) Thread.sleep(10)
-        assert(servlet.pendingTimeouts == 1)
+        val answer = client.sendAsync(request(server, "hang").POST(HttpRequest.BodyPublishers.noBody()).build(),
+          HttpResponse.BodyHandlers.discarding())
+        assert(started.await(2, TimeUnit.SECONDS), "the call never started")
         servlet.destroy()
         assert(answer.get(8, TimeUnit.SECONDS).statusCode() == 500)
-        assert(timerThread.getName == "udash-rest-servlet-timer")
       } finally server.stop()
-      timerThread.join(3000)
-      assert(!timerThread.isAlive, "the timer thread outlived the servlet")
     }
   }
 }

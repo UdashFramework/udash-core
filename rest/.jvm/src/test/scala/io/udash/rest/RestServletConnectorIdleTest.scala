@@ -71,6 +71,7 @@ class RestServletConnectorIdleTest extends UdashSharedTest with UsesHttpServer {
   private def get[T](protocol: String, path: String, body: HttpResponse.BodyHandler[T]): HttpResponse[T] = {
     val client = clients(protocol)
     def request(path: String) = HttpRequest.newBuilder(URI.create(s"$baseUrl/api/$path")).GET().build()
+    logEvents.clear()
     // a cleartext HTTP/2 connection starts as an HTTP/1.1 upgrade, so the request itself must find it upgraded
     if (protocol == "h2") client.send(request("ping"), HttpResponse.BodyHandlers.discarding())
     // a failure carries the servlet's log, which tells a reset by the container from a failed write

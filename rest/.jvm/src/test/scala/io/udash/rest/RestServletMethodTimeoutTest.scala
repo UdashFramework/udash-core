@@ -62,6 +62,8 @@ class RestServletMethodTimeoutTest extends UdashSharedTest with UsesHttpServer {
     mount("plain-api", new RestServlet(RawRest.asHandleRequest[MethodTimeoutApi](impl), HandleTimeout))
     mount("wrapped-api", new RestServlet(RawRest.wrapHandleRequest(streaming)((_, task) => task), HandleTimeout))
     mount("lambda-api", new RestServlet(request => streaming(request), HandleTimeout))
+    mount("lambda-timeouts-api",
+      new RestServlet(RawRest.withTimeouts(MethodTimeoutApi.restMetadata)(request => streaming(request)), HandleTimeout))
     server.setHandler(handler)
   }
 
@@ -108,7 +110,11 @@ class RestServletMethodTimeoutTest extends UdashSharedTest with UsesHttpServer {
       assertTimedOut(post("api/shortPrefix/overriddenHang"), 500.millis)
     }
 
-    for ((mount, handler) <- List("plain-api" -> "RawRest.asHandleRequest", "wrapped-api" -> "RawRest.wrapHandleRequest")) {
+    for ((mount, handler) <- List(
+      "plain-api" -> "RawRest.asHandleRequest",
+      "wrapped-api" -> "RawRest.wrapHandleRequest",
+      "lambda-timeouts-api" -> "RawRest.withTimeouts over a plain function",
+    )) {
       s"honour @timeout for a servlet whose handler comes from $handler" in {
         assertTimedOut(post(s"$mount/shortHang"), 300.millis)
       }
@@ -118,16 +124,17 @@ class RestServletMethodTimeoutTest extends UdashSharedTest with UsesHttpServer {
       assertTimedOut(post("lambda-api/shortHang"), HandleTimeout)
     }
 
-    "log when created with a handler wrapped in a plain function" in {
+    "log at debug when created with a handler wrapped in a plain function" in {
       def creationLog(handler: RawRest.HandleRequestWithStreaming): List[(Level, String)] = {
         val events = new ConcurrentLinkedQueue[SubstituteLoggingEvent]
         new RestServlet(handler, customLogger = new SubstituteLogger(classOf[RestServlet].getName, events, false))
         events.asScala.map(e => (e.getLevel, e.getMessage)).toList
       }
-      assert(creationLog(request => streaming(request)) == List(Level.INFO ->
+      assert(creationLog(request => streaming(request)) == List(Level.DEBUG ->
         ("RestServlet's handler does not resolve calls, so @timeout does not apply to them. " +
-          "Wrap it with RawRest.wrapHandleRequest rather than a function for @timeout to apply.")))
+          "Wrap it with RawRest.withTimeouts or RawRest.wrapHandleRequest for @timeout to apply.")))
       assert(creationLog(RawRest.wrapHandleRequest(streaming)((_, task) => task)).isEmpty)
+      assert(creationLog(RawRest.withTimeouts(MethodTimeoutApi.restMetadata)(request => streaming(request))).isEmpty)
     }
   }
 }

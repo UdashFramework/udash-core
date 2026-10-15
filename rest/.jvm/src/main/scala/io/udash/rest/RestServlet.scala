@@ -17,9 +17,9 @@ import org.slf4j.{Logger, LoggerFactory}
 import java.io.{ByteArrayOutputStream, EOFException, IOException}
 import java.nio.channels.ClosedChannelException
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import java.util.concurrent.locks.ReentrantLock
-import java.util.concurrent.{ScheduledThreadPoolExecutor, TimeUnit}
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import javax.servlet.{AsyncEvent, AsyncListener}
 import scala.annotation.tailrec
@@ -122,12 +122,12 @@ object RestServlet {
 
 /**
  * @param handleRequest      the handler of REST requests. Only a handler that resolves calls, i.e. one made by
- *                           `RawRest.asHandleRequest*` or wrapped with `RawRest.wrapHandleRequest`, has its calls bound
- *                           by their [[io.udash.rest.timeout timeout]]; any other gets `handleTimeout` for all of them,
- *                           which the servlet logs when created.
+ *                           `RawRest.asHandleRequest*` or `RawRest.withTimeouts`, or one of these wrapped with
+ *                           `RawRest.wrapHandleRequest`, has its calls bound by their [[io.udash.rest.timeout timeout]];
+ *                           any other gets `handleTimeout` for all of them.
  * @param handleTimeout      bound for calls without [[io.udash.rest.timeout timeout]]: a call that has not answered
  *                           within it gets a 500 and is cancelled, and a streamed response ends once it has emitted
- *                           nothing for that long. The servlet's own thread runs the former, `scheduler` the latter.
+ *                           nothing for that long. `timer` runs the former, `scheduler` the latter.
  *                           Neither counts time spent writing to the client, which the container bounds, e.g. by
  *                           Jetty's connector idle timeout. One under a millisecond sets no bound, as for the
  *                           container's own async timeout.
@@ -145,6 +145,9 @@ object RestServlet {
  *                           by the call's timeout. Independently of this setting, nothing is written into a request
  *                           the container has already completed, so a streamed response is abandoned at the next
  *                           chunk.
+ * @param timer              runs the timeouts of calls, `scheduler` if empty. A call that times out while `scheduler`
+ *                           has no free thread gets its 500 only once one frees up, so pass a dedicated one, e.g.
+ *                           `Scheduler.singleThread`, if handlers may block all of its threads.
  */
 class RestServlet(
   handleRequest: RawRest.HandleRequestWithStreaming,
@@ -153,11 +156,31 @@ class RestServlet(
   defaultStreamingBatchSize: Int = DefaultStreamingBatchSize,
   customLogger: OptArg[Logger] = OptArg.Empty,
   cancelOnDisconnect: Boolean = DefaultCancelOnDisconnect,
+  timer: OptArg[Scheduler] = OptArg.Empty,
 )(implicit
   scheduler: Scheduler
 ) extends HttpServlet with LazyLogging {
 
   import RestServlet.*
+
+  @bincompat private[rest] def this(
+    handleRequest: RawRest.HandleRequestWithStreaming,
+    handleTimeout: FiniteDuration,
+    maxPayloadSize: Long,
+    defaultStreamingBatchSize: Int,
+    customLogger: OptArg[Logger],
+    cancelOnDisconnect: Boolean,
+  )(implicit
+    scheduler: Scheduler
+  ) = this(
+    handleRequest,
+    handleTimeout,
+    maxPayloadSize,
+    defaultStreamingBatchSize,
+    customLogger,
+    cancelOnDisconnect,
+    timer = OptArg.Empty,
+  )
 
   @bincompat private[rest] def this(
     handleRequest: RawRest.HandleRequestWithStreaming,
@@ -174,6 +197,7 @@ class RestServlet(
     defaultStreamingBatchSize,
     customLogger,
     cancelOnDisconnect = DefaultCancelOnDisconnect,
+    timer = OptArg.Empty,
   )
 
   override protected lazy val logger: ScalaLogger =
@@ -184,45 +208,13 @@ class RestServlet(
   private val resolve: RestRequest => (Opt[FiniteDuration], Task[AbstractRestResponse]) = handleRequest match {
     case resolving: RawRest.ResolvingHandleRequest[AbstractRestResponse] => resolving.resolve
     case _ =>
-      logger.info("RestServlet's handler does not resolve calls, so @timeout does not apply to them. " +
-        "Wrap it with RawRest.wrapHandleRequest rather than a function for @timeout to apply.")
+      // debug, as a servlet built per request would log it for each
+      logger.debug("RestServlet's handler does not resolve calls, so @timeout does not apply to them. " +
+        "Wrap it with RawRest.withTimeouts or RawRest.wrapHandleRequest for @timeout to apply.")
       request => (Opt.Empty, Task.defer(handleRequest(request)))
   }
 
-  private val timerRef = new AtomicReference[ScheduledThreadPoolExecutor]
-
-  // Created on demand, so that a servlet started again after destroy() gets a new one
-  @tailrec private def timer: ScheduledThreadPoolExecutor = timerRef.get match {
-    case null =>
-      val created = newTimer()
-      if (timerRef.compareAndSet(null, created)) created
-      else {
-        created.shutdown()
-        timer
-      }
-    case existing => existing
-  }
-
-  private def newTimer(): ScheduledThreadPoolExecutor = {
-    val executor = new ScheduledThreadPoolExecutor(1, { (task: Runnable) =>
-      val thread = new Thread(task, "udash-rest-servlet-timer")
-      thread.setDaemon(true)
-      thread
-    })
-    executor.setKeepAliveTime(1, TimeUnit.SECONDS)
-    executor.allowCoreThreadTimeOut(true)
-    // a cancelled timer would otherwise keep its request reachable until it was due
-    executor.setRemoveOnCancelPolicy(true)
-    executor
-  }
-
-  private[rest] def pendingTimeouts: Int = timerRef.get.opt.fold(0)(_.getQueue.size)
-
-  override def destroy(): Unit = {
-    // the pending timeouts still run, as they are all that bounds the calls in flight; the thread ends after the last
-    timerRef.getAndSet(null).opt.foreach(_.shutdown())
-    super.destroy()
-  }
+  private val timeoutScheduler: Scheduler = timer.getOrElse(scheduler)
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     val asyncContext = request.startAsync()
@@ -297,7 +289,6 @@ class RestServlet(
     }.fold(e => (defaultTimeout, Task.raiseError(e)), identity)
 
     def timeOut(timeout: FiniteDuration): Runnable = () =>
-      // a ScheduledFuture keeps what its task throws, and nothing reads it
       try {
         if (headClaimed.compareAndSet(false, true)) {
           // every holder of the lock has completed the request or is completing it, and waiting for one would delay
@@ -313,23 +304,31 @@ class RestServlet(
       } catch {
         case NonFatal(e) => logger.error("Failed to time out REST request", e)
       }
-    val timeoutTimer = timeout.map(t => timer.schedule(timeOut(t), t.toMillis, TimeUnit.MILLISECONDS))
-    def cancelTimer(): Unit = timeoutTimer.foreach(_.cancel(false))
+    // A cancelled timer may stay queued until it is due, e.g. on Scheduler.singleThread, so it reaches the request
+    // only through this reference, which claimHead clears
+    val pendingTimeOut = new AtomicReference[Runnable]
+    val timeoutTimer = timeout.map { t =>
+      pendingTimeOut.set(timeOut(t))
+      timeoutScheduler.scheduleOnce(t.toMillis, TimeUnit.MILLISECONDS, () => pendingTimeOut.getAndSet(null).opt.foreach(_.run()))
+    }
+    // Cancels only a timer that has not claimed the head: Monix may interrupt a running task it cancels, which would
+    // cut the timer's 500 short
+    def claimHead(): Boolean = headClaimed.compareAndSet(false, true) && {
+      pendingTimeOut.set(null)
+      timeoutTimer.foreach(_.cancel())
+      true
+    }
 
     cancelable := (for {
       restResponse <- handle
-      claimed <- Task(headClaimed.compareAndSet(false, true))
-      _ <- Task(cancelTimer())
+      claimed <- Task(claimHead())
       _ <- Task.when(claimed)(unlessCompleted(completed)(setResponseHeaders(response, restResponse.code, restResponse.headers)))
       // the timer has answered, possibly before completed is set, so the response is only drained
       _ <- writeResponseBody(response, restResponse, if (claimed) completed else new AtomicBoolean(true), timeout)
     } yield claimed).executeAsync.guaranteeCase { _ =>
       // Outside executeAsync, so that it also runs for a task cancelled before it started. A timer that fires after
       // the handler's outcome must not wait on completeWith while that outcome is written.
-      Task {
-        headClaimed.set(true)
-        cancelTimer()
-      }
+      Task(claimHead()).void
     }.runAsync {
       case Right(false) =>
         // the timer claimed the head, and it completes the request itself
@@ -358,9 +357,10 @@ class RestServlet(
 
   // Async under an idle bound, as its check would otherwise wait out a slow write holding a scheduler thread. A write
   // the client cut short or one failing after completion ends the stream here: escaping, it can race a cancellation.
+  // Checks completed right before writing, as the request may be completed while the step waits for a thread.
   private def writeStep(completed: AtomicBoolean, async: Boolean)(op: => Unit): Task[Boolean] = {
     val step = Task.eval {
-      try {
+      try !completed.get && {
         write(op)
         true
       } catch {
@@ -439,10 +439,9 @@ class RestServlet(
     writeEnd: => Unit = (),
   )(writeChunk: A => Unit): Task[Unit] =
     chunks
-      .takeWhile(_ => !completed.get)
       .mapEval(chunk => writeStep(completed, async)(writeChunk(chunk)))
-      .foldWhileLeftL(true)((_, written) => if (written) Left(true) else Right(false))
-      .flatMap(allWritten => Task.when(allWritten && !completed.get)(writeStep(completed, async = false)(writeEnd).void))
+      .forallL(identity)
+      .flatMap(allWritten => Task.when(allWritten)(writeStep(completed, async = false)(writeEnd).void))
 
   private def writeNonEmptyStreamedBody(
     response: HttpServletResponse,
@@ -457,7 +456,7 @@ class RestServlet(
     // This signals to the client that the response body size is not predetermined and will be streamed.
     // Clients implementing the streaming part of the REST interface contract MUST be prepared
     // to handle responses without Content-Length by reading data incrementally until the stream completes.
-    // A stream is subscribed even once the request is completed, so that its finalizers run; takeWhile then
+    // A stream is subscribed even once the request is completed, so that its finalizers run; its write step then
     // stops it at the first element.
     responseBody match {
       case single: StreamedBody.Single =>

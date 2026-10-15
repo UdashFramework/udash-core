@@ -228,7 +228,8 @@ object RawRest extends RawRpcCompanion[RawRest] {
 
   /**
    * A request handler that resolves a call before running it, so that the server can bound the call by its
-   * [[io.udash.rest.timeout timeout]]. The handlers made by `asHandleRequest*` and [[wrapHandleRequest]] are such.
+   * [[io.udash.rest.timeout timeout]]. The handlers made by `asHandleRequest*` and [[withTimeouts]] are such, and so is
+   * [[wrapHandleRequest]] applied to one of them.
    * Applied as a function, such a handler invokes the API methods at once; [[resolve]] defers them to its task.
    */
   trait ResolvingHandleRequest[+R <: AbstractRestResponse] extends (RestRequest => Task[R]) {
@@ -342,41 +343,21 @@ object RawRest extends RawRpcCompanion[RawRest] {
     metadata.ensureValid()
 
     // the call's timeout, and what invokes its handler
-    def resolveCall(request: RestRequest): (Opt[FiniteDuration], () => Task[AbstractRestResponse]) = {
-      val path = request.parameters.path
-      metadata.resolvePath(path) match {
-        case Nil =>
-          val message = s"path ${PlainValue.encodePath(path)} not found"
-          (Opt.Empty, () => Task.now(RestResponse.plain(404, message)))
-        case calls => request.method match {
-          case HttpMethod.OPTIONS =>
-            val meths = calls.iterator.map(_.method).flatMap {
-              case HttpMethod.GET => List(HttpMethod.GET, HttpMethod.HEAD)
-              case m => List(m)
-            } ++ Iterator(HttpMethod.OPTIONS)
-            (Opt.Empty, () => Task.now(RestResponse(200, IMapping.create("Allow" -> PlainValue(meths.mkString(","))), HttpBody.Empty)))
-          case wireMethod =>
-            val head = wireMethod == HttpMethod.HEAD
-            val req = if (head) request.copy(method = HttpMethod.GET) else request
-            calls.find(_.method == req.method) match {
-              case Some(call) =>
-                (call.timeout, () => {
-                  val resp = handleResolved(req, call)
-                  if (head)
-                    resp.map {
-                      case resp: RestResponse => resp.copy(body = HttpBody.empty)
-                      case stream: StreamedRestResponse => stream.copy(body = StreamedBody.empty)
-                    }
-                  else
-                    resp
-                })
-              case None =>
-                val message = s"$wireMethod not allowed on path ${PlainValue.encodePath(path)}"
-                (Opt.Empty, () => Task.now(RestResponse.plain(405, message)))
-            }
-        }
+    def resolveCall(request: RestRequest): (Opt[FiniteDuration], () => Task[AbstractRestResponse]) =
+      callOf(metadata, request) match {
+        case Left(answer) => (Opt.Empty, () => Task.now(answer))
+        case Right((req, call)) =>
+          (call.timeout, () => {
+            val resp = handleResolved(req, call)
+            if (request.method == HttpMethod.HEAD)
+              resp.map {
+                case resp: RestResponse => resp.copy(body = HttpBody.empty)
+                case stream: StreamedRestResponse => stream.copy(body = StreamedBody.empty)
+              }
+            else
+              resp
+          })
       }
-    }
 
     new ResolvingHandleRequest[AbstractRestResponse] {
       def resolve(request: RestRequest): (Opt[FiniteDuration], Task[AbstractRestResponse]) = {
@@ -384,6 +365,41 @@ object RawRest extends RawRpcCompanion[RawRest] {
         (timeout, invokedOnFirstRun(handle()))
       }
       def apply(request: RestRequest): Task[AbstractRestResponse] = resolveCall(request)._2()
+    }
+  }
+
+  // The call that handles the request, with the request as the call takes it, or the answer when no call does
+  private def callOf(metadata: RestMetadata[_], request: RestRequest): Either[RestResponse, (RestRequest, ResolvedCall)] = {
+    val path = request.parameters.path
+    metadata.resolvePath(path) match {
+      case Nil =>
+        Left(RestResponse.plain(404, s"path ${PlainValue.encodePath(path)} not found"))
+      case calls => request.method match {
+        case HttpMethod.OPTIONS =>
+          val meths = calls.iterator.map(_.method).flatMap {
+            case HttpMethod.GET => List(HttpMethod.GET, HttpMethod.HEAD)
+            case m => List(m)
+          } ++ Iterator(HttpMethod.OPTIONS)
+          Left(RestResponse(200, IMapping.create("Allow" -> PlainValue(meths.mkString(","))), HttpBody.Empty))
+        case wireMethod =>
+          val req = if (wireMethod == HttpMethod.HEAD) request.copy(method = HttpMethod.GET) else request
+          calls.find(_.method == req.method).map((req, _))
+            .toRight(RestResponse.plain(405, s"$wireMethod not allowed on path ${PlainValue.encodePath(path)}"))
+      }
+    }
+  }
+
+  /**
+   * Makes `handler` resolve calls, so that the server bounds them by their [[io.udash.rest.timeout timeout]], which
+   * it looks up in `metadata` by the request's path and method. Apply it outside any wrapper that rewrites requests,
+   * so that the timeout is that of the call `handler` gets.
+   */
+  def withTimeouts(metadata: RestMetadata[_])(handler: HandleRequestWithStreaming): HandleRequestWithStreaming = {
+    metadata.ensureValid()
+    new ResolvingHandleRequest[AbstractRestResponse] {
+      def resolve(request: RestRequest): (Opt[FiniteDuration], Task[AbstractRestResponse]) =
+        (callOf(metadata, request).fold(_ => Opt.Empty, _._2.timeout), invokedOnFirstRun(handler(request)))
+      def apply(request: RestRequest): Task[AbstractRestResponse] = handler(request)
     }
   }
 
