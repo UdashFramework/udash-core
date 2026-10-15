@@ -28,6 +28,9 @@ import scala.util.control.NonFatal
 class RestServletConnectorIdleTest extends UdashSharedTest with UsesHttpServer {
 
   private val ConnectorIdleTimeout = 1.second
+  // Midway between two expiries of the idle timeout, which recur while nothing happens: one firing during the write
+  // that ends the pause would fail it, as Jetty fails any write in flight when its idle timeout fires
+  private val Pause = 2.5.seconds
 
   private implicit val scheduler: Scheduler = Scheduler.global
 
@@ -43,12 +46,12 @@ class RestServletConnectorIdleTest extends UdashSharedTest with UsesHttpServer {
       case List("ping") =>
         Task.now(RestResponse(204, IMapping.empty, HttpBody.Empty))
       case List("sleep") =>
-        Task.sleep(3.seconds).as(RestResponse(204, IMapping.empty, HttpBody.Empty))
+        Task.sleep(Pause).as(RestResponse(204, IMapping.empty, HttpBody.Empty))
       case List("unread-stream") =>
         val content = Observable.repeatEval(new Array[Byte](64 * 1024)).guarantee(Task(unreadStreamEnded.countDown()))
         Task.now(StreamedRestResponse(200, IMapping.empty, StreamedBody.RawBinary(content, "application/octet-stream")))
       case _ =>
-        val content = Observable(chunk) ++ Observable.evalDelayed(3.seconds, chunk)
+        val content = Observable(chunk) ++ Observable.evalDelayed(Pause, chunk)
         Task.now(StreamedRestResponse(200, IMapping.empty, StreamedBody.RawBinary(content, "application/octet-stream")))
     }
 
