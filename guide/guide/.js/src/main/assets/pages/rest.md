@@ -111,6 +111,43 @@ object ServerMain {
 }
 ```
 
+#### Timeouts
+
+`RestServlet` answers a call that has not responded within `handleTimeout` (30 seconds by default) with
+`500 Internal Server Error` and cancels it. A method can set its own limit, longer or shorter than `handleTimeout`.
+On a prefix method, the limit applies to every method under it:
+
+```scala
+import io.udash.rest._
+import scala.concurrent.Future
+import scala.concurrent.duration._
+
+trait ReportApi {
+  @timeout(5.minutes) def generateReport(year: Int): Future[Report]
+}
+```
+
+For a streamed response, the same limit bounds each gap between elements, not the whole stream. A stream that keeps
+producing runs until it ends, so bound the `Observable` itself if it needs a total cap. Its first element may arrive up
+to twice the limit after the request. A stream cut after its first chunk can no longer report an error status: a
+binary stream then looks complete, while a JSON list lacks its closing `]`, so prefer a JSON list when the client must
+notice. A JSON list is sent in batches of `defaultStreamingBatchSize` elements, so a progress stream needs
+`@streamingResponseBatchSize(1)`.
+
+The limit applies to servlets created with `RestServlet[Api](...)` or from handlers made by `RawRest.asHandleRequest*`.
+Wrap such a handler (e.g. for authentication) with `RawRest.wrapHandleRequest`. Any other handler, such as one wrapped
+in a plain function, gets `handleTimeout` for every call unless `RawRest.withTimeouts(RestMetadata[Api])(handler)`
+looks the limit up for it. Apply `withTimeouts` outside any wrapper that rewrites the request, so that the limit is
+that of the call actually handled.
+
+The timeouts run on the servlet's `Scheduler`, so a call that times out while all of its threads are busy gets its
+`500` only once one frees up. If handlers may block them, pass the servlet a dedicated `timer`, e.g.
+`Scheduler.singleThread("rest-timeouts")`.
+
+Only the server enforces `@timeout`. `JettyRestClient` bounds the whole exchange by its own `timeout` (10 seconds by
+default, `Duration.Inf` allowed), so raise it for long calls and streams. It also reads a JSON list whole before
+emitting its elements.
+
 ### Client
 
 On the client side, obtain a client proxy for your API and make a call:
