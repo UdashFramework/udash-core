@@ -141,8 +141,18 @@ looks the limit up for it. Apply `withTimeouts` outside any wrapper that rewrite
 that of the call actually handled.
 
 The timeouts run on the servlet's `Scheduler`, so a call that times out while all of its threads are busy gets its
-`500` only once one frees up. If handlers may block them, pass the servlet a dedicated `timer`, e.g.
-`Scheduler.singleThread("rest-timeouts")`.
+`500` only once one frees up. If handlers may block them, pass the servlet a dedicated `timer`. Build it over an
+executor that drops cancelled tasks, or the timeout of every call answered in time stays queued until it would have
+fired:
+
+```scala
+import java.util.concurrent.ScheduledThreadPoolExecutor
+import monix.execution.Scheduler
+
+val executor = new ScheduledThreadPoolExecutor(1)
+executor.setRemoveOnCancelPolicy(true)
+val servlet = RestServlet[ReportApi](new ReportApiImpl, timer = Scheduler(executor))
+```
 
 Only the server enforces `@timeout`. `JettyRestClient` bounds the whole exchange by its own `timeout` (10 seconds by
 default, `Duration.Inf` allowed), so raise it for long calls and streams. It also reads a JSON list whole before
@@ -1057,8 +1067,10 @@ val handle: RawRest.HandleRequestWithStreaming = request => {
   implicit val ctx: UserContext = extractUser(request.parameters.headers)
   RawRest.asHandleRequestWithStreaming[UserApi](impl).apply(request)
 }
-val servlet = new RestServlet(handle)
+val servlet = new RestServlet(RawRest.withTimeouts(RestMetadata[UserApi])(handle))
 ```
+
+`RawRest.withTimeouts` keeps the [timeouts](#timeouts) of the methods, which a plain function would lose.
 
 Don't write `RestServlet[UserApi](impl)` with an implicit context in scope at startup: it compiles, but the
 handler is then built only once and **every** request runs with that one context.

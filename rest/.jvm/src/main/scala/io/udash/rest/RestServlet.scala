@@ -72,6 +72,7 @@ object RestServlet {
    * @param defaultStreamingBatchSize default batch when streaming [[StreamedBody.JsonList]]
    * @param cancelOnDisconnect        whether to cancel the handler `Task` when the container reports that the
    *                                  client went away; see [[RestServlet.cancelOnDisconnect]]
+   * @param timer                     runs the timeouts of calls, see [[RestServlet]]
    */
   @explicitGenerics def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
     apiImpl: RestApi,
@@ -79,6 +80,7 @@ object RestServlet {
     maxPayloadSize: Long = DefaultMaxPayloadSize,
     defaultStreamingBatchSize: Int = DefaultStreamingBatchSize,
     cancelOnDisconnect: Boolean = DefaultCancelOnDisconnect,
+    timer: OptArg[Scheduler] = OptArg.Empty,
   )(implicit
     scheduler: Scheduler
   ): RestServlet =
@@ -88,7 +90,25 @@ object RestServlet {
       maxPayloadSize = maxPayloadSize,
       defaultStreamingBatchSize = defaultStreamingBatchSize,
       cancelOnDisconnect = cancelOnDisconnect,
+      timer = timer,
     )
+
+  @bincompat private[rest] def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
+    apiImpl: RestApi,
+    handleTimeout: FiniteDuration,
+    maxPayloadSize: Long,
+    defaultStreamingBatchSize: Int,
+    cancelOnDisconnect: Boolean,
+  )(implicit
+    scheduler: Scheduler
+  ): RestServlet = apply[RestApi](
+    apiImpl,
+    handleTimeout = handleTimeout,
+    maxPayloadSize = maxPayloadSize,
+    defaultStreamingBatchSize = defaultStreamingBatchSize,
+    cancelOnDisconnect = cancelOnDisconnect,
+    timer = OptArg.Empty,
+  )
 
   @bincompat private[rest] def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
     apiImpl: RestApi,
@@ -102,6 +122,7 @@ object RestServlet {
     maxPayloadSize = maxPayloadSize,
     defaultStreamingBatchSize = DefaultStreamingBatchSize,
     cancelOnDisconnect = DefaultCancelOnDisconnect,
+    timer = OptArg.Empty,
   )
 
   @bincompat def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
@@ -117,6 +138,7 @@ object RestServlet {
     maxPayloadSize = maxPayloadSize,
     defaultStreamingBatchSize = defaultStreamingBatchSize,
     cancelOnDisconnect = DefaultCancelOnDisconnect,
+    timer = OptArg.Empty,
   )
 }
 
@@ -146,8 +168,11 @@ object RestServlet {
  *                           the container has already completed, so a streamed response is abandoned at the next
  *                           chunk.
  * @param timer              runs the timeouts of calls, `scheduler` if empty. A call that times out while `scheduler`
- *                           has no free thread gets its 500 only once one frees up, so pass a dedicated one, e.g.
- *                           `Scheduler.singleThread`, if handlers may block all of its threads.
+ *                           has no free thread gets its 500 only once one frees up, so pass a dedicated one if
+ *                           handlers may block all of its threads, e.g. `Scheduler(executor)` over a
+ *                           `ScheduledThreadPoolExecutor` with `setRemoveOnCancelPolicy(true)`. Without that policy,
+ *                           as in `Scheduler.singleThread`, the timeout of every call answered in time stays queued
+ *                           until it would have fired.
  */
 class RestServlet(
   handleRequest: RawRest.HandleRequestWithStreaming,
