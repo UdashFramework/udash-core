@@ -125,6 +125,7 @@ import scala.concurrent.duration._
 trait ReportApi {
   @timeout(5.minutes) def generateReport(year: Int): Future[Report]
 }
+object ReportApi extends DefaultRestApiCompanion[ReportApi]
 ```
 
 For a streamed response, the same limit bounds each gap between elements, not the whole stream. A stream that keeps
@@ -141,9 +142,13 @@ looks the limit up for it. Apply `withTimeouts` outside any wrapper that rewrite
 that of the call actually handled.
 
 The timeouts run on the servlet's `Scheduler`, so a call that times out while all of its threads are busy gets its
-`500` only once one frees up. If handlers may block them, pass the servlet a dedicated `timer`. Build it over an
-executor that drops cancelled tasks, or the timeout of every call answered in time stays queued until it would have
-fired:
+`500` only once one frees up. If handlers may block them, pass the servlet a dedicated `timer`, which then runs the
+call timeouts. A stream's idle bound still runs on the `Scheduler`, so a silent stream is cut only once one of its
+threads frees up.
+
+A scheduler that keeps cancelled tasks queued retains the timeout of every call answered in time until it would have
+fired. `Scheduler.global` does not, but `Scheduler.fixedPool` and `Scheduler.singleThread` do, so this applies to the
+`Scheduler` too when no `timer` is given. Build a dedicated `timer` over an executor that drops cancelled tasks:
 
 ```scala
 import java.util.concurrent.ScheduledThreadPoolExecutor

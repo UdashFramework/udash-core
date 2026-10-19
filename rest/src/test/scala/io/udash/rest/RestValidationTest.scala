@@ -102,6 +102,6 @@ class RestValidationTest extends AnyFunSuite with DefaultRestImplicits {
     val failure = intercept[InvalidRestApiException] {
       RestMetadata.materialize[TimeoutPrefixApi].ensureValid()
     }
-    assert(failure.getMessage == "@timeout of post must be at least 1 millisecond, got 500 microseconds")
+    assert(failure.getMessage == "@timeout of prefix->post must be at least 1 millisecond, got 500 microseconds")
   }
 }

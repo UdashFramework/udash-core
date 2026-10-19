@@ -58,7 +58,7 @@ final case class RestMetadata[T](
   private[this] lazy val valid: Unit = {
     ensureUnambiguousPaths()
     ensureUniqueParams(Nil)
-    ensureValidTimeouts()
+    ensureValidTimeouts(Nil)
   }
 
   def ensureValid(): Unit = valid
@@ -98,16 +98,19 @@ final case class RestMetadata[T](
   }
 
   // Checked here rather than by the annotation, so that only a server rejects the API, naming the method
-  private def ensureValidTimeouts(): Unit = {
+  private def ensureValidTimeouts(prefixes: List[PrefixMetadata[_]]): Unit = {
+    val prefixChain = prefixes.reverseIterator.map(_.name).mkStringOrEmpty("", "->", "->")
+
     // RestServlet counts whole milliseconds
     def ensureValidTimeout(name: String, annot: Opt[timeout]): Unit = annot.foreach { t =>
       if (t.duration.toMillis <= 0)
-        throw new InvalidRestApiException(s"@timeout of $name must be at least 1 millisecond, got ${t.duration}")
+        throw new InvalidRestApiException(
+          s"@timeout of $prefixChain$name must be at least 1 millisecond, got ${t.duration}")
     }
 
     prefixMethods.foreach { prefix =>
       ensureValidTimeout(prefix.name, prefix.timeout)
-      prefix.result.value.ensureValidTimeouts()
+      prefix.result.value.ensureValidTimeouts(prefix :: prefixes)
     }
     httpMethods.foreach(method => ensureValidTimeout(method.name, method.timeout))
   }

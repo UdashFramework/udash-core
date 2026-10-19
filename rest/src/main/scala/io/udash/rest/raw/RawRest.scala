@@ -235,7 +235,8 @@ object RawRest extends RawRpcCompanion[RawRest] {
   trait ResolvingHandleRequest[+R <: AbstractRestResponse] extends (RestRequest => Task[R]) {
     /**
      * The call's timeout, if it has one, and the task that handles the request, which invokes no API method until it
-     * first runs, and none again when it runs again.
+     * first runs, and none again when it runs again. A timeout under a millisecond sets no bound, as for
+     * `RestServlet`'s `handleTimeout`.
      */
     def resolve(request: RestRequest): (Opt[FiniteDuration], Task[R])
   }

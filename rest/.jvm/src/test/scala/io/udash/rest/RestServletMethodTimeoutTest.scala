@@ -1,7 +1,8 @@
 package io.udash
 package rest
 
-import io.udash.rest.raw.RawRest
+import com.avsystem.commons.Opt
+import io.udash.rest.raw.{AbstractRestResponse, RawRest, RestRequest, RestResponse}
 import io.udash.testing.UdashSharedTest
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -55,6 +56,13 @@ class RestServletMethodTimeoutTest extends UdashSharedTest with UsesHttpServer {
 
   private val streaming = RawRest.asHandleRequestWithStreaming[MethodTimeoutApi](impl)
 
+  // Resolves every call to a timeout under a millisecond, and answers only after handleTimeout
+  private val zeroTimeoutHandler = new RawRest.ResolvingHandleRequest[AbstractRestResponse] {
+    def resolve(request: RestRequest): (Opt[FiniteDuration], Task[AbstractRestResponse]) =
+      (Opt(Duration.Zero), Task.sleep(HandleTimeout + 500.millis).as(RestResponse.plain(200, "late")))
+    def apply(request: RestRequest): Task[AbstractRestResponse] = resolve(request)._2
+  }
+
   protected def setupServer(server: Server): Unit = {
     val handler = new ServletContextHandler()
     def mount(path: String, servlet: RestServlet): Unit = handler.addServlet(new ServletHolder(servlet), s"/$path/*")
@@ -64,6 +72,7 @@ class RestServletMethodTimeoutTest extends UdashSharedTest with UsesHttpServer {
     mount("lambda-api", new RestServlet(request => streaming(request), HandleTimeout))
     mount("lambda-timeouts-api",
       new RestServlet(RawRest.withTimeouts(MethodTimeoutApi.restMetadata)(request => streaming(request)), HandleTimeout))
+    mount("zero-timeout-api", new RestServlet(zeroTimeoutHandler, HandleTimeout))
     server.setHandler(handler)
   }
 
@@ -120,6 +129,12 @@ class RestServletMethodTimeoutTest extends UdashSharedTest with UsesHttpServer {
       }
     }
 
+    "not bound a call resolved to a timeout under a millisecond" in {
+      val response = post("zero-timeout-api/any")
+      assert(response.statusCode() == 200)
+      assert(response.body() == "late")
+    }
+
     "fall back to handleTimeout for a handler wrapped in a plain function" in {
       assertTimedOut(post("lambda-api/shortHang"), HandleTimeout)
     }
@@ -132,7 +147,8 @@ class RestServletMethodTimeoutTest extends UdashSharedTest with UsesHttpServer {
       }
       assert(creationLog(request => streaming(request)) == List(Level.DEBUG ->
         ("RestServlet's handler does not resolve calls, so @timeout does not apply to them. " +
-          "Wrap it with RawRest.withTimeouts or RawRest.wrapHandleRequest for @timeout to apply.")))
+          "Apply RawRest.withTimeouts to it, or wrap the RawRest.asHandleRequest* handler itself with " +
+          "RawRest.wrapHandleRequest instead of a function, for @timeout to apply.")))
       assert(creationLog(RawRest.wrapHandleRequest(streaming)((_, task) => task)).isEmpty)
       assert(creationLog(RawRest.withTimeouts(MethodTimeoutApi.restMetadata)(request => streaming(request))).isEmpty)
     }

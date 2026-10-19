@@ -171,8 +171,9 @@ object RestServlet {
  *                           has no free thread gets its 500 only once one frees up, so pass a dedicated one if
  *                           handlers may block all of its threads, e.g. `Scheduler(executor)` over a
  *                           `ScheduledThreadPoolExecutor` with `setRemoveOnCancelPolicy(true)`. Without that policy,
- *                           as in `Scheduler.singleThread`, the timeout of every call answered in time stays queued
- *                           until it would have fired.
+ *                           as in `Scheduler.fixedPool` and `Scheduler.singleThread`, the timeout of every call
+ *                           answered in time stays queued until it would have fired. That also holds for `scheduler`
+ *                           when it is used instead of a `timer`; `Scheduler.global` does not retain them.
  */
 class RestServlet(
   handleRequest: RawRest.HandleRequestWithStreaming,
@@ -235,7 +236,8 @@ class RestServlet(
     case _ =>
       // debug, as a servlet built per request would log it for each
       logger.debug("RestServlet's handler does not resolve calls, so @timeout does not apply to them. " +
-        "Wrap it with RawRest.withTimeouts or RawRest.wrapHandleRequest for @timeout to apply.")
+        "Apply RawRest.withTimeouts to it, or wrap the RawRest.asHandleRequest* handler itself with " +
+        "RawRest.wrapHandleRequest instead of a function, for @timeout to apply.")
       request => (Opt.Empty, Task.defer(handleRequest(request)))
   }
 
@@ -310,7 +312,7 @@ class RestServlet(
     // readRequest must execute in Jetty thread but we want exceptions to be handled uniformly, hence the Try
     val (timeout, handle) = Try {
       val (callTimeout, response) = resolve(readRequest(request))
-      (callTimeout.orElse(defaultTimeout), response)
+      (callTimeout.fold(defaultTimeout)(handleTimeoutBound), response)
     }.fold(e => (defaultTimeout, Task.raiseError(e)), identity)
 
     def timeOut(timeout: FiniteDuration): Runnable = () =>
