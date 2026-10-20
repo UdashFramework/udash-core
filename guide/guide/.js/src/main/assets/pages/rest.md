@@ -154,7 +154,11 @@ fired. `Scheduler.global` does not, but `Scheduler.fixedPool` and `Scheduler.sin
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import monix.execution.Scheduler
 
-val executor = new ScheduledThreadPoolExecutor(1)
+val executor = new ScheduledThreadPoolExecutor(1, { (r: Runnable) =>
+  val t = new Thread(r, "rest-timeouts")
+  t.setDaemon(true) // does not keep the JVM alive after the server stops
+  t
+})
 executor.setRemoveOnCancelPolicy(true)
 val servlet = RestServlet[ReportApi](new ReportApiImpl, timer = Scheduler(executor))
 ```

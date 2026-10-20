@@ -11,7 +11,7 @@ import monix.eval.Task
 import monix.execution.Scheduler
 import monix.execution.cancelables.SingleAssignCancelable
 import monix.execution.exceptions.UpstreamTimeoutException
-import monix.reactive.{Consumer, Observable}
+import monix.reactive.{Consumer, Observable, OverflowStrategy}
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.io.{ByteArrayOutputStream, EOFException, IOException}
@@ -35,6 +35,7 @@ object RestServlet {
   // Recorded on a request its client abandoned, as nginx does, so that it is not logged as a success
   final val ClientClosedRequestStatus = 499
   private final val BufferSize = 8192
+  private final val StreamBufferSize = 16
 
   // Walks the cause chain like Jetty's QuietException.isQuiet, so this does not depend on how the container wraps
   // the failure of a reset stream or a dropped connection
@@ -382,11 +383,10 @@ class RestServlet(
   private def unlessCompleted(completed: AtomicBoolean)(write: => Unit): Task[Unit] =
     Task(if (!completed.get) write)
 
-  // Async under an idle bound, as its check would otherwise wait out a slow write holding a scheduler thread. A write
-  // the client cut short or one failing after completion ends the stream here: escaping, it can race a cancellation.
-  // Checks completed right before writing, as the request may be completed while the step waits for a thread.
-  private def writeStep(completed: AtomicBoolean, async: Boolean)(op: => Unit): Task[Boolean] = {
-    val step = Task.eval {
+  // A write the client cut short or one failing after completion ends the stream here: escaping, it can race a
+  // cancellation. Checks completed right before writing, as the request may be completed while the chunk waits.
+  private def writeStep(completed: AtomicBoolean)(op: => Unit): Task[Boolean] =
+    Task.eval {
       try !completed.get && {
         write(op)
         true
@@ -396,8 +396,6 @@ class RestServlet(
           false
       }
     }
-    if (async) step.executeAsync else step
-  }
 
   private def logAbandonedStream(e: Throwable): Unit = e match {
     case e: ClientGoneException => logger.warn("Request was cancelled by the client during streaming REST response", e.getCause)
@@ -465,10 +463,12 @@ class RestServlet(
     async: Boolean,
     writeEnd: => Unit = (),
   )(writeChunk: A => Unit): Task[Unit] =
-    chunks
-      .mapEval(chunk => writeStep(completed, async)(writeChunk(chunk)))
+    // Under an idle bound, whose check waits for the call handing it an element, a write on that call would hold a
+    // scheduler thread for as long as it is slow. The buffer takes each element at once and the writes drain it.
+    (if (async) chunks.asyncBoundary(OverflowStrategy.BackPressure(StreamBufferSize)) else chunks)
+      .mapEval(chunk => writeStep(completed)(writeChunk(chunk)))
       .forallL(identity)
-      .flatMap(allWritten => Task.when(allWritten)(writeStep(completed, async = false)(writeEnd).void))
+      .flatMap(allWritten => Task.when(allWritten)(writeStep(completed)(writeEnd).void))
 
   private def writeNonEmptyStreamedBody(
     response: HttpServletResponse,
