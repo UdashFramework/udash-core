@@ -129,11 +129,11 @@ object ReportApi extends DefaultRestApiCompanion[ReportApi]
 ```
 
 For a streamed response, the same limit bounds each gap between elements, not the whole stream. A stream that keeps
-producing runs until it ends, so bound the `Observable` itself if it needs a total cap. Its first element may arrive up
-to twice the limit after the request. A stream cut after its first chunk can no longer report an error status: a
-binary stream then looks complete, while a JSON list lacks its closing `]`, so prefer a JSON list when the client must
-notice. A JSON list is sent in batches of `defaultStreamingBatchSize` elements, so a progress stream needs
-`@streamingResponseBatchSize(1)`.
+producing runs until it ends, so bound the `Observable` itself if it needs a total cap. A silent stream is cut up to a
+quarter of the limit late, so its first element may arrive up to 2.25 times the limit after the request. A stream cut
+after its first chunk can no longer report an error status: a binary stream then looks complete, while a JSON list lacks
+its closing `]`, so prefer a JSON list when the client must notice. A JSON list is sent in batches of
+`defaultStreamingBatchSize` elements, so a progress stream needs `@streamingResponseBatchSize(1)`.
 
 The limit applies to servlets created with `RestServlet[Api](...)` or from handlers made by `RawRest.asHandleRequest*`.
 Wrap such a handler (e.g. for authentication) with `RawRest.wrapHandleRequest`. Any other handler, such as one wrapped

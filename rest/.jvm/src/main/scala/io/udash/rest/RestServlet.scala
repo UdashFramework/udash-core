@@ -8,9 +8,10 @@ import io.udash.rest.RestServlet.*
 import io.udash.rest.raw.*
 import io.udash.utils.URLEncoder
 import monix.eval.Task
-import monix.execution.Scheduler
-import monix.execution.cancelables.SingleAssignCancelable
-import monix.execution.exceptions.UpstreamTimeoutException
+import monix.execution.Ack.{Continue, Stop}
+import monix.execution.cancelables.{CompositeCancelable, MultiAssignCancelable, SingleAssignCancelable}
+import monix.execution.{Ack, Cancelable, Scheduler}
+import monix.reactive.observers.Subscriber
 import monix.reactive.{Consumer, Observable, OverflowStrategy}
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -23,6 +24,7 @@ import java.util.concurrent.locks.ReentrantLock
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import javax.servlet.{AsyncEvent, AsyncListener}
 import scala.annotation.tailrec
+import scala.concurrent.Future
 import scala.concurrent.duration.*
 import scala.util.control.{NoStackTrace, NonFatal}
 
@@ -54,10 +56,99 @@ object RestServlet {
 
   private def timedOutMessage(timeout: FiniteDuration): String = s"server operation timed out after $timeout"
 
-  private final class IdleTimeoutException(val timeout: FiniteDuration)
+  private[rest] final class IdleTimeoutException(val timeout: FiniteDuration)
     extends Exception(timedOutMessage(timeout)) with NoStackTrace
 
-  private final case class SourceFailure(cause: Throwable) extends Exception(cause) with NoStackTrace
+  private final val IdleTicks = 4
+
+  // Fails with IdleTimeoutException a source that emitted nothing for `timeout`, as Monix's timeoutOnSlowUpstream does,
+  // but counts ticks instead of reading the clock for every element, which does not scale across threads on some
+  // platforms. A silence is cut after `timeout` plus at most one tick. Time spent in `downstream.onNext` counts as
+  // activity, so writes to a slow client do not trip it.
+  private[rest] final class IdleBoundedObservable[A](source: Observable[A], timeout: FiniteDuration)
+    extends Observable[A] {
+
+    def unsafeSubscribeFn(downstream: Subscriber[A]): Cancelable = {
+      val ticker = MultiAssignCancelable()
+      val main = SingleAssignCancelable()
+      main := source.unsafeSubscribeFn(new Subscriber[A] with Runnable { self =>
+        implicit val scheduler: Scheduler = downstream.scheduler
+
+        private val tick = timeout / IdleTicks
+        // guarded by `self`, which also keeps the timer's onError from overlapping an onNext
+        private var active = false
+        private var processing = false
+        private var quietTicks = 0
+        private var isDone = false
+
+        scheduleTick()
+
+        private def scheduleTick(): Unit =
+          ticker := scheduler.scheduleOnce(tick.length, tick.unit, self)
+
+        def run(): Unit = self.synchronized {
+          if (!isDone) {
+            if (active || processing) {
+              active = false
+              quietTicks = 0
+            } else quietTicks += 1
+
+            if (quietTicks < IdleTicks) scheduleTick()
+            else {
+              isDone = true
+              try downstream.onError(new IdleTimeoutException(timeout))
+              finally main.cancel()
+            }
+          }
+        }
+
+        def onNext(elem: A): Future[Ack] = {
+          def finishProcessing(): Ack = {
+            active = true
+            processing = false
+            Continue
+          }
+
+          self.synchronized {
+            if (isDone) Stop
+            else {
+              processing = true
+              downstream.onNext(elem) match {
+                case Continue => finishProcessing()
+                case Stop =>
+                  ticker.cancel()
+                  Stop
+                case async =>
+                  async.flatMap {
+                    case Continue => self.synchronized(finishProcessing())
+                    case Stop =>
+                      ticker.cancel()
+                      Stop
+                  }
+              }
+            }
+          }
+        }
+
+        def onError(ex: Throwable): Unit = self.synchronized {
+          if (!isDone) {
+            isDone = true
+            try downstream.onError(ex)
+            finally ticker.cancel()
+          }
+        }
+
+        def onComplete(): Unit = self.synchronized {
+          if (!isDone) {
+            isDone = true
+            try downstream.onComplete()
+            finally ticker.cancel()
+          }
+        }
+      })
+      CompositeCancelable(main, ticker)
+    }
+  }
 
   // As for the container's own async timeout, which counts whole milliseconds and sets no bound at 0
   private[rest] def handleTimeoutBound(handleTimeout: FiniteDuration): Opt[FiniteDuration] =
@@ -426,16 +517,6 @@ class RestServlet(
       case NonFatal(e) => logger.warn("Failed to write REST failure response", e)
     }
 
-  // Monix does not count the time spent in a downstream onNext, so writes to a slow client do not trip this
-  private def idleBounded[A](source: Observable[A], timeout: FiniteDuration): Observable[A] =
-    source
-      .onErrorHandleWith(e => Observable.raiseError(SourceFailure(e)))
-      .timeoutOnSlowUpstream(timeout)
-      .onErrorRecoverWith {
-        case SourceFailure(e) => Observable.raiseError(e)
-        case _: UpstreamTimeoutException => Observable.raiseError(new IdleTimeoutException(timeout))
-      }
-
   // Undoes only what this servlet staged for a stream's head, keeping the headers that filters set before it ran
   private def discardStreamHead(response: HttpServletResponse, headers: IMapping[PlainValue]): Unit = {
     response.resetBuffer()
@@ -477,7 +558,7 @@ class RestServlet(
     completed: AtomicBoolean,
     timeout: Opt[FiniteDuration],
   ): Task[Unit] = {
-    def bounded[A](source: Observable[A]): Observable[A] = timeout.fold(source)(idleBounded(source, _))
+    def bounded[A](source: Observable[A]): Observable[A] = timeout.fold(source)(new IdleBoundedObservable(source, _))
     val async = timeout.nonEmpty
     // The Content-Length header is intentionally omitted for streams.
     // This signals to the client that the response body size is not predetermined and will be streamed.

@@ -385,9 +385,9 @@ class streamingResponseBatchSize(size: Int) extends StreamedResponseAdjuster {
  * Bounds how long the server waits for an HTTP or prefix method, overriding the server's default.
  * On a prefix method it applies to every method reached through it, and the innermost annotation wins.
  *
- * It bounds the time to the response head and, for a streamed response, each gap between elements, so a stream's
- * first byte may arrive up to twice the timeout after the request. It sets no total cap: a stream that needs one must
- * bound its `Observable` itself.
+ * It bounds the time to the response head and, for a streamed response, each gap between elements, which a silent
+ * stream outlasts by up to a quarter of the timeout, so a stream's first byte may arrive up to 2.25 times the timeout
+ * after the request. It sets no total cap: a stream that needs one must bound its `Observable` itself.
  *
  * A [[StreamedBody.RawBinary]] stream cut after its first chunk ends like a complete one, while a cut
  * [[StreamedBody.JsonList]] lacks its closing `]`. A `JsonList` is flushed once per batch, so a progress stream needs
