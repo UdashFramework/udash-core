@@ -193,7 +193,9 @@ class RestServlet(
       // path instead of the scheduler's uncaught reporter.
       def onTimeout(event: AsyncEvent): Unit = {
         val claimed = completeWith {
-          // the servlet API offers no way to abort a committed response, so a streamed one ends as if it had finished
+          // The servlet API offers no way to abort a committed response, so a streamed one ends as if it had finished.
+          // A chunk write still in flight is the exception: the container may then reset the response instead, as
+          // Jetty does when the request is completed while another thread is blocked writing into it.
           if (response.isCommitted) logger.warn(s"REST response was cut short by the $handleTimeout handle timeout")
           else writeFailure(response, s"server operation timed out after $handleTimeout".opt)
         }
