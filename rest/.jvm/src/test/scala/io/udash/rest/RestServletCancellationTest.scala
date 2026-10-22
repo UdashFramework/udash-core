@@ -16,6 +16,7 @@ import java.util.{ArrayDeque, Collections}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import javax.servlet.{AsyncContext, AsyncEvent, AsyncListener, ServletOutputStream, WriteListener}
 import scala.collection.mutable
+import scala.concurrent.duration.*
 import scala.jdk.CollectionConverters.*
 
 /**
@@ -53,6 +54,7 @@ class RestServletCancellationTest extends UdashSharedTest {
     failFirstWrite: Boolean = true,
     lateDisconnect: Boolean = false,
     unreportedReset: Boolean = false,
+    handleTimeout: FiniteDuration = RestServlet.DefaultHandleTimeout,
   ): Seq[SubstituteLoggingEvent] = {
     implicit val scheduler: TestScheduler = TestScheduler()
     val logEvents = new ArrayDeque[SubstituteLoggingEvent]
@@ -93,7 +95,7 @@ class RestServletCancellationTest extends UdashSharedTest {
     }
 
     val handleRequest: RawRest.HandleRequestWithStreaming = _ => Task.now(StreamedRestResponse(200, IMapping.empty, body))
-    new RestServlet(handleRequest, customLogger = logger, cancelOnDisconnect = true).service(request, response)
+    new RestServlet(handleRequest, handleTimeout, customLogger = logger, cancelOnDisconnect = true).service(request, response)
     if (lateDisconnect) {
       while (writes == 0 && scheduler.tickOne()) {}
       reportDisconnect()
@@ -132,22 +134,25 @@ class RestServletCancellationTest extends UdashSharedTest {
       assertLogged(events, Level.WARN, "cancelled by the client", "reset")
     }
 
-    "not report a stream failing after a disconnect cancelled the handler as uncaught" in {
-      // waits for its next element after its first, and fails when the disconnect during the first write cancels it,
-      // as a source blocked on a read does when the cancellation closes it
-      var sourceClosed = false
-      val events = serveStreamed(
-        binary(Observable(Array[Byte](1)) ++ Observable.unsafeCreate[Array[Byte]] { subscriber =>
-          Cancelable { () =>
-            sourceClosed = true
-            subscriber.onError(new IllegalStateException("source closed"))
-          }
-        }),
-        failFirstWrite = false,
-      )
-      assert(sourceClosed, "the disconnect did not cancel the source")
-      // the response may already belong to the next request on the connection
-      assert(!events.exists(_.getMessage.contains("Failed to close")), describe(events))
+    Seq(RestServlet.DefaultHandleTimeout, 0.seconds).foreach { handleTimeout =>
+      s"not report a stream failing after a disconnect cancelled the handler as uncaught, with handleTimeout $handleTimeout" in {
+        // waits for its next element after its first, and fails when the disconnect during the first write cancels it,
+        // as a source blocked on a read does when the cancellation closes it
+        var sourceClosed = false
+        val events = serveStreamed(
+          binary(Observable(Array[Byte](1)) ++ Observable.unsafeCreate[Array[Byte]] { subscriber =>
+            Cancelable { () =>
+              sourceClosed = true
+              subscriber.onError(new IllegalStateException("source closed"))
+            }
+          }),
+          failFirstWrite = false,
+          handleTimeout = handleTimeout,
+        )
+        assert(sourceClosed, "the disconnect did not cancel the source")
+        // the response may already belong to the next request on the connection
+        assert(!events.exists(_.getMessage.contains("Failed to close")), describe(events))
+      }
     }
 
     "log a binary chunk write failing before its disconnect is reported once, without reporting it as uncaught" in {

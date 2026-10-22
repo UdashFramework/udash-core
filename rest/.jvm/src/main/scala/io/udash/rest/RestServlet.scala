@@ -548,6 +548,12 @@ class RestServlet(
     // scheduler thread for as long as it is slow. The buffer takes each element at once and the writes drain it.
     (if (async) chunks.asyncBoundary(OverflowStrategy.BackPressure(StreamBufferSize)) else chunks)
       .mapEval(chunk => writeStep(completed)(writeChunk(chunk)))
+      // Once the request is completed, a disconnect may have cancelled the task, whose consumer would pass a failure to
+      // the uncaught reporter, e.g. that of a source closed by the cancellation
+      .onErrorRecoverWith { case e if completed.get =>
+        logAbandonedStream(e)
+        Observable.now(false)
+      }
       .forallL(identity)
       .flatMap(allWritten => Task.when(allWritten)(writeStep(completed)(writeEnd).void))
 
