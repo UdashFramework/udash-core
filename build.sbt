@@ -1,3 +1,4 @@
+import com.typesafe.tools.mima.core.*
 import org.openqa.selenium.Capabilities
 import org.openqa.selenium.firefox.{FirefoxDriverLogLevel, FirefoxOptions}
 import org.scalajs.jsdependencies.sbtplugin.JSModuleID
@@ -72,6 +73,14 @@ val forIdeaImport = System.getProperty("idea.managed", "false").toBoolean && Sys
 val CompileAndTest = "test->test;compile->compile"
 
 val previousCompatibleVersions: Set[String] = Set("0.23.0")
+
+// REST metadata is materialized by macros through its constructors, so the case classes' copy and apply aren't API
+val restMetadataMimaFilters = Seq(
+  ProblemFilters.exclude[DirectMissingMethodProblem]("io.udash.rest.raw.PrefixMetadata.apply"),
+  ProblemFilters.exclude[DirectMissingMethodProblem]("io.udash.rest.raw.PrefixMetadata.copy"),
+  ProblemFilters.exclude[DirectMissingMethodProblem]("io.udash.rest.raw.HttpMethodMetadata.apply"),
+  ProblemFilters.exclude[DirectMissingMethodProblem]("io.udash.rest.raw.HttpMethodMetadata.copy"),
+)
 
 // Settings for JS tests run in browser
 val browserCapabilities: Capabilities = {
@@ -336,12 +345,14 @@ lazy val rest = jvmProject(project)
   .dependsOn(utils % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.restJvmDeps.value,
+    mimaBinaryIssueFilters ++= restMetadataMimaFilters,
   )
 
 lazy val `rest-js` = jsProjectFor(project, rest)
   .dependsOn(`utils-js` % CompileAndTest)
   .settings(
     libraryDependencies ++= Dependencies.restSjsDeps.value,
+    mimaBinaryIssueFilters ++= restMetadataMimaFilters,
   )
 
 lazy val `rest-jetty` = jvmProject(project.in(file("rest/jetty")))
