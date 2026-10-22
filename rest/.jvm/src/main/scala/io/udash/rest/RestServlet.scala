@@ -12,7 +12,7 @@ import monix.execution.Ack.{Continue, Stop}
 import monix.execution.cancelables.{CompositeCancelable, MultiAssignCancelable, SingleAssignCancelable}
 import monix.execution.{Ack, Cancelable, Scheduler}
 import monix.reactive.observers.Subscriber
-import monix.reactive.{Consumer, Observable, OverflowStrategy}
+import monix.reactive.{Consumer, Observable}
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.io.{ByteArrayOutputStream, EOFException, IOException}
@@ -37,7 +37,6 @@ object RestServlet {
   // Recorded on a request its client abandoned, as nginx does, so that it is not logged as a success
   final val ClientClosedRequestStatus = 499
   private final val BufferSize = 8192
-  private final val StreamBufferSize = 16
 
   // Walks the cause chain like Jetty's QuietException.isQuiet, so this does not depend on how the container wraps
   // the failure of a reset stream or a dropped connection
@@ -75,32 +74,42 @@ object RestServlet {
         implicit val scheduler: Scheduler = downstream.scheduler
 
         private val tick = timeout / IdleTicks
-        // guarded by `self`, which also keeps the timer's onError from overlapping an onNext
+        // guarded by `lock`, which also keeps the timer's onError from overlapping an onNext
+        private val lock = new ReentrantLock
         private var active = false
         private var processing = false
         private var quietTicks = 0
         private var isDone = false
+
+        private def locked[T](code: => T): T = {
+          lock.lock()
+          try code finally lock.unlock()
+        }
 
         scheduleTick()
 
         private def scheduleTick(): Unit =
           ticker := scheduler.scheduleOnce(tick.length, tick.unit, self)
 
-        def run(): Unit = self.synchronized {
-          if (!isDone) {
-            if (active || processing) {
-              active = false
-              quietTicks = 0
-            } else quietTicks += 1
+        // A held lock means an element is being handed downstream, i.e. activity. Waiting for it would hold this
+        // thread for as long as a write to a slow client.
+        def run(): Unit =
+          if (!lock.tryLock()) scheduleTick()
+          else try {
+            if (!isDone) {
+              if (active || processing) {
+                active = false
+                quietTicks = 0
+              } else quietTicks += 1
 
-            if (quietTicks < IdleTicks) scheduleTick()
-            else {
-              isDone = true
-              try downstream.onError(new IdleTimeoutException(timeout))
-              finally main.cancel()
+              if (quietTicks < IdleTicks) scheduleTick()
+              else {
+                isDone = true
+                try downstream.onError(new IdleTimeoutException(timeout))
+                finally main.cancel()
+              }
             }
-          }
-        }
+          } finally lock.unlock()
 
         def onNext(elem: A): Future[Ack] = {
           def finishProcessing(): Ack = {
@@ -109,7 +118,7 @@ object RestServlet {
             Continue
           }
 
-          self.synchronized {
+          locked {
             if (isDone) Stop
             else {
               processing = true
@@ -120,7 +129,7 @@ object RestServlet {
                   Stop
                 case async =>
                   async.flatMap {
-                    case Continue => self.synchronized(finishProcessing())
+                    case Continue => locked(finishProcessing())
                     case Stop =>
                       ticker.cancel()
                       Stop
@@ -130,7 +139,7 @@ object RestServlet {
           }
         }
 
-        def onError(ex: Throwable): Unit = self.synchronized {
+        def onError(ex: Throwable): Unit = locked {
           if (!isDone) {
             isDone = true
             try downstream.onError(ex)
@@ -138,7 +147,7 @@ object RestServlet {
           }
         }
 
-        def onComplete(): Unit = self.synchronized {
+        def onComplete(): Unit = locked {
           if (!isDone) {
             isDone = true
             try downstream.onComplete()
@@ -541,12 +550,9 @@ class RestServlet(
   private def writeChunks[A](
     chunks: Observable[A],
     completed: AtomicBoolean,
-    async: Boolean,
     writeEnd: => Unit = (),
   )(writeChunk: A => Unit): Task[Unit] =
-    // Under an idle bound, whose check waits for the call handing it an element, a write on that call would hold a
-    // scheduler thread for as long as it is slow. The buffer takes each element at once and the writes drain it.
-    (if (async) chunks.asyncBoundary(OverflowStrategy.BackPressure(StreamBufferSize)) else chunks)
+    chunks
       .mapEval(chunk => writeStep(completed)(writeChunk(chunk)))
       // Once the request is completed, a disconnect may have cancelled the task, whose consumer would pass a failure to
       // the uncaught reporter, e.g. that of a source closed by the cancellation
@@ -565,7 +571,6 @@ class RestServlet(
     timeout: Opt[FiniteDuration],
   ): Task[Unit] = {
     def bounded[A](source: Observable[A]): Observable[A] = timeout.fold(source)(new IdleBoundedObservable(source, _))
-    val async = timeout.nonEmpty
     // The Content-Length header is intentionally omitted for streams.
     // This signals to the client that the response body size is not predetermined and will be streamed.
     // Clients implementing the streaming part of the REST interface contract MUST be prepared
@@ -577,7 +582,7 @@ class RestServlet(
         unlessCompleted(completed)(writeNonEmptyBody(response, single.body))
       case binary: StreamedBody.RawBinary =>
         unlessCompleted(completed)(response.setContentType(binary.contentType)) >>
-          writeChunks(bounded(binary.content), completed, async) { chunk =>
+          writeChunks(bounded(binary.content), completed) { chunk =>
             response.getOutputStream.write(chunk)
             response.getOutputStream.flush()
           }
@@ -589,7 +594,6 @@ class RestServlet(
               .switchIfEmpty(Observable(Seq.empty))
               .zipWithIndex,
             completed,
-            async,
             writeEnd = response.getOutputStream.write("]".getBytes(jsonList.charset)),
           ) { case (batch, idx) =>
             val firstBatch = idx == 0
