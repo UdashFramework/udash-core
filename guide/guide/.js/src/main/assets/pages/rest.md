@@ -111,6 +111,62 @@ object ServerMain {
 }
 ```
 
+#### Timeouts
+
+`RestServlet` answers a call that has not responded within `handleTimeout` (30 seconds by default) with
+`500 Internal Server Error` and cancels it. A method can set its own limit, longer or shorter than `handleTimeout`.
+On a prefix method, the limit applies to every method under it:
+
+```scala
+import io.udash.rest._
+import scala.concurrent.Future
+import scala.concurrent.duration._
+
+trait ReportApi {
+  @timeout(5.minutes) def generateReport(year: Int): Future[Report]
+}
+object ReportApi extends DefaultRestApiCompanion[ReportApi]
+```
+
+For a streamed response, the same limit bounds each gap between elements, not the whole stream. A stream that keeps
+producing runs until it ends, so bound the `Observable` itself if it needs a total cap. A silent stream is cut up to a
+quarter of the limit late, so its first element may arrive up to 2.25 times the limit after the request. A stream cut
+after its first chunk can no longer report an error status: a binary stream then looks complete, while a JSON list lacks
+its closing `]`, so prefer a JSON list when the client must notice. A JSON list is sent in batches of
+`defaultStreamingBatchSize` elements, so a progress stream needs `@streamingResponseBatchSize(1)`.
+
+The limit applies to servlets created with `RestServlet[Api](...)` or from handlers made by `RawRest.asHandleRequest*`.
+Wrap such a handler (e.g. for authentication) with `RawRest.wrapHandleRequest`. Any other handler, such as one wrapped
+in a plain function, gets `handleTimeout` for every call unless `RawRest.withTimeouts(RestMetadata[Api])(handler)`
+looks the limit up for it. Apply `withTimeouts` outside any wrapper that rewrites the request, so that the limit is
+that of the call actually handled.
+
+The timeouts run on the servlet's `Scheduler`, so a call that times out while all of its threads are busy gets its
+`500` only once one frees up. If handlers may block them, pass the servlet a dedicated `timer`, which then runs the
+call timeouts. A stream's idle bound still runs on the `Scheduler`, so a silent stream is cut only once one of its
+threads frees up.
+
+A scheduler that keeps cancelled tasks queued retains the timeout of every call answered in time until it would have
+fired. `Scheduler.global` does not, but `Scheduler.fixedPool` and `Scheduler.singleThread` do, so this applies to the
+`Scheduler` too when no `timer` is given. Build a dedicated `timer` over an executor that drops cancelled tasks:
+
+```scala
+import java.util.concurrent.ScheduledThreadPoolExecutor
+import monix.execution.Scheduler
+
+val executor = new ScheduledThreadPoolExecutor(1, { (r: Runnable) =>
+  val t = new Thread(r, "rest-timeouts")
+  t.setDaemon(true) // does not keep the JVM alive after the server stops
+  t
+})
+executor.setRemoveOnCancelPolicy(true)
+val servlet = RestServlet[ReportApi](new ReportApiImpl, timer = Scheduler(executor))
+```
+
+Only the server enforces `@timeout`. `JettyRestClient` bounds the whole exchange by its own `timeout` (10 seconds by
+default, `Duration.Inf` allowed), so raise it for long calls and streams. It also reads a JSON list whole before
+emitting its elements.
+
 ### Client
 
 On the client side, obtain a client proxy for your API and make a call:
@@ -1020,8 +1076,10 @@ val handle: RawRest.HandleRequestWithStreaming = request => {
   implicit val ctx: UserContext = extractUser(request.parameters.headers)
   RawRest.asHandleRequestWithStreaming[UserApi](impl).apply(request)
 }
-val servlet = new RestServlet(handle)
+val servlet = new RestServlet(RawRest.withTimeouts(RestMetadata[UserApi])(handle))
 ```
+
+`RawRest.withTimeouts` keeps the [timeouts](#timeouts) of the methods, which a plain function would lose.
 
 Don't write `RestServlet[UserApi](impl)` with an implicit context in scope at startup: it compiles, but the
 handler is then built only once and **every** request runs with that one context.

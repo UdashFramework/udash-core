@@ -9,6 +9,7 @@ import com.avsystem.commons.serialization.optionalParam
 import io.udash.rest.raw.*
 
 import scala.annotation.StaticAnnotation
+import scala.concurrent.duration.FiniteDuration
 
 /**
   * Base trait for tag annotations that determine how a REST method is translated into actual HTTP request.
@@ -379,3 +380,20 @@ class streamingResponseBatchSize(size: Int) extends StreamedResponseAdjuster {
       case _ => response
     }
 }
+
+/**
+ * Bounds how long the server waits for an HTTP or prefix method, overriding the server's default.
+ * On a prefix method it applies to every method reached through it, and the innermost annotation wins.
+ *
+ * It bounds the time to the response head and, for a streamed response, each gap between elements, which a silent
+ * stream outlasts by up to a quarter of the timeout, so a stream's first byte may arrive up to 2.25 times the timeout
+ * after the request. It sets no total cap: a stream that needs one must bound its `Observable` itself.
+ *
+ * A [[StreamedBody.RawBinary]] stream cut after its first chunk ends like a complete one, while a cut
+ * [[StreamedBody.JsonList]] lacks its closing `]`. A `JsonList` is flushed once per batch, so a progress stream needs
+ * [[streamingResponseBatchSize]] of 1.
+ *
+ * It is enforced only by the server, so clients must allow at least as long. A server rejects the API if the
+ * duration is shorter than a millisecond.
+ */
+class timeout(val duration: FiniteDuration) extends RealSymAnnotation
