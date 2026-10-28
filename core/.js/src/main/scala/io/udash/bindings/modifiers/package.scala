@@ -11,7 +11,9 @@ package object modifiers {
           el.replaceChild(fresh, old)
         }
         oldChildren.iterator.drop(newChildren.size).foreach(el.removeChild)
-        newChildren.iterator.drop(oldChildren.size - 1).sliding(2)
+        newChildren.iterator
+          .drop(oldChildren.size - 1)
+          .sliding(2)
           .foreach(s => if (s.size == 2) el.insertBefore(s(1), s(0).nextSibling))
       }
     }

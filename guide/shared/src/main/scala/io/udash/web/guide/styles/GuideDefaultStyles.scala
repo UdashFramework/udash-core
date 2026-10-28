@@ -10,47 +10,47 @@ object GuideDefaultStyles extends CssBase with DefaultStyles {
   import dsl._
 
   style(
-    unsafeRoot("body") (
-      fontSize(1 rem)
+    unsafeRoot("body")(
+      fontSize(1.rem)
     ),
 
-    unsafeRoot("pre") (
+    unsafeRoot("pre")(
       backgroundColor(c"#f5f5f5"),
-      overflow.auto
+      overflow.auto,
     ),
 
     unsafeRoot("p")(
-      marginTop(1.5625 rem),
-      fontSize(1 rem),
+      marginTop(1.5625.rem),
+      fontSize(1.rem),
       lineHeight(1.3),
 
-      &.firstChild (
+      &.firstChild(
         marginTop(`0`)
-      )
+      ),
     ),
 
-    unsafeRoot("h3") (
+    unsafeRoot("h3")(
       UdashFonts.roboto(FontWeight.Thin),
-      marginTop(2.8125 rem),
-      marginBottom(.9375 rem),
+      marginTop(2.8125.rem),
+      marginBottom(.9375.rem),
       lineHeight(1.2),
-      fontSize(2 rem),
+      fontSize(2.rem),
 
       MediaQueries.phone(
-        fontSize(1.625 rem)
-      )
+        fontSize(1.625.rem)
+      ),
     ),
 
-    unsafeRoot("h4") (
+    unsafeRoot("h4")(
       UdashFonts.roboto(FontWeight.Thin),
-      marginTop(2.1875 rem),
-      marginBottom(.9375 rem),
+      marginTop(2.1875.rem),
+      marginBottom(.9375.rem),
       lineHeight(1.2),
-      fontSize(1.5 rem),
+      fontSize(1.5.rem),
 
       MediaQueries.phone(
-        fontSize(1.25 rem)
-      )
-    )
+        fontSize(1.25.rem)
+      ),
+    ),
   )
 }

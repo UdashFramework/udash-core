@@ -14,10 +14,11 @@ import scala.util.{Failure, Success}
 private[i18n] class TranslationModifier(
   translation: => Future[Translated],
   placeholder: Option[Element],
-  rawHtml: Boolean
-) extends Modifier with CrossLogging {
+  rawHtml: Boolean,
+) extends Modifier
+    with CrossLogging {
 
-  protected final def update(t: Element, holder: Seq[Node]): Future[Seq[Node]] = {
+  protected final def update(t: Element, holder: Seq[Node]): Future[Seq[Node]] =
     translation.transformNow {
       case Success(Translated(text)) =>
         val newHolder: Seq[Node] = parseTranslation(rawHtml, text)
@@ -27,7 +28,6 @@ private[i18n] class TranslationModifier(
         logger.error(ex.getMessage)
         Success(holder)
     }
-  }
 
   override def applyTo(t: Element): Unit = {
     val holder: Seq[Node] = Seq(t.appendChild(placeholder.getOrElse(Bindings.emptyStringNode())))

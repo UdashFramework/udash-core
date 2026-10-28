@@ -14,18 +14,22 @@ object GuideStyleUtils extends CssBase {
   val relativeMiddle: CssStyle = mixin(
     top(50 %%),
     transform := "translateY(-50%)",
-    position.relative
+    position.relative,
   )
 
-  def transition(property: Attr = all, duration: FiniteDuration = 250 milliseconds): CssStyle = mixin(
+  def transition(property: Attr = all, duration: FiniteDuration = 250.milliseconds): CssStyle = mixin(
     transitionProperty := property.toString(),
     transitionDuration(duration),
-    transitionTimingFunction.easeInOut
+    transitionTimingFunction.easeInOut,
   )
 
-  def border(bColor: Color = StyleConstants.Colors.GreyExtra, bWidth: Length[Double] = 1.0 px, bStyle: AV = borderStyle.solid): CssStyle = mixin(
+  def border(
+    bColor: Color = StyleConstants.Colors.GreyExtra,
+    bWidth: Length[Double] = 1.0.px,
+    bStyle: AV = borderStyle.solid,
+  ): CssStyle = mixin(
     borderWidth(bWidth),
     bStyle,
-    borderColor(bColor)
+    borderColor(bColor),
   )
 }

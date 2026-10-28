@@ -11,8 +11,9 @@ import scala.scalajs.js
 
 /** Provides information about current URL. */
 trait UrlChangeProvider {
-  /** Enables all required event listeners.
-   * [[io.udash.Application]] initializes the provider automatically. */
+
+  /** Enables all required event listeners. [[io.udash.Application]] initializes the provider automatically.
+    */
   def initialize(): Unit
 
   /** Changes the URL part representing the frontend routing state. */
@@ -52,10 +53,9 @@ final class WindowUrlFragmentChangeProvider extends UrlChangeProvider {
   }
 }
 
-/**
- * Used for routing based on the URL path.
- * Don't forget to configure your web server to handle frontend routes. You may find "rewrite rules" mechanism useful.
- */
+/** Used for routing based on the URL path. Don't forget to configure your web server to handle frontend routes. You may
+  * find "rewrite rules" mechanism useful.
+  */
 final class WindowUrlPathChangeProvider extends UrlChangeProvider {
 
   import dom.window
@@ -78,9 +78,13 @@ final class WindowUrlPathChangeProvider extends UrlChangeProvider {
 
   @inline
   private def shouldIgnoreClick(
-    event: MouseEvent, target: Element, href: String,
-    samePath: Boolean, sameHash: Boolean, sameOrigin: Boolean
-  ): Boolean = {
+    event: MouseEvent,
+    target: Element,
+    href: String,
+    samePath: Boolean,
+    sameHash: Boolean,
+    sameOrigin: Boolean,
+  ): Boolean =
     // handle only links in the same browser card
     event.button != 0 || event.metaKey || event.ctrlKey || event.shiftKey ||
       // ignore click if default already prevented
@@ -91,26 +95,30 @@ final class WindowUrlPathChangeProvider extends UrlChangeProvider {
       !sameOrigin ||
       // ignore if only the URL fragment changed, but path is the same
       (samePath && !sameHash)
-  }
 
   override def initialize(): Unit = {
-    window.document.addEventListener("click", (event: MouseEvent) => {
-      event.target.opt
-        .collect { case node: Node => node }
-        .flatMap(Iterator.iterate(_)(_.parentNode).takeWhile(_ != null).collectFirstOpt { case a: HTMLAnchorElement => a })
-        .filter(_.getAttribute("href") != null)
-        .foreach { target =>
-          val href = target.getAttribute("href")
-          val location = window.location
-          val newUrl = new JSUrl(href, location.toString)
-          val (samePath, sameHash, sameOrigin) =
-            (isSamePath(location, newUrl), isSameHash(location, newUrl), isSameOrigin(location, newUrl))
-          if (!shouldIgnoreClick(event, target, href, samePath, sameHash, sameOrigin)) {
-            if (!samePath) changeFragment(Url(href))
-            event.preventDefault()
+    window.document.addEventListener(
+      "click",
+      (event: MouseEvent) => {
+        event.target.opt
+          .collect { case node: Node => node }
+          .flatMap(Iterator.iterate(_)(_.parentNode).takeWhile(_ != null).collectFirstOpt { case a: HTMLAnchorElement =>
+            a
+          })
+          .filter(_.getAttribute("href") != null)
+          .foreach { target =>
+            val href = target.getAttribute("href")
+            val location = window.location
+            val newUrl = new JSUrl(href, location.toString)
+            val (samePath, sameHash, sameOrigin) =
+              (isSamePath(location, newUrl), isSameHash(location, newUrl), isSameOrigin(location, newUrl))
+            if (!shouldIgnoreClick(event, target, href, samePath, sameHash, sameOrigin)) {
+              if (!samePath) changeFragment(Url(href))
+              event.preventDefault()
+            }
           }
-        }
-    })
+      },
+    )
 
     window.addEventListener("popstate", (_: PopStateEvent) => callbacks.foreach(_.apply(currentFragment)))
   }
@@ -124,7 +132,7 @@ final class WindowUrlPathChangeProvider extends UrlChangeProvider {
     (null, "", url.value) |> (
       if (replaceCurrent) window.history.replaceState(_: js.Any, _: String, _: String)
       else window.history.pushState(_: js.Any, _: String, _: String)
-      ).tupled
+    ).tupled
     val withoutHash = Url(url.value.takeWhile(_ != '#'))
     callbacks.foreach(_.apply(withoutHash))
   }

@@ -20,37 +20,38 @@ object CodeBlock {
   @js.native
   @JSGlobal("Prism")
   object Prism extends js.Object {
-    //https://prismjs.com/extending.html#api
+    // https://prismjs.com/extending.html#api
     def highlightAllUnder(element: Element): Unit = js.native
   }
 
-  def apply(data: String, language: String = "language-scala")(styles: CodeBlockStyles): JsDom.TypedTag[Pre] = {
+  def apply(data: String, language: String = "language-scala")(styles: CodeBlockStyles): JsDom.TypedTag[Pre] =
     pre(styles.codeWrapper)(
       ol(styles.codeBlock)(
-        data.split("\\r?\\n").map(line =>
-          li(code(cls := language)(line))
-        )
+        data.split("\\r?\\n").map(line => li(code(cls := language)(line)))
       )
     )
-  }
 
-  def lines(lines: Iterator[String], language: String = "language-scala")(styles: CodeBlockStyles): JsDom.TypedTag[Pre] = {
+  def lines(lines: Iterator[String], language: String = "language-scala")(styles: CodeBlockStyles)
+    : JsDom.TypedTag[Pre] =
     pre(styles.codeWrapper)(
       ol(styles.codeBlock)(
-        lines.map(line =>
-          li(code(cls := language)(line))
-        ).toList
+        lines.map(line => li(code(cls := language)(line))).toList
       )
     )
-  }
 
-  def reactive(data: ReadableProperty[String], placeholder: Modifier, language: String = "language-scala")(styles: CodeBlockStyles): Binding = {
+  def reactive(
+    data: ReadableProperty[String],
+    placeholder: Modifier,
+    language: String = "language-scala",
+  )(
+    styles: CodeBlockStyles
+  ): Binding = {
     val progressBar = UdashProgressBar(
       progress = 100.toProperty,
       showPercentage = true.toProperty,
       barStyle = Some(BootstrapStyles.Color.Success).toProperty,
       stripped = true.toProperty,
-      animated = true.toProperty
+      animated = true.toProperty,
     ) { case _ => b(placeholder) }
     produceWithNested(data)((data, nested) =>
       if (data.isEmpty) ForceBootstrap(nested(progressBar)).render

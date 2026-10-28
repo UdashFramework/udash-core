@@ -19,7 +19,7 @@ class WindowUrlFragmentChangeProviderTest extends AsyncUdashFrontendTest {
       provider.currentFragment.value shouldBe fragment
       dom.window.location.hash shouldBe "#" + fragment
       retrying {
-        //sometimes history takes time to catch up here
+        // sometimes history takes time to catch up here
         dom.window.history.length shouldBe historyLength + 1
       }
 

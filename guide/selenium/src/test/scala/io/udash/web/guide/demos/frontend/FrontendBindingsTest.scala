@@ -20,11 +20,10 @@ class FrontendBindingsTest extends SeleniumTest {
     "contain working bind demo" in {
       def bind = findElementById("bind-demo")
 
-      def checkName(expect: String) = {
+      def checkName(expect: String) =
         eventually {
           bind.getText should be(s"Name: $expect")
         }
-      }
 
       for (_ <- 1 to 3) {
         checkName("Diana")
@@ -37,24 +36,21 @@ class FrontendBindingsTest extends SeleniumTest {
     "contain working produce demo" in {
       def produce = findElementById("produce-demo")
 
-      def checkName(expect: String) = {
+      def checkName(expect: String) =
         eventually {
           produce.findElement(new ById("produce-demo-name")).getText should be(expect)
         }
-      }
 
-      def collectIntegers(container: WebElement): String = {
+      def collectIntegers(container: WebElement): String =
         container.findElements(new ByCssSelector("*")).asScala.foldLeft("")((result, el) => result + el.getText)
-      }
 
       var prevIntegers = ""
-      def checkIntegers() = {
+      def checkIntegers() =
         eventually {
           val std = collectIntegers(produce.findElement(new ById("produce-demo-integers")))
           prevIntegers shouldNot be(std)
           prevIntegers = std
         }
-      }
 
       for (_ <- 1 to 3) {
         checkName("Diana")
@@ -71,12 +67,11 @@ class FrontendBindingsTest extends SeleniumTest {
     "contain working repeat demo" in {
       def validation = findElementById("repeat-demo")
 
-      def collectIntegers(container: WebElement): String = {
+      def collectIntegers(container: WebElement): String =
         container.findElements(new ByCssSelector("*")).asScala.foldLeft("")((result, el) => result + el.getText)
-      }
 
       var prevIntegers = ""
-      def checkIntegers() = {
+      def checkIntegers() =
         eventually {
           val repeat = collectIntegers(validation.findElement(new ById("repeat-demo-integers")))
           val produce = collectIntegers(validation.findElement(new ById("repeat-demo-integers-produce")))
@@ -84,7 +79,6 @@ class FrontendBindingsTest extends SeleniumTest {
           prevIntegers shouldNot be(repeat)
           prevIntegers = repeat
         }
-      }
 
       for (_ <- 1 to 5) checkIntegers()
     }

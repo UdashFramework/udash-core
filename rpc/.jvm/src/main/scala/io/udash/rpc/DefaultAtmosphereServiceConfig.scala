@@ -7,8 +7,7 @@ import org.atmosphere.cpr._
 
 import scala.util.Try
 
-/**
-  * <p>Default [[io.udash.rpc.AtmosphereServiceConfig]] implementation.</p>
+/** <p>Default [[io.udash.rpc.AtmosphereServiceConfig]] implementation.</p>
   *
   * <p>Creates RPC endpoint per HTTP connection. Endpoint can be aware of [[io.udash.rpc.ClientId]]. </p>
   */

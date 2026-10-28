@@ -11,13 +11,14 @@ import org.scalajs.dom._
 
 import scala.collection.mutable
 
-final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] private(
+final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] private (
   elements: seq.ReadableSeqProperty[ItemType, ElemType],
-  override val componentId: ComponentId
+  override val componentId: ComponentId,
 )(
   heading: (ElemType, Binding.NestedInterceptor) => Seq[Element],
-  body: (ElemType, Binding.NestedInterceptor) => Seq[Element]
-) extends UdashBootstrapComponent with Listenable {
+  body: (ElemType, Binding.NestedInterceptor) => Seq[Element],
+) extends UdashBootstrapComponent
+    with Listenable {
 
   import io.udash.bootstrap.utils.BootstrapTags._
   import io.udash.css.CssView._
@@ -45,26 +46,35 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
         repeatWithIndex(elements) { case (item, idx, nested) =>
           val headingId = ComponentId.generate()
           val card = UdashCard() { factory =>
-            val collapse = UdashCollapse()(_ => Seq(
-              aria.labelledby := headingId, dataParent := s"#$componentId",
-              factory.body(nested => body(item, nested))
-            ))
+            val collapse = UdashCollapse()(_ =>
+              Seq(
+                aria.labelledby := headingId,
+                dataParent := s"#$componentId",
+                factory.body(nested => body(item, nested)),
+              )
+            )
 
             collapses(item) = collapse
 
-            val header = factory.header { nested => Seq(
-              headingId,
-              h5(BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Bottom, size = BootstrapStyles.SpacingSize.None))(
-                button(
-                  BootstrapStyles.Button.btn, BootstrapStyles.Button.color(BootstrapStyles.Color.Link),
-                  tpe := "button", dataToggle:= "collapse", href := s"#${collapse.componentId}",
-                  heading(item, nested)
-                )
+            val header = factory.header { nested =>
+              Seq(
+                headingId,
+                h5(BootstrapStyles.Spacing.margin(BootstrapStyles.Side.Bottom, size = BootstrapStyles.SpacingSize.None))(
+                  button(
+                    BootstrapStyles.Button.btn,
+                    BootstrapStyles.Button.color(BootstrapStyles.Color.Link),
+                    tpe := "button",
+                    dataToggle := "collapse",
+                    href := s"#${collapse.componentId}",
+                    heading(item, nested),
+                  )
+                ),
               )
-            )}
+            }
             nested(collapse)
             Seq[Modifier](
-              header, collapse.render,
+              header,
+              collapse.render,
               nested(
                 new Binding {
                   override def applyTo(t: Element): Unit = {
@@ -73,7 +83,7 @@ final class UdashAccordion[ItemType, ElemType <: ReadableProperty[ItemType]] pri
                     }
                   }
                 }
-              )
+              ),
             )
           }
           nested(card)
@@ -88,29 +98,34 @@ object UdashAccordion {
     override val source: UdashAccordion[ItemType, ElemType],
     item: ItemType,
     idx: Int,
-    collapseEvent: UdashCollapse.CollapseEvent
-  ) extends AbstractCase with ListenableEvent
+    collapseEvent: UdashCollapse.CollapseEvent,
+  ) extends AbstractCase
+      with ListenableEvent
 
-  /**
-    * Creates a dynamic accordion component. `items` sequence changes will be synchronised with the rendered elements.
+  /** Creates a dynamic accordion component. `items` sequence changes will be synchronised with the rendered elements.
     * More: <a href="http://getbootstrap.com/docs/4.1/components/collapse/#accordion-example">Bootstrap Docs</a>.
     *
-    * @param elements    Data items which will be represented as cards in the accordion.
-    * @param componentId An id of the root DOM node.
-    * @param heading     Creates panel header.
-    *                    Use the provided interceptor to properly clean up bindings inside the content.
-    * @param body        Creates panel body.
-    *                    Use the provided interceptor to properly clean up bindings inside the content.
-    * @tparam ItemType A single element's type in the `items` sequence.
-    * @tparam ElemType A type of a property containing an element in the `items` sequence.
-    * @return A `UdashAccordion` component, call `render` to create a DOM element.
+    * @param elements
+    *   Data items which will be represented as cards in the accordion.
+    * @param componentId
+    *   An id of the root DOM node.
+    * @param heading
+    *   Creates panel header. Use the provided interceptor to properly clean up bindings inside the content.
+    * @param body
+    *   Creates panel body. Use the provided interceptor to properly clean up bindings inside the content.
+    * @tparam ItemType
+    *   A single element's type in the `items` sequence.
+    * @tparam ElemType
+    *   A type of a property containing an element in the `items` sequence.
+    * @return
+    *   A `UdashAccordion` component, call `render` to create a DOM element.
     */
   def apply[ItemType, ElemType <: ReadableProperty[ItemType]](
     elements: seq.ReadableSeqProperty[ItemType, ElemType],
-    componentId: ComponentId = ComponentId.generate()
+    componentId: ComponentId = ComponentId.generate(),
   )(
     heading: (ElemType, Binding.NestedInterceptor) => Seq[Element],
-    body: (ElemType, Binding.NestedInterceptor) => Seq[Element]
+    body: (ElemType, Binding.NestedInterceptor) => Seq[Element],
   ): UdashAccordion[ItemType, ElemType] =
     new UdashAccordion(elements, componentId)(heading, body)
 }

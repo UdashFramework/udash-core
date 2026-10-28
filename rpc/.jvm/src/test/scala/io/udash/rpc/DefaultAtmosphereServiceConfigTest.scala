@@ -25,14 +25,18 @@ class DefaultAtmosphereServiceConfigTest extends UdashRpcBackendTest {
       var counter = 0
       val config = new DefaultAtmosphereServiceConfig[TestRPC](_ => { counter += 1; new DefaultExposesServerRPC(null) })
 
-      config.resolveRpc(new AtmosphereResourceMock(AtmosphereResource.TRANSPORT.WEBSOCKET, "1", null, null)) shouldNot be(null)
+      config.resolveRpc(new AtmosphereResourceMock(AtmosphereResource.TRANSPORT.WEBSOCKET, "1", null, null)) shouldNot
+        be(null)
       counter should be(1)
 
-      config.resolveRpc(new AtmosphereResourceMock(AtmosphereResource.TRANSPORT.WEBSOCKET, "2", null, null)) shouldNot be(null)
+      config.resolveRpc(new AtmosphereResourceMock(AtmosphereResource.TRANSPORT.WEBSOCKET, "2", null, null)) shouldNot
+        be(null)
       counter should be(2)
 
-      config.resolveRpc(new AtmosphereResourceMock(AtmosphereResource.TRANSPORT.WEBSOCKET, "1", null, null)) shouldNot be(null)
-      config.resolveRpc(new AtmosphereResourceMock(AtmosphereResource.TRANSPORT.WEBSOCKET, "2", null, null)) shouldNot be(null)
+      config.resolveRpc(new AtmosphereResourceMock(AtmosphereResource.TRANSPORT.WEBSOCKET, "1", null, null)) shouldNot
+        be(null)
+      config.resolveRpc(new AtmosphereResourceMock(AtmosphereResource.TRANSPORT.WEBSOCKET, "2", null, null)) shouldNot
+        be(null)
       counter should be(2)
     }
 

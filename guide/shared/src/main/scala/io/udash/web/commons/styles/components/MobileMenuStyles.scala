@@ -12,23 +12,23 @@ object MobileMenuStyles extends CssBase {
   private val lineHeight = 4
   val btnMobileLines: CssStyle = style(
     CommonStyleUtils.absoluteCenter,
-    width(60 %%)
+    width(60 %%),
   )
 
   private val btnMobileLine: CssStyle = mixin(
     CommonStyleUtils.transition(),
     position.relative,
     display.block,
-    height(lineHeight px),
+    height(lineHeight.px),
     width(100 %%),
-    marginTop(lineHeight px),
-    marginBottom(lineHeight px),
-    backgroundColor(StyleConstants.Colors.Red)
+    marginTop(lineHeight.px),
+    marginBottom(lineHeight.px),
+    backgroundColor(StyleConstants.Colors.Red),
   )
 
   val btnMobileLineTop: CssStyle = style(
     btnMobileLine,
-    transformOrigin := s"50% calc(50% + ${lineHeight * 2}px)"
+    transformOrigin := s"50% calc(50% + ${lineHeight * 2}px)",
   )
 
   val btnMobileLineMiddle: CssStyle = style(
@@ -37,36 +37,36 @@ object MobileMenuStyles extends CssBase {
 
   val btnMobileLineBottom: CssStyle = style(
     btnMobileLine,
-    transformOrigin := s"50% calc(50% - ${lineHeight * 2}px)"
+    transformOrigin := s"50% calc(50% - ${lineHeight * 2}px)",
   )
 
   private val btnMobileActive = mixin(
-    unsafeChild(s".${btnMobileLineTop.className}") (
+    unsafeChild(s".${btnMobileLineTop.className}")(
       transform := s"rotate(45deg) translateY(${lineHeight * 2}px)"
     ),
 
-    unsafeChild(s".${btnMobileLineBottom.className}") (
+    unsafeChild(s".${btnMobileLineBottom.className}")(
       transform := s"rotate(-45deg) translateY(-${lineHeight * 2}px)"
     ),
 
-    unsafeChild(s".${btnMobileLineMiddle.className}") (
+    unsafeChild(s".${btnMobileLineMiddle.className}")(
       opacity(0)
-    )
+    ),
   )
 
   val btnMobile: CssStyle = style(
     display.none,
-    width(StyleConstants.Sizes.GuideHeaderHeightMobile + 1 px),
-    height(StyleConstants.Sizes.GuideHeaderHeightMobile  px),
+    width((StyleConstants.Sizes.GuideHeaderHeightMobile + 1).px),
+    height(StyleConstants.Sizes.GuideHeaderHeightMobile.px),
     zIndex(9),
 
     MediaQueries.tabletPortrait(
       display.inlineBlock,
-      verticalAlign.middle
+      verticalAlign.middle,
     ),
 
-    &.attr(Attributes.data(Attributes.Active), "true") (
+    &.attr(Attributes.data(Attributes.Active), "true")(
       btnMobileActive
-    )
+    ),
   )
 }

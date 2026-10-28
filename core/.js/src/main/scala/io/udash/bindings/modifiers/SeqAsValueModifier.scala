@@ -10,15 +10,18 @@ import org.scalajs.dom.Node
 private[bindings] final class SeqAsValueModifier[T](
   override val property: ReadableSeqProperty[T, _ <: ReadableProperty[T]],
   build: (Seq[T], Binding.NestedInterceptor) => Seq[Node],
-  override val customElementsReplace: DOMManipulator.ReplaceMethod
+  override val customElementsReplace: DOMManipulator.ReplaceMethod,
 ) extends ValueModifier[BSeq[T]] {
 
-  override protected def builder: (BSeq[T], NestedInterceptor) => Seq[Node] = (data, interceptor) => build(data.toSeq, interceptor)
+  override protected def builder: (BSeq[T], NestedInterceptor) => Seq[Node] = (data, interceptor) =>
+    build(data.toSeq, interceptor)
 
-  def this(property: ReadableSeqProperty[T, _ <: ReadableProperty[T]], builder: Seq[T] => Seq[Node],
-    customElementsReplace: DOMManipulator.ReplaceMethod) = {
+  def this(
+    property: ReadableSeqProperty[T, _ <: ReadableProperty[T]],
+    builder: Seq[T] => Seq[Node],
+    customElementsReplace: DOMManipulator.ReplaceMethod,
+  ) =
     this(property, (data: Seq[T], _: Binding.NestedInterceptor) => builder(data), customElementsReplace)
-  }
 
   override def listen(callback: BSeq[T] => Unit): Registration =
     property.listen(callback)

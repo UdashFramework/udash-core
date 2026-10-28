@@ -7,7 +7,7 @@ import io.udash.web.commons.components.CodeBlock
 import io.udash.web.guide.styles.partials.GuideStyles
 import scalatags.JsDom.all._
 
-import scala.reflect.{ClassTag, classTag}
+import scala.reflect.{classTag, ClassTag}
 import scala.util.matching.Regex
 
 trait AutoDemo extends SharedExtensions {
@@ -41,5 +41,6 @@ object AutoDemo {
   private[demos] val mpcFix = companionFix[ModelPropertyCreator[_]]
   private[demos] val codecFix = companionFix[GenCodec[_]]
 
-  def snippet(code: String): Modifier = CodeBlock.lines(code.linesIterator.drop(1).map(_.drop(2)).toList.view.dropRight(1).iterator)(GuideStyles)
+  def snippet(code: String): Modifier =
+    CodeBlock.lines(code.linesIterator.drop(1).map(_.drop(2)).toList.view.dropRight(1).iterator)(GuideStyles)
 }

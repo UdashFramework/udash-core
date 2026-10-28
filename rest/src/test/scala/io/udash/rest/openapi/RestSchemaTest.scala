@@ -4,7 +4,7 @@ package rest.openapi
 import com.avsystem.commons._
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx}
 import com.avsystem.commons.serialization.json.JsonStringOutput
-import com.avsystem.commons.serialization.{GenCodec, flatten, name, optionalParam, transparent}
+import com.avsystem.commons.serialization.{flatten, name, optionalParam, transparent, GenCodec}
 import io.udash.rest.openapi.adjusters.description
 import io.udash.rest.{DefaultRestImplicits, PolyRestDataCompanion, RestDataCompanion, RestDataCompanionWithDeps}
 import org.scalatest.funsuite.AnyFunSuite
@@ -27,7 +27,7 @@ final case class KejsKlass(
   @name("integer") @customWa(42) int: Int,
   @description("serious dependency") dep: Dependency,
   @description("optional thing") @optionalParam opty: Opt[String] = Opt("defaultThatMustBeIgnored"),
-  @description("serious string") str: Opt[String] = Opt.Empty
+  @description("serious string") str: Opt[String] = Opt.Empty,
 )
 object KejsKlass extends RestDataCompanion[KejsKlass]
 
@@ -83,7 +83,8 @@ object CustomSchemaNameHierarchy extends RestDataCompanion[CustomSchemaNameHiera
   final case class CustomName(str: String) extends CustomSchemaNameHierarchy
 
   // @schemaName annotation should be used as schema name, @name annotation should be used only as type discriminator value
-  @schemaName("CustomSchemaNameBoth") @name("CustomNameBoth123")
+  @schemaName("CustomSchemaNameBoth")
+  @name("CustomNameBoth123")
   final case class CustomNameBoth(str: String) extends CustomSchemaNameHierarchy
 }
 
@@ -104,8 +105,7 @@ class RestSchemaTest extends AnyFunSuite {
     JsonStringOutput.writePretty(schema)
 
   test("case class") {
-    assert(schemaStr[KejsKlass] ==
-      """{
+    assert(schemaStr[KejsKlass] == """{
         |  "type": "object",
         |  "description": "kejs klass",
         |  "properties": {
@@ -140,16 +140,14 @@ class RestSchemaTest extends AnyFunSuite {
   }
 
   test("transparent wrapper") {
-    assert(schemaStr[Wrap] ==
-      """{
+    assert(schemaStr[Wrap] == """{
         |  "type": "string",
         |  "description": "wrapped string"
         |}""".stripMargin)
   }
 
   test("generic case class") {
-    assert(schemaStr[PlainGenericCC[String]] ==
-      """{
+    assert(schemaStr[PlainGenericCC[String]] == """{
         |  "type": "object",
         |  "properties": {
         |    "thing": {
@@ -163,8 +161,7 @@ class RestSchemaTest extends AnyFunSuite {
   }
 
   test("generic case class with with annotation") {
-    assert(schemaStr[GenCC[String]] ==
-      """{
+    assert(schemaStr[GenCC[String]] == """{
         |  "type": "object",
         |  "properties": {
         |    "value": {
@@ -172,13 +169,11 @@ class RestSchemaTest extends AnyFunSuite {
         |      "default": null
         |    }
         |  }
-        |}""".stripMargin
-    )
+        |}""".stripMargin)
   }
 
   test("map with enum key") {
-    assert(schemaStr[Map[KeyEnum, String]] ==
-      """{
+    assert(schemaStr[Map[KeyEnum, String]] == """{
         |  "type": "object",
         |  "properties": {
         |    "First": {
@@ -199,8 +194,7 @@ class RestSchemaTest extends AnyFunSuite {
   }
 
   test("nullable enum") {
-    assert(schemaStr[Opt[KeyEnum]] ==
-      """{
+    assert(schemaStr[Opt[KeyEnum]] == """{
         |  "type": "string",
         |  "nullable": true,
         |  "enum": [
@@ -219,8 +213,7 @@ class RestSchemaTest extends AnyFunSuite {
     val schemas = resolvedSchemas[HierarchyRoot[String]]
 
     assert(schemas.contains("CustomHierarchyCaseName"))
-    assert(printSchema(schemas("CustomHierarchyCaseName")) ==
-      """{
+    assert(printSchema(schemas("CustomHierarchyCaseName")) == """{
         |  "type": "object",
         |  "properties": {
         |    "tpe": {
@@ -239,8 +232,7 @@ class RestSchemaTest extends AnyFunSuite {
         |  ]
         |}""".stripMargin)
 
-    assert(printSchema(schemas("StringHierarchy")) ==
-      """{
+    assert(printSchema(schemas("StringHierarchy")) == """{
         |  "type": "object",
         |  "oneOf": [
         |    {
@@ -257,8 +249,7 @@ class RestSchemaTest extends AnyFunSuite {
   }
 
   test("flat sealed hierarchy schema with customized schema names") {
-    assert(allSchemasStr[FullyQualifiedHierarchy] ==
-      """{
+    assert(allSchemasStr[FullyQualifiedHierarchy] == """{
         |  "io.udash.rest.openapi.FullyQualifiedHierarchy": {
         |    "type": "object",
         |    "oneOf": [
@@ -350,8 +341,7 @@ class RestSchemaTest extends AnyFunSuite {
   }
 
   test("Customized schema name") {
-    assert(allSchemasStr[CustomSchemaNameHierarchy] ==
-      """{
+    assert(allSchemasStr[CustomSchemaNameHierarchy] == """{
         |  "CustomName123": {
         |    "type": "object",
         |    "properties": {

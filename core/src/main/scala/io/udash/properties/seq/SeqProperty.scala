@@ -5,6 +5,7 @@ import io.udash.properties._
 import io.udash.properties.single.{AbstractProperty, CastableProperty, Property}
 
 object SeqProperty {
+
   /** Creates a blank DirectSeqProperty[T]. */
   def blank[T](implicit pc: SeqPropertyCreator[T, Seq], blank: Blank[Seq[T]]): SeqProperty[T, CastableProperty[T]] =
     Property.blank[Seq[T]](pc, blank).asSeq[T]
@@ -19,6 +20,7 @@ object SeqProperty {
 }
 
 trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, ElemType] with Property[BSeq[A]] {
+
   /** Replaces `amount` elements from index `idx` with provided `values`. */
   def replaceSeq(idx: Int, amount: Int, values: BSeq[A]): Unit
   final def replace(idx: Int, amount: Int, values: A*): Unit = replaceSeq(idx, amount, values)
@@ -44,10 +46,12 @@ trait SeqProperty[A, +ElemType <: Property[A]] extends ReadableSeqProperty[A, El
   /** Removes all elements from this SeqProperty. */
   def clear(): Unit
 
-  /** Creates SeqProperty[B] linked to `this`. Changes will be bidirectionally synchronized between `this` and new property.
-   * Prefer this to `bitransform` whenever you don't need the whole sequence to perform the transformation.
-   *
-   * @return New SeqProperty[B], which will be synchronised with original SeqProperty[A]. */
+  /** Creates SeqProperty[B] linked to `this`. Changes will be bidirectionally synchronized between `this` and new
+    * property. Prefer this to `bitransform` whenever you don't need the whole sequence to perform the transformation.
+    *
+    * @return
+    *   New SeqProperty[B], which will be synchronised with original SeqProperty[A].
+    */
   def bitransformElements[B](transformer: A => B)(revert: B => A): SeqProperty[B, Property[B]]
 
   /** Creates `SeqProperty[A]` providing reversed order of elements from `this`. */

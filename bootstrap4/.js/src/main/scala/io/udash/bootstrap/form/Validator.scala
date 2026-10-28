@@ -30,7 +30,7 @@ object Invalid {
     Invalid(error +: errors)
 
   def apply(error: String, errors: String*): Invalid[ValidationError] =
-    this ((error +: errors).map(DefaultValidationError.apply))
+    this((error +: errors).map(DefaultValidationError.apply))
 }
 
 trait Validator[-ArgumentType] {
@@ -41,11 +41,10 @@ object Validator {
   final val Default: Validator[Any] = _ => Valid
 
   implicit final class FutureValidationOps[T](private val future: Future[Seq[ValidationResult]]) extends AnyVal {
-    def foldValidationResult: Future[ValidationResult] = {
+    def foldValidationResult: Future[ValidationResult] =
       future.mapNow { s =>
         val errors = s.iterator.flatCollect { case Invalid(results) => results }
         if (errors.isEmpty) Valid else Invalid(errors.toSeq)
       }
-    }
   }
 }

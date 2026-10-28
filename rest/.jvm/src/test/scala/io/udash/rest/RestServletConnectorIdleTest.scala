@@ -20,11 +20,10 @@ import scala.concurrent.duration.*
 import scala.jdk.CollectionConverters.*
 import scala.util.control.NonFatal
 
-/**
- * Pins what the servlet's own timeouts rely on: Jetty does not expire a request that is suspended without pending
- * I/O when the connector's idle timeout elapses, so a call may run past it up to the call's own timeout. A write that
- * its client stops reading does fail at that idle timeout, which is the only bound on it.
- */
+/** Pins what the servlet's own timeouts rely on: Jetty does not expire a request that is suspended without pending I/O
+  * when the connector's idle timeout elapses, so a call may run past it up to the call's own timeout. A write that its
+  * client stops reading does fail at that idle timeout, which is the only bound on it.
+  */
 class RestServletConnectorIdleTest extends UdashSharedTest with UsesHttpServer {
 
   private val ConnectorIdleTimeout = 1.second
@@ -62,7 +61,8 @@ class RestServletConnectorIdleTest extends UdashSharedTest with UsesHttpServer {
     connector.addConnectionFactory(new HTTP2CServerConnectionFactory(httpConfig))
 
     val handler = new ServletContextHandler()
-    handler.addServlet(new ServletHolder(new RestServlet(handleRequest, 10.seconds, customLogger = servletLogger)), "/api/*")
+    handler
+      .addServlet(new ServletHolder(new RestServlet(handleRequest, 10.seconds, customLogger = servletLogger)), "/api/*")
     server.setHandler(handler)
   }
 

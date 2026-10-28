@@ -15,24 +15,32 @@ object CheckButtons {
   def divWithLabelDecorator[T](labelFactory: T => Modifier): Seq[(JSInput, T)] => Seq[Node] =
     RadioButtons.divWithLabelDecorator(labelFactory)
 
-  /**
-   * @param selectedItems  SeqProperty which is going to be bound to checkboxes
-   * @param options        Seq of available options, one checkbox will be created for each option.
-   * @param decorator      Function creating HTML element from checkboxes Seq.
-   * @param inputModifiers Modifiers to apply on each generated checkbox.
-   * @return HTML element created by decorator.
-   */
+  /** @param selectedItems
+    *   SeqProperty which is going to be bound to checkboxes
+    * @param options
+    *   Seq of available options, one checkbox will be created for each option.
+    * @param decorator
+    *   Function creating HTML element from checkboxes Seq.
+    * @param inputModifiers
+    *   Modifiers to apply on each generated checkbox.
+    * @return
+    *   HTML element created by decorator.
+    */
   def apply[T](
-    selectedItems: SeqProperty[T, _ <: ReadableProperty[T]], options: ReadableSeqProperty[T]
-  )(decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*): InputBinding[Div] = {
+    selectedItems: SeqProperty[T, _ <: ReadableProperty[T]],
+    options: ReadableSeqProperty[T],
+  )(
+    decorator: Seq[(JSInput, T)] => Seq[Node],
+    inputModifiers: Modifier*
+  ): InputBinding[Div] =
     new GroupedButtonsBinding(options, decorator, inputModifiers)(
       "checkbox",
       opt => selectedItems.transform(_.contains(opt)),
       opts => selectedItems.set(selectedItems.get.filter(opts.contains)),
-      (in: JSInput, opt: T) => (_: Event) => {
-        if (in.checked && !selectedItems.get.contains(opt)) selectedItems.append(opt)
-        else selectedItems.remove(opt)
-      }
+      (in: JSInput, opt: T) =>
+        (_: Event) => {
+          if (in.checked && !selectedItems.get.contains(opt)) selectedItems.append(opt)
+          else selectedItems.remove(opt)
+        },
     )
-  }
 }

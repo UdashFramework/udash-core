@@ -11,12 +11,16 @@ class LocalTranslationProviderTest extends UdashFrontendTest {
     "provide translations without argument" in {
       implicit val translator = new LocalTranslationProvider(
         Map(
-          Lang("en") -> Bundle(BundleHash("hash1"), Map(
-            "tr1" -> "Translation",
-            "tr2" -> "Translation2",
-            "tr3" -> "Translation3"
-          ))
-        ), missingTranslationError = "ERROR"
+          Lang("en") -> Bundle(
+            BundleHash("hash1"),
+            Map(
+              "tr1" -> "Translation",
+              "tr2" -> "Translation2",
+              "tr3" -> "Translation3",
+            ),
+          )
+        ),
+        missingTranslationError = "ERROR",
       )
 
       getTranslatedString(TranslationKey.key("tr1")) should be("Translation")
@@ -28,13 +32,17 @@ class LocalTranslationProviderTest extends UdashFrontendTest {
     "provide translations with arguments" in {
       implicit val translator = new LocalTranslationProvider(
         Map(
-          Lang("en") -> Bundle(BundleHash("hash1"), Map(
-            "tr1" -> "Translation {0}",
-            "tr2" -> "Translation2 {1} {0}",
-            "tr3" -> "Translation3 {}",
-            "tr4" -> "Translation4 {1} {} {}"
-          ))
-        ), missingTranslationError = "ERROR"
+          Lang("en") -> Bundle(
+            BundleHash("hash1"),
+            Map(
+              "tr1" -> "Translation {0}",
+              "tr2" -> "Translation2 {1} {0}",
+              "tr3" -> "Translation3 {}",
+              "tr4" -> "Translation4 {1} {} {}",
+            ),
+          )
+        ),
+        missingTranslationError = "ERROR",
       )
 
       getTranslatedString(TranslationKey.key1("tr1")(123.3)) should be("Translation 123.3")
@@ -47,19 +55,26 @@ class LocalTranslationProviderTest extends UdashFrontendTest {
     "handle languages" in {
       implicit val translator = new LocalTranslationProvider(
         Map(
-          Lang("en") -> Bundle(BundleHash("hash1"), Map(
-            "tr1" -> "Translation {0}",
-            "tr2" -> "Translation2 {1} {0}",
-            "tr3" -> "Translation3 {}",
-            "tr4" -> "Translation4 {1} {} {}"
-          )),
-          Lang("pl") -> Bundle(BundleHash("hash1"), Map(
-            "tr1" -> "Translation {0} pl",
-            "tr2" -> "Translation2 {1} {0} pl",
-            "tr3" -> "Translation3 {} pl",
-            "tr4" -> "Translation4 {1} {} {} pl"
-          ))
-        ), missingTranslationError = "ERROR"
+          Lang("en") -> Bundle(
+            BundleHash("hash1"),
+            Map(
+              "tr1" -> "Translation {0}",
+              "tr2" -> "Translation2 {1} {0}",
+              "tr3" -> "Translation3 {}",
+              "tr4" -> "Translation4 {1} {} {}",
+            ),
+          ),
+          Lang("pl") -> Bundle(
+            BundleHash("hash1"),
+            Map(
+              "tr1" -> "Translation {0} pl",
+              "tr2" -> "Translation2 {1} {0} pl",
+              "tr3" -> "Translation3 {} pl",
+              "tr4" -> "Translation4 {1} {} {} pl",
+            ),
+          ),
+        ),
+        missingTranslationError = "ERROR",
       )
 
       getTranslatedString(TranslationKey.key1("tr1")(123.3)) should be("Translation 123.3")

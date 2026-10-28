@@ -20,24 +20,29 @@ object DropdownsDemo extends AutoDemo with CrossLogging {
     import scalatags.JsDom.all._
 
     val url = Url(BootstrapExtState.url)
-    val items = SeqProperty[UdashDropdown.DefaultDropdownItem](Seq(
-      UdashDropdown.DefaultDropdownItem.Header("Start"),
-      UdashDropdown.DefaultDropdownItem.Link("Intro", Url(IntroState.url)),
-      UdashDropdown.DefaultDropdownItem.Disabled(
-        UdashDropdown.DefaultDropdownItem.Link("Test Disabled", url)
-      ),
-      UdashDropdown.DefaultDropdownItem.Divider,
-      UdashDropdown.DefaultDropdownItem.Header("Dynamic")
-    ))
+    val items = SeqProperty[UdashDropdown.DefaultDropdownItem](
+      Seq(
+        UdashDropdown.DefaultDropdownItem.Header("Start"),
+        UdashDropdown.DefaultDropdownItem.Link("Intro", Url(IntroState.url)),
+        UdashDropdown.DefaultDropdownItem.Disabled(
+          UdashDropdown.DefaultDropdownItem.Link("Test Disabled", url)
+        ),
+        UdashDropdown.DefaultDropdownItem.Divider,
+        UdashDropdown.DefaultDropdownItem.Header("Dynamic"),
+      )
+    )
 
     val clicks = SeqProperty[String](Seq.empty)
     var i = 1
-    val appendHandler = window.setInterval(() => {
-      items.append(
-        UdashDropdown.DefaultDropdownItem.Link(s"Test $i", url)
-      )
-      i += 1
-    }, 5000)
+    val appendHandler = window.setInterval(
+      () => {
+        items.append(
+          UdashDropdown.DefaultDropdownItem.Link(s"Test $i", url)
+        )
+        i += 1
+      },
+      5000,
+    )
     window.setTimeout(() => window.clearInterval(appendHandler), 60000)
 
     val dropdown = UdashDropdown.default(items)(_ => Seq[Modifier]("Dropdown ", Button.color(Color.Primary)))
@@ -55,16 +60,14 @@ object DropdownsDemo extends AutoDemo with CrossLogging {
         Grid.row,
         Spacing.margin(
           side = Side.Bottom,
-          size = SpacingSize.Normal
-        )
+          size = SpacingSize.Normal,
+        ),
       )(
         div(Grid.col(6))(dropdown),
-        div(Grid.col(6))(dropup)
+        div(Grid.col(6))(dropup),
       ),
       h4("Clicks: "),
-      produce(clicks)(seq =>
-        ul(Card.card, Card.body, Background.color(Color.Light))(seq.map(li(_))).render
-      )
+      produce(clicks)(seq => ul(Card.card, Card.body, Background.color(Color.Light))(seq.map(li(_))).render),
     ).render
   }.withSourceCode
 
@@ -73,4 +76,3 @@ object DropdownsDemo extends AutoDemo with CrossLogging {
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
   }
 }
-

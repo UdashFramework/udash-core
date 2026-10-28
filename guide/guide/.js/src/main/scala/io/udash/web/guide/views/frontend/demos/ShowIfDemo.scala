@@ -17,7 +17,7 @@ object ShowIfDemo extends AutoDemo with CssView {
 
     p(
       span("Visible: ", bind(visible), " -> "),
-      showIf(visible)(span("Show/hide").render)
+      showIf(visible)(span("Show/hide").render),
     )
   }.withSourceCode
 

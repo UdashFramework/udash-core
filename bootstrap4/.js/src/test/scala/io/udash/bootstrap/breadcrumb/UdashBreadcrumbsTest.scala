@@ -14,14 +14,15 @@ class UdashBreadcrumbsTest extends UdashCoreFrontendTest {
       val pages = SeqProperty(
         new CustomBreadcrumb("A", "id1"),
         new CustomBreadcrumb("B", "id2"),
-        new CustomBreadcrumb("C", "id3")
+        new CustomBreadcrumb("C", "id3"),
       )
       val breadcrumbs = UdashBreadcrumbs(pages)(
-        itemFactory = (item, nested) => span(
-          nested(id.bind(item.transform(_.id))),
-          nested(bind(item.transform(_.name)))
-        ).render,
-        isActive = _.id.charAt(2).toInt % 2 == 0
+        itemFactory = (item, nested) =>
+          span(
+            nested(id.bind(item.transform(_.id))),
+            nested(bind(item.transform(_.name))),
+          ).render,
+        isActive = _.id.charAt(2).toInt % 2 == 0,
       )
       val el = breadcrumbs.render
 
@@ -55,7 +56,7 @@ class UdashBreadcrumbsTest extends UdashCoreFrontendTest {
       val pages = SeqProperty(
         new UdashBreadcrumbs.Breadcrumb("Home", Url("https://udash.io/")),
         new UdashBreadcrumbs.Breadcrumb("Guide", Url("https://guide.udash.io/")),
-        new UdashBreadcrumbs.Breadcrumb("RPC", Url("https://guide.udash.io/rpc"))
+        new UdashBreadcrumbs.Breadcrumb("RPC", Url("https://guide.udash.io/rpc")),
       )
       val breadcrumbs = UdashBreadcrumbs.default(pages)()
       val el = breadcrumbs.render

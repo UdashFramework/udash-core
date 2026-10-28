@@ -5,31 +5,30 @@ import com.avsystem.commons.misc.Opt
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization.{GenCodec, Input, InputWrapper, ObjectInput}
 
-import scala.reflect.{ClassTag, classTag}
+import scala.reflect.{classTag, ClassTag}
 
-/**
- * Builds a `GenCodec[T]` for a single case `T` of a `@flatten` (flat) sealed hierarchy rooted at `R`. It
- * delegates reading/writing to the root codec but, on read, additionally rejects objects whose
- * discriminator field (`caseFieldName`) does not equal the expected `caseName` - see
- * [[CaseNameValidatingInput]]. The value read by the root codec is also checked to be an instance of `T`, as the root
- * codec may return a different case when the discriminator is missing (e.g. for a hierarchy with a `@defaultCase`).
- */
+/** Builds a `GenCodec[T]` for a single case `T` of a `@flatten` (flat) sealed hierarchy rooted at `R`. It delegates
+  * reading/writing to the root codec but, on read, additionally rejects objects whose discriminator field
+  * (`caseFieldName`) does not equal the expected `caseName` - see [[CaseNameValidatingInput]]. The value read by the
+  * root codec is also checked to be an instance of `T`, as the root codec may return a different case when the
+  * discriminator is missing (e.g. for a hierarchy with a `@defaultCase`).
+  */
 object CaseNameValidatingCodec {
   // `caseName` is a by-name parameter to avoid recursive access problem
   def apply[T: ClassTag, R >: T](rootCodec: GenCodec[R], caseFieldName: String, caseName: => String): GenCodec[T] =
     GenCodec.create(
-      input => rootCodec.read(new CaseNameValidatingInput(input, caseFieldName, caseName)) match {
-        case t: T => t
-        case null => null.asInstanceOf[T]
-        case v => throw new ReadFailure(s"$v is not an instance of ${classTag[T].runtimeClass}")
-      },
+      input =>
+        rootCodec.read(new CaseNameValidatingInput(input, caseFieldName, caseName)) match {
+          case t: T => t
+          case null => null.asInstanceOf[T]
+          case v => throw new ReadFailure(s"$v is not an instance of ${classTag[T].runtimeClass}")
+        },
       (output, value) => rootCodec.write(output, value),
     )
 }
 
-/**
- * Input that rejects objects with unexpected discriminator field value.
- */
+/** Input that rejects objects with unexpected discriminator field value.
+  */
 final class CaseNameValidatingInput(
   protected val wrapped: Input,
   caseFieldName: String,

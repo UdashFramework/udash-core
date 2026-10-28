@@ -5,8 +5,7 @@ import io.udash.css.CssBase
 object StyleConstants extends CssBase {
   import dsl._
 
-  /**
-    * SIZES
+  /** SIZES
     */
   object Sizes {
     val BodyWidth = 1075
@@ -20,8 +19,7 @@ object StyleConstants extends CssBase {
     val MenuWidth = 320
   }
 
-  /**
-    * COLORS
+  /** COLORS
     */
   object Colors {
     val Red = c"#e30613"
@@ -34,8 +32,7 @@ object StyleConstants extends CssBase {
     val Yellow = c"#ffd600"
   }
 
-  /**
-    * MEDIA QUERIES
+  /** MEDIA QUERIES
     */
   object MediaQueriesBounds {
     val TabletLandscapeMax = 1074

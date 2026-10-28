@@ -2,16 +2,16 @@ package io.udash.routing
 
 import io.udash.core.{State, Url}
 
-/**
- * The implementation of this trait should be injected to [[io.udash.Application]].
- * It should implement a bidirectional mapping between [[io.udash.core.Url]] and [[io.udash.core.State]].
- */
+/** The implementation of this trait should be injected to [[io.udash.Application]]. It should implement a bidirectional
+  * mapping between [[io.udash.core.Url]] and [[io.udash.core.State]].
+  */
 trait RoutingRegistry[HierarchyRoot <: State] {
   def matchUrl(url: Url): HierarchyRoot
   def matchState(state: HierarchyRoot): Url
 
-  protected def bidirectional(pf: PartialFunction[String, HierarchyRoot]): (PartialFunction[String, HierarchyRoot], PartialFunction[HierarchyRoot, String]) =
-  macro com.avsystem.commons.macros.misc.BidirectionalMacro.impl[String, HierarchyRoot]
+  protected def bidirectional(pf: PartialFunction[String, HierarchyRoot])
+    : (PartialFunction[String, HierarchyRoot], PartialFunction[HierarchyRoot, String]) =
+    macro com.avsystem.commons.macros.misc.BidirectionalMacro.impl[String, HierarchyRoot]
 
   import RoutingRegistry._
 

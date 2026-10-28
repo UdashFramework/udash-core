@@ -10,7 +10,7 @@ trait DefaultStyles extends CssBase {
   import dsl._
 
   style(
-    unsafeRoot( """
+    unsafeRoot("""
                   |html, body, div, span, applet, object, iframe,
                   |h1, h2, h3, h4, h5, h6, p, blockquote, pre,
                   |a, abbr, acronym, address, big, cite, code,
@@ -30,7 +30,7 @@ trait DefaultStyles extends CssBase {
       border.`0`,
       fontSize(100 %%),
       font := Literal.inherit,
-      verticalAlign.baseline
+      verticalAlign.baseline,
     ),
 
     unsafeRoot("article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section")(
@@ -51,41 +51,41 @@ trait DefaultStyles extends CssBase {
 
     unsafeRoot("blockquote:before, blockquote:after, q:before, q:after")(
       content.string(""),
-      content.none
+      content.none,
     ),
 
     unsafeRoot("table")(
       borderCollapse.collapse,
-      borderSpacing.`0`
+      borderSpacing.`0`,
     ),
 
-    unsafeRoot("#application") (
+    unsafeRoot("#application")(
       height(100 %%)
     ),
 
-    unsafeRoot("html") (
+    unsafeRoot("html")(
       UdashFonts.roboto(),
       position.relative,
       height(100 %%),
     ),
 
-    unsafeRoot("body") (
+    unsafeRoot("body")(
       position.relative,
-      height(100 %%)
+      height(100 %%),
     ),
 
     unsafeRoot("li")(
       fontSize.inherit,
-      lineHeight(1.3)
+      lineHeight(1.3),
     ),
 
-    unsafeRoot("h1") (
+    unsafeRoot("h1")(
       position.relative,
       UdashFonts.roboto(FontWeight.Bold),
-      paddingTop(4.375 rem),
-      paddingBottom(2.8125 rem),
+      paddingTop(4.375.rem),
+      paddingBottom(2.8125.rem),
       lineHeight(1.2),
-      fontSize(3 rem),
+      fontSize(3.rem),
       textAlign.left,
 
       &.after(
@@ -93,49 +93,49 @@ trait DefaultStyles extends CssBase {
         position.absolute,
         left(`0`),
         bottom(`0`),
-        fontSize(2.25 rem)
+        fontSize(2.25.rem),
       ),
 
       MediaQueries.phone(
-        fontSize(2 rem)
-      )
+        fontSize(2.rem)
+      ),
     ),
 
-    unsafeRoot("h2") (
+    unsafeRoot("h2")(
       UdashFonts.roboto(FontWeight.Bold),
-      marginTop(3.4375 rem),
-      marginBottom(1.25 rem),
+      marginTop(3.4375.rem),
+      marginBottom(1.25.rem),
       lineHeight(1.2),
-      fontSize(2 rem),
+      fontSize(2.rem),
 
       MediaQueries.phone(
-        fontSize(1.75 rem)
-      )
+        fontSize(1.75.rem)
+      ),
     ),
 
-    unsafeRoot("blockquote") (
+    unsafeRoot("blockquote")(
       UdashFonts.roboto(FontWeight.Thin, FontStyle.Italic),
       position.relative,
-      margin(2.5 rem, `0`, 3.125 rem, 2.8125 rem),
-      padding(.9375 rem, 1.875 rem),
-      fontSize(2 rem),
+      margin(2.5.rem, `0`, 3.125.rem, 2.8125.rem),
+      padding(.9375.rem, 1.875.rem),
+      fontSize(2.rem),
       color(StyleConstants.Colors.Grey),
 
       &.before(
-        CommonStyleUtils.border(StyleConstants.Colors.Red,.1875 rem),
+        CommonStyleUtils.border(StyleConstants.Colors.Red, .1875.rem),
         content.string(" "),
         position.absolute,
         top(`0`),
         left(`0`),
-        height(100 %%)
+        height(100 %%),
       ),
 
       MediaQueries.phone(
-        fontSize(1.5 rem)
-      )
+        fontSize(1.5.rem)
+      ),
     ),
 
-    unsafeRoot("a") (
+    unsafeRoot("a")(
       textDecoration := none,
       outline(`0`).important,
 
@@ -143,50 +143,50 @@ trait DefaultStyles extends CssBase {
         textDecoration := none
       ),
 
-      &.hover (
+      &.hover(
         textDecoration := none
       ),
 
-      &.hover (
+      &.hover(
         textDecoration := Literal.underline
-      )
+      ),
     ),
 
     unsafeRoot("img")(
       maxWidth(100 %%),
-      height.auto
+      height.auto,
     ),
 
-    unsafeRoot("svg") (
+    unsafeRoot("svg")(
       display.block
     ),
 
-    unsafeRoot("object[type='image/svg+xml']") (
+    unsafeRoot("object[type='image/svg+xml']")(
       display.block,
-      pointerEvents.none
+      pointerEvents.none,
     ),
 
-    unsafeRoot("input") (
-      &.focus (
+    unsafeRoot("input")(
+      &.focus(
         outline.none
       )
     ),
 
-    unsafeRoot("input[type=number]") (
+    unsafeRoot("input[type=number]")(
       Attr.real("-moz-appearance") := "textfield"
     ),
 
     unsafeRoot("input::-webkit-outer-spin-button")(
       Attr.real("-webkit-appearance") := none,
-      margin(`0`)
+      margin(`0`),
     ),
 
     unsafeRoot("input::-webkit-inner-spin-button")(
       Attr.real("-webkit-appearance") := none,
-      margin(`0`)
+      margin(`0`),
     ),
 
-    unsafeRoot("textarea") (
+    unsafeRoot("textarea")(
       resize.none
     ),
 
@@ -200,25 +200,24 @@ trait DefaultStyles extends CssBase {
 
     unsafeRoot("i")(
       fontStyle.italic,
-      fontWeight._600
+      fontWeight._600,
     ),
 
     unsafeRoot("em")(
       fontStyle.italic,
-      fontWeight._600
+      fontWeight._600,
     ),
 
-    unsafeRoot("*") (
+    unsafeRoot("*")(
       boxSizing.borderBox,
 
-      &.before (
+      &.before(
         boxSizing.borderBox
       ),
 
-      &.after (
+      &.after(
         boxSizing.borderBox
-      )
-    )
+      ),
+    ),
   )
 }
-

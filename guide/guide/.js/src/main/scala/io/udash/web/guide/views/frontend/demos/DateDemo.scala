@@ -23,12 +23,12 @@ object DateDemo extends AutoDemo {
         UdashInputGroup()(
           UdashInputGroup.input(
             DateInput(dateProperty)().render
-          ),
+          )
         )
       ),
       div(Grid.col(4, ResponsiveBreakpoint.Medium))(
-        produce(dateProperty) { date => span(s"Selected date: $date": Modifier).render }
-      )
+        produce(dateProperty)(date => span(s"Selected date: $date": Modifier).render)
+      ),
     )
 
     input.render
@@ -38,10 +38,15 @@ object DateDemo extends AutoDemo {
   override protected def demoWithSource(): (Modifier, String) = {
     import io.udash.bootstrap.utils.BootstrapStyles._
     import io.udash.css.CssView._
-    (div(id := "date-input-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
-      form(containerFluid)(
-        firstInput, br, secondInput
-      )
-    ), source.dropFinalLine)
+    (
+      div(id := "date-input-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
+        form(containerFluid)(
+          firstInput,
+          br,
+          secondInput,
+        )
+      ),
+      source.dropFinalLine,
+    )
   }
 }

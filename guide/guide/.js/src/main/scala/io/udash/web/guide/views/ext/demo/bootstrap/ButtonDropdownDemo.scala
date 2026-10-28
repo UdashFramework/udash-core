@@ -33,9 +33,9 @@ object ButtonDropdownDemo extends AutoDemo with CssView {
         UdashButtonGroup()(
           UdashButton()("Button").render,
           UdashDropdown.default(items)(_ => "").render,
-          UdashDropdown.default(items, Direction.Up.toProperty)(_ => "").render
+          UdashDropdown.default(items, Direction.Up.toProperty)(_ => "").render,
         ).render,
-        UdashDropdown.default(items)(_ => "Dropdown ").render
+        UdashDropdown.default(items)(_ => "Dropdown ").render,
       )
     ).render
   }.withSourceCode
@@ -43,4 +43,3 @@ object ButtonDropdownDemo extends AutoDemo with CssView {
   override protected def demoWithSource(): (Modifier, String) =
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
 }
-

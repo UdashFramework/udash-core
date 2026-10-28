@@ -25,7 +25,7 @@ object TextInputDemo extends AutoDemo {
           UdashInputGroup.input(
             TextInput(name)(placeholder := "Input your name...", maxlength := "6").render
           ),
-          UdashInputGroup.appendText(span(bind(name)))
+          UdashInputGroup.appendText(span(bind(name))),
         ).render
       ),
       div(Grid.col(4, ResponsiveBreakpoint.Medium))(
@@ -33,7 +33,7 @@ object TextInputDemo extends AutoDemo {
           UdashInputGroup.input(
             PasswordInput(password)(placeholder := "Input your password...", maxlength := "6").render
           ),
-          UdashInputGroup.appendText(span(bind(password)))
+          UdashInputGroup.appendText(span(bind(password))),
         ).render
       ),
       div(Grid.col(4, ResponsiveBreakpoint.Medium))(
@@ -41,9 +41,9 @@ object TextInputDemo extends AutoDemo {
           UdashInputGroup.input(
             NumberInput(age.bitransform(_.toString)(_.toInt))(maxlength := "6").render
           ),
-          UdashInputGroup.appendText(span(bind(age)))
+          UdashInputGroup.appendText(span(bind(age))),
         ).render
-      )
+      ),
     )
 
     inputs.render
@@ -56,10 +56,12 @@ object TextInputDemo extends AutoDemo {
     (
       div(id := "inputs-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
         form(containerFluid)(
-          firstInputs, br, secondInputs
+          firstInputs,
+          br,
+          secondInputs,
         )
       ),
-      source.dropFinalLine
+      source.dropFinalLine,
     )
   }
 }

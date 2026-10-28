@@ -8,9 +8,8 @@ import org.scalajs.dom.Element
 import scala.annotation.nowarn
 import scala.scalajs.js
 
-/**
- * ViewRenderer is used to provide mechanism to render nested [[View]] within provided [[rootElement]].
- */
+/** ViewRenderer is used to provide mechanism to render nested [[View]] within provided [[rootElement]].
+  */
 private[udash] class ViewRenderer(rootElement: => Element) {
   private lazy val endpoint = rootElement
   private val views: MBuffer[View] = js.Array[View]()
@@ -21,7 +20,9 @@ private[udash] class ViewRenderer(rootElement: => Element) {
         case p: ContainerView =>
           p.renderChild(Some(child))
         case rest =>
-          throw new RuntimeException(s"Only instances of ContainerView can render a child view! Check the states hierarchy of view $rest.")
+          throw new RuntimeException(
+            s"Only instances of ContainerView can render a child view! Check the states hierarchy of view $rest."
+          )
       }
 
     pathIterator.nextOpt.setup(_.foreach { top =>
@@ -34,31 +35,22 @@ private[udash] class ViewRenderer(rootElement: => Element) {
     })
   }
 
-  /**
-   * Updates views hierarchy.
-   * <br/><br/>
-   * Example: <br/>
-   * Current views: A -> B -> C -> D <br/>
-   * subPathToLeave: A -> B <br/>
-   * pathToAdd: E -> F <br/>
-   * <br/>
-   * Calls:<br/>
-   * A - nothing<br/>
-   * B - renderChild(None); renderChild(E)<br/>
-   * C - renderChild(None)<br/>
-   * D - renderChild(None) // if D is a ContainerView <br/>
-   * E - getTemplate(); renderChild(F)<br/>
-   * F - getTemplate()<br/>
-   *
-   * @param subPathToLeave prefix of views hierarchy, which will not be removed
-   * @param pathToAdd      views list, which will be added to hierarchy
-   */
+  /** Updates views hierarchy. <br/><br/> Example: <br/> Current views: A -> B -> C -> D <br/> subPathToLeave: A -> B
+    * <br/> pathToAdd: E -> F <br/> <br/> Calls:<br/> A - nothing<br/> B - renderChild(None); renderChild(E)<br/> C -
+    * renderChild(None)<br/> D - renderChild(None) // if D is a ContainerView <br/> E - getTemplate();
+    * renderChild(F)<br/> F - getTemplate()<br/>
+    *
+    * @param subPathToLeave
+    *   prefix of views hierarchy, which will not be removed
+    * @param pathToAdd
+    *   views list, which will be added to hierarchy
+    */
   def renderView(subPathToLeave: Iterator[View], pathToAdd: Iterable[View]): Unit = {
     val viewsToLeaveSize = findEqPrefix(subPathToLeave, views.iterator).size
     val rootView = views.applyOpt(viewsToLeaveSize - 1)
-    //technically e.g. B from docs stays, but we run it through the algorithm anyway for proper children cleanup
+    // technically e.g. B from docs stays, but we run it through the algorithm anyway for proper children cleanup
     val unmodifiedViews = rootView.foldLeft(viewsToLeaveSize)((unmodified, _) => unmodified - 1)
-    views.drop(unmodifiedViews).foreach { //doesn't mutate views
+    views.drop(unmodifiedViews).foreach { // doesn't mutate views
       case c: ContainerView => c.renderChild(None)
       case _ =>
     }

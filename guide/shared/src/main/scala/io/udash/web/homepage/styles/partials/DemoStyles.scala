@@ -13,9 +13,9 @@ object DemoStyles extends CssBase {
   val demoComponent: CssStyle = style(
     UdashFonts.roboto(),
     position.relative,
-    height(682 px),
-    marginBottom(3.125 rem),
-    fontSize(.875 rem),
+    height(682.px),
+    marginBottom(3.125.rem),
+    fontSize(.875.rem),
 
     MediaQueries.tabletLandscape(
       height.auto
@@ -23,7 +23,7 @@ object DemoStyles extends CssBase {
 
     unsafeChild("input")(
       UdashFonts.roboto()
-    )
+    ),
   )
 
   val demoCode: CssStyle = style(
@@ -46,21 +46,21 @@ object DemoStyles extends CssBase {
 
     MediaQueries.tabletLandscape(
       display.none
-    )
+    ),
   )
 
   val demoBody: CssStyle = style(
-    width(990 px),
-    height(600 px),
+    width(990.px),
+    height(600.px),
     paddingTop(30.px),
     margin(`0`, auto),
 
     MediaQueries.tabletLandscape(
       width.auto,
       height.auto,
-      paddingTop(0 px),
-      backgroundColor.black
-    )
+      paddingTop(0.px),
+      backgroundColor.black,
+    ),
   )
 
   val demoFiddle: CssStyle = style(
@@ -74,15 +74,15 @@ object DemoStyles extends CssBase {
 
   val demoTabs: CssStyle = style(
     position.relative,
-    paddingTop(15 px),
+    paddingTop(15.px),
     textAlign.left,
     borderColor(StyleConstants.Colors.Grey),
-    borderWidth(1 px),
+    borderWidth(1.px),
     borderBottomStyle.solid,
 
     MediaQueries.phone(
       border.none
-    )
+    ),
   )
 
   val demoTabsItem: CssStyle = style(
@@ -91,35 +91,35 @@ object DemoStyles extends CssBase {
     MediaQueries.phone(
       display.block,
       margin(`0`),
-      textAlign.center
-    )
+      textAlign.center,
+    ),
   )
 
   val demoTabsLink: CssStyle = style(
     position.relative,
     CommonStyleUtils.transition(),
     display.block,
-    padding(.3125 rem,.5625 rem),
+    padding(.3125.rem, .5625.rem),
     color(StyleConstants.Colors.Grey),
     zIndex(2),
 
-    &.attr(Attributes.data(Attributes.Active), "true") (
+    &.attr(Attributes.data(Attributes.Active), "true")(
       color.white,
 
       &.before(
         opacity(1),
-        transform := "scaleY(1)"
+        transform := "scaleY(1)",
       ),
 
       &.after(
         opacity(1),
-        transform := "scaleY(1)"
-      )
+        transform := "scaleY(1)",
+      ),
     ),
     MediaQueries.desktop(
       &.hover(
         color.white,
-        textDecoration := none
+        textDecoration := none,
       )
     ),
 
@@ -128,12 +128,12 @@ object DemoStyles extends CssBase {
       content.string(" "),
       position.absolute,
       left(`0`),
-      bottom(-2 px),
+      bottom(-2.px),
       width(100 %%),
       height :=! "calc(100% + 2px)",
       backgroundColor(StyleConstants.Colors.GreySuperDark),
       zIndex(-1),
-      opacity(0)
+      opacity(0),
     ),
 
     &.after(
@@ -141,12 +141,12 @@ object DemoStyles extends CssBase {
       content.string(" "),
       position.absolute,
       left(`0`),
-      bottom(-1 px),
+      bottom(-1.px),
       width(100 %%),
       height(100 %%),
-      borderRadius(4 px, 4 px, `0`, `0`),
+      borderRadius(4.px, 4.px, `0`, `0`),
       borderColor(StyleConstants.Colors.Grey),
-      borderWidth(1 px),
+      borderWidth(1.px),
       borderTopStyle.solid,
       borderLeftStyle.solid,
       borderRightStyle.solid,
@@ -158,8 +158,8 @@ object DemoStyles extends CssBase {
       MediaQueries.phone(
         borderLeftStyle.none,
         borderRightStyle.none,
-        borderBottomStyle.solid
-      )
-    )
+        borderBottomStyle.solid,
+      ),
+    ),
   )
 }

@@ -28,8 +28,13 @@ class WithCtxTest extends AnyFunSuite with ScalaFutures with Matchers {
     CtxTask.readCtx.apply(alice).runToFuture.futureValue shouldBe alice
     CtxTask.unit.apply(alice).runToFuture.futureValue shouldBe (())
     CtxTask.defer(CtxTask.now(3)).apply(alice).runToFuture.futureValue shouldBe 3
-    CtxTask.raiseError[Int](new RuntimeException("boom"))
-      .apply(alice).runToFuture.failed.futureValue.getMessage shouldBe "boom"
+    CtxTask
+      .raiseError[Int](new RuntimeException("boom"))
+      .apply(alice)
+      .runToFuture
+      .failed
+      .futureValue
+      .getMessage shouldBe "boom"
   }
 
   test("CtxTaskOps.map and flatMap thread the same context through") {

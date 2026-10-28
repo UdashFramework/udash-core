@@ -15,23 +15,23 @@ object ResponsiveEmbedDemo extends AutoDemo {
       div(
         EmbedResponsive.responsive,
         EmbedResponsive.embed16by9,
-        Spacing.margin(size = SpacingSize.Small)
+        Spacing.margin(size = SpacingSize.Small),
       )(
         iframe(
           EmbedResponsive.item,
-          src := "https://www.youtube.com/embed/zpOULjyy-n8?rel=0"
+          src := "https://www.youtube.com/embed/zpOULjyy-n8?rel=0",
         )
       ),
       div(
         EmbedResponsive.responsive,
         EmbedResponsive.embed4by3,
-        Spacing.margin(size = SpacingSize.Small)
+        Spacing.margin(size = SpacingSize.Small),
       )(
         iframe(
           EmbedResponsive.item,
-          src := "https://www.youtube.com/embed/zpOULjyy-n8?rel=0"
+          src := "https://www.youtube.com/embed/zpOULjyy-n8?rel=0",
         )
-      )
+      ),
     ).render
   }.withSourceCode
 
@@ -40,4 +40,3 @@ object ResponsiveEmbedDemo extends AutoDemo {
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
   }
 }
-

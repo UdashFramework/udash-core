@@ -37,13 +37,12 @@ object SimpleCollapseDemo extends AutoDemo with CssView {
     div(
       UdashButtonGroup(justified = true.toProperty)(
         toggleButton.render,
-        openAndCloseButton.render
+        openAndCloseButton.render,
       ),
-      collapse
+      collapse,
     ).render
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, String) =
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
 }
-

@@ -27,44 +27,45 @@ object SimpleModalDemo extends AutoDemo {
       bodyFactory = Some { nested =>
         div(
           Spacing.margin(),
-          Card.card, Card.body, Background.color(Color.Light),
+          Card.card,
+          Card.body,
+          Background.color(Color.Light),
         )(
-          ul(nested(repeat(events)(event =>
-            li(event.get.toString).render
-          )))
+          ul(nested(repeat(events)(event => li(event.get.toString).render)))
         ).render
       },
       footerFactory = Some { _ =>
         div(
-          UdashButton()(_ => Seq[Modifier](
-            UdashModal.CloseButtonAttr, "Close"
-          )).render,
-          UdashButton()("Something...").render
+          UdashButton()(_ =>
+            Seq[Modifier](
+              UdashModal.CloseButtonAttr,
+              "Close",
+            )
+          ).render,
+          UdashButton()("Something...").render,
         ).render
-      }
+      },
     )
     modal.listen { case ev => events.append(ev) }
 
     val openModalButton = UdashButton()("Show modal...")
-    openModalButton.listen {
-      case UdashButton.ButtonClickEvent(_, _) =>
-        modal.show()
+    openModalButton.listen { case UdashButton.ButtonClickEvent(_, _) =>
+      modal.show()
     }
     val openAndCloseButton = UdashButton()(
       "Open and close after 2 seconds..."
     )
-    openAndCloseButton.listen {
-      case UdashButton.ButtonClickEvent(_, _) =>
-        modal.show()
-        window.setTimeout(() => modal.hide(), 2000)
+    openAndCloseButton.listen { case UdashButton.ButtonClickEvent(_, _) =>
+      modal.show()
+      window.setTimeout(() => modal.hide(), 2000)
     }
 
     div(
       modal,
       UdashButtonGroup()(
         openModalButton.render,
-        openAndCloseButton.render
-      )
+        openAndCloseButton.render,
+      ),
     ).render
   }.withSourceCode
 
@@ -73,4 +74,3 @@ object SimpleModalDemo extends AutoDemo {
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
   }
 }
-

@@ -13,7 +13,8 @@ import io.udash.web.guide.views.rpc.demos.PingPongCallDemoComponent
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class UserActivityExtPresenter(model: SeqProperty[Call]) extends Presenter[UserActivityExtState.type] with CrossLogging {
+class UserActivityExtPresenter(model: SeqProperty[Call])
+  extends Presenter[UserActivityExtState.type] with CrossLogging {
 
   import io.udash.web.guide.Context._
 
@@ -28,7 +29,6 @@ class UserActivityExtPresenter(model: SeqProperty[Call]) extends Presenter[UserA
     }
   }
 }
-
 
 case object UserActivityExtViewFactory extends ViewFactory[UserActivityExtState.type] {
 
@@ -67,8 +67,11 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
         |Udash user activity extenstions enable you to gather the data you need to provide the best user experience for your website.""".stripMargin
     ),
     h2("Browser navigation"),
-    p("To enable browser navigation tracking, simply mixin UrlLogging into your frontend application. ",
-      "The ", i("log(url, referrer)"), " method will be called whenever the user changes app state."
+    p(
+      "To enable browser navigation tracking, simply mixin UrlLogging into your frontend application. ",
+      "The ",
+      i("log(url, referrer)"),
+      " method will be called whenever the user changes app state.",
     ),
     p("You can see this mechanism in action here in the guide. We've already provided the implementation: "),
     CodeBlock(
@@ -80,13 +83,18 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
          |}""".stripMargin
     )(GuideStyles),
     urlLoggingSnippet,
-    p("to see it in action just enable logging below, switch to another chapter and come back here."), br,
+    p("to see it in action just enable logging below, switch to another chapter and come back here."),
+    br,
     ForceBootstrap(urlLoggingDemo),
     h2("RPC call logging"),
-    p("Enabling backend call logging is also quite simple. In order to define logging behaviour, you have to mix ",
-      i("CallLogging"), " into your ", i("ExposesServerRPC"), ", e.g.: "),
-    CodeBlock(
-      """new DefaultExposesServerRPC[MainServerRPC](
+    p(
+      "Enabling backend call logging is also quite simple. In order to define logging behaviour, you have to mix ",
+      i("CallLogging"),
+      " into your ",
+      i("ExposesServerRPC"),
+      ", e.g.: ",
+    ),
+    CodeBlock("""new DefaultExposesServerRPC[MainServerRPC](
         |  new ExposedRpcInterfaces(clientId)
         |) with CallLogging[MainServerRPC] {
         |  override protected val metadata: RPCMetadata[MainServerRPC] =
@@ -95,16 +103,23 @@ class UserActivityExtView(model: SeqProperty[Call], presenter: UserActivityExtPr
         |  override def log(rpcName: String, methodName: String, args: Seq[String]): Unit =
         |    println(s"$rpcName $methodName $args")
         |} """.stripMargin)(GuideStyles),
-    p("The methods you want log calls on have to be annotated with ", i("@Logged"), ". For this example we reused the ping example from RPC guide introduction: "),
+    p(
+      "The methods you want log calls on have to be annotated with ",
+      i("@Logged"),
+      ". For this example we reused the ping example from RPC guide introduction: ",
+    ),
     AutoDemo.snippet(pingPongServerSource),
     ForceBootstrap(
       new PingPongCallDemoComponent,
-      RpcLoggingDemo(model, () => presenter.reload())
+      RpcLoggingDemo(model, () => presenter.reload()),
     ),
     h2("What's next?"),
     p(
-      "Take a look at another extensions like ", a(href := BootstrapExtState.url)("Bootstrap Components"), " or ",
-      a(href := AuthorizationExtState.url)("Authorization utilities"), "."
-    )
+      "Take a look at another extensions like ",
+      a(href := BootstrapExtState.url)("Bootstrap Components"),
+      " or ",
+      a(href := AuthorizationExtState.url)("Authorization utilities"),
+      ".",
+    ),
   )
 }

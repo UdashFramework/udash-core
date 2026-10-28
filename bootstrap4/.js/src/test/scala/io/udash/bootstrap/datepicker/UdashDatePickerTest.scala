@@ -23,17 +23,21 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
     "show/hide on method call and emit events" in {
       val contentId = "datepicker-test-content"
       val date = Property[Option[ju.Date]](None)
-      val options = Property(new UdashDatePicker.DatePickerOptions(
-        format = "YYYY MM DD a",
-        useCurrent = false
-      ))
+      val options = Property(
+        new UdashDatePicker.DatePickerOptions(
+          format = "YYYY MM DD a",
+          useCurrent = false,
+        )
+      )
       val picker = UdashDatePicker(date, options, ComponentId(contentId))
 
-      jQ("body").append(UdashInputGroup()(
-        UdashInputGroup.input(picker.render),
-        UdashInputGroup.appendText("test"),
-        style := "position: relative;"
-      ).render)
+      jQ("body").append(
+        UdashInputGroup()(
+          UdashInputGroup.input(picker.render),
+          UdashInputGroup.appendText("test"),
+          style := "position: relative;",
+        ).render
+      )
 
       var showCounter = 0
       var hideCounter = 0
@@ -92,17 +96,19 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
 
     "not fail on null input value" in {
       val date = Property[Option[ju.Date]](Some(new ju.Date()))
-      val pickerOptions = Property(new UdashDatePicker.DatePickerOptions(
-        format = "MMMM Do YYYY, hh:mm a",
-        locale = Some("en_GB")
-      ))
+      val pickerOptions = Property(
+        new UdashDatePicker.DatePickerOptions(
+          format = "MMMM Do YYYY, hh:mm a",
+          locale = Some("en_GB"),
+        )
+      )
       val picker: UdashDatePicker = UdashDatePicker(date, pickerOptions)
       jQ("body").append(
         div(
           UdashDatePicker.loadBootstrapDatePickerStyles(),
           UdashInputGroup()(
             UdashInputGroup.input(picker.render)
-          ).render
+          ).render,
         ).render
       )
       noException shouldBe thrownBy {
@@ -112,16 +118,18 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
 
     "sync with property" in {
       val date = Property[Option[ju.Date]](Some(new ju.Date()))
-      val pickerOptions = Property(new UdashDatePicker.DatePickerOptions(
-        format = "MMMM Do YYYY, hh:mm a",
-        locale = Some("en_GB")
-      ))
+      val pickerOptions = Property(
+        new UdashDatePicker.DatePickerOptions(
+          format = "MMMM Do YYYY, hh:mm a",
+          locale = Some("en_GB"),
+        )
+      )
       val picker: UdashDatePicker = UdashDatePicker(date, pickerOptions)
       val r = div(
         UdashDatePicker.loadBootstrapDatePickerStyles(),
         UdashInputGroup()(
           UdashInputGroup.input(picker.render)
-        ).render
+        ).render,
       ).render
       jQ("body").append(r)
 
@@ -148,18 +156,22 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
     "emit error events" in {
       val contentId = "datepicker-test-content"
       val date = Property[Option[ju.Date]](Some(new ju.Date()))
-      val options = Property(new UdashDatePicker.DatePickerOptions(
-        format = "YYYY MM DD",
-        minDate = Some(new ju.Date(1000000000)),
-        maxDate = Some(new ju.Date(5000000000L))
-      ))
+      val options = Property(
+        new UdashDatePicker.DatePickerOptions(
+          format = "YYYY MM DD",
+          minDate = Some(new ju.Date(1000000000)),
+          maxDate = Some(new ju.Date(5000000000L)),
+        )
+      )
       val picker = UdashDatePicker(date, options, ComponentId(contentId))
 
-      jQ("body").append(UdashInputGroup()(
-        UdashInputGroup.input(picker.render),
-        UdashInputGroup.appendText("test"),
-        style := "position: relative;"
-      ).render)
+      jQ("body").append(
+        UdashInputGroup()(
+          UdashInputGroup.input(picker.render),
+          UdashInputGroup.appendText("test"),
+          style := "position: relative;",
+        ).render
+      )
 
       var errorCounter = 0
       var changeCounter = 0
@@ -212,32 +224,55 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
       implicit val tp = new LocalTranslationProvider(
         Map(
           Lang("test") -> Bundle(BundleHash("h"), Map("today" -> "Dzisiaj", "clear" -> "Wyczyść")),
-          Lang("test2") -> Bundle(BundleHash("h"), Map("today" -> "Today", "clear" -> "Clear"))
+          Lang("test2") -> Bundle(BundleHash("h"), Map("today" -> "Today", "clear" -> "Clear")),
         )
       )
       val lang = Property(Lang("test"))
 
       val date = Property[Option[ju.Date]](Some(new ju.Date()))
-      val pickerOptions = ModelProperty(new UdashDatePicker.DatePickerOptions(
-        format = "MMMM Do YYYY, hh:mm a",
-        locale = Some("en_GB")
-      ))
+      val pickerOptions = ModelProperty(
+        new UdashDatePicker.DatePickerOptions(
+          format = "MMMM Do YYYY, hh:mm a",
+          locale = Some("en_GB"),
+        )
+      )
       val emptyTk = TranslationKey.untranslatable("")
 
-      val picker = UdashDatePicker(date, pickerOptions).setup(_.addRegistration(lang.listen(implicit lang =>
-        for {
-          today <- TranslationKey.key("today")().mapNow(_.string)
-          clear <- TranslationKey.key("clear")().mapNow(_.string)
-          close <- TranslationKey.untranslatable("close 123")().mapNow(_.string)
-          other <- emptyTk().mapNow(_.string)
-        } yield {
-          pickerOptions.subProp(_.tooltips).set(
-            UdashDatePicker.DatePickerTooltips(
-              today, clear, close, other, other, other, other, other, other, other, other, other, other, other
-            )
+      val picker = UdashDatePicker(date, pickerOptions).setup(
+        _.addRegistration(
+          lang.listen(
+            implicit lang =>
+              for {
+                today <- TranslationKey.key("today")().mapNow(_.string)
+                clear <- TranslationKey.key("clear")().mapNow(_.string)
+                close <- TranslationKey.untranslatable("close 123")().mapNow(_.string)
+                other <- emptyTk().mapNow(_.string)
+              } yield {
+                pickerOptions
+                  .subProp(_.tooltips)
+                  .set(
+                    UdashDatePicker.DatePickerTooltips(
+                      today,
+                      clear,
+                      close,
+                      other,
+                      other,
+                      other,
+                      other,
+                      other,
+                      other,
+                      other,
+                      other,
+                      other,
+                      other,
+                      other,
+                    )
+                  )
+              },
+            initUpdate = true,
           )
-        }
-        , initUpdate = true)))
+        )
+      )
 
       jQ("body").append(picker.render)
 
@@ -272,28 +307,44 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
     "invoke setup/detach callbacks when appending to/removing from the DOM" in {
       def defaultPicker = UdashDatePicker(
         Property(Option.empty),
-        new UdashDatePicker.DatePickerOptions("YYYY MM DD").toProperty
+        new UdashDatePicker.DatePickerOptions("YYYY MM DD").toProperty,
       ).render
 
       var firstPickerSetupCount = 0
       var firstPickerDetachCount = 0
-      val firstPicker = defaultPicker.setup(UdashDatePicker.registerMutationCallbacks(
-        _, setupCallback = () => firstPickerSetupCount += 1, detachCallback = () => firstPickerDetachCount += 1))
+      val firstPicker = defaultPicker.setup(
+        UdashDatePicker.registerMutationCallbacks(
+          _,
+          setupCallback = () => firstPickerSetupCount += 1,
+          detachCallback = () => firstPickerDetachCount += 1,
+        )
+      )
 
       var secondPickerSetupCount = 0
       var secondPickerDetachCount = 0
-      val secondPicker = defaultPicker.setup(UdashDatePicker.registerMutationCallbacks(
-        _, setupCallback = () => secondPickerSetupCount += 1, detachCallback = () => secondPickerDetachCount += 1))
+      val secondPicker = defaultPicker.setup(
+        UdashDatePicker.registerMutationCallbacks(
+          _,
+          setupCallback = () => secondPickerSetupCount += 1,
+          detachCallback = () => secondPickerDetachCount += 1,
+        )
+      )
 
       def assertCounters(
         expectedFirstPickerSetupCount: Int,
-        expectedSecondPickerSetupCount: Int
+        expectedSecondPickerSetupCount: Int,
       )(
         expectedFirstPickerDetachCount: Int,
-        expectedSecondPickerDetachCount: Int
+        expectedSecondPickerDetachCount: Int,
       ) =
         (firstPickerSetupCount, secondPickerSetupCount, firstPickerDetachCount, secondPickerDetachCount) should be(
-          (expectedFirstPickerSetupCount, expectedSecondPickerSetupCount, expectedFirstPickerDetachCount, expectedSecondPickerDetachCount))
+          (
+            expectedFirstPickerSetupCount,
+            expectedSecondPickerSetupCount,
+            expectedFirstPickerDetachCount,
+            expectedSecondPickerDetachCount,
+          )
+        )
 
       for {
         _ <- {
@@ -327,8 +378,8 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
           format = dateFormat,
           locale = Some(localeString),
           inline = inlinePicker,
-          showToday = todayButton
-        ).toProperty
+          showToday = todayButton,
+        ).toProperty,
       ).render
 
       def assertOptions() = {
@@ -362,7 +413,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
         date = Property(Some(new ju.Date(0L))),
         options = new UdashDatePicker.DatePickerOptions(
           format = formatString
-        ).toProperty
+        ).toProperty,
       ).render
       val jqPicker = jQ(picker).asInstanceOf[JQueryDatePickerExt]
 
@@ -385,11 +436,13 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
     "apply selected icons config" in {
       new UdashDatePicker.CustomDatePickerIcons(
         date = FontAwesome.Solid.calendarAlt.option,
-        next = FontAwesome.Regular.arrowAltCircleRight.option
-      ).jsDictionary.json should be(js.Dictionary[js.Any](
-        "date" -> FontAwesome.Solid.calendarAlt.classNames.toJSArray,
-        "next" -> FontAwesome.Regular.arrowAltCircleRight.classNames.toJSArray
-      ).json)
+        next = FontAwesome.Regular.arrowAltCircleRight.option,
+      ).jsDictionary.json should be(
+        js.Dictionary[js.Any](
+          "date" -> FontAwesome.Solid.calendarAlt.classNames.toJSArray,
+          "next" -> FontAwesome.Regular.arrowAltCircleRight.classNames.toJSArray,
+        ).json
+      )
     }
 
     "apply full icons config" in {
@@ -402,7 +455,7 @@ class UdashDatePickerTest extends AsyncUdashCoreFrontendTest {
         next = FontAwesome.Solid.angleRight.option,
         today = FontAwesome.Regular.calendarCheck.option,
         clear = FontAwesome.Regular.trashAlt.option,
-        close = FontAwesome.Solid.times.option
+        close = FontAwesome.Solid.times.option,
       ).jsDictionary.json should be(UdashDatePicker.DefaultDatePickerIcons.jsDictionary.json)
     }
   }
@@ -421,10 +474,11 @@ object UdashDatePickerTest {
 
   @js.native
   private trait MomentDate extends js.Any {
-    /**
-      * https://momentjs.com/docs/#/parsing/creation-data/
+
+    /** https://momentjs.com/docs/#/parsing/creation-data/
       *
-      * @return input data provided during the Moment object creation
+      * @return
+      *   input data provided during the Moment object creation
       */
     def creationData(): js.Dictionary[Any] = js.native
   }

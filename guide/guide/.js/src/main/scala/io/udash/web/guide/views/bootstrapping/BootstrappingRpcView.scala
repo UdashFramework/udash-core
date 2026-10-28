@@ -6,7 +6,8 @@ import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.{Context, _}
 
-case object BootstrappingRpcViewFactory extends StaticViewFactory[BootstrappingRpcState.type](() => new BootstrappingRpcView)
+case object BootstrappingRpcViewFactory
+  extends StaticViewFactory[BootstrappingRpcState.type](() => new BootstrappingRpcView)
 
 class BootstrappingRpcView extends View with CssView {
 
@@ -21,8 +22,7 @@ class BootstrappingRpcView extends View with CssView {
       def pong(id: Int): Unit
     }
 
-    object MainClientRPC
-      extends DefaultClientRpcCompanion[MainClientRPC]
+    object MainClientRPC extends DefaultClientRpcCompanion[MainClientRPC]
   }.sourceCode
 
   private val serverRpcSource = {
@@ -35,40 +35,47 @@ class BootstrappingRpcView extends View with CssView {
       def hello(name: String): Future[String]
     }
 
-    object MainServerRPC
-      extends DefaultServerRpcCompanion[MainServerRPC]
+    object MainServerRPC extends DefaultServerRpcCompanion[MainServerRPC]
   }.sourceCode
 
   override def getTemplate: Modifier = div(
     h2("Bootstrapping RPC interfaces"),
     p(
-      "Creating RPC interfaces for the Udash application is pretty simple. Inside the ", i("shared"),
-      " module, define two traits: "
+      "Creating RPC interfaces for the Udash application is pretty simple. Inside the ",
+      i("shared"),
+      " module, define two traits: ",
     ),
     ul(GuideStyles.defaultList)(
       li("MainClientRPC - contains methods which can be called by a server on a client application."),
-      li("MainServerRPC - contains methods which can be called by a client on a server.")
+      li("MainServerRPC - contains methods which can be called by a client on a server."),
     ),
     p(
-      "Each RPC trait requires a companion object extending ", i("RPCCompanion"),
+      "Each RPC trait requires a companion object extending ",
+      i("RPCCompanion"),
       " from an RPC framework which you are planning to use. Usually it will be ",
-      i("io.udash.rpc.DefaultClientUdashRPCFramework"), " for client's interfaces and ",
-      i("io.udash.rpc.DefaultServerUdashRPCFramework"), " for server's interfaces.",
+      i("io.udash.rpc.DefaultClientUdashRPCFramework"),
+      " for client's interfaces and ",
+      i("io.udash.rpc.DefaultServerUdashRPCFramework"),
+      " for server's interfaces.",
     ),
     p(
-      "That is all you have to do in the ", i("shared"), " module. Implementation of those interfaces will be covered in ",
-      a(href := BootstrappingBackendState.url)("backend"), " and ", a(href := BootstrappingFrontendState.url)("frontend"),
-      " bootstrapping chapters."
+      "That is all you have to do in the ",
+      i("shared"),
+      " module. Implementation of those interfaces will be covered in ",
+      a(href := BootstrappingBackendState.url)("backend"),
+      " and ",
+      a(href := BootstrappingFrontendState.url)("frontend"),
+      " bootstrapping chapters.",
     ),
     h3("RPC vs Client RPC"),
     p(
       "An RPC interface is a trait or class whose abstract methods will be interpreted as remote methods by the RPC framework. ",
-      "Remote methods must be defined according to following rules:"
+      "Remote methods must be defined according to following rules:",
     ),
     ul(GuideStyles.defaultList)(
       li("Types of arguments must be ", a(href := RpcSerializationState.url)("serializable"), "."),
       li("Return type must be either Unit, another RPC interface or Future[T] where type T is serializable."),
-      li("Method must not have type parameters.")
+      li("Method must not have type parameters."),
     ),
     p(
       "RPC interfaces may also have non-abstract members - these will be invoked locally. However, they may invoke " +
@@ -78,14 +85,18 @@ class BootstrappingRpcView extends View with CssView {
       "Client RPC is basically the same as standard RPC interface, but it cannot contain abstract methods returning Future[T]. ",
       "The reason for this is that those methods can be called on many clients and there is no standard way of collecting the results. ",
       "Collecting the results can be implemented with one call from the server to the clients and another call from the clients to the server. ",
-      "Client RPC can be used in every place where a RPC is expected, but you can not put a standard RPC where a Client RPC is expected."
+      "Client RPC can be used in every place where a RPC is expected, but you can not put a standard RPC where a Client RPC is expected.",
     ),
     p(
       "The RPC system uses some macro-generated code. To keep the JavaScript code as small as possible ",
       "and make compilation faster, for each RPC interface create companion object extending ",
-      i("RPCCompanion"), " class from the RPC framework you use. The RPC framework describes supported RPC methods ",
-      "and serialization methods. Usually you will probably use ", i("DefaultClientUdashRPCFramework"),
-      " for the client interfaces and ", i("DefaultServerUdashRPCFramework"), " for the server API."
+      i("RPCCompanion"),
+      " class from the RPC framework you use. The RPC framework describes supported RPC methods ",
+      "and serialization methods. Usually you will probably use ",
+      i("DefaultClientUdashRPCFramework"),
+      " for the client interfaces and ",
+      i("DefaultServerUdashRPCFramework"),
+      " for the server API.",
     ),
     h4("Examples"),
     p("Example of RPC interfaces:"),
@@ -93,8 +104,11 @@ class BootstrappingRpcView extends View with CssView {
     AutoDemo.snippet(serverRpcSource),
     h2("What's next?"),
     p(
-      "When RPC interfaces are ready, it is time to bootstrap the ", a(href := BootstrappingBackendState.url)("server-side"),
-      " of the application. You can also read more about ", a(href := RpcIntroState.url)("RPC in Udash"), "."
-    )
+      "When RPC interfaces are ready, it is time to bootstrap the ",
+      a(href := BootstrappingBackendState.url)("server-side"),
+      " of the application. You can also read more about ",
+      a(href := RpcIntroState.url)("RPC in Udash"),
+      ".",
+    ),
   )
 }

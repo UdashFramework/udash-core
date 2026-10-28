@@ -6,17 +6,15 @@ import io.udash.rpc.internals.{BroadcastManager, UsesClientRPC}
 
 import scala.concurrent.ExecutionContext
 
-/**
-  * Target for server to client call. Possible values:<br/>
-  * * [[io.udash.rpc.AllClients]] - all connected clients<br/>
-  * * [[io.udash.rpc.ClientId]] - one concrete client connection id
+/** Target for server to client call. Possible values:<br/> * [[io.udash.rpc.AllClients]] - all connected clients<br/> *
+  * [[io.udash.rpc.ClientId]] - one concrete client connection id
   */
 sealed trait ClientRPCTarget
 case object AllClients extends ClientRPCTarget
 final case class ClientId(id: String) extends ClientRPCTarget
 
-abstract class ClientRPC[ClientRPCType](target: ClientRPCTarget)
-  (implicit ec: ExecutionContext) extends UsesClientRPC[ClientRPCType] {
+abstract class ClientRPC[ClientRPCType](target: ClientRPCTarget)(implicit ec: ExecutionContext)
+  extends UsesClientRPC[ClientRPCType] {
 
   override protected def fireRemote(getterChain: List[RpcInvocation], invocation: RpcInvocation): Unit = {
     val json = JsonStringOutput.write[RpcRequest](RpcFire(invocation, getterChain))

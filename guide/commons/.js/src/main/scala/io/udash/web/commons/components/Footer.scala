@@ -29,11 +29,16 @@ object Footer {
               a(href := ExternalUrls.udashDemos, target := "_blank", GlobalStyles.underlineLink)("Demos on GitHub")
             ),
             li(styles.navItem)(
-              a(href := ExternalUrls.stackoverflow, target := "_blank", GlobalStyles.underlineLink)("StackOverflow questions")
-            )
-          )
+              a(href := ExternalUrls.stackoverflow, target := "_blank", GlobalStyles.underlineLink)(
+                "StackOverflow questions"
+              )
+            ),
+          ),
         ),
-        p(styles.footerCopyrights)("Proudly made by ", a(styles.footerAvsystemLink, href := ExternalUrls.avsystem, target := "_blank")("AVSystem"))
+        p(styles.footerCopyrights)(
+          "Proudly made by ",
+          a(styles.footerAvsystemLink, href := ExternalUrls.avsystem, target := "_blank")("AVSystem"),
+        ),
       )
     )
   )

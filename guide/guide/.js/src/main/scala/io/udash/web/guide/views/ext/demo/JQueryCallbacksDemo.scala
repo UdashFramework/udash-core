@@ -15,22 +15,22 @@ object JQueryCallbacksDemo extends AutoDemo with CssView {
     import scala.scalajs.js
 
     val callbacks = jQ.callbacks[js.Function1[(Int, Int), js.Any], (Int, Int)]()
-    callbacks.add((t: (Int, Int)) => {
+    callbacks.add { (t: (Int, Int)) =>
       val (a, b) = t
       jQ("#jquery-callbacks-demo #plus").append(li(s"$a + $b = ${a + b}").render)
-    })
-    callbacks.add((t: (Int, Int)) => {
+    }
+    callbacks.add { (t: (Int, Int)) =>
       val (a, b) = t
       jQ("#jquery-callbacks-demo #minus").append(li(s"$a - $b = ${a - b}").render)
-    })
-    callbacks.add((t: (Int, Int)) => {
+    }
+    callbacks.add { (t: (Int, Int)) =>
       val (a, b) = t
       jQ("#jquery-callbacks-demo #mul").append(li(s"$a * $b = ${a * b}").render)
-    })
-    callbacks.add((t: (Int, Int)) => {
+    }
+    callbacks.add { (t: (Int, Int)) =>
       val (a, b) = t
       jQ("#jquery-callbacks-demo #div").append(li(s"$a / $b = ${a / b}").render)
-    })
+    }
 
     div(
       "Plus:",
@@ -42,16 +42,20 @@ object JQueryCallbacksDemo extends AutoDemo with CssView {
       "Divide:",
       ul(id := "div"),
       br,
-      UdashButton()(_ => Seq[Modifier](
-        id := "fire", "Fire",
-        onclick := (() => {
-          callbacks.fire((1, 1))
-          callbacks.fire((3, 3))
-          callbacks.fire((7, 4))
-          callbacks.disable()
-          callbacks.fire((1, 2))
-        }))
-      ).render
+      UdashButton()(_ =>
+        Seq[Modifier](
+          id := "fire",
+          "Fire",
+          onclick :=
+            (() => {
+              callbacks.fire((1, 1))
+              callbacks.fire((3, 3))
+              callbacks.fire((7, 4))
+              callbacks.disable()
+              callbacks.fire((1, 2))
+            }),
+        )
+      ).render,
     ).render
   }.withSourceCode
 
@@ -60,8 +64,8 @@ object JQueryCallbacksDemo extends AutoDemo with CssView {
       div(
         id := "jquery-callbacks-demo",
         GuideStyles.frame,
-        GuideStyles.useBootstrap
+        GuideStyles.useBootstrap,
       )(rendered),
-      source
+      source,
     )
 }

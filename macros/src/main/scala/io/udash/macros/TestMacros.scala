@@ -3,7 +3,7 @@ package macros
 
 import com.avsystem.commons.macros.AbstractMacroCommons
 
-import scala.reflect.macros.{TypecheckException, blackbox}
+import scala.reflect.macros.{blackbox, TypecheckException}
 
 class TestMacros(val ctx: blackbox.Context) extends AbstractMacroCommons(ctx) {
 

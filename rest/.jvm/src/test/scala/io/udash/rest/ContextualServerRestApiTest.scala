@@ -17,13 +17,13 @@ object CtxGreetApi extends CtxRestApis.ServerApiCompanion[CtxGreetApi]
 
 class CtxGreetApiImpl extends CtxGreetApi {
   def greet(tag: Tag): CtxRestApis.CtxTask[String] =
-    CtxRestApis.CtxTask { ctx => Task.now(s"${ctx.user}:${tag.value}") }
+    CtxRestApis.CtxTask(ctx => Task.now(s"${ctx.user}:${tag.value}"))
 }
 
 // Server-only contextual API defined directly as an implementation class (no separate trait).
 class CtxPingImpl {
   @GET def ping(@Query tag: Tag): CtxRestApis.CtxTask[String] =
-    CtxRestApis.CtxTask { ctx => Task.now(s"pong-${ctx.user}-${tag.value}") }
+    CtxRestApis.CtxTask(ctx => Task.now(s"pong-${ctx.user}-${tag.value}"))
 }
 object CtxPingImpl extends CtxRestApis.ServerApiImplCompanion[CtxPingImpl]
 
@@ -35,7 +35,7 @@ object CtxGreetNoDocApi extends CtxRestApis.ServerNoDocApiCompanion[CtxGreetNoDo
 
 class CtxGreetNoDocApiImpl extends CtxGreetNoDocApi {
   def greet(tag: Tag): CtxRestApis.CtxTask[String] =
-    CtxRestApis.CtxTask { ctx => Task.now(s"nodoc-${ctx.user}:${tag.value}") }
+    CtxRestApis.CtxTask(ctx => Task.now(s"nodoc-${ctx.user}:${tag.value}"))
 }
 
 // Server-only contextual API with a streamed result.
@@ -93,8 +93,9 @@ class ContextualServerRestApiTest extends AnyFunSuite with ScalaFutures with Mat
     }
 
     def greetAs(user: String): String =
-      handle(getRequest("greet", "tag" -> "tag:hi").header("X-User", user))
-        .runToFuture.futureValue.body.textualContentOpt.get
+      handle(
+        getRequest("greet", "tag" -> "tag:hi").header("X-User", user)
+      ).runToFuture.futureValue.body.textualContentOpt.get
 
     greetAs("alice") shouldBe "\"alice:hi\""
     greetAs("bob") shouldBe "\"bob:hi\""

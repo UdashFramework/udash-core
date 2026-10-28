@@ -31,7 +31,7 @@ class UdashModalTest extends UdashCoreFrontendTest {
       for (i <- 1 to 10) {
         modal.show()
         showCounter should be(i)
-        hideCounter should be(i-1)
+        hideCounter should be(i - 1)
         modal.hide()
         showCounter should be(i)
         hideCounter should be(i)
@@ -42,22 +42,22 @@ class UdashModalTest extends UdashCoreFrontendTest {
       val modal = UdashModal()(
         Some(header),
         Some(body),
-        Some(footer)
+        Some(footer),
       )
       val modal1 = UdashModal()(
         None,
         Some(body),
-        Some(footer)
+        Some(footer),
       )
       val modal2 = UdashModal()(
         Some(header),
         None,
-        Some(footer)
+        Some(footer),
       )
       val modal3 = UdashModal()(
         Some(header),
         Some(body),
-        None
+        None,
       )
 
       modal.render.textContent should be("Header Body Footer ")

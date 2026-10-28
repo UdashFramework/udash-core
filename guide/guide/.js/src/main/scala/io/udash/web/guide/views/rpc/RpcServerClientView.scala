@@ -8,7 +8,8 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.views.rpc.demos.NotificationsDemoComponent
 import scalatags.JsDom
 
-case object RpcServerClientViewFactory extends StaticViewFactory[RpcServerClientState.type](() => new RpcServerClientView)
+case object RpcServerClientViewFactory
+  extends StaticViewFactory[RpcServerClientState.type](() => new RpcServerClientView)
 
 class RpcServerClientView extends View with CssView {
   import JsDom.all._
@@ -18,18 +19,20 @@ class RpcServerClientView extends View with CssView {
     h2("Server ➔ client communication"),
     p(
       "Modern web applications often notify users about some events, for example about finishing a background task. ",
-      "In a Udash application it is really easy to create such notifications. All you have to do is: "
+      "In a Udash application it is really easy to create such notifications. All you have to do is: ",
     ),
     ul(GuideStyles.defaultList)(
       li("Prepare RPC interfaces as described in the ", a(href := RpcInterfacesState.url)("RPC interfaces"), " chapter."),
       li("Implement such interface in your frontend code."),
       li("Use ", i("DefaultServerRPC"), " in the frontend code to create a server connection."),
-      li("Use ", i("DefaultClientRPC"), " in the backend code to push notifications from the server to the client.")
+      li("Use ", i("DefaultClientRPC"), " in the backend code to push notifications from the server to the client."),
     ),
     h2("Server connection"),
     p(
-      "As you might remember from the ", a(href := RpcClientServerState.url)("Client ➔ server communication"),
-      " chapter, in frontend code we can create the server connection in the following way:"),
+      "As you might remember from the ",
+      a(href := RpcClientServerState.url)("Client ➔ server communication"),
+      " chapter, in frontend code we can create the server connection in the following way:",
+    ),
     CodeBlock(
       """import io.udash.rpc._
         |
@@ -49,7 +52,9 @@ class RpcServerClientView extends View with CssView {
     h2("Push notifications"),
     p(
       "Now it is time for the most interesting thing - sending messages from the server to the client. In your backend code, ",
-      "creating a wrapper around the ", i("DefaultClientRPC"), " class can be useful."
+      "creating a wrapper around the ",
+      i("DefaultClientRPC"),
+      " class can be useful.",
     ),
     CodeBlock(
       """import io.udash.rpc._
@@ -67,8 +72,11 @@ class RpcServerClientView extends View with CssView {
     p("You can also select a specific connection by passing ", i("ClientId"), ":"),
     CodeBlock("""ClientRPC(ClientId(???)).methodFromMainClientRPC()""")(GuideStyles),
     p(
-      "You can find out how to obtain ", i("ClientId"), " in the ",
-      a(href := RpcClientServerState.url)("Client ➔ Server"), " chapter."
+      "You can find out how to obtain ",
+      i("ClientId"),
+      " in the ",
+      a(href := RpcClientServerState.url)("Client ➔ Server"),
+      " chapter.",
     ),
     h2("Notifications example"),
     ForceBootstrap(new NotificationsDemoComponent),
@@ -93,7 +101,7 @@ class RpcServerClientView extends View with CssView {
         |object NotificationsServerRPC
         |  extends DefaultServerRpcCompanion[NotificationsServerRPC]""".stripMargin
     )(GuideStyles),
-    CodeBlock (
+    CodeBlock(
       """/** Client implementation */
         |object NotificationsClient extends NotificationsClientRPC {
         |  import Context._
@@ -163,7 +171,9 @@ class RpcServerClientView extends View with CssView {
     CodeBlock("NotificationsClient.registerListener((msg: String) => println(msg))")(GuideStyles),
     h2("What's next?"),
     p(
-      "You may find the ", a(href := RpcSerializationState.url)("Udash serialization"), " chapter interesting later on. "
-    )
+      "You may find the ",
+      a(href := RpcSerializationState.url)("Udash serialization"),
+      " chapter interesting later on. ",
+    ),
   )
 }

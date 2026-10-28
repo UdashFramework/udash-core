@@ -132,6 +132,7 @@ trait RPCMethodsImpl extends RPCMethods {
 
 @nowarn
 object TestRPC extends DefaultServerRpcCompanionWithDeps[ExternalTypeCodec.type, TestRPC] {
+
   /** Returns implementation of server side RPC interface */
   def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any): TestRPC =
     new TestRPC with RPCMethodsImpl {
@@ -186,6 +187,7 @@ object TestRPC extends DefaultServerRpcCompanionWithDeps[ExternalTypeCodec.type,
 
 @nowarn
 object TestClientRPC extends DefaultClientRpcCompanion[TestClientRPC] {
+
   /** Returns implementation of client side RPC interface */
   def rpcImpl(onInvocation: (String, List[Any], Option[Any]) => Any): TestClientRPC =
     new TestClientRPC with RPCMethodsImpl {

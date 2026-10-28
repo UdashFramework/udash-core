@@ -4,12 +4,14 @@ import java.io.{File, PrintWriter}
 
 import scalacss.internal.Renderer
 
-/**
-  * Renders provided styles into files. Creates separate file for each stylesheet.
-  * Keeps styles order from provided `Seq`.
-  * @param dirPath Target directory for rendered files.
-  * @param styles Sequence of stylesheets.
-  * @param createMain If true, creates `main.css` file. It imports all other stylesheets.
+/** Renders provided styles into files. Creates separate file for each stylesheet. Keeps styles order from provided
+  * `Seq`.
+  * @param dirPath
+  *   Target directory for rendered files.
+  * @param styles
+  *   Sequence of stylesheets.
+  * @param createMain
+  *   If true, creates `main.css` file. It imports all other stylesheets.
   */
 class CssFileRenderer(dirPath: String, styles: Seq[CssBase], createMain: Boolean) {
   def render()(implicit renderer: Renderer[String]): Unit = {

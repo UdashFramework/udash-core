@@ -16,13 +16,18 @@ class UdashCardTest extends UdashCoreFrontendTest {
       val textAlignment: Property[Option[BootstrapStyles.Align]] = Property(None)
       val textColor: Property[Option[BootstrapStyles.Color]] = Property(None)
       val card = UdashCard(
-        backgroundColor, borderColor, textAlignment, textColor
-      ) { factory => Seq(
-        factory.header(nested => nested(bind(headText))),
-        factory.body { nested =>
-          factory.body(_ => nested(bind(bodyText)))
-        }
-      )}
+        backgroundColor,
+        borderColor,
+        textAlignment,
+        textColor,
+      ) { factory =>
+        Seq(
+          factory.header(nested => nested(bind(headText))),
+          factory.body { nested =>
+            factory.body(_ => nested(bind(bodyText)))
+          },
+        )
+      }
       val el = card.render
       el.childNodes.length should be(2)
       el.textContent should be("headbody")

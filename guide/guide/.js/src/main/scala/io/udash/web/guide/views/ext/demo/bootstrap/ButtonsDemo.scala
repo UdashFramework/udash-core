@@ -21,12 +21,11 @@ object ButtonsDemo extends AutoDemo {
 
     val disabledButtons = Property(Set.empty[Int])
 
-    def bottomMargin: CssStyle = {
+    def bottomMargin: CssStyle =
       Spacing.margin(
         side = Side.Bottom,
-        size = SpacingSize.Normal
+        size = SpacingSize.Normal,
       )
-    }
 
     val buttons: Seq[UdashButton] = Color.values.map(color =>
       UdashButton(
@@ -34,33 +33,37 @@ object ButtonsDemo extends AutoDemo {
           color.opt,
           Size.Small.opt,
         ),
-        disabled = disabledButtons.transform(_.contains(color.ordinal))
-      )(_ => Seq[Modifier](
-        color.name,
-        Spacing.margin(size = SpacingSize.ExtraSmall)
-      ))
+        disabled = disabledButtons.transform(_.contains(color.ordinal)),
+      )(_ =>
+        Seq[Modifier](
+          color.name,
+          Spacing.margin(size = SpacingSize.ExtraSmall),
+        )
+      )
     )
 
     val clicks = SeqProperty[String](Seq.empty)
-    buttons.foreach(_.listen {
-      case UdashButton.ButtonClickEvent(source, _) =>
-        clicks.append(source.render.textContent)
+    buttons.foreach(_.listen { case UdashButton.ButtonClickEvent(source, _) =>
+      clicks.append(source.render.textContent)
     })
 
     val push = UdashButton(
       options = UdashButtonOptions(
         size = Size.Large.opt,
-        block = true
+        block = true,
       )
     )("Disable random buttons!")
-    push.listen {
-      case UdashButton.ButtonClickEvent(_, _) =>
-        clicks.set(Seq.empty)
+    push.listen { case UdashButton.ButtonClickEvent(_, _) =>
+      clicks.set(Seq.empty)
 
-        val maxDisabledCount = Random.nextInt(buttons.size + 1)
-        disabledButtons.set(Seq.fill(maxDisabledCount)(
-          Random.nextInt(buttons.size)
-        ).toSet)
+      val maxDisabledCount = Random.nextInt(buttons.size + 1)
+      disabledButtons.set(
+        Seq
+          .fill(maxDisabledCount)(
+            Random.nextInt(buttons.size)
+          )
+          .toSet
+      )
     }
 
     div(
@@ -68,12 +71,10 @@ object ButtonsDemo extends AutoDemo {
       div(
         Display.flex(),
         Flex.justifyContent(FlexContentJustification.Center),
-        bottomMargin
+        bottomMargin,
       )(buttons),
       h4("Clicks: "),
-      produce(clicks)(seq =>
-        ul(Card.card, Card.body, Background.color(Color.Light))(seq.map(li(_))).render
-      )
+      produce(clicks)(seq => ul(Card.card, Card.body, Background.color(Color.Light))(seq.map(li(_))).render),
     ).render
   }.withSourceCode
 
@@ -82,4 +83,3 @@ object ButtonsDemo extends AutoDemo {
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
   }
 }
-

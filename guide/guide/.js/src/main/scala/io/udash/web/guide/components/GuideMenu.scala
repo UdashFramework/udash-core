@@ -19,7 +19,8 @@ sealed trait MenuEntry {
 }
 
 final case class MenuContainer(override val name: String, children: Seq[MenuLink]) extends MenuEntry
-final case class MenuLink(override val name: String, state: RoutingState, fragment: OptArg[String] = OptArg.Empty) extends MenuEntry
+final case class MenuLink(override val name: String, state: RoutingState, fragment: OptArg[String] = OptArg.Empty)
+  extends MenuEntry
 
 class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
 
@@ -28,12 +29,17 @@ class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
 
   private val ClickEvent = "click"
   private val ActiveItemSelector = s".${MenuStyles.subToggle.className}[${Attributes.data(Attributes.Active)} = 'true']"
-  private val InactiveItemSelector = s".${MenuStyles.subToggle.className}[${Attributes.data(Attributes.Active)} = 'false']"
+  private val InactiveItemSelector =
+    s".${MenuStyles.subToggle.className}[${Attributes.data(Attributes.Active)} = 'false']"
 
   private def getMenuElementTag(entry: MenuEntry): TypedTag[Element] = entry match {
     case MenuLink(_, state, fragment) =>
       li(MenuStyles.item)(
-        a(href := state.url(Context.applicationInstance) + fragment.fold("")("#" + _), MenuStyles.link, data("id") := entry.name)(
+        a(
+          href := state.url(Context.applicationInstance) + fragment.fold("")("#" + _),
+          MenuStyles.link,
+          data("id") := entry.name,
+        )(
           span(MenuStyles.linkText)(entry.name)
         )
       )
@@ -41,20 +47,19 @@ class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
       li(MenuStyles.subItem)(
         a(href := "#", MenuStyles.subToggle, data("id") := entry.name)(
           span(MenuStyles.linkText)(entry.name),
-          i(MenuStyles.icon)(SVG("icon_submenu.svg#icon_submenu", Size(7, 11)))
+          i(MenuStyles.icon)(SVG("icon_submenu.svg#icon_submenu", Size(7, 11))),
         ),
         ul(MenuStyles.subList)(
           children.map(subEntry => getMenuElementTag(subEntry))
-        )
+        ),
       )
   }
-
 
   private lazy val btnMenu = a(href := "#", MobileMenuStyles.btnMobile, MenuStyles.btnMobile)(
     div(MobileMenuStyles.btnMobileLines)(
       span(MobileMenuStyles.btnMobileLineTop),
       span(MobileMenuStyles.btnMobileLineMiddle),
-      span(MobileMenuStyles.btnMobileLineBottom)
+      span(MobileMenuStyles.btnMobileLineBottom),
     )
   ).render
 
@@ -64,7 +69,7 @@ class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
         entries.map(entry => getMenuElementTag(entry))
       )
     ),
-    btnMenu
+    btnMenu,
   ).render
 
   private lazy val menuSubs = jQ(template).find(s".${MenuStyles.subToggle.className}")
@@ -78,9 +83,7 @@ class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
   }
 
   def initListeners(): Unit = {
-    Context.applicationInstance.onStateChange(event => {
-      property.set(event.currentState.url(Context.applicationInstance))
-    })
+    Context.applicationInstance.onStateChange(event => property.set(event.currentState.url(Context.applicationInstance)))
 
     property.listen(onCurrentItemUpdate)
 
@@ -102,12 +105,11 @@ class GuideMenu(entries: Seq[MenuEntry], property: Property[String]) {
   }
 
   @tailrec
-  private def menuItemByUrl(url: String): JQuery = {
+  private def menuItemByUrl(url: String): JQuery =
     if (url.trim.nonEmpty) {
       val item = jQ(template).find(s".${MenuStyles.link.className}[href = '$url']")
       if (item.length > 0) item else menuItemByUrl(url.substring(0, url.lastIndexOf("/")))
     } else jQ()
-  }
 
   private lazy val onSubClick: JQueryCallback = (jqThis: Element, jqEvent: JQueryEvent) => {
     jqEvent.preventDefault()
@@ -137,8 +139,6 @@ object GuideMenu {
 
   private val property = Property.blank[String]
 
-  def apply(): GuideMenu = {
+  def apply(): GuideMenu =
     new GuideMenu(Context.mainMenuEntries, property)
-  }
 }
-

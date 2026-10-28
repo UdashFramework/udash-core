@@ -4,8 +4,9 @@ import com.avsystem.commons._
 import io.udash.utils.Registration
 
 private[udash] class MutableSetRegistration[ElementType](
-  s: MSet[ElementType], el: ElementType,
-  statusChangeListener: Opt[() => Unit]
+  s: MSet[ElementType],
+  el: ElementType,
+  statusChangeListener: Opt[() => Unit],
 ) extends Registration {
   override def cancel(): Unit = {
     s -= el

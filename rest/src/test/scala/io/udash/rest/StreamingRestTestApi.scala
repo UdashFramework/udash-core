@@ -32,11 +32,12 @@ object CustomStream extends GenCodecRestImplicits {
 
   implicit val customStreamAsRawReal: AsRawReal[StreamedRestResponse, CustomStream] =
     AsRawReal.create(
-      stream => StreamedRestResponse(
-        code = stream.code,
-        headers = IMapping.empty,
-        body = StreamedBody.JsonList(stream.source.map(AsRaw[JsonValue, Int].asRaw)),
-      ),
+      stream =>
+        StreamedRestResponse(
+          code = stream.code,
+          headers = IMapping.empty,
+          body = StreamedBody.JsonList(stream.source.map(AsRaw[JsonValue, Int].asRaw)),
+        ),
       rawResponse => {
         val list = StreamedBody.castOrFail[StreamedBody.JsonList](rawResponse.body)
         CustomStream(list.elements.map(AsReal[JsonValue, Int].asReal), rawResponse.code)
@@ -73,7 +74,7 @@ object StreamingRestTestApi extends DefaultRestApiCompanion[StreamingRestTestApi
     override def jsonStream: Observable[RestEntity] = Observable(
       RestEntity(RestEntityId("1"), "first"),
       RestEntity(RestEntityId("2"), "second"),
-      RestEntity(RestEntityId("3"), "third")
+      RestEntity(RestEntityId("3"), "third"),
     )
 
     override def binaryStream(): Observable[Array[Byte]] =
@@ -89,7 +90,8 @@ object StreamingRestTestApi extends DefaultRestApiCompanion[StreamingRestTestApi
         }
 
     override def delayedStream(size: Int, delayMillis: Long): Observable[Int] =
-      Observable.fromIterable(Range(0, size))
+      Observable
+        .fromIterable(Range(0, size))
         .zip(Observable.intervalAtFixedRate(delayMillis.millis, delayMillis.millis))
         .map(_._1)
 
@@ -99,7 +101,7 @@ object StreamingRestTestApi extends DefaultRestApiCompanion[StreamingRestTestApi
     override def customStreamTask(size: Int): Task[DataStream] = Task {
       DataStream(
         source = Observable.fromIterable(Range(0, size)),
-        metadata = Map.empty
+        metadata = Map.empty,
       )
     }
 

@@ -10,8 +10,8 @@ class RadioButtonsTest extends UdashFrontendTest {
 
   "RadioButtons" should {
     def checkSelected(select: Element, selected: Seq[Boolean])(implicit pos: Position): Unit = {
-      selected.zipWithIndex.foreach {
-        case (value, idx) => select.childNodes(idx).asInstanceOf[JSInput].checked should be(value)
+      selected.zipWithIndex.foreach { case (value, idx) =>
+        select.childNodes(idx).asInstanceOf[JSInput].checked should be(value)
       }
     }
 

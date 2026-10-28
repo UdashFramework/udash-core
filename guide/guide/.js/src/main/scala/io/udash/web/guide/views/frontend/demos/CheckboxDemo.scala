@@ -26,28 +26,28 @@ object CheckboxDemo extends AutoDemo {
         UdashInputGroup()(
           prependText("Property A:"),
           appendCheckbox(Checkbox(propA)(cls := "checkbox-demo-a").render),
-          appendText(bind(propA))
+          appendText(bind(propA)),
         ).render
       ),
       div(Grid.col(4, ResponsiveBreakpoint.Medium))(
         UdashInputGroup()(
           prependText("Property B:"),
           appendCheckbox(Checkbox(propB)(cls := "checkbox-demo-b").render),
-          appendText(bind(propB))
+          appendText(bind(propB)),
         ).render
       ),
       div(Grid.col(4, ResponsiveBreakpoint.Medium))(
         UdashInputGroup()(
           prependText("Property C:"),
           appendCheckbox(Checkbox(propCAsBoolean)(cls := "checkbox-demo-c").render),
-          appendText(bind(propC))
+          appendText(bind(propC)),
         ).render
-      )
+      ),
     )
 
     checkboxes.render
     (checkboxes, checkboxes)
-    }.withSourceCode
+  }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, String) = {
     import io.udash.bootstrap.utils.BootstrapStyles._
@@ -56,13 +56,15 @@ object CheckboxDemo extends AutoDemo {
       div(
         id := "checkbox-demo",
         GuideStyles.frame,
-        GuideStyles.useBootstrap
+        GuideStyles.useBootstrap,
       )(
         form(containerFluid)(
-          firstCheckboxes, br, secondCheckboxes
+          firstCheckboxes,
+          br,
+          secondCheckboxes,
         )
       ),
-      source.dropFinalLine
+      source.dropFinalLine,
     )
   }
 }

@@ -29,10 +29,11 @@ object MultiSelectDemo extends AutoDemo {
       UdashInputGroup.prependText("Fruits:"),
       UdashInputGroup.select(
         Select(
-          favoriteFruitsStrings, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
+          favoriteFruitsStrings,
+          Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty,
         )(Select.defaultLabel, Form.control).render
       ),
-      UdashInputGroup.appendText(span(cls := "multi-select-demo-fruits")(bind(favoriteFruits)))
+      UdashInputGroup.appendText(span(cls := "multi-select-demo-fruits")(bind(favoriteFruits))),
     )
 
     multiSelect.render
@@ -46,10 +47,10 @@ object MultiSelectDemo extends AutoDemo {
       div(id := "multi-select-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
         form(containerFluid)(
           div(Grid.row)(firstMultiSelect),
-          div(Grid.row)(secondMultiSelect)
+          div(Grid.row)(secondMultiSelect),
         )
       ),
-      source.dropFinalLine
+      source.dropFinalLine,
     )
   }
 }

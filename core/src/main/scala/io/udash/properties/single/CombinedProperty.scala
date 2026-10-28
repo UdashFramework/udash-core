@@ -4,25 +4,27 @@ import com.avsystem.commons._
 import io.udash.utils.Registration
 
 private[properties] class CombinedProperty[A, B, R](
-  override val origin: ReadableProperty[A], originTwo: ReadableProperty[B], combiner: (A, B) => R
+  override val origin: ReadableProperty[A],
+  originTwo: ReadableProperty[B],
+  combiner: (A, B) => R,
 ) extends ForwarderReadableProperty[R] {
   private var lastValueOne: Opt[A] = Opt.empty
   private var lastValueTwo: Opt[B] = Opt.empty
   private var originListenerRegistrations: (Registration, Registration) = _
 
-  protected def originListenerOne(originValue: A) : Unit = {
+  protected def originListenerOne(originValue: A): Unit = {
     lastValueOne = Opt(originValue)
     valueChanged()
   }
 
-  protected def originListenerTwo(originValue: B) : Unit = {
+  protected def originListenerTwo(originValue: B): Unit = {
     lastValueTwo = Opt(originValue)
     valueChanged()
   }
 
   private def initOriginListener(): Unit = {
-    val alreadyActive = Opt(originListenerRegistrations).exists {
-      case (listenerOne, listenerTwo) => listenerOne.isActive && listenerTwo.isActive
+    val alreadyActive = Opt(originListenerRegistrations).exists { case (listenerOne, listenerTwo) =>
+      listenerOne.isActive && listenerTwo.isActive
     }
     if (!alreadyActive) {
       listeners.clear()
@@ -68,7 +70,10 @@ private[properties] class CombinedProperty[A, B, R](
   override def get: R = {
     val originValueOne = origin.get
     val originValueTwo = originTwo.get
-    if (lastValueOne.isEmpty || lastValueTwo.isEmpty || lastValueOne.get != originValueOne || lastValueTwo.get != originValueTwo) {
+    if (
+      lastValueOne.isEmpty || lastValueTwo.isEmpty || lastValueOne.get != originValueOne ||
+      lastValueTwo.get != originValueTwo
+    ) {
       lastValueOne = Opt(originValueOne)
       lastValueTwo = Opt(originValueTwo)
     }

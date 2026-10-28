@@ -16,7 +16,7 @@ trait GreetSharedApi[Ctx] extends CtxSharedRestApis.Api[Ctx] {
 object GreetSharedApi extends CtxSharedRestApis.ApiCompanion[GreetSharedApi]
 
 class GreetSharedApiImpl extends GreetSharedApi[UserCtx] {
-  def greet(tag: Tag): CtxTask[String] = CtxTask { ctx => Task.now(s"${ctx.user}:${tag.value}") }
+  def greet(tag: Tag): CtxTask[String] = CtxTask(ctx => Task.now(s"${ctx.user}:${tag.value}"))
 }
 
 // Same, but without OpenAPI generation.
@@ -26,7 +26,7 @@ trait GreetSharedNoDocApi[Ctx] extends CtxSharedRestApis.Api[Ctx] {
 object GreetSharedNoDocApi extends CtxSharedRestApis.NoDocApiCompanion[GreetSharedNoDocApi]
 
 class GreetSharedNoDocApiImpl extends GreetSharedNoDocApi[UserCtx] {
-  def greet(tag: Tag): CtxTask[String] = CtxTask { ctx => Task.now(s"nodoc-${ctx.user}:${tag.value}") }
+  def greet(tag: Tag): CtxTask[String] = CtxTask(ctx => Task.now(s"nodoc-${ctx.user}:${tag.value}"))
 }
 
 // Shared contextual API with a streamed result.

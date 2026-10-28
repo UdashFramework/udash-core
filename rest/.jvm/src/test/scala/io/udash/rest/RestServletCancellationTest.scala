@@ -19,35 +19,37 @@ import scala.collection.mutable
 import scala.concurrent.duration.*
 import scala.jdk.CollectionConverters.*
 
-/**
- * Drives [[RestServlet]] through fake servlet objects on a [[TestScheduler]], so that a disconnect can be ordered
- * exactly against a write in flight - an ordering that a real container leaves to chance - and everything the request
- * started has run by the time its outcome is checked.
- */
+/** Drives [[RestServlet]] through fake servlet objects on a [[TestScheduler]], so that a disconnect can be ordered
+  * exactly against a write in flight - an ordering that a real container leaves to chance - and everything the request
+  * started has run by the time its outcome is checked.
+  */
 class RestServletCancellationTest extends UdashSharedTest {
 
   // Methods not answered return null, so every method returning a primitive that the servlet calls must be answered.
   // Object's own methods are answered by identity.
   private def fake[T](cls: Class[T])(answer: PartialFunction[(String, Seq[AnyRef]), AnyRef]): T =
-    Proxy.newProxyInstance(cls.getClassLoader, Array[Class[?]](cls), (proxy, method, args) =>
-      (method.getName, Option(args).fold(Seq.empty[AnyRef])(_.toSeq)) match {
-        case ("hashCode", Seq()) => Int.box(System.identityHashCode(proxy))
-        case ("equals", Seq(other)) => Boolean.box(proxy eq other)
-        case ("toString", Seq()) => s"fake ${cls.getSimpleName}"
-        case call => answer.applyOrElse(call, (_: (String, Seq[AnyRef])) => null)
-      }
-    ).asInstanceOf[T]
+    Proxy
+      .newProxyInstance(
+        cls.getClassLoader,
+        Array[Class[?]](cls),
+        (proxy, method, args) =>
+          (method.getName, Option(args).fold(Seq.empty[AnyRef])(_.toSeq)) match {
+            case ("hashCode", Seq()) => Int.box(System.identityHashCode(proxy))
+            case ("equals", Seq(other)) => Boolean.box(proxy eq other)
+            case ("toString", Seq()) => s"fake ${cls.getSimpleName}"
+            case call => answer.applyOrElse(call, (_: (String, Seq[AnyRef])) => null)
+          },
+      )
+      .asInstanceOf[T]
 
-  /**
-   * Serves `body`, failing the first write into the response unless `failFirstWrite` is off, and any later write.
-   * With `disconnect`, the client disconnects during the first write: the container reports it to the servlet's
-   * listeners, which cancel the handler, and then fails the write as a reset stream does. Without it, writes fail as
-   * on a broken connection that the container has not reported. With `lateDisconnect`, writes fail as for a reset
-   * stream, and the container reports that only once the task of the failed write has run, while the failure is on its
-   * way up. With `unreportedReset`, writes fail as for a reset stream that the container never reports. Closing the
-   * response fails either way. Asserts that nothing reached the uncaught failure reporter and
-   * returns what the servlet logged.
-   */
+  /** Serves `body`, failing the first write into the response unless `failFirstWrite` is off, and any later write. With
+    * `disconnect`, the client disconnects during the first write: the container reports it to the servlet's listeners,
+    * which cancel the handler, and then fails the write as a reset stream does. Without it, writes fail as on a broken
+    * connection that the container has not reported. With `lateDisconnect`, writes fail as for a reset stream, and the
+    * container reports that only once the task of the failed write has run, while the failure is on its way up. With
+    * `unreportedReset`, writes fail as for a reset stream that the container never reports. Closing the response fails
+    * either way. Asserts that nothing reached the uncaught failure reporter and returns what the servlet logged.
+    */
   private def serveStreamed(
     body: StreamedBody.NonEmpty,
     disconnect: Boolean = true,
@@ -62,8 +64,8 @@ class RestServletCancellationTest extends UdashSharedTest {
     val listeners = new mutable.ListBuffer[AsyncListener]
     var writes = 0
 
-    val asyncContext = fake(classOf[AsyncContext]) {
-      case ("addListener", Seq(listener: AsyncListener)) => listeners += listener; null
+    val asyncContext = fake(classOf[AsyncContext]) { case ("addListener", Seq(listener: AsyncListener)) =>
+      listeners += listener; null
     }
     val request = fake(classOf[HttpServletRequest]) {
       case ("startAsync", _) => asyncContext
@@ -91,11 +93,13 @@ class RestServletCancellationTest extends UdashSharedTest {
       }
       override def close(): Unit = throw new IOException("broken pipe")
       private def failure: IOException =
-        if (disconnect || lateDisconnect || unreportedReset) new EOFException("reset") else new IOException("broken pipe")
+        if (disconnect || lateDisconnect || unreportedReset) new EOFException("reset")
+        else new IOException("broken pipe")
     }
 
     val handleRequest: RawRest.HandleRequestWithStreaming = _ => Task.now(StreamedRestResponse(200, IMapping.empty, body))
-    new RestServlet(handleRequest, handleTimeout, customLogger = logger, cancelOnDisconnect = true).service(request, response)
+    new RestServlet(handleRequest, handleTimeout, customLogger = logger, cancelOnDisconnect = true)
+      .service(request, response)
     if (lateDisconnect) {
       while (writes == 0 && scheduler.tickOne()) {}
       reportDisconnect()
@@ -162,13 +166,15 @@ class RestServletCancellationTest extends UdashSharedTest {
     }
 
     "log a JSON list batch write failing before its disconnect is reported once, without writing its end" in {
-      val events = serveStreamed(StreamedBody.JsonList(Observable(JsonValue("1"))), disconnect = false, lateDisconnect = true)
+      val events =
+        serveStreamed(StreamedBody.JsonList(Observable(JsonValue("1"))), disconnect = false, lateDisconnect = true)
       assertLogged(events, Level.WARN, "cancelled by the client", "reset")
       assert(events.count(_.getLevel == Level.WARN) == 1, describe(events))
     }
 
     "log a JSON list batch write failing on a reset stream that is never reported once, without writing its end" in {
-      val events = serveStreamed(StreamedBody.JsonList(Observable(JsonValue("1"))), disconnect = false, unreportedReset = true)
+      val events =
+        serveStreamed(StreamedBody.JsonList(Observable(JsonValue("1"))), disconnect = false, unreportedReset = true)
       assertLogged(events, Level.WARN, "cancelled by the client", "reset")
       assert(events.count(_.getLevel == Level.WARN) == 1, describe(events))
     }

@@ -21,12 +21,16 @@ class ErrorView extends View with CssView {
     div(GlobalStyles.body)(
       div(GuideStyles.errorInner)(
         p(GuideStyles.errorHead)(
-          span(GlobalStyles.red)("Oops! 404"), br(),
+          span(GlobalStyles.red)("Oops! 404"),
+          br(),
           span(
             "The link doesn't work. Or maybe it never did? You can still ",
-            a(GlobalStyles.grey, href := "/assets/pdf/origami_crane_printok.pdf", target := "_blank")("make origami")
-          ), br(),
-          span("... or go "), a(GlobalStyles.red, href := IntroState.url)("home"), span(".")
+            a(GlobalStyles.grey, href := "/assets/pdf/origami_crane_printok.pdf", target := "_blank")("make origami"),
+          ),
+          br(),
+          span("... or go "),
+          a(GlobalStyles.red, href := IntroState.url)("home"),
+          span("."),
         )
       )
     )
@@ -41,8 +45,7 @@ class ErrorView extends View with CssView {
 
   private def onResize(): Unit = {
     if (jqWindow.width() <= StyleConstants.MediaQueriesBounds.TabletLandscapeMax) {
-      val h = jqWindow.height() -
-        jQ(s".${FooterStyles.footer.className}").outerHeight().getOrElse(0d) -
+      val h = jqWindow.height() - jQ(s".${FooterStyles.footer.className}").outerHeight().getOrElse(0d) -
         jQ(s".${HeaderStyles.header.className}").outerHeight().getOrElse(0d)
       jQ(content).css("min-height", s"${h}px")
     }

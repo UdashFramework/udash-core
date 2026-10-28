@@ -8,17 +8,15 @@ import com.avsystem.commons.rpc.*
 
 import scala.util.control.NoStackTrace
 
-/**
- * Enum representing HTTP methods.
- */
+/** Enum representing HTTP methods.
+  */
 final class HttpMethod(implicit enumCtx: EnumCtx) extends AbstractValueEnum
 object HttpMethod extends AbstractValueEnumCompanion[HttpMethod] {
   final val GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH: Value = new HttpMethod
 }
 
-/**
- * Aggregates serialized path, header and query parameters of an HTTP request.
- */
+/** Aggregates serialized path, header and query parameters of an HTTP request.
+  */
 final case class RestParameters(
   @multi @tagged[Path] path: List[PlainValue] = Nil,
   @multi @tagged[Header] @allowOptional headers: IMapping[PlainValue] = IMapping.empty,
@@ -50,7 +48,8 @@ object RestParameters {
 }
 
 final case class HttpErrorException(code: Int, payload: HttpBody = HttpBody.Empty, cause: Throwable = null)
-  extends RuntimeException(s"HTTP ERROR $code${payload.textualContentOpt.fold("")(p => s": $p")}", cause) with NoStackTrace {
+  extends RuntimeException(s"HTTP ERROR $code${payload.textualContentOpt.fold("")(p => s": $p")}", cause)
+    with NoStackTrace {
   def toResponse: RestResponse = RestResponse(code, IMapping.empty, payload)
 }
 object HttpErrorException {

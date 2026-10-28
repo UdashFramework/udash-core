@@ -49,7 +49,7 @@ class UdashCarouselTest extends AsyncUdashCoreFrontendTest {
       val carousel = UdashCarousel.default(
         sl,
         activeSlide = Property(3),
-        animationOptions = UdashCarousel.AnimationOptions(active = false).toProperty
+        animationOptions = UdashCarousel.AnimationOptions(active = false).toProperty,
       )()
       jQ("body").append(carousel.render)
       carousel.activeSlide.get shouldBe 3
@@ -64,7 +64,7 @@ class UdashCarouselTest extends AsyncUdashCoreFrontendTest {
       val carousel = UdashCarousel.default(
         sl,
         activeSlide = activeSlide,
-        animationOptions = options
+        animationOptions = options,
       )()
       jQ("body").append(carousel.render)
 
@@ -74,15 +74,15 @@ class UdashCarouselTest extends AsyncUdashCoreFrontendTest {
       options.listenersCount() should be(0)
     }
 
-    //For some reason, the 3 tests below have to be independent (can't first goTo() then nextSlide() without timeout)
-    //This does not seem to cause any problems with carousels in the wild (outside tests).
+    // For some reason, the 3 tests below have to be independent (can't first goTo() then nextSlide() without timeout)
+    // This does not seem to cause any problems with carousels in the wild (outside tests).
 
     "go to slide in" in {
       val sl = slides()
       val carousel = UdashCarousel.default(
         sl,
         activeSlide = Property(1),
-        animationOptions = UdashCarousel.AnimationOptions(active = false).toProperty
+        animationOptions = UdashCarousel.AnimationOptions(active = false).toProperty,
       )()
       jQ("body").append(carousel.render)
       carousel.activeSlide.get shouldBe 1
@@ -97,7 +97,7 @@ class UdashCarouselTest extends AsyncUdashCoreFrontendTest {
       val carousel = UdashCarousel.default(
         sl,
         activeSlide = Property(1),
-        animationOptions = UdashCarousel.AnimationOptions(active = false).toProperty
+        animationOptions = UdashCarousel.AnimationOptions(active = false).toProperty,
       )()
       jQ("body").append(carousel.render)
       carousel.activeSlide.get shouldBe 1
@@ -112,7 +112,7 @@ class UdashCarouselTest extends AsyncUdashCoreFrontendTest {
       val carousel = UdashCarousel.default(
         sl,
         activeSlide = Property(1),
-        animationOptions = UdashCarousel.AnimationOptions(active = false).toProperty
+        animationOptions = UdashCarousel.AnimationOptions(active = false).toProperty,
       )()
       jQ("body").append(carousel.render)
       carousel.activeSlide.get shouldBe 1
@@ -126,16 +126,16 @@ class UdashCarouselTest extends AsyncUdashCoreFrontendTest {
       val carousel = UdashCarousel.default(
         slides(),
         activeSlide = Property(1),
-        animationOptions = UdashCarousel.AnimationOptions(active = false).toProperty
+        animationOptions = UdashCarousel.AnimationOptions(active = false).toProperty,
       )()
       jQ("body").append(carousel.render)
       carousel.activeSlide.get shouldBe 1
       var changeEvent: CarouselEvent[UdashCarouselSlide, ReadableProperty[UdashCarouselSlide]] = null
       var changedEvent: CarouselEvent[UdashCarouselSlide, ReadableProperty[UdashCarouselSlide]] = null
       carousel.listen {
-        case ev@CarouselEvent(_, _, _, false) =>
+        case ev @ CarouselEvent(_, _, _, false) =>
           changeEvent = ev
-        case ev@CarouselEvent(_, _, _, true) =>
+        case ev @ CarouselEvent(_, _, _, true) =>
           changedEvent = ev
       }
       carousel.goTo(5)
@@ -149,7 +149,7 @@ class UdashCarouselTest extends AsyncUdashCoreFrontendTest {
       val carousel = UdashCarousel.default(
         sl,
         activeSlide = Property(3),
-        animationOptions = UdashCarousel.AnimationOptions(active = false).toProperty
+        animationOptions = UdashCarousel.AnimationOptions(active = false).toProperty,
       )()
       jQ("body").append(carousel.render)
       carousel.activeSlide.get shouldBe 3
@@ -163,7 +163,7 @@ class UdashCarouselTest extends AsyncUdashCoreFrontendTest {
       implicit val tp: LocalTranslationProvider = new LocalTranslationProvider(
         Map(
           Lang("test") -> Bundle(BundleHash("h"), Map("prev" -> "Poprzedni", "next" -> "Następny")),
-          Lang("test2") -> Bundle(BundleHash("h"), Map("prev" -> "Prev", "next" -> "next"))
+          Lang("test2") -> Bundle(BundleHash("h"), Map("prev" -> "Prev", "next" -> "next")),
         )
       )
       val langProperty = Property(Lang("test"))
@@ -172,52 +172,64 @@ class UdashCarouselTest extends AsyncUdashCoreFrontendTest {
       val next = Property.blank[String]
 
       val sl = slides()
-      val carousel = UdashCarousel.default(
-        sl,
-        srTexts = Some((previous, next)),
-        animationOptions = UdashCarousel.AnimationOptions(active = false).toProperty
-      )().setup(_.addRegistration(
-        langProperty.listen(implicit lang =>
-          for {
-            p <- TranslationKey.key("prev")()
-            n <- TranslationKey.key("next")()
-          } yield CallbackSequencer().sequence {
-            previous.set(p.string)
-            next.set(n.string)
-          },
-          initUpdate = true)
-      ))
+      val carousel = UdashCarousel
+        .default(
+          sl,
+          srTexts = Some((previous, next)),
+          animationOptions = UdashCarousel.AnimationOptions(active = false).toProperty,
+        )()
+        .setup(
+          _.addRegistration(
+            langProperty.listen(
+              implicit lang =>
+                for {
+                  p <- TranslationKey.key("prev")()
+                  n <- TranslationKey.key("next")()
+                } yield CallbackSequencer().sequence {
+                  previous.set(p.string)
+                  next.set(n.string)
+                },
+              initUpdate = true,
+            )
+          )
+        )
       val el = carousel.render
       jQ("body").append(el)
 
       for {
         _ <- retrying {
-          el.getElementsByClassName(Carousel.controlPrevIcon.className)(0).getAttribute(aria.label.name) should be("Poprzedni")
-          el.getElementsByClassName(Carousel.controlNextIcon.className)(0).getAttribute(aria.label.name) should be("Następny")
+          el.getElementsByClassName(Carousel.controlPrevIcon.className)(0).getAttribute(aria.label.name) should
+            be("Poprzedni")
+          el.getElementsByClassName(Carousel.controlNextIcon.className)(0).getAttribute(aria.label.name) should
+            be("Następny")
         }
         _ <- Future(langProperty.set(Lang("test2")))
         r <- retrying {
-          el.getElementsByClassName(Carousel.controlPrevIcon.className)(0).getAttribute(aria.label.name) should be("Prev")
-          el.getElementsByClassName(Carousel.controlNextIcon.className)(0).getAttribute(aria.label.name) should be("next")
+          el.getElementsByClassName(Carousel.controlPrevIcon.className)(0).getAttribute(aria.label.name) should
+            be("Prev")
+          el.getElementsByClassName(Carousel.controlNextIcon.className)(0).getAttribute(aria.label.name) should
+            be("next")
         }
       } yield r
     }
   }
 
-  private def activeIdx(carousel: UdashCarousel[_, _]): Int = {
+  private def activeIdx(carousel: UdashCarousel[_, _]): Int =
     jQ(carousel.render)
-      .find(s".${BootstrapStyles.Carousel.item.className}").get()
+      .find(s".${BootstrapStyles.Carousel.item.className}")
+      .get()
       .zipWithIndex
       .collectFirst { case (el, idx) if el.classList.contains(BootstrapStyles.active.className) => idx }
       .getOrElse(-1)
-  }
 
   private def activeIndicatorIdx(carousel: UdashCarousel[_, _]): Int = {
     val indicators = jQ(carousel.render).find(s".${BootstrapStyles.Carousel.indicators.className}").children()
     (0 until indicators.length)
       .map(indicators.at)
-      .find(_.hasClass(BootstrapStyles.active.className)).get
-      .attr(BootstrapTags.dataSlideTo.name).get
+      .find(_.hasClass(BootstrapStyles.active.className))
+      .get
+      .attr(BootstrapTags.dataSlideTo.name)
+      .get
       .toInt
   }
 

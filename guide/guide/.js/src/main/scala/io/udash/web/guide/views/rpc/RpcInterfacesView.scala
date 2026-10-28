@@ -7,7 +7,6 @@ import io.udash.web.guide.styles.partials.GuideStyles
 import io.udash.web.guide.{Context, _}
 import scalatags.JsDom
 
-
 case object RpcInterfacesViewFactory extends StaticViewFactory[RpcInterfacesState.type](() => new RpcInterfacesView)
 
 class RpcInterfacesView extends View with CssView {
@@ -23,17 +22,32 @@ class RpcInterfacesView extends View with CssView {
     ),
     ul(GuideStyles.defaultList)(
       li(i("RPC"), " - the RPC interface exposed by the server-side."),
-      li(i("Client RPC"), " - the RPC interface exposed by the client-side.")
+      li(i("Client RPC"), " - the RPC interface exposed by the client-side."),
     ),
     p("Methods exposed by the RPC interface can be divided into three groups:"),
     ul(GuideStyles.defaultList)(
-      li(i("Calls"), " - methods returning ", i("Future[T]"), " where ", i("T"), " is a serializable type (a client RPC interface cannot expose these methods)."),
-      li(i("Fires"), " - methods with a return type ", i("Unit"), ", there is no guarantee that your request will be received by a recipient."),
-      li(i("Getters"), " - methods returning another RPC interface, calling this method does not send anything over network.")
+      li(
+        i("Calls"),
+        " - methods returning ",
+        i("Future[T]"),
+        " where ",
+        i("T"),
+        " is a serializable type (a client RPC interface cannot expose these methods).",
+      ),
+      li(
+        i("Fires"),
+        " - methods with a return type ",
+        i("Unit"),
+        ", there is no guarantee that your request will be received by a recipient.",
+      ),
+      li(
+        i("Getters"),
+        " - methods returning another RPC interface, calling this method does not send anything over network.",
+      ),
     ),
     p(
       "Both call and fire methods are asynchronous. Call will complete a returned Future when response is received. Fire is a ",
-      "\"fire&forget\" method, there is no acknowledgement that the request reached its recipient."
+      "\"fire&forget\" method, there is no acknowledgement that the request reached its recipient.",
     ),
     h3("Server-side RPC interface"),
     p("Let's take a look at the following example of the server-side RPC interface:"),
@@ -69,9 +83,12 @@ class RpcInterfacesView extends View with CssView {
         |  extends DefaultServerRpcCompanion[InnerRPC]""".stripMargin
     )(GuideStyles),
     p(
-      "Inside ", i("ServerRPC"), " you can find all mentioned method types. The RPC system also supports multiple arguments lists. ",
-      i("@rpcName"), " allows you to change a method name for serialization purposes, it is useful for overloaded methods in the RPC interface. ",
-      "Take a look at the example of RPC usage:"
+      "Inside ",
+      i("ServerRPC"),
+      " you can find all mentioned method types. The RPC system also supports multiple arguments lists. ",
+      i("@rpcName"),
+      " allows you to change a method name for serialization purposes, it is useful for overloaded methods in the RPC interface. ",
+      "Take a look at the example of RPC usage:",
     ),
     CodeBlock(
       """def useRpc(rpc: ServerRPC): Unit = {
@@ -98,7 +115,8 @@ class RpcInterfacesView extends View with CssView {
     h3("Client-side RPC interface"),
     p(
       "Client RPC interfaces are similar to the server ones, with one important difference - they cannot contain any ",
-      i("call"), " methods. For example: "
+      i("call"),
+      " methods. For example: ",
     ),
     CodeBlock(
       """import io.udash.rpc._
@@ -130,18 +148,25 @@ class RpcInterfacesView extends View with CssView {
         |  extends DefaultClientRpcCompanion[ClientInnerRPC]""".stripMargin
     )(GuideStyles),
     p(
-      "Notice that ", i("ClientInnerRPC"), " is also a client RPC interface. It is impossible to return a standard RPC ",
-      "interface inside client RPC."
+      "Notice that ",
+      i("ClientInnerRPC"),
+      " is also a client RPC interface. It is impossible to return a standard RPC ",
+      "interface inside client RPC.",
     ),
     p(
-      "The client RPC cannot contain ", i("call"), " methods, because it can broadcast to many clients. It is hard to decide ",
-      "when a broadcasted call can be assumed as finished without any use case context."
+      "The client RPC cannot contain ",
+      i("call"),
+      " methods, because it can broadcast to many clients. It is hard to decide ",
+      "when a broadcasted call can be assumed as finished without any use case context.",
     ),
     h2("RPC interface composition"),
     p(
       "The Udash RPC system makes it possible to compose RPC interfaces from smaller interfaces. Inside the application " +
-        "you can create one ", i("MainServerRPC"), " and one ", i("MainClientRPC"),
-      " which will give access to other service RPC interfaces."
+        "you can create one ",
+      i("MainServerRPC"),
+      " and one ",
+      i("MainClientRPC"),
+      " which will give access to other service RPC interfaces.",
     ),
     CodeBlock(
       """import io.udash.rpc._
@@ -181,9 +206,12 @@ class RpcInterfacesView extends View with CssView {
     h2("What's next?"),
     p(
       "Now you know more about Udash RPC interfaces. You might also want to take a look at ",
-      a(href := RpcClientServerState.url)("Client ➔ Server"), " & ",
-      a(href := RpcClientServerState.url)("Server ➔ Client"), " communication or the ",
-      a(href := RpcSerializationState.url)("Udash serialization"), " mechanism."
-    )
+      a(href := RpcClientServerState.url)("Client ➔ Server"),
+      " & ",
+      a(href := RpcClientServerState.url)("Server ➔ Client"),
+      " communication or the ",
+      a(href := RpcSerializationState.url)("Udash serialization"),
+      " mechanism.",
+    ),
   )
 }

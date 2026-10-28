@@ -12,7 +12,7 @@ class UdashInputGroupTest extends UdashCoreFrontendTest {
       val size = Property[Option[BootstrapStyles.Size]](Some(BootstrapStyles.Size.Large))
       val group = UdashInputGroup(size)(
         UdashInputGroup.prependText("Test"),
-        UdashInputGroup.input(TextInput(Property(""))().render)
+        UdashInputGroup.input(TextInput(Property(""))().render),
       )
       val el = group.render
       el.childNodes.length should be(2)

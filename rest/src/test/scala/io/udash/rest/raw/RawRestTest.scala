@@ -33,7 +33,8 @@ final case class NonBlankString(str: String) {
 object NonBlankString extends RestDataWrapperCompanion[String, NonBlankString]
 
 class omit[T](value: => T) extends AnnotationAggregate {
-  @transientDefault @whenAbsent(value)
+  @transientDefault
+  @whenAbsent(value)
   final def aggregated: List[StaticAnnotation] = reifyAggregated
 }
 
@@ -47,13 +48,13 @@ trait UserApi {
     @Header("X-Awesome") awesome: Boolean,
     @Query("f") foo: Int,
     @Cookie("co") coo: Double,
-    user: User
+    user: User,
   ): Future[Unit]
 
   @POST def defaults(
     @omit(false) @Header("X-Awesome") awesome: Boolean = whenAbsent.value,
     @transientDefault @Query("f") foo: Int = 42,
-    @omit("lel") kek: String = whenAbsent.value
+    @omit("lel") kek: String = whenAbsent.value,
   ): Future[Unit]
 
   def autopost(bodyarg: String): Future[String]
@@ -83,14 +84,16 @@ trait RootApi {
   def fail: Future[Unit]
   def failMore: Future[Unit]
   @GET def requireNonBlank(param: NonBlankString): Future[Unit]
-  @POST @CustomBody def echoHeaders(headers: Map[String, String]): Future[WithHeaders[Unit]]
+  @POST
+  @CustomBody def echoHeaders(headers: Map[String, String]): Future[WithHeaders[Unit]]
 }
 object RootApi extends DefaultRestApiCompanion[RootApi]
 
 trait TimeoutLeafApi {
   @timeout(3.seconds) def annotated: Future[Unit]
   def plain: Future[Unit]
-  @GET @timeout(4.seconds) def fetch: Future[Unit]
+  @GET
+  @timeout(4.seconds) def fetch: Future[Unit]
 }
 object TimeoutLeafApi extends DefaultRestApiCompanion[TimeoutLeafApi]
 
@@ -113,35 +116,34 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
 
   def repr(body: HttpBody, inNewLine: Boolean = true): String = body match {
     case HttpBody.Empty => ""
-    case tb@HttpBody.Textual(content, _, _) =>
+    case tb @ HttpBody.Textual(content, _, _) =>
       s"${if (inNewLine) "" else " "}${tb.contentType}\n$content"
-    case bb@HttpBody.Binary(content, _) =>
-      s"${if (inNewLine) "" else " "}${bb.contentType}\n" +
-        s"${content.iterator.map(b => f"$b%02X").mkString}"
+    case bb @ HttpBody.Binary(content, _) =>
+      s"${if (inNewLine) "" else " "}${bb.contentType}\n" + s"${content.iterator.map(b => f"$b%02X").mkString}"
   }
 
   def repr(req: RestRequest): String = {
     val pathRepr = req.parameters.path.map(_.value).mkString("/", "/", "")
-    val queryRepr = req.parameters.query.entries.iterator
-      .map({ case (k, PlainValue(v)) => s"$k=$v" }).mkStringOrEmpty("?", "&", "")
+    val queryRepr =
+      req.parameters.query.entries.iterator.map { case (k, PlainValue(v)) => s"$k=$v" }.mkStringOrEmpty("?", "&", "")
     val hasHeaders = req.parameters.headers.nonEmpty || req.parameters.cookies.nonEmpty
-    val cookieHeader = Opt(req.parameters.cookies).filter(_.nonEmpty)
-      .map(cs => "Cookie" -> PlainValue(cs.iterator.map({ case (n, PlainValue(v)) => s"$n=$v" }).mkString("; ")))
+    val cookieHeader = Opt(req.parameters.cookies)
+      .filter(_.nonEmpty)
+      .map(cs => "Cookie" -> PlainValue(cs.iterator.map { case (n, PlainValue(v)) => s"$n=$v" }.mkString("; ")))
     val headersRepr = (req.parameters.headers.iterator ++ cookieHeader.iterator)
-      .map({ case (n, PlainValue(v)) => s"$n: $v" }).mkStringOrEmpty("\n", "\n", "\n")
+      .map { case (n, PlainValue(v)) => s"$n: $v" }
+      .mkStringOrEmpty("\n", "\n", "\n")
     s"-> ${req.method} $pathRepr$queryRepr$headersRepr${repr(req.body, hasHeaders)}".trim
   }
 
   def repr(resp: RestResponse): String = {
     val hasHeaders = resp.headers.nonEmpty
-    val headersRepr = resp.headers.iterator
-      .map({ case (n, v) => s"$n: ${v.value}" }).mkStringOrEmpty("\n", "\n", "\n")
+    val headersRepr = resp.headers.iterator.map { case (n, v) => s"$n: ${v.value}" }.mkStringOrEmpty("\n", "\n", "\n")
     s"<- ${resp.code}$headersRepr${repr(resp.body, hasHeaders)}".trim
   }
 
   def repr(resp: StreamedRestResponse): Task[String] = {
-    val headersRepr = resp.headers.iterator
-      .map({ case (n, v) => s"$n: ${v.value}" }).mkStringOrEmpty("\n", "\n", "\n")
+    val headersRepr = resp.headers.iterator.map { case (n, v) => s"$n: ${v.value}" }.mkStringOrEmpty("\n", "\n", "\n")
 
     val bodyReprTask: Task[String] = resp.body match {
       case StreamedBody.Empty => Task.now("")
@@ -190,7 +192,8 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
     def streamBinary(bytes: Array[Byte]): Observable[Array[Byte]] =
       Observable.fromIterable(bytes.grouped(2).toList)
     def streamWithError(failAt: Int): Observable[String] =
-      Observable.fromIterable(1 to 10)
+      Observable
+        .fromIterable(1 to 10)
         .map(i => if (i == failAt) throw HttpErrorException.plain(400, s"Error at $i") else s"item-$i")
   }
 
@@ -219,7 +222,6 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
       logTask.as(response)
     }
 
-
   val realProxy: RootApi = RawRest.fromHandleRequest[RootApi](serverHandle)
 
   val realStreamingProxy: RootApi = RawRest.fromHandleRequestWithStreaming[RootApi](new RawRest.RestRequestHandler {
@@ -241,7 +243,8 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
     trafficLog shouldBe expectedTraffic
   }
 
-  def testStreamingRestCall[T](call: RootApi => Observable[T], expectedTraffic: String)(implicit pos: Position): Unit = {
+  def testStreamingRestCall[T](call: RootApi => Observable[T], expectedTraffic: String)(implicit pos: Position)
+    : Unit = {
     val realResultFuture = call(real).toListL.runToFuture.wrapToTry
     val proxyResultFuture = call(realStreamingProxy).toListL.runToFuture.wrapToTry
 
@@ -266,113 +269,131 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
   }
 
   test("simple GET") {
-    testRestCall(_.self.user(UserId("ID")),
+    testRestCall(
+      _.self.user(UserId("ID")),
       """-> GET /user?userId=ID
         |<- 200 application/json;charset=utf-8
         |{"id":"ID","name":"ID-0-"}
-        |""".stripMargin
+        |""".stripMargin,
     )
   }
 
   test("simple POST with path, header, query and cookie") {
-    testRestCall(_.self.user("paf", awesome = true, 42, 3.14, User(UserId("ID"), "Fred")),
+    testRestCall(
+      _.self.user("paf", awesome = true, 42, 3.14, User(UserId("ID"), "Fred")),
       """-> POST /user/save/paf/moar/path?f=42
         |X-Awesome: true
         |Cookie: co=3.14
         |application/json;charset=utf-8
         |{"id":"ID","name":"Fred"}
         |<- 204
-        |""".stripMargin)
+        |""".stripMargin,
+    )
   }
 
   test("simple POST using default transient values") {
-    testRestCall(_.self.defaults(),
+    testRestCall(
+      _.self.defaults(),
       """-> POST /defaults
         |<- 204
-        |""".stripMargin)
+        |""".stripMargin,
+    )
   }
 
   test("auto POST") {
-    testRestCall(_.self.autopost("bod"),
+    testRestCall(
+      _.self.autopost("bod"),
       """-> POST /autopost application/json;charset=utf-8
         |{"bodyarg":"bod"}
         |<- 200 application/json;charset=utf-8
         |"BOD"
-        |""".stripMargin)
+        |""".stripMargin,
+    )
   }
 
   test("single body auto POST") {
-    testRestCall(_.self.singleBodyAutopost("bod"),
+    testRestCall(
+      _.self.singleBodyAutopost("bod"),
       """-> POST /singleBodyAutopost application/json;charset=utf-8
         |"bod"
         |<- 200 application/json;charset=utf-8
         |"BOD"
-        |""".stripMargin)
+        |""".stripMargin,
+    )
   }
 
   test("form POST") {
-    testRestCall(_.self.formpost("qu", "a=b", 42),
+    testRestCall(
+      _.self.formpost("qu", "a=b", 42),
       """-> POST /formpost?qarg=qu application/x-www-form-urlencoded;charset=utf-8
         |sarg=a%3Db&iarg=42
         |<- 200 application/json;charset=utf-8
         |"qu-a=b-42"
-        |""".stripMargin)
+        |""".stripMargin,
+    )
   }
 
   test("simple GET after prefix call") {
-    testRestCall(_.subApi(1, "query").user(UserId("ID")),
+    testRestCall(
+      _.subApi(1, "query").user(UserId("ID")),
       """-> GET /subApi/1/user?query=query&userId=ID
         |<- 200 application/json;charset=utf-8
         |{"id":"ID","name":"ID-1-query"}
-        |""".stripMargin
+        |""".stripMargin,
     )
   }
 
   test("failing POST") {
-    testRestCall(_.fail,
+    testRestCall(
+      _.fail,
       """-> POST /fail
         |<- 400 text/plain;charset=utf-8
         |zuo
-        |""".stripMargin
+        |""".stripMargin,
     )
   }
 
   test("throwing POST") {
-    testRestCall(_.failMore,
+    testRestCall(
+      _.failMore,
       """-> POST /failMore
         |<- 400 text/plain;charset=utf-8
         |ZUO
-        |""".stripMargin
+        |""".stripMargin,
     )
   }
 
   test("request and response adjusting") {
-    testRestCall(_.self.adjusted,
+    testRestCall(
+      _.self.adjusted,
       """-> POST /adjusted
         |X-Req-Custom: custom-req
         |<- 204
         |X-Res-Custom: custom-res
-        |""".stripMargin
+        |""".stripMargin,
     )
   }
 
   test("binary body") {
-    testRestCall(_.self.binaryEcho(Array.fill[Byte](5)(5)),
+    testRestCall(
+      _.self.binaryEcho(Array.fill[Byte](5)(5)),
       """-> POST /binaryEcho application/octet-stream
         |0505050505
         |<- 200 application/octet-stream
         |0505050505
-        |""".stripMargin)
+        |""".stripMargin,
+    )
   }
 
   test("response with headers") {
-    testRestCall(_.echoHeaders(IListMap("X-A" -> "a", "X-B" -> "b")),
+    testRestCall(
+      _.echoHeaders(IListMap("X-A" -> "a", "X-B" -> "b")),
       """-> POST /echoHeaders application/json;charset=utf-8
         |{"X-A":"a","X-B":"b"}
         |<- 204
         |X-A: a
         |X-B: b
-        |""".stripMargin
+        |""".stripMargin,
     )
   }
 
@@ -392,7 +413,7 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
   test("header case insensitivity") {
     val params = RestParameters(
       path = List(PlainValue("eatHeader")),
-      headers = IMapping.create("x-sTuFf" -> PlainValue("StUfF"))
+      headers = IMapping.create("x-sTuFf" -> PlainValue("StUfF")),
     )
     val request = RestRequest(HttpMethod.POST, params, HttpBody.Empty)
     val response = RestResponse(200, IMapping.empty, HttpBody.json(JsonValue("\"stuff\"")))
@@ -400,19 +421,27 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
   }
 
   test("bad body") {
-    val request = RestRequest(HttpMethod.PUT, RestParameters(List(PlainValue("user"))), HttpBody.json(JsonValue(" \n  \n {")))
-    val response = RestResponse(400, IMapping.empty, HttpBody.plain(
-      "Invalid HTTP body: Unexpected EOF (line 3, column 3) (line content:  {)"))
+    val request =
+      RestRequest(HttpMethod.PUT, RestParameters(List(PlainValue("user"))), HttpBody.json(JsonValue(" \n  \n {")))
+    val response = RestResponse(
+      400,
+      IMapping.empty,
+      HttpBody.plain("Invalid HTTP body: Unexpected EOF (line 3, column 3) (line content:  {)"),
+    )
     assertRawExchange(request, response)
   }
 
   test("bad argument") {
     val body = HttpBody.json(JsonValue("{\"user\": {}}"))
     val request = RestRequest(HttpMethod.PUT, RestParameters(List(PlainValue("user"))), body)
-    val response = RestResponse(400, IMapping.empty, HttpBody.plain(
-      "Argument user of RPC put_user is invalid: " +
-        "Cannot read io.udash.rest.raw.User, field id is missing in decoded data"
-    ))
+    val response = RestResponse(
+      400,
+      IMapping.empty,
+      HttpBody.plain(
+        "Argument user of RPC put_user is invalid: " +
+          "Cannot read io.udash.rest.raw.User, field id is missing in decoded data"
+      ),
+    )
     assertRawExchange(request, response)
   }
 
@@ -436,47 +465,55 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
   }
 
   test("invalid parameter with custom validation error") {
-    val request = RestRequest(HttpMethod.GET, RestParameters(
-      List(PlainValue("requireNonBlank")),
-      query = Mapping(ISeq("param" -> PlainValue("")))
-    ), HttpBody.Empty)
+    val request = RestRequest(
+      HttpMethod.GET,
+      RestParameters(
+        List(PlainValue("requireNonBlank")),
+        query = Mapping(ISeq("param" -> PlainValue(""))),
+      ),
+      HttpBody.Empty,
+    )
     val response = RestResponse(400, IMapping.empty, HttpBody.plain("this stuff is blank"))
     assertRawExchange(request, response)
   }
 
   test("stream numbers") {
-    testStreamingRestCall(_.self.streamNumbers(5),
+    testStreamingRestCall(
+      _.self.streamNumbers(5),
       """-> GET /streamNumbers?count=5
         |<- 200 application/json;charset=utf-8
         |[1,2,3,4,5]
-        |""".stripMargin
+        |""".stripMargin,
     )
   }
 
   test("stream strings with prefix") {
-    testStreamingRestCall(_.self.streamStrings(3, "test"),
+    testStreamingRestCall(
+      _.self.streamStrings(3, "test"),
       """-> GET /streamStrings?count=3&prefix=test
         |<- 200 application/json;charset=utf-8
         |["test-1","test-2","test-3"]
-        |""".stripMargin
+        |""".stripMargin,
     )
   }
 
   test("stream users") {
-    testStreamingRestCall(_.self.streamUsers(2),
+    testStreamingRestCall(
+      _.self.streamUsers(2),
       """-> GET /streamUsers?count=2
         |<- 200 application/json;charset=utf-8
         |[{"id":"id-1","name":"User 1"},{"id":"id-2","name":"User 2"}]
-        |""".stripMargin
+        |""".stripMargin,
     )
   }
 
   test("stream empty") {
-    testStreamingRestCall(_.self.streamEmpty,
+    testStreamingRestCall(
+      _.self.streamEmpty,
       """-> GET /streamEmpty
         |<- 200 application/json;charset=utf-8
         |[]
-        |""".stripMargin
+        |""".stripMargin,
     )
   }
 
@@ -512,13 +549,13 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
     }
   }
 
-
   test("streaming after prefix call") {
-    testStreamingRestCall(_.subApi(5, "test").streamNumbers(3),
+    testStreamingRestCall(
+      _.subApi(5, "test").streamNumbers(3),
       """-> GET /subApi/5/streamNumbers?query=test&count=3
         |<- 200 application/json;charset=utf-8
         |[1,2,3]
-        |""".stripMargin
+        |""".stripMargin,
     )
   }
 
@@ -526,7 +563,7 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
     val request = RestRequest(
       HttpMethod.GET,
       RestParameters(PlainValue.decodePath("streamNumbers"), query = Mapping(ISeq("count" -> PlainValue("4")))),
-      HttpBody.Empty
+      HttpBody.Empty,
     )
     whenReady(serverHandleWithStreaming(request).runToFuture) {
       case StreamedRestResponse(code, headers, body) =>
@@ -560,8 +597,11 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
     RestRequest(method, RestParameters(PlainValue.decodePath(path)), HttpBody.Empty)
 
   private def resolvedTimeout(method: HttpMethod, path: String): Opt[FiniteDuration] =
-    TimeoutRootApi.restMetadata.resolvePath(PlainValue.decodePath(path)).find(_.method == method)
-      .getOrElse(fail(s"$method $path not resolved")).timeout
+    TimeoutRootApi.restMetadata
+      .resolvePath(PlainValue.decodePath(path))
+      .find(_.method == method)
+      .getOrElse(fail(s"$method $path not resolved"))
+      .timeout
 
   private def resolve(handler: RawRest.HandleRequestWithStreaming, request: RestRequest)
     : (Opt[FiniteDuration], Task[AbstractRestResponse]) = handler match {
@@ -613,7 +653,9 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
 
   test("applying a handler invokes the API methods at once, and its task invokes none again") {
     val impl = new TimeoutApiImpl
-    val streamed = RawRest.asHandleRequestWithStreaming[TimeoutRootApi](impl).apply(timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
+    val streamed = RawRest
+      .asHandleRequestWithStreaming[TimeoutRootApi](impl)
+      .apply(timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
     impl.invoked shouldBe List("outer", "inner", "annotated")
     val plain = RawRest.asHandleRequest[TimeoutRootApi](impl).apply(timeoutRequest(HttpMethod.POST, "untimed"))
     impl.invoked shouldBe List("outer", "inner", "annotated", "untimed")
@@ -621,10 +663,12 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
   }
 
   test("a resolved task invokes the API methods once however many times it runs") {
-    for (handler <- List[TimeoutApiImpl => RawRest.HandleRequestWithStreaming](
-      RawRest.asHandleRequestWithStreaming[TimeoutRootApi](_),
-      RawRest.asHandleRequest[TimeoutRootApi](_),
-    )) {
+    for (
+      handler <- List[TimeoutApiImpl => RawRest.HandleRequestWithStreaming](
+        RawRest.asHandleRequestWithStreaming[TimeoutRootApi](_),
+        RawRest.asHandleRequest[TimeoutRootApi](_),
+      )
+    ) {
       val impl = new TimeoutApiImpl
       val (_, task) = resolve(handler(impl), timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
       whenReady(task.flatMap(_ => task).runToFuture)(_ => impl.invoked shouldBe List("outer", "inner", "annotated"))

@@ -11,7 +11,8 @@ import io.udash.web.guide.views.References
 import io.udash.wrappers.jquery._
 import scalatags.JsDom
 
-case object FrontendTemplatesViewFactory extends StaticViewFactory[FrontendTemplatesState.type](() => new FrontendTemplatesView)
+case object FrontendTemplatesViewFactory
+  extends StaticViewFactory[FrontendTemplatesState.type](() => new FrontendTemplatesView)
 
 class FrontendTemplatesView extends View with CssView {
 
@@ -25,7 +26,7 @@ class FrontendTemplatesView extends View with CssView {
       head(
         meta(charset := "UTF-8"),
         meta(name := "viewport", content := "width=device-width, initial-scale=1"),
-        script(src := "scripts/fastopt.js")
+        script(src := "scripts/fastopt.js"),
       ),
       body(
         header(cls := "site-header")(
@@ -37,9 +38,9 @@ class FrontendTemplatesView extends View with CssView {
             a(href := "#", target := "_blank")(
               "I'm a link."
             )
-          )
-        )
-      )
+          ),
+        ),
+      ),
     )
   }.sourceCode
 
@@ -75,8 +76,8 @@ class FrontendTemplatesView extends View with CssView {
           color(c"#333333"),
           backgroundColor(c"#E6E6E6"),
           borderColor(c"#ADADAD"),
-          textDecoration := "none"
-        )
+          textDecoration := "none",
+        ),
       )
 
       val btnSuccess: CssStyle = style(
@@ -87,8 +88,8 @@ class FrontendTemplatesView extends View with CssView {
         &.hover(
           color(c"#FFFFFF"),
           backgroundColor(c"#449D44"),
-          borderColor(c"#398439")
-        )
+          borderColor(c"#398439"),
+        ),
       )
     }
   }.sourceCode
@@ -104,7 +105,7 @@ class FrontendTemplatesView extends View with CssView {
         padding(6.px, 12.px),
         borderBottomWidth(1.px),
         borderBottomStyle.solid,
-        borderBottomColor(c"#CCCCCC")
+        borderBottomColor(c"#CCCCCC"),
       )
 
       val innerOn: CssStyle = style(
@@ -113,7 +114,7 @@ class FrontendTemplatesView extends View with CssView {
         backgroundColor(c"#5CB85C"),
         borderTopWidth(1.px),
         borderTopStyle.solid,
-        borderTopColor(c"#4CAE4C")
+        borderTopColor(c"#4CAE4C"),
       )
 
       val switcher: CssStyle = style(
@@ -135,7 +136,7 @@ class FrontendTemplatesView extends View with CssView {
           ),
           unsafeChild(s".${innerOn.className}")(
             visibility.visible
-          )
+          ),
         ),
         &.attr("data-state", "off")(
           unsafeChild(s".${innerOff.className}")(
@@ -143,8 +144,8 @@ class FrontendTemplatesView extends View with CssView {
           ),
           unsafeChild(s".${innerOn.className}")(
             visibility.hidden
-          )
-        )
+          ),
+        ),
       )
     }
   }.sourceCode
@@ -163,7 +164,7 @@ class FrontendTemplatesView extends View with CssView {
         padding(40.px, 0.px),
         borderWidth(2.px),
         borderStyle.solid,
-        borderColor(c"#000000")
+        borderColor(c"#000000"),
       )
 
       val mediaDesktop = style(
@@ -177,7 +178,7 @@ class FrontendTemplatesView extends View with CssView {
 
         media.maxWidth(768.px)(
           display.block
-        )
+        ),
       )
     }
   }.sourceCode
@@ -188,7 +189,7 @@ class FrontendTemplatesView extends View with CssView {
     a(
       cls := "btn btn-default",
       id := "example-button",
-      onclick := { () => jQ("#example-button").toggleClass("btn-success") }
+      onclick := { () => jQ("#example-button").toggleClass("btn-success") },
     )("Click me")
   }.sourceCode
 
@@ -197,11 +198,12 @@ class FrontendTemplatesView extends View with CssView {
 
     div(
       a(
-        ExampleStyles.btn, ExampleStyles.btnDefault,
+        ExampleStyles.btn,
+        ExampleStyles.btnDefault,
         id := "example-button",
         onclick := { () =>
           document.getElementById("example-button").classList.toggle(ExampleStyles.btnSuccess.className)
-        }
+        },
       )("Click me")
     )
   }.withSourceCode
@@ -218,10 +220,10 @@ class FrontendTemplatesView extends View with CssView {
           jqSwitcher.attr("data-state", "off")
         else
           jqSwitcher.attr("data-state", "on")
-      }
+      },
     )(
       div(ExampleStyles.innerOff)("Off"),
-      div(ExampleStyles.innerOn)("On")
+      div(ExampleStyles.innerOn)("On"),
     )
   }.withSourceCode
 
@@ -237,24 +239,24 @@ class FrontendTemplatesView extends View with CssView {
       val colorPulse = keyframes(
         0d -> keyframe(
           color(c"#000000"),
-          backgroundColor(c"#FFFFFF")
+          backgroundColor(c"#FFFFFF"),
         ),
 
         50d -> keyframe(
           color(c"#FFFFFF"),
-          backgroundColor(c"#5CB85C")
+          backgroundColor(c"#5CB85C"),
         ),
 
         100d -> keyframe(
           color(c"#000000"),
-          backgroundColor(c"#FFFFFF")
-        )
+          backgroundColor(c"#FFFFFF"),
+        ),
       )
 
       val animated = style(
         animationName(colorPulse),
         animationIterationCount.count(1),
-        animationDuration(2.seconds)
+        animationDuration(2.seconds),
       )
     }
   }.sourceCode
@@ -273,12 +275,12 @@ class FrontendTemplatesView extends View with CssView {
         keyframes: CssStyle,
         duration: FiniteDuration,
         iterationCount: AV = animationIterationCount.infinite,
-        easing: AV = animationTimingFunction.easeInOut
+        easing: AV = animationTimingFunction.easeInOut,
       ): CssStyle = mixin(
         animationName(keyframes),
         iterationCount,
         animationDuration(duration),
-        easing
+        easing,
       )
     }
   }.sourceCode
@@ -305,17 +307,21 @@ class FrontendTemplatesView extends View with CssView {
 
   private val (animationDemo, animationSource) = {
     a(
-      ExampleStyles.btn, ExampleStyles.btnDefault, ExampleStyles.btnAnimated
+      ExampleStyles.btn,
+      ExampleStyles.btnDefault,
+      ExampleStyles.btnAnimated,
     )("Hover over me")
   }.withSourceCode
 
   private val (responsiveDemo, responsiveSource) = {
     div(
       div(
-        ExampleStyles.mediaContainer, ExampleStyles.mediaDesktop
+        ExampleStyles.mediaContainer,
+        ExampleStyles.mediaDesktop,
       )("Reduce the browser width"),
       div(
-        ExampleStyles.mediaContainer, ExampleStyles.mediaTablet
+        ExampleStyles.mediaContainer,
+        ExampleStyles.mediaTablet,
       )("Increase the browser width"),
     )
   }.withSourceCode
@@ -323,14 +329,18 @@ class FrontendTemplatesView extends View with CssView {
   override def getTemplate: Modifier = div(
     h2("Scalatags & UdashCSS"),
     p(
-      "Using ", a(href := References.ScalatagsHomepage, target := "_blank")("ScalaTags"), " and ", i("UdashCSS"), " ",
+      "Using ",
+      a(href := References.ScalatagsHomepage, target := "_blank")("ScalaTags"),
+      " and ",
+      i("UdashCSS"),
+      " ",
       "is the recommended way of creating and styling view templates. This part of the guide presents the most interesting parts ",
-      "of these libraries. For more details refer to projects documentation."
+      "of these libraries. For more details refer to projects documentation.",
     ),
     h2("Scalatags"),
     p(
       "Scalatags is a fast and small library for creating an XML/HTML/CSS structure directly in Scala code. ",
-      "The important advantage of Scalatags is the ability to maintain views and logic in one place."
+      "The important advantage of Scalatags is the ability to maintain views and logic in one place.",
     ),
     p("For example, this piece of code:"),
     AutoDemo.snippet(scalatagsSource),
@@ -360,23 +370,45 @@ class FrontendTemplatesView extends View with CssView {
       a(href := References.ScalaCssHomepage, target := "_blank")("ScalaCSS"),
       " is a library for creating CSS stylesheets with the Scala language. Using inline stylesheets is type-safe ",
       "and there is no need to manually manage class names. You can create your styles like in SASS/LESS, but you have the power ",
-      "of Scala and your stylesheets can be generated dynamically (that is, you can change property values at runtime)."
+      "of Scala and your stylesheets can be generated dynamically (that is, you can change property values at runtime).",
     ),
     p(
       "Unfortunately ScalaCSS generates a lot of JavaScript code and significantly reduces application start-up performance. ",
       "Udash provides tools for server-side CSS rendering with type-safe class references. It allows to keep benefits of ScalaCSS DSL ",
-      "and decrease JS size and initialization time. For reference, the Udash Homepage JS size decreased from ", i("766kB"), " to ", i("314kB"), "."
+      "and decrease JS size and initialization time. For reference, the Udash Homepage JS size decreased from ",
+      i("766kB"),
+      " to ",
+      i("314kB"),
+      ".",
     ),
     p(
       "Udash CSS tooling tries to keep migration from ScalaCSS as easy as possible. It also reuses a huge part of ScalaCSS DSL. ",
       "Here is a list of all major differences: ",
       ul(GuideStyles.defaultList)(
-        li(b("Styles in shared module"), " - you have to create your stylesheets in the cross-compiled module in order to render them on the JVM and refer to them in JS."),
-        li(b(i("CssBase"), " instead of ", i("StyleSheet.Inline")), " - it provides ", i("import dsl._"), " like ScalaCSS, but with minor internal differences."),
+        li(
+          b("Styles in shared module"),
+          " - you have to create your stylesheets in the cross-compiled module in order to render them on the JVM and refer to them in JS.",
+        ),
+        li(
+          b(i("CssBase"), " instead of ", i("StyleSheet.Inline")),
+          " - it provides ",
+          i("import dsl._"),
+          " like ScalaCSS, but with minor internal differences.",
+        ),
         li(b(i("CssStyle"), " instead of ", i("StyleS")), "/", i("StylaA"), " - all your style fields use this type."),
-        li(b("Names in JavaScript, definition in JVM"), " - all your styles are not compiled into JS, it contains only class names."),
-        li(b("Render in JVM"), " - you can use ", i("CssFileRenderer"), " or ", i("CssStringRenderer"), " to render your stylesheets and provide them to the frontend app.")
-      )
+        li(
+          b("Names in JavaScript, definition in JVM"),
+          " - all your styles are not compiled into JS, it contains only class names.",
+        ),
+        li(
+          b("Render in JVM"),
+          " - you can use ",
+          i("CssFileRenderer"),
+          " or ",
+          i("CssStringRenderer"),
+          " to render your stylesheets and provide them to the frontend app.",
+        ),
+      ),
     ),
     p("Look at a simple button example:"),
     AutoDemo.snippet(stylesSource),
@@ -406,7 +438,7 @@ class FrontendTemplatesView extends View with CssView {
     h3("Rendering"),
     p(
       "The JavaScript version of this cross-compiled code contains only the class names of CSS rules. ",
-      "This chapter describes the CSS rendering process."
+      "This chapter describes the CSS rendering process.",
     ),
     p("First of all you have to create ", i("CssRenderer"), " class:"),
     CodeBlock(
@@ -470,24 +502,24 @@ class FrontendTemplatesView extends View with CssView {
         |// the `compileStatics` and `compileAndOptimizeStatics` tasks""".stripMargin
     )(GuideStyles),
     p(
-      "With above configuration you can call ", i("sbt frontend/compileCss"), " to render your styles. ",
-      "Now you just need to include them in the ", i("index.html"), " file."
+      "With above configuration you can call ",
+      i("sbt frontend/compileCss"),
+      " to render your styles. ",
+      "Now you just need to include them in the ",
+      i("index.html"),
+      " file.",
     ),
     CodeBlock(
       """<link href="styles/main.css" rel="stylesheet" />""".stripMargin
     )(GuideStyles),
     h2("What's next?"),
     p(
-      "Take a look at the ", a(href := FrontendPropertiesState.url)("Properties"),
+      "Take a look at the ",
+      a(href := FrontendPropertiesState.url)("Properties"),
       " chapter to read about a data model in the Udash applications. ",
-      "You might find ", a(href := BootstrapExtState.url)("Bootstrap Components"), " interesting later on."
-    )
+      "You might find ",
+      a(href := BootstrapExtState.url)("Bootstrap Components"),
+      " interesting later on.",
+    ),
   )
 }
-
-
-
-
-
-
-

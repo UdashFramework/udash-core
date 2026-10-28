@@ -4,10 +4,10 @@ import javax.servlet.ServletConfig
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import org.atmosphere.cpr._
 
-/**
-  * Servlet for RPC endpoint.
+/** Servlet for RPC endpoint.
   *
-  * @param framework Instance of initialized AtmosphereFramework, which handle RPC requests.
+  * @param framework
+  *   Instance of initialized AtmosphereFramework, which handle RPC requests.
   */
 class RpcServlet(framework: AtmosphereFramework) extends HttpServlet {
   override def init(config: ServletConfig): Unit = {

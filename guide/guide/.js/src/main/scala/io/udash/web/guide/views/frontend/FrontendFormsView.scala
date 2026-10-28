@@ -29,8 +29,10 @@ class FrontendFormsView extends View with CssView {
   override def getTemplate: Modifier = div(
     h2("Two-way Form Bindings"),
     p(
-      "In the ", a(href := FrontendBindingsState.url)("previous"), " chapter you could read about one way properties to Scalatags templates bindings. ",
-      "In this part of the guide you will learn means of binding properties to form elements."
+      "In the ",
+      a(href := FrontendBindingsState.url)("previous"),
+      " chapter you could read about one way properties to Scalatags templates bindings. ",
+      "In this part of the guide you will learn means of binding properties to form elements.",
     ),
     p("Let's briefly introduce all bindable form elements:"),
     ul(GuideStyles.defaultList)(
@@ -43,18 +45,23 @@ class FrontendFormsView extends View with CssView {
       li(i("TextArea"), " - multiline input bound to ", i("Property[String]"), "."),
       li(i("TextInput"), " - standard input bound to ", i("Property[String]"), "."),
       li(
-        i("DateTimeLocalInput"), " - date and time input bound to ", i("Property[String]"), ". ",
+        i("DateTimeLocalInput"),
+        " - date and time input bound to ",
+        i("Property[String]"),
+        ". ",
         "This input type is not supported by Firefox and Internet Explorer as stated in ",
-        a(`href` := "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local", "documentation.")
+        a(`href` := "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local", "documentation."),
       ),
       li(i("DateInput"), " - date input bound to ", i("Property[String]"), "."),
-      li(i("TimeInput"), " - time input bound to ", i("Property[String]"), ".")
+      li(i("TimeInput"), " - time input bound to ", i("Property[String]"), "."),
     ),
     h3("TextInput & NumberInput & PasswordInput"),
     p(
       "Let's start with simple input fields. ",
-      "The below example presents how easily you can bind your properties to HTML input elements. ", i("TextInput"), " takes ",
-      "a property which should be bound to an input and takes care of updating a field and property after every change."
+      "The below example presents how easily you can bind your properties to HTML input elements. ",
+      i("TextInput"),
+      " takes ",
+      "a property which should be bound to an input and takes care of updating a field and property after every change.",
     ),
     textInputSnippet,
     ForceBootstrap(textInputDemo),
@@ -65,23 +72,33 @@ class FrontendFormsView extends View with CssView {
     h3("Checkbox"),
     p(
       "Below you can find the example of creating a single checkbox. Notice that the third property contains String, so it uses ",
-      "property transformation for checkbox binding. "
+      "property transformation for checkbox binding. ",
     ),
     checkboxSnippet,
     ForceBootstrap(checkboxDemo),
     h3("CheckButtons"),
     p(
       "The below example shows how to create a sequence of checkboxes for a provided sequence of possible values and bind them ",
-      "with a SeqProperty. The CheckButtons constructor gets ", i("SeqProperty[String]"), ", ", i("Seq[String]"), " with possible values and ",
-      "a decorator method. The decorator gets ", i("Seq[(Input, String)]"), ", where the Input generates a checkbox and the String ",
-      "is the bound value. This generates a Scalatags template containing the checkboxes."
+      "with a SeqProperty. The CheckButtons constructor gets ",
+      i("SeqProperty[String]"),
+      ", ",
+      i("Seq[String]"),
+      " with possible values and ",
+      "a decorator method. The decorator gets ",
+      i("Seq[(Input, String)]"),
+      ", where the Input generates a checkbox and the String ",
+      "is the bound value. This generates a Scalatags template containing the checkboxes.",
     ),
     checkButtonsSnippet,
     ForceBootstrap(checkButtonsDemo),
     h3("RadioButtons"),
     p(
-      "RadioButtons work very similarly to CheckButtons. The only difference is that they work with a ", i("Property"), ", ",
-      "not with a ", i("SeqProperty"), ", so only one value can be selected. "
+      "RadioButtons work very similarly to CheckButtons. The only difference is that they work with a ",
+      i("Property"),
+      ", ",
+      "not with a ",
+      i("SeqProperty"),
+      ", so only one value can be selected. ",
     ),
     radioButtonsSnippet,
     ForceBootstrap(radioButtonsDemo),
@@ -94,8 +111,15 @@ class FrontendFormsView extends View with CssView {
     multiSelectSnippet,
     ForceBootstrap(multiSelectDemo),
     h3("Date and time"),
-    p("Below examples show how to utilise ", i("datetime-local"), ", ", i("date"), " and ", i("time"), " input bindings. All of them are bound to String property, " +
-      "so additional parsing might be required."),
+    p(
+      "Below examples show how to utilise ",
+      i("datetime-local"),
+      ", ",
+      i("date"),
+      " and ",
+      i("time"),
+      " input bindings. All of them are bound to String property, " + "so additional parsing might be required.",
+    ),
     dateTimeLocalSnippet,
     ForceBootstrap(dateTimeLocalDemo),
     dateSnippet,
@@ -106,9 +130,13 @@ class FrontendFormsView extends View with CssView {
     p(
       "Now you know everything you need to start frontend development using Udash. ",
       "If you want to learn more about client-server communication, check the ",
-      a(href := RpcIntroState.url)("RPC"), " chapter. ",
-      "You might  find ", a(href := BootstrapExtState.url)("Bootstrap Components"), " and ",
-      a(href := FrontendFilesState.url)("File upload"), " interesting later on."
-    )
+      a(href := RpcIntroState.url)("RPC"),
+      " chapter. ",
+      "You might  find ",
+      a(href := BootstrapExtState.url)("Bootstrap Components"),
+      " and ",
+      a(href := FrontendFilesState.url)("File upload"),
+      " interesting later on.",
+    ),
   )
 }

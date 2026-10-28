@@ -24,8 +24,8 @@ object BindDemo extends AutoDemo with CssView {
     (
       div(
         id := "bind-demo",
-        GuideStyles.frame
+        GuideStyles.frame,
       )(rendered),
-      source
+      source,
     )
 }

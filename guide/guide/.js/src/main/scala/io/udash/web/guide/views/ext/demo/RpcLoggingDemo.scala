@@ -15,9 +15,11 @@ object RpcLoggingDemo {
   def apply(model: ReadableSeqProperty[Call], loadCalls: () => Any): dom.Element =
     span(GuideStyles.frame, GuideStyles.useBootstrap)(
       button(
-        id := "call-logging-demo", BootstrapStyles.Button.btn, BootstrapStyles.Button.color(Color.Primary),
-        onclick :+= ((_: MouseEvent) => loadCalls().thenReturn(true))
+        id := "call-logging-demo",
+        BootstrapStyles.Button.btn,
+        BootstrapStyles.Button.color(Color.Primary),
+        onclick :+= ((_: MouseEvent) => loadCalls().thenReturn(true)),
       )("Load call list"),
-      produce(model)(seq => ul(seq.map(call => li(call.toString))).render)
+      produce(model)(seq => ul(seq.map(call => li(call.toString))).render),
     ).render
 }

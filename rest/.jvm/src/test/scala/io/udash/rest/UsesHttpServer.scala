@@ -18,7 +18,10 @@ trait UsesHttpServer extends BeforeAndAfterAll { this: Suite =>
   override protected def beforeAll(): Unit = {
     super.beforeAll()
     // Unsafe URI compliance is required for testing purposes
-    connector.getConnectionFactory(classOf[HttpConnectionFactory]).getHttpConfiguration.setUriCompliance(UsesHttpServer.LegacyJettyCompliance)
+    connector
+      .getConnectionFactory(classOf[HttpConnectionFactory])
+      .getHttpConfiguration
+      .setUriCompliance(UsesHttpServer.LegacyJettyCompliance)
     setupServer(server)
     server.start()
   }
@@ -31,5 +34,6 @@ trait UsesHttpServer extends BeforeAndAfterAll { this: Suite =>
 
 private object UsesHttpServer {
   // Jetty 10 default URI compliance
-  final val LegacyJettyCompliance = new UriCompliance("LEGACY_DEFAULT", JEnumSet(Violation.AMBIGUOUS_PATH_SEPARATOR, Violation.AMBIGUOUS_PATH_ENCODING))
+  final val LegacyJettyCompliance =
+    new UriCompliance("LEGACY_DEFAULT", JEnumSet(Violation.AMBIGUOUS_PATH_SEPARATOR, Violation.AMBIGUOUS_PATH_ENCODING))
 }

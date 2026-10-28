@@ -18,7 +18,7 @@ object StaticButtonsGroupDemo extends AutoDemo with CssView {
       UdashButtonGroup(vertical = true.toProperty)(
         UdashButton()("Button 1").render,
         UdashButton()("Button 2").render,
-        UdashButton()("Button 3").render
+        UdashButton()("Button 3").render,
       )
     ).render
   }.withSourceCode
@@ -26,4 +26,3 @@ object StaticButtonsGroupDemo extends AutoDemo with CssView {
   override protected def demoWithSource(): (Modifier, String) =
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
 }
-

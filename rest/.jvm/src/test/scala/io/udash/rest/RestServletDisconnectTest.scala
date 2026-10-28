@@ -29,14 +29,13 @@ import javax.servlet.{DispatcherType, Filter, FilterChain, ServletOutputStream, 
 import scala.concurrent.duration.*
 import scala.jdk.CollectionConverters.*
 
-/**
- * Covers cancellation of the handler `Task` when the client abandons a request, and how the servlet bounds a call by
- * its timeout.
- *
- * The server speaks both HTTP/1.1 and cleartext HTTP/2, because disconnect detection differs between them:
- * an HTTP/2 abort arrives as `RST_STREAM` on a connection the server is already reading and surfaces as
- * `AsyncListener.onError`, while an aborted HTTP/1.1 request goes unnoticed until the call times out.
- */
+/** Covers cancellation of the handler `Task` when the client abandons a request, and how the servlet bounds a call by
+  * its timeout.
+  *
+  * The server speaks both HTTP/1.1 and cleartext HTTP/2, because disconnect detection differs between them: an HTTP/2
+  * abort arrives as `RST_STREAM` on a connection the server is already reading and surfaces as `AsyncListener.onError`,
+  * while an aborted HTTP/1.1 request goes unnoticed until the call times out.
+  */
 class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
 
   private val HandleTimeout = 8.seconds // long enough to tell a disconnect apart from a timeout
@@ -53,7 +52,7 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
 
   private implicit val scheduler: Scheduler = Scheduler(
     Scheduler.global,
-    UncaughtExceptionReporter(t => { uncaughtErrors.add(t); () }),
+    UncaughtExceptionReporter { t => uncaughtErrors.add(t); () },
     ExecutionModel.Default,
   )
 
@@ -78,16 +77,17 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
     def report(latches: ConcurrentHashMap[String, CountDownLatch]): Task[Unit] =
       Task(latch(latches, scenario).countDown())
     def lateResponse: Task[AbstractRestResponse] =
-      Task.sleep(1.second)
+      Task
+        .sleep(1.second)
         .map(_ => RestResponse(200, IMapping.empty, HttpBody.plain("finished after the client left")))
         .doOnFinish(_ => report(finished))
         .doOnCancel(report(cancelled))
     def finishing[A](content: Observable[A]): Observable[A] =
       content.guaranteeCase(_ => report(finished))
     // "started" fires with the first chunk written, so an abort lands mid-stream
-    def chunks: Observable[Array[Byte]] = finishing(Observable.intervalAtFixedRate(20.millis)
-      .map(_ => chunk)
-      .doOnStart(_ => report(started)))
+    def chunks: Observable[Array[Byte]] = finishing(
+      Observable.intervalAtFixedRate(20.millis).map(_ => chunk).doOnStart(_ => report(started))
+    )
     def binary(content: Observable[Array[Byte]]): AbstractRestResponse =
       StreamedRestResponse(200, IMapping.empty, StreamedBody.RawBinary(content, "application/octet-stream"))
     def jsonList(elements: Observable[Int], headers: IMapping[PlainValue] = IMapping.empty): AbstractRestResponse =
@@ -115,8 +115,12 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
       case Some("silent-list") =>
         Task.now(jsonList(finishing(Observable.never)))
       case Some("failing-list") =>
-        Task.now(jsonList(Observable.raiseError(HttpErrorException.plain(400, "bad list")),
-          IMapping.create("X-Stream" -> PlainValue("yes"), "X-Filter" -> PlainValue("staged"))))
+        Task.now(
+          jsonList(
+            Observable.raiseError(HttpErrorException.plain(400, "bad list")),
+            IMapping.create("X-Stream" -> PlainValue("yes"), "X-Filter" -> PlainValue("staged")),
+          )
+        )
       case Some("paced-list") =>
         Task.now(jsonList(Observable.intervalAtFixedRate(300.millis).map(_.toInt + 1).take(6)))
       case Some("slow-uncancelable-stream") =>
@@ -144,11 +148,23 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
     connector.addConnectionFactory(new HTTP2CServerConnectionFactory(httpConfig))
 
     def servlet(handleTimeout: FiniteDuration, cancelOnDisconnect: Boolean): ServletHolder =
-      new ServletHolder(new RestServlet(handleRequest, handleTimeout, customLogger = servletLogger, cancelOnDisconnect = cancelOnDisconnect))
+      new ServletHolder(
+        new RestServlet(
+          handleRequest,
+          handleTimeout,
+          customLogger = servletLogger,
+          cancelOnDisconnect = cancelOnDisconnect,
+        )
+      )
 
     val handler = new ServletContextHandler()
     handler.setErrorHandler(new ErrorHandler {
-      override def handle(target: String, baseRequest: JettyRequest, request: HttpServletRequest, response: HttpServletResponse): Unit = {
+      override def handle(
+        target: String,
+        baseRequest: JettyRequest,
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+      ): Unit = {
         errorDispatches.add(s"${request.getDispatcherType} $target -> ${response.getStatus}")
         super.handle(target, baseRequest, request, response)
       }
@@ -157,13 +173,17 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
     handler.addServlet(servlet(HandleTimeout, cancelOnDisconnect = false), "/no-cancel-api/*")
     handler.addServlet(servlet(ShortHandleTimeout, cancelOnDisconnect = true), "/short-timeout-api/*")
     handler.addServlet(servlet(ShortHandleTimeout, cancelOnDisconnect = false), "/short-no-cancel-api/*")
-    handler.addFilter(new FilterHolder(new Filter {
-      def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain): Unit = {
-        val scenario = request.asInstanceOf[HttpServletRequest].getRequestURI.split('/').last
-        channelStates.put(scenario, JettyRequest.getBaseRequest(request).getHttpChannelState)
-        chain.doFilter(request, response)
-      }
-    }), "/*", EnumSet.of(DispatcherType.REQUEST))
+    handler.addFilter(
+      new FilterHolder(new Filter {
+        def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain): Unit = {
+          val scenario = request.asInstanceOf[HttpServletRequest].getRequestURI.split('/').last
+          channelStates.put(scenario, JettyRequest.getBaseRequest(request).getHttpChannelState)
+          chain.doFilter(request, response)
+        }
+      }),
+      "/*",
+      EnumSet.of(DispatcherType.REQUEST),
+    )
     for ((handleTimeout, mount) <- UnboundedMounts)
       handler.addServlet(servlet(handleTimeout, cancelOnDisconnect = true), s"/$mount/*")
     // stands for a filter in front of the servlet that sets a header, e.g. for CORS
@@ -175,15 +195,32 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
     })
     headerFilter.setAsyncSupported(true)
     handler.addFilter(headerFilter, "/*", EnumSet.of(DispatcherType.REQUEST))
-    handler.addServlet(new ServletHolder(slowWrites(new RestServlet(handleRequest, SlowWriteTimeout, customLogger = servletLogger))),
-      "/slow-write-api/*")
-    handler.addServlet(new ServletHolder(new RestServlet(blockingHandler, ShortHandleTimeout, customLogger = servletLogger,
-      timer = Scheduler(blockedTimer))(blockingScheduler)), "/blocked-api/*")
+    handler.addServlet(
+      new ServletHolder(slowWrites(new RestServlet(handleRequest, SlowWriteTimeout, customLogger = servletLogger))),
+      "/slow-write-api/*",
+    )
+    handler.addServlet(
+      new ServletHolder(
+        new RestServlet(
+          blockingHandler,
+          ShortHandleTimeout,
+          customLogger = servletLogger,
+          timer = Scheduler(blockedTimer),
+        )(blockingScheduler)
+      ),
+      "/blocked-api/*",
+    )
     handler.addServlet(new ServletHolder(blockedCancelServlet), "/blocked-cancel-api/*")
-    handler.addServlet(new ServletHolder(slowWrites(new RestServlet(handleRequest, SlowWriteTimeout, customLogger = servletLogger)(pooledScheduler))),
-      "/pooled-slow-write-api/*")
-    handler.addServlet(new ServletHolder(failingFirstWrite(new RestServlet(handleRequest, HandleTimeout, customLogger = servletLogger))),
-      "/failing-write-api/*")
+    handler.addServlet(
+      new ServletHolder(
+        slowWrites(new RestServlet(handleRequest, SlowWriteTimeout, customLogger = servletLogger)(pooledScheduler))
+      ),
+      "/pooled-slow-write-api/*",
+    )
+    handler.addServlet(
+      new ServletHolder(failingFirstWrite(new RestServlet(handleRequest, HandleTimeout, customLogger = servletLogger))),
+      "/failing-write-api/*",
+    )
     server.setHandler(handler)
   }
 
@@ -198,22 +235,25 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
   private def interceptWrites(servlet: RestServlet)(beforeWrite: (String, Int) => Unit): HttpServlet = new HttpServlet {
     override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
       val scenario = request.getRequestURI.split('/').last
-      servlet.service(request, new HttpServletResponseWrapper(response) {
-        private lazy val output = new ServletOutputStream {
-          private val underlying = response.getOutputStream
-          private val writes = new AtomicInteger
-          def isReady: Boolean = underlying.isReady
-          def setWriteListener(listener: WriteListener): Unit = underlying.setWriteListener(listener)
-          def write(b: Int): Unit = underlying.write(b)
-          override def write(b: Array[Byte], off: Int, len: Int): Unit = {
-            beforeWrite(scenario, writes.getAndIncrement())
-            underlying.write(b, off, len)
+      servlet.service(
+        request,
+        new HttpServletResponseWrapper(response) {
+          private lazy val output = new ServletOutputStream {
+            private val underlying = response.getOutputStream
+            private val writes = new AtomicInteger
+            def isReady: Boolean = underlying.isReady
+            def setWriteListener(listener: WriteListener): Unit = underlying.setWriteListener(listener)
+            def write(b: Int): Unit = underlying.write(b)
+            override def write(b: Array[Byte], off: Int, len: Int): Unit = {
+              beforeWrite(scenario, writes.getAndIncrement())
+              underlying.write(b, off, len)
+            }
+            override def flush(): Unit = underlying.flush()
+            override def close(): Unit = underlying.close()
           }
-          override def flush(): Unit = underlying.flush()
-          override def close(): Unit = underlying.close()
-        }
-        override def getOutputStream: ServletOutputStream = output
-      })
+          override def getOutputStream: ServletOutputStream = output
+        },
+      )
     }
   }
 
@@ -250,24 +290,29 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
   }
 
   // Blocks the only thread of its Scheduler for 4 seconds
-  private val blockingHandler: RawRest.HandleRequestWithStreaming = request => Task.eval {
-    val scenario = request.parameters.path.last.value
-    latch(started, scenario).countDown()
-    Thread.sleep(4000)
-    latch(finished, scenario).countDown()
-    RestResponse(204, IMapping.empty, HttpBody.Empty)
-  }
+  private val blockingHandler: RawRest.HandleRequestWithStreaming = request =>
+    Task.eval {
+      val scenario = request.parameters.path.last.value
+      latch(started, scenario).countDown()
+      Thread.sleep(4000)
+      latch(finished, scenario).countDown()
+      RestResponse(204, IMapping.empty, HttpBody.Empty)
+    }
 
   private lazy val blockedCancelServlet =
-    new RestServlet(blockingHandler, HandleTimeout, customLogger = servletLogger, cancelOnDisconnect = true,
-      timer = Scheduler(blockedCancelTimer))(blockingScheduler)
+    new RestServlet(
+      blockingHandler,
+      HandleTimeout,
+      customLogger = servletLogger,
+      cancelOnDisconnect = true,
+      timer = Scheduler(blockedCancelTimer),
+    )(blockingScheduler)
 
-  /**
-   * Waits for the handler to start and for the container to return from dispatching the request. Jetty hands a failure
-   * of the request to the `AsyncListener`s only once the dispatch has returned and drops one arriving before that, so
-   * an abort sent while the servlet is still in `service` would go unnoticed until `handleTimeout`. Any state past
-   * `HANDLING` counts, since a short `handleTimeout` may already have woken the request again.
-   */
+  /** Waits for the handler to start and for the container to return from dispatching the request. Jetty hands a failure
+    * of the request to the `AsyncListener`s only once the dispatch has returned and drops one arriving before that, so
+    * an abort sent while the servlet is still in `service` would go unnoticed until `handleTimeout`. Any state past
+    * `HANDLING` counts, since a short `handleTimeout` may already have woken the request again.
+    */
   private def awaitStarted(path: String): Unit = {
     val scenario = path.split('/').last
     assert(latch(started, scenario).await(4, TimeUnit.SECONDS), s"handler for $path never started")
@@ -313,11 +358,10 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
     assert(response.cancel(true), "request already completed, nothing was aborted")
   }
 
-  /**
-   * Starts a request on an HTTP/2 connection opened with prior knowledge, waits for the handler, then shuts down the
-   * client's output. The socket stays open while `check` runs, since closing it with the server's frames unread would
-   * reset the connection instead of closing it.
-   */
+  /** Starts a request on an HTTP/2 connection opened with prior knowledge, waits for the handler, then shuts down the
+    * client's output. The socket stays open while `check` runs, since closing it with the server's frames unread would
+    * reset the connection instead of closing it.
+    */
   private def dropHttp2Connection(path: String)(check: => Unit): Unit = {
     val generator = new Generator(new ByteBufferPool.NonPooling)
     val frames = new RetainableByteBuffer.DynamicCapacity()
@@ -364,8 +408,13 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
 
   // Takes the warning of a call that timed out before it responded, which is expected, out of the log
   private def takeTimeoutWarning(message: String): Unit = {
-    val warnings = logEvents.asScala.filter(e => e.getLevel == Level.WARN && e.getMessage.startsWith("REST request timed out")).toList
-    assert(warnings.map(formatted) == List(message), logEvents.asScala.map(e => s"${e.getLevel} ${formatted(e)}").mkString(", "))
+    val warnings = logEvents.asScala
+      .filter(e => e.getLevel == Level.WARN && e.getMessage.startsWith("REST request timed out"))
+      .toList
+    assert(
+      warnings.map(formatted) == List(message),
+      logEvents.asScala.map(e => s"${e.getLevel} ${formatted(e)}").mkString(", "),
+    )
     warnings.foreach(logEvents.remove)
   }
 
@@ -448,7 +497,8 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
     for (protocol <- List("h1", "h2")) {
       s"complete a stream that runs past its timeout without going idle over $protocol" in {
         resetFailures()
-        val response = fetch(protocol, s"short-timeout-api/finite-stream/finite-$protocol", HttpResponse.BodyHandlers.ofByteArray())
+        val response =
+          fetch(protocol, s"short-timeout-api/finite-stream/finite-$protocol", HttpResponse.BodyHandlers.ofByteArray())
         assert(response.statusCode() == 200)
         assert(response.body().length == 150 * 64)
         assert(latch(finished, s"finite-$protocol").await(4, TimeUnit.SECONDS), "stream finalizer never ran")
@@ -458,7 +508,8 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
 
       s"end a stream that goes idle at its timeout over $protocol" in {
         resetFailures()
-        val response = fetch(protocol, s"short-timeout-api/idle-stream/idle-$protocol", HttpResponse.BodyHandlers.ofByteArray())
+        val response =
+          fetch(protocol, s"short-timeout-api/idle-stream/idle-$protocol", HttpResponse.BodyHandlers.ofByteArray())
         assert(response.statusCode() == 200)
         assert(response.body().length == 64)
         assert(latch(finished, s"idle-$protocol").await(4, TimeUnit.SECONDS), "stream finalizer never ran")
@@ -470,30 +521,36 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
 
       s"answer with 500 when a stream emits nothing within its timeout over $protocol" in {
         resetFailures()
-        val response = fetch(protocol, s"short-timeout-api/silent-stream/silent-$protocol", HttpResponse.BodyHandlers.ofString())
+        val response =
+          fetch(protocol, s"short-timeout-api/silent-stream/silent-$protocol", HttpResponse.BodyHandlers.ofString())
         assert(response.statusCode() == 500)
         assert(response.body() == timedOut(ShortHandleTimeout))
         assert(response.headers().firstValue("X-Filter").orElse(null) == "kept")
         assert(latch(finished, s"silent-$protocol").await(4, TimeUnit.SECONDS), "stream finalizer never ran")
         settle()
-        takeTimeoutWarning(s"REST request timed out: its stream emitted nothing for $ShortHandleTimeout before the response was sent")
+        takeTimeoutWarning(
+          s"REST request timed out: its stream emitted nothing for $ShortHandleTimeout before the response was sent"
+        )
         assertNoFailures()
       }
 
       s"answer with 500 when a JSON list emits nothing within its timeout over $protocol" in {
-        val response = fetch(protocol, s"short-timeout-api/silent-list/silent-list-$protocol", HttpResponse.BodyHandlers.ofString())
+        val response =
+          fetch(protocol, s"short-timeout-api/silent-list/silent-list-$protocol", HttpResponse.BodyHandlers.ofString())
         assert(response.statusCode() == 500)
         assert(response.body() == timedOut(ShortHandleTimeout))
       }
 
       s"answer with 500 when a JSON list goes silent before filling its first batch over $protocol" in {
-        val response = fetch(protocol, s"short-timeout-api/partial-list/partial-list-$protocol", HttpResponse.BodyHandlers.ofString())
+        val response =
+          fetch(protocol, s"short-timeout-api/partial-list/partial-list-$protocol", HttpResponse.BodyHandlers.ofString())
         assert(response.statusCode() == 500)
         assert(response.body() == timedOut(ShortHandleTimeout))
       }
 
       s"answer with the error status when a JSON list fails before its first flush over $protocol" in {
-        val response = fetch(protocol, s"short-timeout-api/failing-list/failing-list-$protocol", HttpResponse.BodyHandlers.ofString())
+        val response =
+          fetch(protocol, s"short-timeout-api/failing-list/failing-list-$protocol", HttpResponse.BodyHandlers.ofString())
         assert(response.statusCode() == 400)
         assert(response.body() == "bad list")
         assert(response.headers().allValues("X-Filter").asScala == List("kept"))
@@ -501,13 +558,15 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
       }
 
       s"complete a batched JSON list whose elements come within the timeout over $protocol" in {
-        val response = fetch(protocol, s"short-timeout-api/paced-list/paced-list-$protocol", HttpResponse.BodyHandlers.ofString())
+        val response =
+          fetch(protocol, s"short-timeout-api/paced-list/paced-list-$protocol", HttpResponse.BodyHandlers.ofString())
         assert(response.statusCode() == 200)
         assert(response.body() == "[1,2,3,4,5,6]")
       }
 
       s"answer with 500 and cancel a buffered call that exceeds its timeout over $protocol" in {
-        val response = fetch(protocol, s"short-timeout-api/hanging/buffered-$protocol", HttpResponse.BodyHandlers.ofString())
+        val response =
+          fetch(protocol, s"short-timeout-api/hanging/buffered-$protocol", HttpResponse.BodyHandlers.ofString())
         assert(response.statusCode() == 500)
         assert(response.body() == timedOut(ShortHandleTimeout))
         assert(latch(cancelled, s"buffered-$protocol").await(4, TimeUnit.SECONDS), "handler was never cancelled")
@@ -515,7 +574,11 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
 
       s"run the finalizers of a stream returned after the timeout over $protocol" in {
         resetFailures()
-        val response = fetch(protocol, s"short-timeout-api/slow-uncancelable-stream/late-$protocol", HttpResponse.BodyHandlers.ofString())
+        val response = fetch(
+          protocol,
+          s"short-timeout-api/slow-uncancelable-stream/late-$protocol",
+          HttpResponse.BodyHandlers.ofString(),
+        )
         assert(response.statusCode() == 500)
         assert(response.body() == timedOut(ShortHandleTimeout))
         assert(latch(finished, s"late-$protocol").await(6, TimeUnit.SECONDS), "stream finalizer never ran")
@@ -526,7 +589,8 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
 
       s"not count the time spent writing towards a stream's timeout over $protocol" in {
         resetFailures()
-        val response = fetch(protocol, s"slow-write-api/two-chunks/slow-write-$protocol", HttpResponse.BodyHandlers.ofByteArray())
+        val response =
+          fetch(protocol, s"slow-write-api/two-chunks/slow-write-$protocol", HttpResponse.BodyHandlers.ofByteArray())
         assert(response.statusCode() == 200)
         assert(response.body().length == 2 * 64)
         assert(latch(finished, s"slow-write-$protocol").await(4, TimeUnit.SECONDS), "stream finalizer never ran")
@@ -536,7 +600,8 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
 
       s"answer with the stream's own upstream timeout as a handler failure over $protocol" in {
         resetFailures()
-        val response = fetch(protocol, s"short-timeout-api/own-timeout/own-timeout-$protocol", HttpResponse.BodyHandlers.ofString())
+        val response =
+          fetch(protocol, s"short-timeout-api/own-timeout/own-timeout-$protocol", HttpResponse.BodyHandlers.ofString())
         assert(response.statusCode() == 500)
         assert(response.body() == s"Upstream timeout after $ShortHandleTimeout")
         settle()
@@ -545,12 +610,17 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
 
       s"end a stream that fails with its own upstream timeout after a chunk as a failure over $protocol" in {
         resetFailures()
-        val response = fetch(protocol, s"short-timeout-api/own-timeout-after-chunk/own-timeout-chunk-$protocol",
-          HttpResponse.BodyHandlers.ofByteArray())
+        val response = fetch(
+          protocol,
+          s"short-timeout-api/own-timeout-after-chunk/own-timeout-chunk-$protocol",
+          HttpResponse.BodyHandlers.ofByteArray(),
+        )
         assert(response.statusCode() == 200)
         assert(response.body().length == 64)
         settle()
-        assert(logEvents.asScala.exists(e => e.getLevel == Level.ERROR && e.getMessage.contains("Failure during streaming")))
+        assert(
+          logEvents.asScala.exists(e => e.getLevel == Level.ERROR && e.getMessage.contains("Failure during streaming"))
+        )
         assert(!logEvents.asScala.exists(_.getMessage.contains("cut short")))
       }
     }
@@ -569,26 +639,34 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
       assert(latch(finished, "drained-idle").await(4, TimeUnit.SECONDS), "stream finalizer never ran")
       settle()
       assertNoFailures()
-      assert(logEvents.asScala.exists(e => e.getLevel == Level.DEBUG && e.getMessage.contains("went idle while being drained")))
+      assert(
+        logEvents.asScala.exists(e => e.getLevel == Level.DEBUG && e.getMessage.contains("went idle while being drained"))
+      )
     }
 
     "stop timing a call whose client left before it started" in {
       warmUpHttp2()
-      val blocker = http1Client.sendAsync(http2Request("blocked-cancel-api/blocking/queue-blocker"), HttpResponse.BodyHandlers.discarding())
+      val blocker = http1Client
+        .sendAsync(http2Request("blocked-cancel-api/blocking/queue-blocker"), HttpResponse.BodyHandlers.discarding())
       awaitStarted("queue-blocker")
-      val queued = http2Client.sendAsync(http2Request("blocked-cancel-api/blocking/queued"), HttpResponse.BodyHandlers.discarding())
+      val queued =
+        http2Client.sendAsync(http2Request("blocked-cancel-api/blocking/queued"), HttpResponse.BodyHandlers.discarding())
       awaitUntil("the queued call was never timed")(blockedCancelTimer.getQueue.size == 2)
       assert(queued.cancel(true), "request already completed, nothing was aborted")
       // well before the blocker ends, which drops its own timeout
-      awaitUntil("the abandoned call's timeout is still pending", within = 2.seconds)(blockedCancelTimer.getQueue.size == 1)
+      awaitUntil("the abandoned call's timeout is still pending", within = 2.seconds)(
+        blockedCancelTimer.getQueue.size == 1
+      )
       assert(blocker.get(8, TimeUnit.SECONDS).statusCode() == 204)
       awaitUntil("a timeout outlived its call")(blockedCancelTimer.getQueue.size == 0)
       assert(latch(started, "queued").getCount == 1, "the abandoned call started")
     }
 
     "keep a Scheduler thread free while a stream's idle check waits for a slow write" in {
-      val stream = http1Client.sendAsync(http2Request("pooled-slow-write-api/two-chunks/pooled-slow-write"),
-        HttpResponse.BodyHandlers.ofByteArray())
+      val stream = http1Client.sendAsync(
+        http2Request("pooled-slow-write-api/two-chunks/pooled-slow-write"),
+        HttpResponse.BodyHandlers.ofByteArray(),
+      )
       assert(latch(writing, "pooled-slow-write").await(4, TimeUnit.SECONDS), "the stream was never written")
       // past SlowWriteTimeout, so that the idle check runs during the first write
       Thread.sleep(SlowWriteTimeout.toMillis + 200)

@@ -16,13 +16,13 @@ object Header extends HeaderButtons with HeaderNav {
       div(HeaderStyles.headerLeft)(
         a(HeaderStyles.headerLogo, href := ExternalUrls.homepage)(
           Image("udash_logo_m.png", "Udash Framework", GlobalStyles.block)
-        )/*,
+        ) /*,
         navigation(Seq(
           NavItem(ExternalUrls.guide, "Documentation"),
           NavItem(ExternalUrls.releases, "Changelog")
         ))*/
       ),
-      buttons
+      buttons,
     )
   )
 

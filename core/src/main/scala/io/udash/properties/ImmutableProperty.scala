@@ -11,11 +11,11 @@ private[properties] class ImmutableProperty[+A](value: A) extends ReadableProper
   /** @return Current property value. */
   @inline override def get: A = value
 
-  /**
-   * Registers listener which will be called on value change.
-   *
-   * @param initUpdate If `true`, listener will be instantly triggered with current value of property.
-   */
+  /** Registers listener which will be called on value change.
+    *
+    * @param initUpdate
+    *   If `true`, listener will be instantly triggered with current value of property.
+    */
   override def listen(valueListener: A => Any, initUpdate: Boolean): Registration = {
     if (initUpdate) valueListener(value)
     ImmutableProperty.NoOpRegistration
@@ -31,7 +31,8 @@ private[properties] class ImmutableProperty[+A](value: A) extends ReadableProper
   override def transform[B](transformer: A => B): ReadableProperty[B] =
     new ImmutableProperty[B](transformer(value))
 
-  override def transformToSeq[B: PropertyCreator](transformer: A => BSeq[B]): ReadableSeqProperty[B, ReadableProperty[B]] =
+  override def transformToSeq[B: PropertyCreator](transformer: A => BSeq[B])
+    : ReadableSeqProperty[B, ReadableProperty[B]] =
     new ImmutableSeqProperty[B, BSeq](transformer(value))
 
   override def streamTo[B](target: Property[B], initUpdate: Boolean)(transformer: A => B): Registration = {

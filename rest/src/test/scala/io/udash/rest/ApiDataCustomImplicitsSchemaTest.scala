@@ -4,7 +4,7 @@ package rest
 import com.avsystem.commons.misc.{NamedEnum, Opt}
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
-import com.avsystem.commons.serialization.{GenCodec, GenObjectCodec, defaultCase, flatten}
+import com.avsystem.commons.serialization.{defaultCase, flatten, GenCodec, GenObjectCodec}
 import io.udash.rest.openapi.{InliningResolver, RestSchema, RestStructure}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -77,8 +77,7 @@ class ApiDataCustomImplicitsSchemaTest extends AnyFunSuite with Matchers {
     json shouldBe """{"tag":"tag:x","n":1}"""
     JsonStringInput.read[Tagged](json) shouldBe Tagged(Tag("x"), 1)
 
-    schemaStr[Tagged] shouldBe
-      """{
+    schemaStr[Tagged] shouldBe """{
         |  "type": "object",
         |  "properties": {
         |    "tag": {
@@ -168,8 +167,7 @@ class ApiDataCustomImplicitsSchemaTest extends AnyFunSuite with Matchers {
     JsonStringOutput.write(Holder(Dep(7), Tag("x")))(codec) shouldBe """{"dep":{"n":7},"tag":"tag:x"}"""
     JsonStringInput.read[Holder]("""{"dep":{"n":7},"tag":"tag:x"}""")(codec) shouldBe Holder(Dep(7), Tag("x"))
 
-    schemaStr[Holder] shouldBe
-      """{
+    schemaStr[Holder] shouldBe """{
         |  "type": "object",
         |  "properties": {
         |    "dep": {
