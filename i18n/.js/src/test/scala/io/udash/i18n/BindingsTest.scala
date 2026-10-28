@@ -8,24 +8,33 @@ import scala.concurrent.{Future, Promise}
 class BindingsTest extends AsyncUdashFrontendTest {
   import scalatags.JsDom.all._
 
-  implicit val provider: TranslationProvider = new LocalTranslationProvider(Map(
-    Lang("en") -> Bundle(BundleHash("hash1"), Map(
-      "tr0" -> null,
-      "tr1" -> "Translation {0}",
-      "tr2" -> "Translation2 {1} {0}",
-      "tr3" -> "Translation3 {}",
-      "tr4" -> "Translation4 <b>{1}</b> {} {}",
-      "tr5" -> "Translation5 <b>{4}</b>"
-    )),
-    Lang("pl") -> Bundle(BundleHash("hash1"), Map(
-      "tr0" -> null,
-      "tr1" -> "Translation {0} pl",
-      "tr2" -> "Translation2 {1} {0} pl",
-      "tr3" -> "Translation3 {} pl",
-      "tr4" -> "Translation4 <b>{1}</b> {} {} pl",
-      "tr5" -> "Translation5 <b>{4}</b> pl"
-    ))
-  ), missingTranslationError = "ERROR")
+  implicit val provider: TranslationProvider = new LocalTranslationProvider(
+    Map(
+      Lang("en") -> Bundle(
+        BundleHash("hash1"),
+        Map(
+          "tr0" -> null,
+          "tr1" -> "Translation {0}",
+          "tr2" -> "Translation2 {1} {0}",
+          "tr3" -> "Translation3 {}",
+          "tr4" -> "Translation4 <b>{1}</b> {} {}",
+          "tr5" -> "Translation5 <b>{4}</b>",
+        ),
+      ),
+      Lang("pl") -> Bundle(
+        BundleHash("hash1"),
+        Map(
+          "tr0" -> null,
+          "tr1" -> "Translation {0} pl",
+          "tr2" -> "Translation2 {1} {0} pl",
+          "tr3" -> "Translation3 {} pl",
+          "tr4" -> "Translation4 <b>{1}</b> {} {} pl",
+          "tr5" -> "Translation5 <b>{4}</b> pl",
+        ),
+      ),
+    ),
+    missingTranslationError = "ERROR",
+  )
 
   val key0 = TranslationKey.key("tr0")
   val key1 = TranslationKey.key1[String]("tr1")
@@ -46,7 +55,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
           key2(3, 3.14).translated(),
           key3(0.99).translated(),
           key4("test", 1, true, 3.1415).translated(),
-          keyX("test", 1, true, 3.1415, "Udash".asInstanceOf[Any]).translated(rawHtml = true)
+          keyX("test", 1, true, 3.1415, "Udash".asInstanceOf[Any]).translated(rawHtml = true),
         ).render
       }
       val template2 = {
@@ -59,29 +68,32 @@ class BindingsTest extends AsyncUdashFrontendTest {
           key2(3, 3.14).translated(),
           key3(0.99).translated(),
           key4("test", 1, true, 3.1415).translated(),
-          keyX("test", 1.asInstanceOf[Any], true, 3.1415, "Udash").translated(rawHtml = true)
+          keyX("test", 1.asInstanceOf[Any], true, 3.1415, "Udash").translated(rawHtml = true),
         ).render
       }
 
       for {
         _ <- retrying {
-          template.innerHTML should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 &lt;b&gt;1&lt;/b&gt; true 3.1415Translation5 <b>Udash</b>")
-          template.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 <b>1</b> true 3.1415Translation5 Udash")
+          template.innerHTML should
+            be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 &lt;b&gt;1&lt;/b&gt; true 3.1415Translation5 <b>Udash</b>")
+          template.textContent should
+            be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 <b>1</b> true 3.1415Translation5 Udash")
         }
         r <- retrying {
-          template2.innerHTML should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 &lt;b&gt;1&lt;/b&gt; true 3.1415 plTranslation5 <b>Udash</b> pl")
-          template2.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 <b>1</b> true 3.1415 plTranslation5 Udash pl")
+          template2.innerHTML should
+            be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 &lt;b&gt;1&lt;/b&gt; true 3.1415 plTranslation5 <b>Udash</b> pl")
+          template2.textContent should
+            be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 <b>1</b> true 3.1415 plTranslation5 Udash pl")
         }
       } yield r
     }
 
     "handle custom placeholder" in {
       val p: Promise[Translated] = Promise()
-      val template = {
+      val template =
         div(
           translated(p.future, Some(span("placeholder").render))
         ).render
-      }
 
       for {
         _ <- retrying {
@@ -98,11 +110,10 @@ class BindingsTest extends AsyncUdashFrontendTest {
 
     "handle None as placeholder" in {
       val p: Promise[Translated] = Promise()
-      val template = {
+      val template =
         div(
           translated(p.future, None)
         ).render
-      }
 
       for {
         _ <- retrying {
@@ -177,20 +188,28 @@ class BindingsTest extends AsyncUdashFrontendTest {
 
       for {
         _ <- retrying {
-          template.innerHTML should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 &lt;b&gt;1&lt;/b&gt; true 3.1415Translation5 <b>Udash</b>")
-          template.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 <b>1</b> true 3.1415Translation5 Udash")
-          template2.innerHTML should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 &lt;b&gt;1&lt;/b&gt; true 3.1415 plTranslation5 <b>Udash</b> pl")
-          template2.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 <b>1</b> true 3.1415 plTranslation5 Udash pl")
+          template.innerHTML should
+            be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 &lt;b&gt;1&lt;/b&gt; true 3.1415Translation5 <b>Udash</b>")
+          template.textContent should
+            be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 <b>1</b> true 3.1415Translation5 Udash")
+          template2.innerHTML should
+            be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 &lt;b&gt;1&lt;/b&gt; true 3.1415 plTranslation5 <b>Udash</b> pl")
+          template2.textContent should
+            be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 <b>1</b> true 3.1415 plTranslation5 Udash pl")
         }
         _ <- Future {
           en.set(Lang("pl"))
           pl.set(Lang("en"))
         }
         r <- retrying {
-          template.innerHTML should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 &lt;b&gt;1&lt;/b&gt; true 3.1415 plTranslation5 <b>Udash</b> pl")
-          template.textContent should be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 <b>1</b> true 3.1415 plTranslation5 Udash pl")
-          template2.innerHTML should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 &lt;b&gt;1&lt;/b&gt; true 3.1415Translation5 <b>Udash</b>")
-          template2.textContent should be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 <b>1</b> true 3.1415Translation5 Udash")
+          template.innerHTML should
+            be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 &lt;b&gt;1&lt;/b&gt; true 3.1415 plTranslation5 <b>Udash</b> pl")
+          template.textContent should
+            be("Translation: Translation test plTranslation2 3.14 3 plTranslation3 0.99 plTranslation4 <b>1</b> true 3.1415 plTranslation5 Udash pl")
+          template2.innerHTML should
+            be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 &lt;b&gt;1&lt;/b&gt; true 3.1415Translation5 <b>Udash</b>")
+          template2.textContent should
+            be("Translation: Translation testTranslation2 3.14 3Translation3 0.99Translation4 <b>1</b> true 3.1415Translation5 Udash")
         }
       } yield r
     }
@@ -243,9 +262,7 @@ class BindingsTest extends AsyncUdashFrontendTest {
       val translations = SeqProperty[TranslationKey1[String]](pKey1, pKey2, pKey3, pKey4)
 
       val el = div(
-        repeat(translations)(key =>
-          span(key.get("test").translatedDynamic()).render
-        )
+        repeat(translations)(key => span(key.get("test").translatedDynamic()).render)
       ).render
 
       for {
@@ -274,7 +291,8 @@ class BindingsTest extends AsyncUdashFrontendTest {
           lang.set(pl)
         }
         _ <- retrying {
-          el.textContent should be("Translation test plTranslation3 test plTranslation test plTranslation3 test plTranslation test pl")
+          el.textContent should
+            be("Translation test plTranslation3 test plTranslation test plTranslation3 test plTranslation test pl")
         }
         _ <- Future {
           lang.set(en)

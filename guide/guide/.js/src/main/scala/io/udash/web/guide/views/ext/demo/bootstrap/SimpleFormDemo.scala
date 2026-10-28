@@ -66,7 +66,7 @@ object SimpleFormDemo extends AutoDemo with CssView {
         override def shirtSize: ShirtSize = Medium
       })
     }
-    */
+     */
 
     def shirtSizeToLabel(size: ShirtSize): String = size match {
       case Small => "S"
@@ -77,30 +77,34 @@ object SimpleFormDemo extends AutoDemo with CssView {
     val user = ModelProperty.blank[UserModel]
 
     div(
-      UdashForm()(factory => Seq(
-        factory.input.formGroup()(
-          input = _ => factory.input.textInput(user.subProp(_.name))().render,
-          labelContent = Some(_ => "User name": Modifier)
-        ),
-        factory.input.formGroup()(
-          input = _ => factory.input.numberInput(
-            user.subProp(_.age).bitransform(_.toDouble)(_.toInt),
-          )(validator = age => if (age < 0) Invalid("Age should be a non-negative integer!") else Valid).render,
-          labelContent = Some(_ => "Age": Modifier),
-          invalidFeedback = Some(_ => "Age should be a non-negative integer!")
-        ),
-        factory.input.radioButtons(
-          selectedItem = user.subProp(_.shirtSize),
-          options = Seq[ShirtSize](Small, Medium, Large).toSeqProperty,
-          inline = true.toProperty,
-          validationTrigger = UdashForm.ValidationTrigger.None
-        )(labelContent = (item, _, _) => Some(label(shirtSizeToLabel(item)))),
-        factory.disabled()(_ => UdashButton()("Send").render)
-      ))
+      UdashForm()(factory =>
+        Seq(
+          factory.input.formGroup()(
+            input = _ => factory.input.textInput(user.subProp(_.name))().render,
+            labelContent = Some(_ => "User name": Modifier),
+          ),
+          factory.input.formGroup()(
+            input = _ =>
+              factory.input
+                .numberInput(
+                  user.subProp(_.age).bitransform(_.toDouble)(_.toInt)
+                )(validator = age => if (age < 0) Invalid("Age should be a non-negative integer!") else Valid)
+                .render,
+            labelContent = Some(_ => "Age": Modifier),
+            invalidFeedback = Some(_ => "Age should be a non-negative integer!"),
+          ),
+          factory.input.radioButtons(
+            selectedItem = user.subProp(_.shirtSize),
+            options = Seq[ShirtSize](Small, Medium, Large).toSeqProperty,
+            inline = true.toProperty,
+            validationTrigger = UdashForm.ValidationTrigger.None,
+          )(labelContent = (item, _, _) => Some(label(shirtSizeToLabel(item)))),
+          factory.disabled()(_ => UdashButton()("Send").render),
+        )
+      )
     ).render
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, String) =
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
 }
-

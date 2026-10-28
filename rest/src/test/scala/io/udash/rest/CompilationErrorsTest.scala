@@ -21,8 +21,7 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
 
   test("missing serializer for parameter") {
     val error = norm(typeErrorFor("object Api extends DefaultRestApiCompanion[MissingSerializerForParam]"))
-    assert(error ==
-      """problem with parameter par of method meth:
+    assert(error == """problem with parameter par of method meth:
         |Cannot deserialize Any from JsonValue, because:
         |No GenCodec found for Any""".stripMargin)
   }
@@ -33,8 +32,7 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
 
   test("missing serializer for result") {
     val error = norm(typeErrorFor("object Api extends DefaultRestApiCompanion[MissingSerializerForResult]"))
-    assert(error ==
-      """cannot translate between trait MissingSerializerForResult and trait RawRest:
+    assert(error == """cannot translate between trait MissingSerializerForResult and trait RawRest:
         |problem with method meth:
         | * it cannot be translated into a prefix method:
         |   scala.concurrent.Future[Any] is not a valid server REST API trait, does its companion extend DefaultRestApiCompanion, DefaultRestServerApiCompanion or other companion base?
@@ -56,8 +54,7 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
 
   test("bad result type") {
     val error = norm(typeErrorFor("object Api extends DefaultRestApiCompanion[BadResultType]"))
-    assert(error ==
-      """cannot translate between trait BadResultType and trait RawRest:
+    assert(error == """cannot translate between trait BadResultType and trait RawRest:
         |problem with method meth:
         | * it cannot be translated into a prefix method:
         |   Unit is not a valid server REST API trait, does its companion extend DefaultRestApiCompanion, DefaultRestServerApiCompanion or other companion base?
@@ -73,8 +70,7 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
 
   test("unexpected body param in prefix") {
     val error = norm(typeErrorFor("object Api extends DefaultRestApiCompanion[UnexpectedPrefixBodyParam]"))
-    assert(error ==
-      """cannot translate between trait UnexpectedPrefixBodyParam and trait RawRest:
+    assert(error == """cannot translate between trait UnexpectedPrefixBodyParam and trait RawRest:
         |problem with method meth:
         | * it cannot be translated into a prefix method:
         |   prefix methods cannot take @Body parameters
@@ -90,8 +86,7 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
 
   test("unexpected body param in GET") {
     val error = norm(typeErrorFor("object Api extends DefaultRestApiCompanion[UnexpectedGETBodyParam]"))
-    assert(error ==
-      """cannot translate between trait UnexpectedGETBodyParam and trait RawRest:
+    assert(error == """cannot translate between trait UnexpectedGETBodyParam and trait RawRest:
         |problem with method meth:
         | * it cannot be translated into an HTTP GET method:
         |   GET methods cannot take @Body parameters
@@ -107,8 +102,7 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
 
   test("missing body param in custom body method") {
     val error = norm(typeErrorFor("object Api extends DefaultRestApiCompanion[MissingBodyParam]"))
-    assert(error ==
-      """cannot translate between trait MissingBodyParam and trait RawRest:
+    assert(error == """cannot translate between trait MissingBodyParam and trait RawRest:
         |problem with method meth:
         | * it cannot be translated into an HTTP method with custom body:
         |   expected exactly one @Body parameter but none was found
@@ -124,8 +118,7 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
 
   test("multiple body params in custom body method") {
     val error = norm(typeErrorFor("object Api extends DefaultRestApiCompanion[MultipleBodyParams]"))
-    assert(error ==
-      """cannot translate between trait MultipleBodyParams and trait RawRest:
+    assert(error == """cannot translate between trait MultipleBodyParams and trait RawRest:
         |problem with method meth:
         | * it cannot be translated into an HTTP method with custom body:
         |   expected exactly one @Body parameter but more than one was found
@@ -135,15 +128,14 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
         |   Cannot serialize Unit into io.udash.rest.raw.StreamedBody, appropriate AsRaw instance not found""".stripMargin)
   }
 
-
   trait MissingObservableSerializerForResult {
     @GET def streamMeth(): Observable[Any]
   }
 
   test("missing serializer for Observable result element") {
-    val error = norm(typeErrorFor("object Api extends DefaultRestServerApiImplCompanion[MissingObservableSerializerForResult]"))
-    assert(error ==
-      """cannot translate between trait MissingObservableSerializerForResult and trait RawRest:
+    val error =
+      norm(typeErrorFor("object Api extends DefaultRestServerApiImplCompanion[MissingObservableSerializerForResult]"))
+    assert(error == """cannot translate between trait MissingObservableSerializerForResult and trait RawRest:
         |problem with method streamMeth:
         | * it cannot be translated into an HTTP GET method:
         |   monix.reactive.Observable[Any] is not a valid result type of HTTP REST method - it must be a Future
@@ -160,8 +152,7 @@ class CompilationErrorsTest extends AnyFunSuite with CompilationErrorAssertions 
 
   test("missing serializer for Task[Observable] result element") {
     val error = norm(typeErrorFor("object Api extends DefaultRestApiCompanion[MissingTaskObservableSerializerForResult]"))
-    assert(error ==
-      """cannot translate between trait MissingTaskObservableSerializerForResult and trait RawRest:
+    assert(error == """cannot translate between trait MissingTaskObservableSerializerForResult and trait RawRest:
         |problem with method taskStreamMeth:
         | * it cannot be translated into an HTTP GET method:
         |   monix.eval.Task[monix.reactive.Observable[Any]] is not a valid result type because:

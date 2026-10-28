@@ -7,17 +7,22 @@ import io.udash.bootstrap.utils.BootstrapStyles
 import org.scalajs.dom.Element
 import scalatags.JsDom.all._
 
-final class UdashAlert private[alert](
-  alertStyle: ReadableProperty[BootstrapStyles.Color], override val componentId: ComponentId
-)(content: Binding.NestedInterceptor => Modifier) extends UdashAlertBase(alertStyle, componentId) {
+final class UdashAlert private[alert] (
+  alertStyle: ReadableProperty[BootstrapStyles.Color],
+  override val componentId: ComponentId,
+)(
+  content: Binding.NestedInterceptor => Modifier
+) extends UdashAlertBase(alertStyle, componentId) {
   override val render: Element =
     template(content(nestedInterceptor)).render
 }
 
 object UdashAlert extends UdashAlertBaseCompanion[UdashAlert] {
-  protected def create(alertStyle: ReadableProperty[BootstrapStyles.Color], componentId: ComponentId)(
+  protected def create(
+    alertStyle: ReadableProperty[BootstrapStyles.Color],
+    componentId: ComponentId,
+  )(
     content: Binding.NestedInterceptor => Modifier
-  ): UdashAlert = {
+  ): UdashAlert =
     new UdashAlert(alertStyle, componentId)(content)
-  }
 }

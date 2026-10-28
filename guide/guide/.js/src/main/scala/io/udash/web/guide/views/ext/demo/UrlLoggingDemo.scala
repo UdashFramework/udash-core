@@ -34,11 +34,12 @@ object UrlLoggingDemo extends AutoDemo with CssView {
                 Display.flex(),
                 Flex.alignItems(FlexAlign.Center),
                 div(InputGroup.prepend, Spacing.margin(size = SpacingSize.Small, side = Side.Right))("Turn on logging: "),
-                div(InputGroup.append)(Checkbox(enabled)(cls := "checkbox-demo-a"))
+                div(InputGroup.append)(Checkbox(enabled)(cls := "checkbox-demo-a")),
               )
             )
           )
-        ), br,
+        ),
+        br,
         form(containerFluid)(
           div(Grid.row)(
             div(Grid.col(4, ResponsiveBreakpoint.Medium))(
@@ -46,7 +47,7 @@ object UrlLoggingDemo extends AutoDemo with CssView {
             ),
             div(Grid.col(4, ResponsiveBreakpoint.Medium))(
               b("Referrer")
-            )
+            ),
           ),
           produce(history)(seq =>
             div(seq.map { case (url, refOpt) =>
@@ -56,11 +57,11 @@ object UrlLoggingDemo extends AutoDemo with CssView {
                 ),
                 div(Grid.col(4, ResponsiveBreakpoint.Medium))(
                   refOpt
-                )
+                ),
               )
             }).render
-          )
-        )
+          ),
+        ),
       ).render
 
     (rendered, source.dropFinalLine)

@@ -58,8 +58,7 @@ class CustomImplicitsRestApiTest extends AnyFunSuite with ScalaFutures with Matc
       case ref => fail(s"expected an inline path item, got $ref")
     }
     // the parameter schema is the injected RestSchema[Tag] (a plain string)
-    JsonStringOutput.writePretty(parameters) shouldBe
-      """[
+    JsonStringOutput.writePretty(parameters) shouldBe """[
         |  {
         |    "name": "tag",
         |    "in": "query",

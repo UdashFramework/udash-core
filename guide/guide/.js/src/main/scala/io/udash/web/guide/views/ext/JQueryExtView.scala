@@ -10,7 +10,6 @@ import io.udash.web.guide.views.{References, Versions}
 
 case object JQueryExtViewFactory extends StaticViewFactory[JQueryExtState.type](() => new JQueryExtView)
 
-
 class JQueryExtView extends View {
 
   import com.avsystem.commons.SharedExtensions.universalOps
@@ -33,7 +32,7 @@ class JQueryExtView extends View {
     h1("Udash jQuery wrapper"),
     p(
       "The jQuery library is a very popular tool in the web development. We have created a strongly typed wrapper for jQuery, ",
-      "which allows you to use jQuery in the typed environment of Scala.js."
+      "which allows you to use jQuery in the typed environment of Scala.js.",
     ),
     h2("The first steps"),
     p("To start development with the jQuery wrapper add the following line in you frontend module dependencies: "),
@@ -52,9 +51,15 @@ class JQueryExtView extends View {
     p("The below example presents events handling with jQuery wrapper: "),
     jQueryEventsSnippet,
     p(
-      "Notice that if you want to use the ", i("off()"), " method, then you have to pass exactly the same object ",
-      "that you passed to the method ", i("on()"), " or ", i("one()"), ". Be careful with implicit conversions, ",
-      "they create new object every time."
+      "Notice that if you want to use the ",
+      i("off()"),
+      " method, then you have to pass exactly the same object ",
+      "that you passed to the method ",
+      i("on()"),
+      " or ",
+      i("one()"),
+      ". Be careful with implicit conversions, ",
+      "they create new object every time.",
     ),
     ForceBootstrap(jQueryEventsDemo),
     h2("jQuery callbacks"),
@@ -63,8 +68,10 @@ class JQueryExtView extends View {
     ForceBootstrap(jQueryCallbacksDemo),
     h2("What's next?"),
     p(
-      "You can find more information on the wrapper ", a(href := References.UdashjQueryWrapperRepo, target := "_blank")("GitHub repository"), ". ",
-      "It also contains an example application which presents more ways of working with this wrapper."
-    )
+      "You can find more information on the wrapper ",
+      a(href := References.UdashjQueryWrapperRepo, target := "_blank")("GitHub repository"),
+      ". ",
+      "It also contains an example application which presents more ways of working with this wrapper.",
+    ),
   )
 }

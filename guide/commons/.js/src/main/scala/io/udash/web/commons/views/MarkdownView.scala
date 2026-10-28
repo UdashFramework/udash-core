@@ -17,15 +17,17 @@ trait MarkdownPageState extends State {
 
 final case class MarkdownModel(
   content: String = "",
-  error: String = ""
+  error: String = "",
 )
 object MarkdownModel extends HasModelPropertyCreator[MarkdownModel] {
   implicit val blank: Blank[MarkdownModel] = Blank.Simple(apply())
 }
 
-final case class MarkdownPageViewFactory[T <: MarkdownPageState]()(
+final case class MarkdownPageViewFactory[T <: MarkdownPageState](
+)(
   rpc: MarkdownPageRPC
-) extends AbstractCase with ViewFactory[T] {
+) extends AbstractCase
+    with ViewFactory[T] {
   override def create(): (MarkdownView, MarkdownPresenter[T]) = {
     val model: ModelProperty[MarkdownModel] = ModelProperty.blank
     (new MarkdownView(model), new MarkdownPresenter[T](model, rpc))
@@ -34,7 +36,7 @@ final case class MarkdownPageViewFactory[T <: MarkdownPageState]()(
 
 final class MarkdownPresenter[T <: MarkdownPageState](
   model: ModelProperty[MarkdownModel],
-  rpc: MarkdownPageRPC
+  rpc: MarkdownPageRPC,
 ) extends Presenter[T] {
   override def handleState(state: T): Unit = {
     model.set(MarkdownModel.blank.value)
@@ -69,18 +71,19 @@ final class MarkdownView(model: ReadableModelProperty[MarkdownModel]) extends Vi
 
   override val getTemplate: Modifier = Seq(
     produce(model.roSubProp(_.error)) { error =>
-      error.opt.filter(_.nonEmpty).map(e =>
-        div(cls := "bootstrap")(
-          h1("Oops! Something went wrong :("),
-          p("An error occurred during rendering your page:"),
-          UdashAlert(alertStyle = BootstrapStyles.Color.Danger.toProperty)(e).render
-        ).render
-      ).toList
+      error.opt
+        .filter(_.nonEmpty)
+        .map(e =>
+          div(cls := "bootstrap")(
+            h1("Oops! Something went wrong :("),
+            p("An error occurred during rendering your page:"),
+            UdashAlert(alertStyle = BootstrapStyles.Color.Danger.toProperty)(e).render,
+          ).render
+        )
+        .toList
     },
     produce(model.roSubProp(_.content)) { content =>
-      content.opt.filter(_.nonEmpty).map(c =>
-        div(MarkdownStyles.markdownPage)(raw(c)).render
-      ).toList
-    }
+      content.opt.filter(_.nonEmpty).map(c => div(MarkdownStyles.markdownPage)(raw(c)).render).toList
+    },
   )
 }

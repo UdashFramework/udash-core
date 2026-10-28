@@ -17,7 +17,8 @@ final case class CssPrefixedStyleName(prefixClass: String, actualClassSuffix: St
   override val commonPrefixClass: Option[String] = Some(prefixClass)
 }
 
-final case class CssStyleNameWithSharedCompanion(companionClass: String, commonPrefix: String, className: String) extends CssStyle {
+final case class CssStyleNameWithSharedCompanion(companionClass: String, commonPrefix: String, className: String)
+  extends CssStyle {
   override val commonPrefixClass: Option[String] = Some(commonPrefix)
   override def classNames: Seq[String] = Seq(companionClass, className)
 }

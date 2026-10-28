@@ -22,8 +22,7 @@ final case class HttpCall(pathParams: List[PlainValue], metadata: HttpMethodMeta
 final case class ResolvedCall(root: RestMetadata[_], prefixes: List[PrefixCall], finalCall: HttpCall) {
   lazy val pathPattern: List[PathPatternElement] =
     if (prefixes.isEmpty) finalCall.metadata.pathPattern
-    else (prefixes.iterator.flatMap(_.metadata.pathPattern.iterator) ++
-      finalCall.metadata.pathPattern.iterator).toList
+    else (prefixes.iterator.flatMap(_.metadata.pathPattern.iterator) ++ finalCall.metadata.pathPattern.iterator).toList
 
   def method: HttpMethod = finalCall.metadata.method
 
@@ -35,12 +34,13 @@ final case class ResolvedCall(root: RestMetadata[_], prefixes: List[PrefixCall],
     prefixes.foldRight(finalCall.metadata.adjustResponse(response))(_.metadata.adjustResponse(_))
 
   def adjustResponseWithStreaming(response: Task[AbstractRestResponse]): Task[AbstractRestResponse] =
-    prefixes.foldRight(finalCall.metadata.adjustResponseWithStreaming(response))(_.metadata.adjustResponseWithStreaming(_))
+    prefixes
+      .foldRight(finalCall.metadata.adjustResponseWithStreaming(response))(_.metadata.adjustResponseWithStreaming(_))
 
   /** The [[io.udash.rest.timeout timeout]] of the final call, or else of the innermost prefix that has one. */
   def timeout: Opt[FiniteDuration] =
-    (finalCall.metadata.timeout.iterator ++ prefixes.reverseIterator.flatMap(_.metadata.timeout.iterator))
-      .nextOpt.map(_.duration)
+    (finalCall.metadata.timeout.iterator ++ prefixes.reverseIterator.flatMap(_.metadata.timeout.iterator)).nextOpt
+      .map(_.duration)
 }
 
 @methodTag[RestMethodTag]
@@ -51,7 +51,8 @@ trait RawRest {
 
   // declaration order of raw methods matters - it determines their priority!
 
-  @multi @tried
+  @multi
+  @tried
   @tagged[Prefix](whenUntagged = new Prefix)
   @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Path)
@@ -62,7 +63,8 @@ trait RawRest {
     @composite parameters: RestParameters,
   ): Try[RawRest]
 
-  @multi @tried
+  @multi
+  @tried
   @tagged[GET]
   @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Query)
@@ -73,7 +75,8 @@ trait RawRest {
     @composite parameters: RestParameters,
   ): Task[RestResponse]
 
-  @multi @tried
+  @multi
+  @tried
   @tagged[GET]
   @tagged[NoBody](whenUntagged = new NoBody)
   @paramTag[RestParamTag](defaultTag = new Query)
@@ -84,7 +87,8 @@ trait RawRest {
     @composite parameters: RestParameters,
   ): Task[StreamedRestResponse]
 
-  @multi @tried
+  @multi
+  @tried
   @tagged[BodyMethodTag](whenUntagged = new POST)
   @tagged[FormBody]
   @paramTag[RestParamTag](defaultTag = new Body)
@@ -95,7 +99,8 @@ trait RawRest {
     @multi @tagged[Body] body: Mapping[PlainValue],
   ): Task[RestResponse]
 
-  @multi @tried
+  @multi
+  @tried
   @tagged[BodyMethodTag](whenUntagged = new POST)
   @tagged[JsonBody](whenUntagged = new JsonBody)
   @paramTag[RestParamTag](defaultTag = new Body)
@@ -106,7 +111,8 @@ trait RawRest {
     @multi @tagged[Body] body: Mapping[JsonValue],
   ): Task[RestResponse]
 
-  @multi @tried
+  @multi
+  @tried
   @tagged[BodyMethodTag](whenUntagged = new POST)
   @tagged[JsonBody](whenUntagged = new JsonBody)
   @paramTag[RestParamTag](defaultTag = new Body)
@@ -117,7 +123,8 @@ trait RawRest {
     @multi @tagged[Body] body: Mapping[JsonValue],
   ): Task[StreamedRestResponse]
 
-  @multi @tried
+  @multi
+  @tried
   @tagged[BodyMethodTag](whenUntagged = new POST)
   @tagged[CustomBody]
   @paramTag[RestParamTag](defaultTag = new Body)
@@ -129,7 +136,8 @@ trait RawRest {
     @encoded @tagged[Body] @unmatched(RawRest.MissingBodyParam) body: HttpBody,
   ): Task[RestResponse]
 
-  @multi @tried
+  @multi
+  @tried
   @tagged[BodyMethodTag](whenUntagged = new POST)
   @tagged[CustomBody]
   @paramTag[RestParamTag](defaultTag = new Body)
@@ -156,11 +164,10 @@ trait RawRest {
   def asHandleRequestWithStreaming(metadata: RestMetadata[_]): HandleRequestWithStreaming =
     RawRest.resolveAndHandle(metadata)(handleResolvedWithStreaming)
 
-  /**
-   * Handles a resolved REST call and returns a standard [[RestResponse]].
-   * This method is maintained for backward compatibility with non-streaming clients.
-   * It delegates to [[handleResolvedWithStreaming]] and converts any streaming response to a standard response.
-   */
+  /** Handles a resolved REST call and returns a standard [[RestResponse]]. This method is maintained for backward
+    * compatibility with non-streaming clients. It delegates to [[handleResolvedWithStreaming]] and converts any
+    * streaming response to a standard response.
+    */
   def handleResolved(request: RestRequest, resolved: ResolvedCall): Task[RestResponse] =
     StreamedRestResponse.fallbackToRestResponse(handleResolvedWithStreaming(request, resolved))
 
@@ -169,7 +176,8 @@ trait RawRest {
     val ResolvedCall(_, prefixes, finalCall) = resolved
     val HttpCall(finalPathParams, finalMetadata) = finalCall
 
-    def handleBadBody[T](expr: => T): T = try expr catch {
+    def handleBadBody[T](expr: => T): T = try expr
+    catch {
       case NonFatal(cause) => throw new InvalidRpcCall(s"Invalid HTTP body: ${cause.getMessage}", cause)
     }
 
@@ -198,7 +206,8 @@ trait RawRest {
             rawRest.handleJsonStream(finalMetadata.name, finalParameters, handleBadBody(HttpBody.parseJsonBody(body)))
         }
     }
-    try resolved.adjustResponseWithStreaming(resolveCall(this, prefixes)) catch {
+    try resolved.adjustResponseWithStreaming(resolveCall(this, prefixes))
+    catch {
       case e: InvalidRpcCall =>
         Task.now(extractHttpException(e).map(_.toResponse).getOrElse(RestResponse.plain(400, e.getMessage)))
     }
@@ -220,34 +229,35 @@ object RawRest extends RawRpcCompanion[RawRest] {
     def handleRequestStream(request: RestRequest): Task[StreamedRestResponse]
   }
 
-  /**
-   * Similar to [[io.udash.rest.raw.RawRest.HandleRequest HandleRequest]] but accepts already resolved path as a second argument.
-   */
+  /** Similar to [[io.udash.rest.raw.RawRest.HandleRequest HandleRequest]] but accepts already resolved path as a second
+    * argument.
+    */
   type HandleResolvedRequest = (RestRequest, ResolvedCall) => Task[RestResponse]
   type HandleResolvedRequestWithStreaming = (RestRequest, ResolvedCall) => Task[AbstractRestResponse]
 
-  /**
-   * A request handler that resolves a call before running it, so that the server can bound the call by its
-   * [[io.udash.rest.timeout timeout]]. The handlers made by `asHandleRequest*` and [[withTimeouts]] are such, and so is
-   * [[wrapHandleRequest]] applied to one of them.
-   * Applied as a function, such a handler invokes the API methods at once; [[resolve]] defers them to its task.
-   */
+  /** A request handler that resolves a call before running it, so that the server can bound the call by its
+    * [[io.udash.rest.timeout timeout]]. The handlers made by `asHandleRequest*` and [[withTimeouts]] are such, and so
+    * is [[wrapHandleRequest]] applied to one of them. Applied as a function, such a handler invokes the API methods at
+    * once; [[resolve]] defers them to its task.
+    */
   trait ResolvingHandleRequest[+R <: AbstractRestResponse] extends (RestRequest => Task[R]) {
-    /**
-     * The call's timeout, if it has one, and the task that handles the request, which invokes no API method until it
-     * first runs, and none again when it runs again. A timeout under a millisecond sets no bound, as for
-     * `RestServlet`'s `handleTimeout`.
-     */
+
+    /** The call's timeout, if it has one, and the task that handles the request, which invokes no API method until it
+      * first runs, and none again when it runs again. A timeout under a millisecond sets no bound, as for
+      * `RestServlet`'s `handleTimeout`.
+      */
     def resolve(request: RestRequest): (Opt[FiniteDuration], Task[R])
   }
 
-  /**
-   * Wraps a server-side request handler, e.g. for authentication or logging. Unlike a plain function wrapping it,
-   * the result still resolves calls when `handler` does, so that their [[io.udash.rest.timeout timeout]] still applies.
-   *
-   * @param wrapper receives the request and the task that handles it, and runs when the task it returns does
-   */
-  def wrapHandleRequest(handler: HandleRequestWithStreaming)(
+  /** Wraps a server-side request handler, e.g. for authentication or logging. Unlike a plain function wrapping it, the
+    * result still resolves calls when `handler` does, so that their [[io.udash.rest.timeout timeout]] still applies.
+    *
+    * @param wrapper
+    *   receives the request and the task that handles it, and runs when the task it returns does
+    */
+  def wrapHandleRequest(
+    handler: HandleRequestWithStreaming
+  )(
     wrapper: (RestRequest, Task[AbstractRestResponse]) => Task[AbstractRestResponse]
   ): HandleRequestWithStreaming = handler match {
     case resolving: ResolvingHandleRequest[AbstractRestResponse] =>
@@ -261,9 +271,10 @@ object RawRest extends RawRpcCompanion[RawRest] {
           Task.defer(wrapper(request, response))
         }
       }
-    case _ => request =>
-      val response = handler(request)
-      Task.defer(wrapper(request, response))
+    case _ =>
+      request =>
+        val response = handler(request)
+        Task.defer(wrapper(request, response))
   }
 
   // Invokes on the first run only, so that a re-run awaits the same invocation, as it does with an eager handler
@@ -316,29 +327,39 @@ object RawRest extends RawRpcCompanion[RawRest] {
   implicit def rawRestAsRawNotFound[T]: ImplicitNotFound[AsRaw[RawRest, T]] = ImplicitNotFound()
 
   // client side without response streaming support
-  def fromHandleRequest[Real: AsRealRpc : RestMetadata](handle: HandleRequest): Real =
-    RawRest.asReal(new DefaultRawRest(Nil, RestMetadata[Real], RestParameters.Empty, new RawRest.RestRequestHandler {
-      override def handleRequest(request: RestRequest): Task[RestResponse] = handle(request)
-      override def handleRequestStream(request: RestRequest): Task[StreamedRestResponse] =
-        Task.raiseError(new UnsupportedOperationException("Streaming unsupported by the client"))
-    }))
+  def fromHandleRequest[Real: AsRealRpc: RestMetadata](handle: HandleRequest): Real =
+    RawRest.asReal(
+      new DefaultRawRest(
+        Nil,
+        RestMetadata[Real],
+        RestParameters.Empty,
+        new RawRest.RestRequestHandler {
+          override def handleRequest(request: RestRequest): Task[RestResponse] = handle(request)
+          override def handleRequestStream(request: RestRequest): Task[StreamedRestResponse] =
+            Task.raiseError(new UnsupportedOperationException("Streaming unsupported by the client"))
+        },
+      )
+    )
 
   // client side with response streaming support
-  def fromHandleRequestWithStreaming[Real: AsRealRpc : RestMetadata](handleRequest: RawRest.RestRequestHandler): Real =
+  def fromHandleRequestWithStreaming[Real: AsRealRpc: RestMetadata](handleRequest: RawRest.RestRequestHandler): Real =
     RawRest.asReal(new DefaultRawRest(Nil, RestMetadata[Real], RestParameters.Empty, handleRequest))
 
   // server side without response streaming support
-  def asHandleRequest[Real: AsRawRpc : RestMetadata](real: Real): HandleRequest =
+  def asHandleRequest[Real: AsRawRpc: RestMetadata](real: Real): HandleRequest =
     RawRest.asRaw(real).asHandleRequest(RestMetadata[Real])
 
   // server side with response streaming support
-  def asHandleRequestWithStreaming[Real: AsRawRpc : RestMetadata](real: Real): HandleRequestWithStreaming =
-     RawRest.asRaw(real).asHandleRequestWithStreaming(RestMetadata[Real])
+  def asHandleRequestWithStreaming[Real: AsRawRpc: RestMetadata](real: Real): HandleRequestWithStreaming =
+    RawRest.asRaw(real).asHandleRequestWithStreaming(RestMetadata[Real])
 
-  def resolveAndHandle(metadata: RestMetadata[_])(handleResolved: HandleResolvedRequestWithStreaming): HandleRequestWithStreaming =
+  def resolveAndHandle(metadata: RestMetadata[_])(handleResolved: HandleResolvedRequestWithStreaming)
+    : HandleRequestWithStreaming =
     resolving(metadata)(handleResolved)
 
-  private def resolving(metadata: RestMetadata[_])(
+  private def resolving(
+    metadata: RestMetadata[_]
+  )(
     handleResolved: HandleResolvedRequestWithStreaming
   ): ResolvingHandleRequest[AbstractRestResponse] = {
     metadata.ensureValid()
@@ -348,16 +369,19 @@ object RawRest extends RawRpcCompanion[RawRest] {
       callOf(metadata, request) match {
         case Left(answer) => (Opt.Empty, () => Task.now(answer))
         case Right((req, call)) =>
-          (call.timeout, () => {
-            val resp = handleResolved(req, call)
-            if (request.method == HttpMethod.HEAD)
-              resp.map {
-                case resp: RestResponse => resp.copy(body = HttpBody.empty)
-                case stream: StreamedRestResponse => stream.copy(body = StreamedBody.empty)
-              }
-            else
-              resp
-          })
+          (
+            call.timeout,
+            () => {
+              val resp = handleResolved(req, call)
+              if (request.method == HttpMethod.HEAD)
+                resp.map {
+                  case resp: RestResponse => resp.copy(body = HttpBody.empty)
+                  case stream: StreamedRestResponse => stream.copy(body = StreamedBody.empty)
+                }
+              else
+                resp
+            },
+          )
       }
 
     new ResolvingHandleRequest[AbstractRestResponse] {
@@ -370,31 +394,34 @@ object RawRest extends RawRpcCompanion[RawRest] {
   }
 
   // The call that handles the request, with the request as the call takes it, or the answer when no call does
-  private def callOf(metadata: RestMetadata[_], request: RestRequest): Either[RestResponse, (RestRequest, ResolvedCall)] = {
+  private def callOf(metadata: RestMetadata[_], request: RestRequest)
+    : Either[RestResponse, (RestRequest, ResolvedCall)] = {
     val path = request.parameters.path
     metadata.resolvePath(path) match {
       case Nil =>
         Left(RestResponse.plain(404, s"path ${PlainValue.encodePath(path)} not found"))
-      case calls => request.method match {
-        case HttpMethod.OPTIONS =>
-          val meths = calls.iterator.map(_.method).flatMap {
-            case HttpMethod.GET => List(HttpMethod.GET, HttpMethod.HEAD)
-            case m => List(m)
-          } ++ Iterator(HttpMethod.OPTIONS)
-          Left(RestResponse(200, IMapping.create("Allow" -> PlainValue(meths.mkString(","))), HttpBody.Empty))
-        case wireMethod =>
-          val req = if (wireMethod == HttpMethod.HEAD) request.copy(method = HttpMethod.GET) else request
-          calls.find(_.method == req.method).map((req, _))
-            .toRight(RestResponse.plain(405, s"$wireMethod not allowed on path ${PlainValue.encodePath(path)}"))
-      }
+      case calls =>
+        request.method match {
+          case HttpMethod.OPTIONS =>
+            val meths = calls.iterator.map(_.method).flatMap {
+              case HttpMethod.GET => List(HttpMethod.GET, HttpMethod.HEAD)
+              case m => List(m)
+            } ++ Iterator(HttpMethod.OPTIONS)
+            Left(RestResponse(200, IMapping.create("Allow" -> PlainValue(meths.mkString(","))), HttpBody.Empty))
+          case wireMethod =>
+            val req = if (wireMethod == HttpMethod.HEAD) request.copy(method = HttpMethod.GET) else request
+            calls
+              .find(_.method == req.method)
+              .map((req, _))
+              .toRight(RestResponse.plain(405, s"$wireMethod not allowed on path ${PlainValue.encodePath(path)}"))
+        }
     }
   }
 
-  /**
-   * Makes `handler` resolve calls, so that the server bounds them by their [[io.udash.rest.timeout timeout]], which
-   * it looks up in `metadata` by the request's path and method. Apply it outside any wrapper that rewrites requests,
-   * so that the timeout is that of the call `handler` gets.
-   */
+  /** Makes `handler` resolve calls, so that the server bounds them by their [[io.udash.rest.timeout timeout]], which it
+    * looks up in `metadata` by the request's path and method. Apply it outside any wrapper that rewrites requests, so
+    * that the timeout is that of the call `handler` gets.
+    */
   def withTimeouts(metadata: RestMetadata[_])(handler: HandleRequestWithStreaming): HandleRequestWithStreaming = {
     metadata.ensureValid()
     new ResolvingHandleRequest[AbstractRestResponse] {
@@ -405,7 +432,7 @@ object RawRest extends RawRpcCompanion[RawRest] {
   }
 
   private final class DefaultRawRest(
-    prefixMetas: List[PrefixMetadata[_]], //in reverse invocation order!
+    prefixMetas: List[PrefixMetadata[_]], // in reverse invocation order!
     metadata: RestMetadata[_],
     prefixParams: RestParameters,
     handleRequest: RawRest.RestRequestHandler,
@@ -426,7 +453,8 @@ object RawRest extends RawRpcCompanion[RawRest] {
     def handleJson(name: String, parameters: RestParameters, body: Mapping[JsonValue]): Task[RestResponse] =
       doHandle("handle", name, parameters, HttpBody.createJsonBody(body))
 
-    def handleJsonStream(name: String, parameters: RestParameters, body: Mapping[JsonValue]): Task[StreamedRestResponse] =
+    def handleJsonStream(name: String, parameters: RestParameters, body: Mapping[JsonValue])
+      : Task[StreamedRestResponse] =
       doHandleStream("handleStream", name, parameters, HttpBody.Empty)
 
     def handleForm(name: String, parameters: RestParameters, body: Mapping[PlainValue]): Task[RestResponse] =
@@ -438,10 +466,13 @@ object RawRest extends RawRpcCompanion[RawRest] {
     def handleCustomStream(name: String, parameters: RestParameters, body: HttpBody): Task[StreamedRestResponse] =
       doHandleStream("handleSingleStream", name, parameters, body)
 
-    private def doHandle(rawName: String, name: String, parameters: RestParameters, body: HttpBody): Task[RestResponse] =
-      metadata.httpMethodsByName.getOpt(name)
-        .collect { case methodMeta if !methodMeta.streamedResponse =>
-          handleRequest.handleRequest(resolveRequest(parameters, body, methodMeta))
+    private def doHandle(rawName: String, name: String, parameters: RestParameters, body: HttpBody)
+      : Task[RestResponse] =
+      metadata.httpMethodsByName
+        .getOpt(name)
+        .collect {
+          case methodMeta if !methodMeta.streamedResponse =>
+            handleRequest.handleRequest(resolveRequest(parameters, body, methodMeta))
         }
         .getOrElse(Task.raiseError(new UnknownRpc(name, rawName)))
 
@@ -451,9 +482,11 @@ object RawRest extends RawRpcCompanion[RawRest] {
       parameters: RestParameters,
       body: HttpBody,
     ): Task[StreamedRestResponse] =
-      metadata.httpMethodsByName.getOpt(name)
-        .collect { case methodMeta if methodMeta.streamedResponse =>
-          handleRequest.handleRequestStream(resolveRequest(parameters, body, methodMeta))
+      metadata.httpMethodsByName
+        .getOpt(name)
+        .collect {
+          case methodMeta if methodMeta.streamedResponse =>
+            handleRequest.handleRequestStream(resolveRequest(parameters, body, methodMeta))
         }
         .getOrElse(Task.raiseError(new UnknownRpc(name, rawName)))
 

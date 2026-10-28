@@ -17,7 +17,7 @@ object BindAttributeDemo extends AutoDemo with CssView {
 
     p(
       span("Visible: ", bind(visible), " -> "),
-      span((style := "display: none;").attrIfNot(visible))("Show/hide")
+      span((style := "display: none;").attrIfNot(visible))("Show/hide"),
     )
   }.withSourceCode
 
@@ -25,8 +25,8 @@ object BindAttributeDemo extends AutoDemo with CssView {
     (
       div(
         id := "bind-attr-demo",
-        GuideStyles.frame
+        GuideStyles.frame,
       )(rendered),
-      source
+      source,
     )
 }

@@ -4,8 +4,13 @@ import com.avsystem.commons._
 import io.udash.properties.single.{ForwarderReadableProperty, ReadableProperty}
 import io.udash.utils.{CrossCollections, Registration}
 
-private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: ReadableProperty[B], OrigType <: ReadableProperty[A]]
-  extends AbstractReadableSeqProperty[B, ElemType] with ForwarderReadableProperty[BSeq[B]] {
+private[properties] trait ForwarderReadableSeqProperty[
+  A,
+  B,
+  ElemType <: ReadableProperty[B],
+  OrigType <: ReadableProperty[A]]
+  extends AbstractReadableSeqProperty[B, ElemType]
+    with ForwarderReadableProperty[BSeq[B]] {
 
   protected def origin: ReadableSeqProperty[A, OrigType]
 
@@ -23,7 +28,7 @@ private[properties] trait ForwarderReadableSeqProperty[A, B, ElemType <: Readabl
     transformPatch(patch).foreach { transformed =>
       CrossCollections.replaceSeq(transformedElements, transformed.idx, transformed.removed.length, transformed.added)
       val originalListeners = structureListeners.toSet
-      structureListeners.foreach { listener => if (originalListeners.contains(listener)) listener(transformed) }
+      structureListeners.foreach(listener => if (originalListeners.contains(listener)) listener(transformed))
       valueChanged()
     }
 

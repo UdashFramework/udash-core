@@ -21,23 +21,26 @@ object CardsDemo extends AutoDemo with CssView {
       UdashCard(
         borderColor = Some(Color.Success).toProperty,
         textColor = Some(Color.Primary).toProperty,
-      )(factory => Seq(
-        factory.header("Card heading"),
-        factory.body("Some default panel content here. Nulla vitae elit libero, " +
-          "a pharetra augue. Aenean lacinia bibendum nulla sed consectetur. Aenean eu " +
-          "leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam " +
-          "id dolor id nibh ultricies vehicula ut id elit."),
-        factory.listGroup(nested => {
-          val group = UdashListGroup(news)((news, nested) => li(nested(bind(news))).render)
-          nested(group)
-          group
-        }),
-        factory.footer("Card footer")
-      ))
+      )(factory =>
+        Seq(
+          factory.header("Card heading"),
+          factory.body(
+            "Some default panel content here. Nulla vitae elit libero, " +
+              "a pharetra augue. Aenean lacinia bibendum nulla sed consectetur. Aenean eu " +
+              "leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam " +
+              "id dolor id nibh ultricies vehicula ut id elit."
+          ),
+          factory.listGroup { nested =>
+            val group = UdashListGroup(news)((news, nested) => li(nested(bind(news))).render)
+            nested(group)
+            group
+          },
+          factory.footer("Card footer"),
+        )
+      )
     ).render
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, String) =
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
 }
-

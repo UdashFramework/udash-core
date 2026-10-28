@@ -7,7 +7,7 @@ class CallLogger {
 
   def append(call: Call): Unit = _calls.synchronized {
     _calls += call
-    if (_calls.size > 20) _calls.remove(0, _calls.size-20)
+    if (_calls.size > 20) _calls.remove(0, _calls.size - 20)
   }
 
   def calls: List[Call] = _calls.synchronized {

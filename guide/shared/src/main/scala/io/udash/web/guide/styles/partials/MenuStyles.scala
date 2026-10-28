@@ -17,10 +17,10 @@ object MenuStyles extends CssBase {
     width(100 %%),
 
     MediaQueries.phone(
-      width(320 - StyleConstants.Sizes.GuideHeaderHeightMobile px),
+      width((320 - StyleConstants.Sizes.GuideHeaderHeightMobile).px),
       height(100 %%),
-      overflowY.auto
-    )
+      overflowY.auto,
+    ),
   )
 
   private val menuLink: CssStyle = mixin(
@@ -28,48 +28,48 @@ object MenuStyles extends CssBase {
     position.relative,
     display.block,
     width(100 %%),
-    padding(1.25 rem, `0`, 1.25 rem, 2.8125 rem),
-    fontSize(1.375 rem),
+    padding(1.25.rem, `0`, 1.25.rem, 2.8125.rem),
+    fontSize(1.375.rem),
     color.black,
     textAlign.left,
 
-    &.visited (
+    &.visited(
       color.black
     ),
 
-    &.hover (
+    &.hover(
       color.black,
-      textDecoration := none
+      textDecoration := none,
     ),
 
     MediaQueries.tabletLandscape(
-      fontSize(1.125 rem)
-    )
+      fontSize(1.125.rem)
+    ),
   )
 
   val link: CssStyle = style(
     menuLink,
 
-    &.attr(Attributes.data(Attributes.Active), "true") (
+    &.attr(Attributes.data(Attributes.Active), "true")(
       color(StyleConstants.Colors.Red),
 
-      unsafeChild(s".${linkText.className}") (
+      unsafeChild(s".${linkText.className}")(
         linkTextHover,
-        &.after (
+        &.after(
           borderColor(StyleConstants.Colors.Red)
-        )
-      )
-    )
+        ),
+      ),
+    ),
   )
 
   val subToggle: CssStyle = style(
     menuLink,
 
-    &.attr(Attributes.data(Attributes.Active), "true") (
-      unsafeChild(s".${icon.className}") (
+    &.attr(Attributes.data(Attributes.Active), "true")(
+      unsafeChild(s".${icon.className}")(
         transform := "rotate(90deg)"
       )
-    )
+    ),
   )
 
   lazy val linkText: CssStyle = style(
@@ -79,49 +79,49 @@ object MenuStyles extends CssBase {
   val item: CssStyle = style(
     borderBottomColor(StyleConstants.Colors.GreyExtra),
     borderBottomStyle.solid,
-    borderBottomWidth(1 px),
+    borderBottomWidth(1.px),
 
-    &.lastChild (
+    &.lastChild(
       border.none
-    )
+    ),
   )
 
   val subItem: CssStyle = style(
     borderBottomColor(StyleConstants.Colors.GreyExtra),
     borderBottomStyle.solid,
-    borderBottomWidth(1 px),
+    borderBottomWidth(1.px),
 
-    &.lastChild (
+    &.lastChild(
       border.none
-    )
+    ),
   )
 
   lazy val icon: CssStyle = style(
-    GuideStyleUtils.transition(duration = 100 milliseconds),
+    GuideStyleUtils.transition(duration = 100.milliseconds),
     position.absolute,
     display.block,
-    width(7 px),
+    width(7.px),
     top(50 %%),
-    left(1.5625 rem),
+    left(1.5625.rem),
     transform := "translateX(-50%) translateY(-50%)",
-    transformOrigin := "50% 25%"
+    transformOrigin := "50% 25%",
   )
 
   val subList: CssStyle = style(
     display.none,
-    paddingLeft(3.125 rem),
-    paddingBottom(.9375 rem),
+    paddingLeft(3.125.rem),
+    paddingBottom(.9375.rem),
 
-    unsafeChild(s".${item.className}") (
+    unsafeChild(s".${item.className}")(
       border.none.important,
-      paddingTop(.625 rem),
-      paddingBottom(.625 rem)
+      paddingTop(.625.rem),
+      paddingBottom(.625.rem),
     ),
 
-    unsafeChild(s".${link.className}") (
+    unsafeChild(s".${link.className}")(
       UdashFonts.roboto(FontWeight.Bold),
-      padding(`0`, `0`, `0`,.9375 rem),
-      fontSize(1 rem),
+      padding(`0`, `0`, `0`, .9375.rem),
+      fontSize(1.rem),
 
       &.before(
         position.absolute,
@@ -131,17 +131,17 @@ object MenuStyles extends CssBase {
       ),
 
       &.hover(
-        unsafeChild(s".${linkText.className}") (
+        unsafeChild(s".${linkText.className}")(
           linkTextHover
         )
       ),
 
       MediaQueries.tabletLandscape(
-        fontSize(.875 rem)
-      )
+        fontSize(.875.rem)
+      ),
     ),
 
-    unsafeChild(s".${linkText.className}") (
+    unsafeChild(s".${linkText.className}")(
       &.after(
         GuideStyleUtils.transition(transform),
         position.absolute,
@@ -150,12 +150,12 @@ object MenuStyles extends CssBase {
         content.string(" "),
         width(100 %%),
         borderBottomColor.black,
-        borderBottomWidth(1 px),
+        borderBottomWidth(1.px),
         borderBottomStyle.solid,
         transform := "scaleX(0)",
-        transformOrigin := "100% 50%"
+        transformOrigin := "100% 50%",
       )
-    )
+    ),
   )
 
   val btnMobile: CssStyle = style(
@@ -168,14 +168,13 @@ object MenuStyles extends CssBase {
 
     MediaQueries.tabletLandscape(
       display.block
-    )
-
+    ),
   )
 
   private lazy val linkTextHover: CssStyle = mixin(
-    &.after (
+    &.after(
       transformOrigin := "0 50%",
-      transform := "scaleX(1)"
+      transform := "scaleX(1)",
     )
   )
 }

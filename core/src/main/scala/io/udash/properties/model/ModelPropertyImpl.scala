@@ -12,6 +12,7 @@ abstract class ModelPropertyImpl[A](val parent: ReadableProperty[_])
 
   /** False if subproperties were not created yet. */
   protected var initialized: Boolean = false
+
   /** True if value was never changed. */
   protected var isEmpty: Boolean = true
 

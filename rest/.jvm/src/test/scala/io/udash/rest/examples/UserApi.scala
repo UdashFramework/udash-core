@@ -41,7 +41,7 @@ object PrintOpenAPI {
     val userOpenApi: OpenApi =
       UserApi.openapiMetadata.openapi(
         Info("User API", "0.1", description = "User management API"),
-        servers = List(Server("http://www.userapi.com"))
+        servers = List(Server("http://www.userapi.com")),
       )
 
     import com.avsystem.commons.serialization.json._

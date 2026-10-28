@@ -10,17 +10,21 @@ import org.scalajs.dom.{DocumentReadyState, Element, Event, EventListenerOptions
 
 import scala.util.Try
 
-/**
- * Root application which is used to start single instance of app.
- *
- * @param routingRegistry     [[io.udash.routing.RoutingRegistry]] implementation, which will be used to match [[io.udash.core.Url]] to [[io.udash.core.State]]
- * @param viewFactoryRegistry [[io.udash.core.ViewFactoryRegistry]] implementation, which will be used to match [[io.udash.core.State]] into [[io.udash.core.ViewFactory]]
- * @tparam HierarchyRoot Should be a sealed trait which extends [[io.udash.core.State]].
- */
-class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreator](
+/** Root application which is used to start single instance of app.
+  *
+  * @param routingRegistry
+  *   [[io.udash.routing.RoutingRegistry]] implementation, which will be used to match [[io.udash.core.Url]] to
+  *   [[io.udash.core.State]]
+  * @param viewFactoryRegistry
+  *   [[io.udash.core.ViewFactoryRegistry]] implementation, which will be used to match [[io.udash.core.State]] into
+  *   [[io.udash.core.ViewFactory]]
+  * @tparam HierarchyRoot
+  *   Should be a sealed trait which extends [[io.udash.core.State]].
+  */
+class Application[HierarchyRoot >: Null <: GState[HierarchyRoot]: PropertyCreator](
   routingRegistry: RoutingRegistry[HierarchyRoot],
   viewFactoryRegistry: ViewFactoryRegistry[HierarchyRoot],
-  urlChangeProvider: UrlChangeProvider = new WindowUrlFragmentChangeProvider
+  urlChangeProvider: UrlChangeProvider = new WindowUrlFragmentChangeProvider,
 ) extends CrossLogging {
 
   private var rootElement: Element = _
@@ -31,11 +35,11 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
   private def handleUrl(url: Url, fullReload: Boolean = false): Try[Unit] =
     routingEngine.handleUrl(url, fullReload).recover { case t => handleRoutingFailure(t) }
 
-  /**
-   * Starts the application using selected element as root.
-   *
-   * @param attachElement Root element of application.
-   */
+  /** Starts the application using selected element as root.
+    *
+    * @param attachElement
+    *   Root element of application.
+    */
   final def run(attachElement: Element): Unit = {
     rootElement = attachElement
 
@@ -44,16 +48,23 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
     handleUrl(urlChangeProvider.currentFragment)
   }
 
-  /**
-   * Starts the application using selectors to find root element. Handles waiting for document to be ready.
-   *
-   * @param selectors            A DOMString containing one or more selectors to match.
-   *                             This string must be a valid CSS selector string; if it isn't, a native SyntaxError exception is thrown.
-   *                             See https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors.
-   * @param onDocumentReady      Callback ran on the application root element before the application is started but once the DOM document is ready.
-   * @param onApplicationStarted Callback ran on the application root element after the application is started.
-   */
-  final def run(selectors: String, onDocumentReady: Element => Unit = _ => (), onApplicationStarted: Element => Unit = _ => ()): Unit = {
+  /** Starts the application using selectors to find root element. Handles waiting for document to be ready.
+    *
+    * @param selectors
+    *   A DOMString containing one or more selectors to match. This string must be a valid CSS selector string; if it
+    *   isn't, a native SyntaxError exception is thrown. See
+    *   https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors.
+    * @param onDocumentReady
+    *   Callback ran on the application root element before the application is started but once the DOM document is
+    *   ready.
+    * @param onApplicationStarted
+    *   Callback ran on the application root element after the application is started.
+    */
+  final def run(
+    selectors: String,
+    onDocumentReady: Element => Unit = _ => (),
+    onApplicationStarted: Element => Unit = _ => (),
+  ): Unit = {
     def onReady(): Unit = {
       val rootElement = dom.document.querySelector(selectors)
       onDocumentReady(rootElement)
@@ -61,21 +72,25 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
       onApplicationStarted(rootElement)
     }
     if (dom.document.readyState != DocumentReadyState.loading) onReady()
-    else dom.document.addEventListener("DOMContentLoaded", { (_: Event) => onReady() }, new EventListenerOptions {
-      once = true
-      passive = true
-    })
+    else
+      dom.document.addEventListener(
+        "DOMContentLoaded",
+        (_: Event) => onReady(),
+        new EventListenerOptions {
+          once = true
+          passive = true
+        },
+      )
   }
 
   def reload(): Unit =
     handleUrl(urlChangeProvider.currentFragment, fullReload = true)
 
-  /**
-   * Registers callback which will be called after routing failure.
-   *
-   * The callbacks are executed in order of registration. Registration operations don't preserve callbacks order.
-   * Each callback is executed once, exceptions thrown in callbacks are swallowed.
-   */
+  /** Registers callback which will be called after routing failure.
+    *
+    * The callbacks are executed in order of registration. Registration operations don't preserve callbacks order. Each
+    * callback is executed once, exceptions thrown in callbacks are swallowed.
+    */
   def onRoutingFailure(listener: routingFailureListeners.CallbackType): Registration =
     routingFailureListeners.register(listener)
 
@@ -84,12 +99,13 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
     routingFailureListeners.fire(ex)
   }
 
-  /**
-   * Changes application routing state to the provided one.
-   *
-   * @param state          New application routing state,
-   * @param replaceCurrent indicates whether new state should replace the current one in history
-   */
+  /** Changes application routing state to the provided one.
+    *
+    * @param state
+    *   New application routing state,
+    * @param replaceCurrent
+    *   indicates whether new state should replace the current one in history
+    */
   def goTo(state: HierarchyRoot, replaceCurrent: Boolean = false): Unit = {
     val url = routingRegistry.matchState(state)
     urlChangeProvider.changeFragment(url, replaceCurrent)
@@ -99,17 +115,17 @@ class Application[HierarchyRoot >: Null <: GState[HierarchyRoot] : PropertyCreat
   def redirectTo(url: Url): Unit =
     urlChangeProvider.changeUrl(url)
 
-  /**
-   * Register callback for routing state change.
-   *
-   * @param callback Callback getting newState and oldState as arguments.
-   */
+  /** Register callback for routing state change.
+    *
+    * @param callback
+    *   Callback getting newState and oldState as arguments.
+    */
   def onStateChange(callback: StateChangeEvent[HierarchyRoot] => Unit): Registration =
     routingEngine.onStateChange(callback)
 
-  /**
-   * @return URL matched to the provided state.
-   */
+  /** @return
+    *   URL matched to the provided state.
+    */
   def matchState(state: HierarchyRoot): Url =
     routingRegistry.matchState(state)
 

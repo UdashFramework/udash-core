@@ -4,7 +4,8 @@ import scala.scalajs.js
 
 object URLEncoder {
   def encode(query: String, spaceAsPlus: Boolean): String = {
-    val res = js.URIUtils.encodeURIComponent(query)
+    val res = js.URIUtils
+      .encodeURIComponent(query)
       .replace("!", "%21")
       .replace("'", "%27")
       .replace("(", "%28")

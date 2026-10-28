@@ -64,7 +64,12 @@ class SeqPropertyTest extends UdashCoreTest {
     }
   }
 
-  def randTT() = newTT(Random.nextInt(20), Some(Random.nextString(5)), new C(Random.nextInt(20), Random.nextString(5)), Random.nextString(20))
+  def randTT() = newTT(
+    Random.nextInt(20),
+    Some(Random.nextString(5)),
+    new C(Random.nextInt(20), Random.nextString(5)),
+    Random.nextString(20),
+  )
 
   "SeqProperty" should {
     "handle sequence of properties" in {
@@ -72,12 +77,15 @@ class SeqPropertyTest extends UdashCoreTest {
       val pt = SeqProperty[T](TO1, TC1(5), TO2)
       val ptt = SeqProperty[TT](randTT(), randTT(), randTT())
 
-      def checkProperties(expectedSize: Int, props: Seq[SeqProperty[_, Property[_]]] = Seq(p, pt, ptt))(implicit position: Position) = {
-        props.foreach(p => {
+      def checkProperties(
+        expectedSize: Int,
+        props: Seq[SeqProperty[_, Property[_]]] = Seq(p, pt, ptt),
+      )(implicit position: Position
+      ) =
+        props.foreach { p =>
           p.get.size should be(expectedSize)
           p.get should be(p.elemProperties.map(_.get))
-        })
-      }
+        }
 
       checkProperties(expectedSize = 3)
 
@@ -387,7 +395,9 @@ class SeqPropertyTest extends UdashCoreTest {
 
       t.set(5)
 
-      t.get should be(15) // Notice that `t.set(5)` sets original value to `Seq(1, 2, 3, 4, 5)` and `t.get` is equal 15, not 5!
+      t.get should be(
+        15
+      ) // Notice that `t.set(5)` sets original value to `Seq(1, 2, 3, 4, 5)` and `t.get` is equal 15, not 5!
       p.get should be(Seq(1, 2, 3, 4, 5))
       t.get should be(15)
 
@@ -408,9 +418,9 @@ class SeqPropertyTest extends UdashCoreTest {
       val p = SeqProperty[BadEquals](init)
 
       val t = p.bitransformElements[T](i => TC1(i.v)) {
-          case TC1(i) => new BadEquals(i)
-          case _: T => new BadEquals(0)
-        }
+        case TC1(i) => new BadEquals(i)
+        case _: T => new BadEquals(0)
+      }
 
       p.get.map(_.v) should be(Seq(1, 2, 3))
       t.get should be(Seq(TC1(1), TC1(2), TC1(3)))
@@ -427,7 +437,9 @@ class SeqPropertyTest extends UdashCoreTest {
 
       t.set(Seq(TO1, TO2))
 
-      t.get should be(Seq(TC1(0), TC1(0))) // Again notice that you wont get inserted values, because they were transformed.
+      t.get should be(
+        Seq(TC1(0), TC1(0))
+      ) // Again notice that you wont get inserted values, because they were transformed.
       p.get.map(_.v) should be(Seq(0, 0))
       t.get should be(Seq(TC1(0), TC1(0)))
 
@@ -478,7 +490,7 @@ class SeqPropertyTest extends UdashCoreTest {
       val original = wtf.get
       original shouldBe Seq(2, 4, 6, 8, 10)
 
-      wtf.listen(_ => println("")) //initialize listeners
+      wtf.listen(_ => println("")) // initialize listeners
 
       p.touch()
 
@@ -1557,9 +1569,10 @@ class SeqPropertyTest extends UdashCoreTest {
 
   "Seq[Property]" should {
     "combine into ReadableSeqProperty" in {
-      def validateContents[A](propertySeq: ISeq[Property[A]], combined: ReadableSeqProperty[A, ReadableProperty[A]]): Unit = {
-        combined.get.zip(propertySeq).foreach {
-          case (c, s) => c should ===(s.get)
+      def validateContents[A](propertySeq: ISeq[Property[A]], combined: ReadableSeqProperty[A, ReadableProperty[A]])
+        : Unit = {
+        combined.get.zip(propertySeq).foreach { case (c, s) =>
+          c should ===(s.get)
         }
       }
 

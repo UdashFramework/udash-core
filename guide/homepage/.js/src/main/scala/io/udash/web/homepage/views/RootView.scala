@@ -20,7 +20,7 @@ class RootView extends ContainerView with CssView {
     main(GlobalStyles.main)(
       childViewContainer
     ),
-    Footer.getTemplate(HomepageStyles.body.opt)
+    Footer.getTemplate(HomepageStyles.body.opt),
   )
 
   override def getTemplate: Modifier = content

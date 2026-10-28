@@ -51,7 +51,8 @@ object RestServlet {
   private final class ClientGoneException(cause: Throwable) extends IOException(cause)
 
   private def write(op: => Unit): Unit =
-    try op catch { case NonFatal(e) if isClientGone(e) => throw new ClientGoneException(e) }
+    try op
+    catch { case NonFatal(e) if isClientGone(e) => throw new ClientGoneException(e) }
 
   private def timedOutMessage(timeout: FiniteDuration): String = s"server operation timed out after $timeout"
 
@@ -83,7 +84,8 @@ object RestServlet {
 
         private def locked[T](code: => T): T = {
           lock.lock()
-          try code finally lock.unlock()
+          try code
+          finally lock.unlock()
         }
 
         scheduleTick()
@@ -95,21 +97,22 @@ object RestServlet {
         // thread for as long as a write to a slow client.
         def run(): Unit =
           if (!lock.tryLock()) scheduleTick()
-          else try {
-            if (!isDone) {
-              if (active || processing) {
-                active = false
-                quietTicks = 0
-              } else quietTicks += 1
+          else
+            try {
+              if (!isDone) {
+                if (active || processing) {
+                  active = false
+                  quietTicks = 0
+                } else quietTicks += 1
 
-              if (quietTicks < IdleTicks) scheduleTick()
-              else {
-                isDone = true
-                try downstream.onError(new IdleTimeoutException(timeout))
-                finally main.cancel()
+                if (quietTicks < IdleTicks) scheduleTick()
+                else {
+                  isDone = true
+                  try downstream.onError(new IdleTimeoutException(timeout))
+                  finally main.cancel()
+                }
               }
-            }
-          } finally lock.unlock()
+            } finally lock.unlock()
 
         def onNext(elem: A): Future[Ack] = {
           def finishProcessing(): Ack = {
@@ -163,27 +166,32 @@ object RestServlet {
   private[rest] def handleTimeoutBound(handleTimeout: FiniteDuration): Opt[FiniteDuration] =
     handleTimeout.opt.filter(_.toMillis > 0)
 
-  /**
-   * Wraps an implementation of some REST API trait into a Java Servlet.
-   *
-   * @param apiImpl                   implementation of some REST API trait
-   * @param handleTimeout             bound for calls without [[io.udash.rest.timeout timeout]], see [[RestServlet]]
-   * @param maxPayloadSize            maximum acceptable incoming payload size, in bytes;
-   *                                  if exceeded, `413 Payload Too Large` response will be sent back
-   * @param defaultStreamingBatchSize default batch when streaming [[StreamedBody.JsonList]]
-   * @param cancelOnDisconnect        whether to cancel the handler `Task` when the container reports that the
-   *                                  client went away; see [[RestServlet.cancelOnDisconnect]]
-   * @param timer                     runs the timeouts of calls, see [[RestServlet]]
-   */
-  @explicitGenerics def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
+  /** Wraps an implementation of some REST API trait into a Java Servlet.
+    *
+    * @param apiImpl
+    *   implementation of some REST API trait
+    * @param handleTimeout
+    *   bound for calls without [[io.udash.rest.timeout timeout]], see [[RestServlet]]
+    * @param maxPayloadSize
+    *   maximum acceptable incoming payload size, in bytes; if exceeded, `413 Payload Too Large` response will be sent
+    *   back
+    * @param defaultStreamingBatchSize
+    *   default batch when streaming [[StreamedBody.JsonList]]
+    * @param cancelOnDisconnect
+    *   whether to cancel the handler `Task` when the container reports that the client went away; see
+    *   [[RestServlet.cancelOnDisconnect]]
+    * @param timer
+    *   runs the timeouts of calls, see [[RestServlet]]
+    */
+  @explicitGenerics
+  def apply[RestApi: RawRest.AsRawRpc: RestMetadata](
     apiImpl: RestApi,
     handleTimeout: FiniteDuration = DefaultHandleTimeout,
     maxPayloadSize: Long = DefaultMaxPayloadSize,
     defaultStreamingBatchSize: Int = DefaultStreamingBatchSize,
     cancelOnDisconnect: Boolean = DefaultCancelOnDisconnect,
     timer: OptArg[Scheduler] = OptArg.Empty,
-  )(implicit
-    scheduler: Scheduler
+  )(implicit scheduler: Scheduler
   ): RestServlet =
     new RestServlet(
       handleRequest = RawRest.asHandleRequestWithStreaming[RestApi](apiImpl),
@@ -194,14 +202,13 @@ object RestServlet {
       timer = timer,
     )
 
-  @bincompat private[rest] def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
+  @bincompat private[rest] def apply[RestApi: RawRest.AsRawRpc: RestMetadata](
     apiImpl: RestApi,
     handleTimeout: FiniteDuration,
     maxPayloadSize: Long,
     defaultStreamingBatchSize: Int,
     cancelOnDisconnect: Boolean,
-  )(implicit
-    scheduler: Scheduler
+  )(implicit scheduler: Scheduler
   ): RestServlet = apply[RestApi](
     apiImpl,
     handleTimeout = handleTimeout,
@@ -211,12 +218,11 @@ object RestServlet {
     timer = OptArg.Empty,
   )
 
-  @bincompat private[rest] def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
+  @bincompat private[rest] def apply[RestApi: RawRest.AsRawRpc: RestMetadata](
     apiImpl: RestApi,
-    handleTimeout: FiniteDuration ,
+    handleTimeout: FiniteDuration,
     maxPayloadSize: Long,
-  )(implicit
-    scheduler: Scheduler
+  )(implicit scheduler: Scheduler
   ): RestServlet = apply[RestApi](
     apiImpl,
     handleTimeout = handleTimeout,
@@ -226,13 +232,13 @@ object RestServlet {
     timer = OptArg.Empty,
   )
 
-  @bincompat def apply[RestApi: RawRest.AsRawRpc : RestMetadata](
+  @bincompat
+  def apply[RestApi: RawRest.AsRawRpc: RestMetadata](
     apiImpl: RestApi,
     handleTimeout: FiniteDuration,
     maxPayloadSize: Long,
     defaultStreamingBatchSize: Int,
-  )(implicit
-    scheduler: Scheduler
+  )(implicit scheduler: Scheduler
   ): RestServlet = apply[RestApi](
     apiImpl,
     handleTimeout = handleTimeout,
@@ -243,39 +249,35 @@ object RestServlet {
   )
 }
 
-/**
- * @param handleRequest      the handler of REST requests. Only a handler that resolves calls, i.e. one made by
- *                           `RawRest.asHandleRequest*` or `RawRest.withTimeouts`, or one of these wrapped with
- *                           `RawRest.wrapHandleRequest`, has its calls bound by their [[io.udash.rest.timeout timeout]];
- *                           any other gets `handleTimeout` for all of them.
- * @param handleTimeout      bound for calls without [[io.udash.rest.timeout timeout]]: a call that has not answered
- *                           within it gets a 500 and is cancelled, and a streamed response ends once it has emitted
- *                           nothing for that long. `timer` runs the former, `scheduler` the latter.
- *                           Neither counts time spent writing to the client, which the container bounds, e.g. by
- *                           Jetty's connector idle timeout. One under a millisecond sets no bound, as for the
- *                           container's own async timeout.
- * @param cancelOnDisconnect cancel the handler `Task` when the container reports that the client went away, instead
- *                           of letting it run until it completes or times out. Other asynchronous failures never
- *                           cancel it. Off by default: an ordinary client abort (browser navigation, a client-side
- *                           timeout, a load balancer reset) would otherwise interrupt a side-effecting handler
- *                           mid-flight, so enable it once handlers are known to be cancellation-safe. Note that
- *                           detection is transport dependent: `AsyncListener.onError` is only raised for protocols
- *                           where the client's abort reaches the server on a connection it is already reading, e.g.
- *                           HTTP/2 `RST_STREAM`. An aborted HTTP/1.1 request is not reported while the async cycle is
- *                           idle, so it is still bounded by the call's timeout. Neither is an abort arriving before
- *                           the container's dispatch of the request has returned, i.e. while `service` or an enclosing
- *                           filter is still running: the handler then runs until it finishes or a write fails, bounded
- *                           by the call's timeout. Independently of this setting, nothing is written into a request
- *                           the container has already completed, so a streamed response is abandoned at the next
- *                           chunk.
- * @param timer              runs the timeouts of calls, `scheduler` if empty. A call that times out while `scheduler`
- *                           has no free thread gets its 500 only once one frees up, so pass a dedicated one if
- *                           handlers may block all of its threads, e.g. `Scheduler(executor)` over a
- *                           `ScheduledThreadPoolExecutor` with `setRemoveOnCancelPolicy(true)`. Without that policy,
- *                           as in `Scheduler.fixedPool` and `Scheduler.singleThread`, the timeout of every call
- *                           answered in time stays queued until it would have fired. That also holds for `scheduler`
- *                           when it is used instead of a `timer`; `Scheduler.global` does not retain them.
- */
+/** @param handleRequest
+  *   the handler of REST requests. Only a handler that resolves calls, i.e. one made by `RawRest.asHandleRequest*` or
+  *   `RawRest.withTimeouts`, or one of these wrapped with `RawRest.wrapHandleRequest`, has its calls bound by their
+  *   [[io.udash.rest.timeout timeout]]; any other gets `handleTimeout` for all of them.
+  * @param handleTimeout
+  *   bound for calls without [[io.udash.rest.timeout timeout]]: a call that has not answered within it gets a 500 and
+  *   is cancelled, and a streamed response ends once it has emitted nothing for that long. `timer` runs the former,
+  *   `scheduler` the latter. Neither counts time spent writing to the client, which the container bounds, e.g. by
+  *   Jetty's connector idle timeout. One under a millisecond sets no bound, as for the container's own async timeout.
+  * @param cancelOnDisconnect
+  *   cancel the handler `Task` when the container reports that the client went away, instead of letting it run until it
+  *   completes or times out. Other asynchronous failures never cancel it. Off by default: an ordinary client abort
+  *   (browser navigation, a client-side timeout, a load balancer reset) would otherwise interrupt a side-effecting
+  *   handler mid-flight, so enable it once handlers are known to be cancellation-safe. Note that detection is transport
+  *   dependent: `AsyncListener.onError` is only raised for protocols where the client's abort reaches the server on a
+  *   connection it is already reading, e.g. HTTP/2 `RST_STREAM`. An aborted HTTP/1.1 request is not reported while the
+  *   async cycle is idle, so it is still bounded by the call's timeout. Neither is an abort arriving before the
+  *   container's dispatch of the request has returned, i.e. while `service` or an enclosing filter is still running:
+  *   the handler then runs until it finishes or a write fails, bounded by the call's timeout. Independently of this
+  *   setting, nothing is written into a request the container has already completed, so a streamed response is
+  *   abandoned at the next chunk.
+  * @param timer
+  *   runs the timeouts of calls, `scheduler` if empty. A call that times out while `scheduler` has no free thread gets
+  *   its 500 only once one frees up, so pass a dedicated one if handlers may block all of its threads, e.g.
+  *   `Scheduler(executor)` over a `ScheduledThreadPoolExecutor` with `setRemoveOnCancelPolicy(true)`. Without that
+  *   policy, as in `Scheduler.fixedPool` and `Scheduler.singleThread`, the timeout of every call answered in time stays
+  *   queued until it would have fired. That also holds for `scheduler` when it is used instead of a `timer`;
+  *   `Scheduler.global` does not retain them.
+  */
 class RestServlet(
   handleRequest: RawRest.HandleRequestWithStreaming,
   handleTimeout: FiniteDuration = DefaultHandleTimeout,
@@ -284,9 +286,9 @@ class RestServlet(
   customLogger: OptArg[Logger] = OptArg.Empty,
   cancelOnDisconnect: Boolean = DefaultCancelOnDisconnect,
   timer: OptArg[Scheduler] = OptArg.Empty,
-)(implicit
-  scheduler: Scheduler
-) extends HttpServlet with LazyLogging {
+)(implicit scheduler: Scheduler
+) extends HttpServlet
+    with LazyLogging {
 
   import RestServlet.*
 
@@ -297,8 +299,7 @@ class RestServlet(
     defaultStreamingBatchSize: Int,
     customLogger: OptArg[Logger],
     cancelOnDisconnect: Boolean,
-  )(implicit
-    scheduler: Scheduler
+  )(implicit scheduler: Scheduler
   ) = this(
     handleRequest,
     handleTimeout,
@@ -315,8 +316,7 @@ class RestServlet(
     maxPayloadSize: Long,
     defaultStreamingBatchSize: Int,
     customLogger: OptArg[Logger],
-  )(implicit
-    scheduler: Scheduler
+  )(implicit scheduler: Scheduler
   ) = this(
     handleRequest,
     handleTimeout,
@@ -336,9 +336,11 @@ class RestServlet(
     case resolving: RawRest.ResolvingHandleRequest[AbstractRestResponse] => resolving.resolve
     case _ =>
       // debug, as a servlet built per request would log it for each
-      logger.debug("RestServlet's handler does not resolve calls, so @timeout does not apply to them. " +
-        "Apply RawRest.withTimeouts to it, or wrap the RawRest.asHandleRequest* handler itself with " +
-        "RawRest.wrapHandleRequest instead of a function, for @timeout to apply.")
+      logger.debug(
+        "RestServlet's handler does not resolve calls, so @timeout does not apply to them. " +
+          "Apply RawRest.withTimeouts to it, or wrap the RawRest.asHandleRequest* handler itself with " +
+          "RawRest.wrapHandleRequest instead of a function, for @timeout to apply."
+      )
       request => (Opt.Empty, Task.defer(handleRequest(request)))
   }
 
@@ -356,7 +358,8 @@ class RestServlet(
 
     def locked[T](code: => T): T = {
       completion.lock()
-      try code finally completion.unlock()
+      try code
+      finally completion.unlock()
     }
 
     // Returns whether this call claimed the completion. Serialized so that onError returns only once a completion
@@ -437,7 +440,8 @@ class RestServlet(
     val pendingTimeOut = new AtomicReference[Runnable]
     val timeoutTimer = timeout.map { t =>
       pendingTimeOut.set(timeOut(t))
-      timeoutScheduler.scheduleOnce(t.toMillis, TimeUnit.MILLISECONDS, () => pendingTimeOut.getAndSet(null).opt.foreach(_.run()))
+      timeoutScheduler
+        .scheduleOnce(t.toMillis, TimeUnit.MILLISECONDS, () => pendingTimeOut.getAndSet(null).opt.foreach(_.run()))
     }
     // Cancels only a timer that has not claimed the head: Monix may interrupt a running task it cancels, which would
     // cut the timer's 500 short
@@ -447,35 +451,43 @@ class RestServlet(
       true
     }
 
-    cancelable := (for {
-      restResponse <- handle
-      claimed <- Task(claimHead())
-      _ <- Task.when(claimed)(unlessCompleted(completed)(setResponseHeaders(response, restResponse.code, restResponse.headers)))
-      // the timer has answered, possibly before completed is set, so the response is only drained
-      _ <- writeResponseBody(response, restResponse, if (claimed) completed else new AtomicBoolean(true), timeout)
-    } yield claimed).executeAsync.guaranteeCase { _ =>
-      // Outside executeAsync, so that it also runs for a task cancelled before it started. A timer that fires after
-      // the handler's outcome must not wait on completeWith while that outcome is written.
-      Task(claimHead()).void
-    }.runAsync {
-      case Right(false) =>
-        // the timer claimed the head, and it completes the request itself
-      case Right(true) =>
-        completeWith(())
-      case Left(e: HttpErrorException) =>
-        completeWith(writeResponse(response, e.toResponse))
-      case Left(e: ClientGoneException) =>
-        logger.warn("Request was cancelled by the client during REST response", e.getCause)
-        completeWith(())
-      case Left(e: IdleTimeoutException) =>
-        if (completeWith(writeFailure(response, e.getMessage.opt)))
-          logger.warn(s"REST request timed out: its stream emitted nothing for ${e.timeout} before the response was sent")
-      case Left(e) if completed.get =>
-        logger.warn("REST handler failed after the request had already been completed by a timeout or a disconnect", e)
-      case Left(e) =>
-        logger.error("Failed to handle REST request", e)
-        completeWith(writeFailure(response, e.getMessage.opt))
-    }
+    cancelable :=
+      (for {
+        restResponse <- handle
+        claimed <- Task(claimHead())
+        _ <- Task.when(claimed)(
+          unlessCompleted(completed)(setResponseHeaders(response, restResponse.code, restResponse.headers))
+        )
+        // the timer has answered, possibly before completed is set, so the response is only drained
+        _ <- writeResponseBody(response, restResponse, if (claimed) completed else new AtomicBoolean(true), timeout)
+      } yield claimed).executeAsync
+        .guaranteeCase { _ =>
+          // Outside executeAsync, so that it also runs for a task cancelled before it started. A timer that fires after
+          // the handler's outcome must not wait on completeWith while that outcome is written.
+          Task(claimHead()).void
+        }
+        .runAsync {
+          case Right(false) =>
+          // the timer claimed the head, and it completes the request itself
+          case Right(true) =>
+            completeWith(())
+          case Left(e: HttpErrorException) =>
+            completeWith(writeResponse(response, e.toResponse))
+          case Left(e: ClientGoneException) =>
+            logger.warn("Request was cancelled by the client during REST response", e.getCause)
+            completeWith(())
+          case Left(e: IdleTimeoutException) =>
+            if (completeWith(writeFailure(response, e.getMessage.opt)))
+              logger.warn(
+                s"REST request timed out: its stream emitted nothing for ${e.timeout} before the response was sent"
+              )
+          case Left(e) if completed.get =>
+            logger
+              .warn("REST handler failed after the request had already been completed by a timeout or a disconnect", e)
+          case Left(e) =>
+            logger.error("Failed to handle REST request", e)
+            completeWith(writeFailure(response, e.getMessage.opt))
+        }
   }
 
   // A handler may outlive its request, e.g. when uncancelable or blocking, and the response object is then already
@@ -487,10 +499,12 @@ class RestServlet(
   // cancellation. Checks completed right before writing, as the request may be completed while the chunk waits.
   private def writeStep(completed: AtomicBoolean)(op: => Unit): Task[Boolean] =
     Task.eval {
-      try !completed.get && {
-        write(op)
-        true
-      } catch {
+      try
+        !completed.get && {
+          write(op)
+          true
+        }
+      catch {
         case NonFatal(e) if e.isInstanceOf[ClientGoneException] || completed.get =>
           logAbandonedStream(e)
           false
@@ -498,15 +512,16 @@ class RestServlet(
     }
 
   private def logAbandonedStream(e: Throwable): Unit = e match {
-    case e: ClientGoneException => logger.warn("Request was cancelled by the client during streaming REST response", e.getCause)
+    case e: ClientGoneException =>
+      logger.warn("Request was cancelled by the client during streaming REST response", e.getCause)
     case e: IdleTimeoutException => logger.debug("Streaming REST response went idle while being drained", e)
     case _ => logger.warn("Streaming REST response failed after the request had already been completed", e)
   }
 
   private def setResponseHeaders(response: HttpServletResponse, code: Int, headers: IMapping[PlainValue]): Unit = {
     response.setStatus(code)
-    headers.entries.foreach {
-      case (name, PlainValue(value)) => response.addHeader(name, value)
+    headers.entries.foreach { case (name, PlainValue(value)) =>
+      response.addHeader(name, value)
     }
   }
 
@@ -551,14 +566,17 @@ class RestServlet(
     chunks: Observable[A],
     completed: AtomicBoolean,
     writeEnd: => Unit = (),
-  )(writeChunk: A => Unit): Task[Unit] =
+  )(
+    writeChunk: A => Unit
+  ): Task[Unit] =
     chunks
       .mapEval(chunk => writeStep(completed)(writeChunk(chunk)))
       // Once the request is completed, a disconnect may have cancelled the task, whose consumer would pass a failure to
       // the uncaught reporter, e.g. that of a source closed by the cancellation
-      .onErrorRecoverWith { case e if completed.get =>
-        logAbandonedStream(e)
-        Observable.now(false)
+      .onErrorRecoverWith {
+        case e if completed.get =>
+          logAbandonedStream(e)
+          Observable.now(false)
       }
       .forallL(identity)
       .flatMap(allWritten => Task.when(allWritten)(writeStep(completed)(writeEnd).void))
@@ -587,31 +605,30 @@ class RestServlet(
             response.getOutputStream.flush()
           }
       case jsonList: StreamedBody.JsonList =>
-        unlessCompleted(completed)(response.setContentType(jsonList.contentType)) >>
-          writeChunks(
-            bounded(jsonList.elements)
-              .bufferTumbling(jsonList.customBatchSize.getOrElse(defaultStreamingBatchSize))
-              .switchIfEmpty(Observable(Seq.empty))
-              .zipWithIndex,
-            completed,
-            writeEnd = response.getOutputStream.write("]".getBytes(jsonList.charset)),
-          ) { case (batch, idx) =>
-            val firstBatch = idx == 0
-            if (firstBatch) {
-              response.getOutputStream.write("[".getBytes(jsonList.charset))
-              batch.iterator.zipWithIndex.foreach { case (e, idx) =>
-                if (idx != 0) {
-                  response.getOutputStream.write(",".getBytes(jsonList.charset))
-                }
-                response.getOutputStream.write(e.value.getBytes(jsonList.charset))
-              }
-            } else
-              batch.foreach { e =>
+        unlessCompleted(completed)(response.setContentType(jsonList.contentType)) >> writeChunks(
+          bounded(jsonList.elements)
+            .bufferTumbling(jsonList.customBatchSize.getOrElse(defaultStreamingBatchSize))
+            .switchIfEmpty(Observable(Seq.empty))
+            .zipWithIndex,
+          completed,
+          writeEnd = response.getOutputStream.write("]".getBytes(jsonList.charset)),
+        ) { case (batch, idx) =>
+          val firstBatch = idx == 0
+          if (firstBatch) {
+            response.getOutputStream.write("[".getBytes(jsonList.charset))
+            batch.iterator.zipWithIndex.foreach { case (e, idx) =>
+              if (idx != 0) {
                 response.getOutputStream.write(",".getBytes(jsonList.charset))
-                response.getOutputStream.write(e.value.getBytes(jsonList.charset))
               }
-            response.getOutputStream.flush()
-          }
+              response.getOutputStream.write(e.value.getBytes(jsonList.charset))
+            }
+          } else
+            batch.foreach { e =>
+              response.getOutputStream.write(",".getBytes(jsonList.charset))
+              response.getOutputStream.write(e.value.getBytes(jsonList.charset))
+            }
+          response.getOutputStream.flush()
+        }
     }
   }.onErrorHandleWith {
     case e: ClientGoneException => Task(logAbandonedStream(e))
@@ -620,20 +637,24 @@ class RestServlet(
     case ex if !response.isCommitted =>
       // nothing has reached the client, so the failure is answered like the handler's own
       unlessCompleted(completed)(discardStreamHead(response, stream.headers)) >> Task.raiseError(ex)
-    case e: IdleTimeoutException => Task {
-      // the servlet API offers no way to abort a committed response, so a streamed one ends as if it had finished
-      logger.warn(s"Streaming REST response was cut short, so the client got it incomplete: its stream emitted " +
-        s"nothing for ${e.timeout}. Give the method a longer @timeout if the stream may pause for longer.")
-      closeFailedStream(response)
-    }
-    case ex => Task {
-      // When an error occurs during streaming, we immediately close the connection rather than
-      // attempting to send an error response. This is intentional because:
-      // The client has likely already received and started processing partial data
-      // for structured formats (like JSON arrays), the stream is now in an invalid state
-      logger.error("Failure during streaming REST response", ex)
-      closeFailedStream(response)
-    }
+    case e: IdleTimeoutException =>
+      Task {
+        // the servlet API offers no way to abort a committed response, so a streamed one ends as if it had finished
+        logger.warn(
+          s"Streaming REST response was cut short, so the client got it incomplete: its stream emitted " +
+            s"nothing for ${e.timeout}. Give the method a longer @timeout if the stream may pause for longer."
+        )
+        closeFailedStream(response)
+      }
+    case ex =>
+      Task {
+        // When an error occurs during streaming, we immediately close the connection rather than
+        // attempting to send an error response. This is intentional because:
+        // The client has likely already received and started processing partial data
+        // for structured formats (like JSON arrays), the stream is now in an invalid state
+        logger.error("Failure during streaming REST response", ex)
+        closeFailedStream(response)
+      }
   }
 
   private def writeResponseBody(

@@ -21,12 +21,16 @@ class ErrorView extends View with CssView {
     div(GlobalStyles.body, HomepageStyles.body)(
       div(HomepageStyles.errorInner)(
         p(HomepageStyles.errorHead)(
-          span(GlobalStyles.red)("Oops! 404"), br(),
+          span(GlobalStyles.red)("Oops! 404"),
+          br(),
           span(
             "The link doesn't work. Or maybe it never did? You can still ",
-            a(GlobalStyles.grey, href := "/assets/pdf/origami_crane_printok.pdf", target := "_blank")("make origami")
-          ), br(),
-          span("... or go "), a(GlobalStyles.red, href := HelloState.url)("home"), span(".")
+            a(GlobalStyles.grey, href := "/assets/pdf/origami_crane_printok.pdf", target := "_blank")("make origami"),
+          ),
+          br(),
+          span("... or go "),
+          a(GlobalStyles.red, href := HelloState.url)("home"),
+          span("."),
         )
       )
     )

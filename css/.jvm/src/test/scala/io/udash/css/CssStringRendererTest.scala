@@ -10,8 +10,7 @@ class CssStringRendererTest extends UdashSharedTest {
     "render stylesheets to string" in {
       implicit val r = scalacss.internal.StringRenderer.defaultPretty
       val renderer = new CssStringRenderer(stylesheets)
-      renderer.render().trim should be(
-        """.io-udash-css-StylesheetExample-common {
+      renderer.render().trim should be(""".io-udash-css-StylesheetExample-common {
           |  background-color: red;
           |}
           |

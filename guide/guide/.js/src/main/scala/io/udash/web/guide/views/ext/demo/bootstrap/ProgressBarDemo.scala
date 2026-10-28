@@ -20,41 +20,44 @@ object ProgressBarDemo extends AutoDemo {
     val animate = Property(true)
     val value = Property(50)
 
-    def bottomMargin: CssStyleName = {
+    def bottomMargin: CssStyleName =
       Spacing.margin(
         side = Side.Bottom,
-        size = SpacingSize.Normal
+        size = SpacingSize.Normal,
       )
-    }
 
     div(
       div(
         UdashButtonGroup()(
-          UdashButton.toggle(
-            active = showPercentage
-          )("Show percentage").render,
-          UdashButton.toggle(
-            active = animate
-          )("Animate").render
+          UdashButton
+            .toggle(
+              active = showPercentage
+            )("Show percentage")
+            .render,
+          UdashButton
+            .toggle(
+              active = animate
+            )("Animate")
+            .render,
         )
-      ), br,
+      ),
+      br,
       div(bottomMargin)(
         UdashProgressBar(
           progress = value,
           showPercentage = showPercentage,
-          barStyle = Some(Color.Success).toProperty
+          barStyle = Some(Color.Success).toProperty,
         )()
       ),
       div(bottomMargin)(
         UdashProgressBar(
           progress = value,
           showPercentage = showPercentage,
-          stripped = true.toProperty
-        )(
-          (value, min, max, nested) => Seq[Modifier](
-            nested(bind(value.combine(min)(_ - _).combine(
-              max.combine(min)(_ - _))(_ * 100 / _))
-            ), " percent"
+          stripped = true.toProperty,
+        )((value, min, max, nested) =>
+          Seq[Modifier](
+            nested(bind(value.combine(min)(_ - _).combine(max.combine(min)(_ - _))(_ * 100 / _))),
+            " percent",
           )
         )
       ),
@@ -64,14 +67,15 @@ object ProgressBarDemo extends AutoDemo {
           showPercentage = showPercentage,
           stripped = true.toProperty,
           animated = animate,
-          barStyle = Some(Color.Danger).toProperty
-        )(),
+          barStyle = Some(Color.Danger).toProperty,
+        )()
       ),
       div(bottomMargin)(
         NumberInput(value.bitransform(_.toString)(_.toInt))(
-          Form.control, placeholder := "Percentage"
+          Form.control,
+          placeholder := "Percentage",
         )
-      )
+      ),
     ).render
   }.withSourceCode
 
@@ -80,4 +84,3 @@ object ProgressBarDemo extends AutoDemo {
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
   }
 }
-

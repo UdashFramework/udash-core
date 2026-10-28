@@ -1,6 +1,5 @@
 package io.udash.web.guide.views.ext.demo.bootstrap
 
-
 import io.udash.css.CssView
 import io.udash.web.guide.demos.AutoDemo
 import io.udash.web.guide.styles.partials.GuideStyles
@@ -22,15 +21,19 @@ object DateRangePickerDemo extends AutoDemo with CssView {
     val from = Property[Option[ju.Date]](Some(new ju.Date(now - sevenDays)))
     val to = Property[Option[ju.Date]](Some(new ju.Date(now + sevenDays)))
 
-    val fromPickerOptions = ModelProperty(new UdashDatePicker.DatePickerOptions(
-      format = "MMMM Do YYYY",
-      locale = Some("en_GB")
-    ))
+    val fromPickerOptions = ModelProperty(
+      new UdashDatePicker.DatePickerOptions(
+        format = "MMMM Do YYYY",
+        locale = Some("en_GB"),
+      )
+    )
 
-    val toPickerOptions = ModelProperty(new UdashDatePicker.DatePickerOptions(
-      format = "D MMMM YYYY",
-      locale = Some("pl")
-    ))
+    val toPickerOptions = ModelProperty(
+      new UdashDatePicker.DatePickerOptions(
+        format = "D MMMM YYYY",
+        locale = Some("pl"),
+      )
+    )
 
     val fromPicker: UdashDatePicker = UdashDatePicker(from, fromPickerOptions)
     val toPicker: UdashDatePicker = UdashDatePicker(to, toPickerOptions)
@@ -43,8 +46,8 @@ object DateRangePickerDemo extends AutoDemo with CssView {
         UdashInputGroup.prependText("From"),
         UdashInputGroup.input(fromPicker.render),
         UdashInputGroup.appendText("to"),
-        UdashInputGroup.input(toPicker.render)
-      )
+        UdashInputGroup.input(toPicker.render),
+      ),
     ).render
   }.withSourceCode
 

@@ -39,13 +39,13 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
 
       val childNodes: BSeq[Node] = root.childNodes
 
-      //index of the first element produced by the binding
+      // index of the first element produced by the binding
       val firstIndex = childNodes.indexOf(firstElement)
 
-      //number of nodes produced by properties before patch index
+      // number of nodes produced by properties before patch index
       val elementsBefore = producedElementsCount.jsSlice(0, patch.idx).sum
 
-      //total number of produced nodes
+      // total number of produced nodes
       val allElements = elementsBefore + producedElementsCount.iterator.drop(patch.idx).sum
 
       // Add new elements
@@ -61,8 +61,9 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       if (patch.removed.nonEmpty) {
         def childToRemoveIdx(elIdx: Int): Int = elIdx + firstIndex + newElementsFlatten.size + elementsBefore
 
-        val nodesToRemove = (0 until producedElementsCount.jsSlice(patch.idx, patch.idx + patch.removed.size).sum)
-          .map(idx => root.childNodes(childToRemoveIdx(idx)))
+        val nodesToRemove = (0 until producedElementsCount.jsSlice(patch.idx, patch.idx + patch.removed.size).sum).map(
+          idx => root.childNodes(childToRemoveIdx(idx))
+        )
 
         val replacement = {
           // if no new elements were added and all old ones are to be removed, add a placeholder
@@ -78,9 +79,8 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
       val sizeChange = patch.added.size - patch.removed.size
       if (sizeChange > 0) producedElementsCount.insertAll(patch.idx, Seq.fill(sizeChange)(0))
       else producedElementsCount.remove(patch.idx, -sizeChange)
-      newElements.zipWithIndex.foreach {
-        case (res, idx) =>
-          producedElementsCount(patch.idx + idx) = res.size
+      newElements.zipWithIndex.foreach { case (res, idx) =>
+        producedElementsCount(patch.idx + idx) = res.size
       }
     }
 
@@ -102,5 +102,3 @@ private[bindings] trait SeqPropertyModifierUtils[T, E <: ReadableProperty[T]] ex
     }
   }
 }
-
-

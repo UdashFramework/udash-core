@@ -25,16 +25,16 @@ trait HeaderNavStyles extends CssBase {
       backgroundColor(c"rgba(0,0,0,.9)"),
       transform := "translateX(-100%)",
 
-      &.attr(Attributes.data(Attributes.Active), "true") (
+      &.attr(Attributes.data(Attributes.Active), "true")(
         transform := "translateX(0)"
-      )
-    )
+      ),
+    ),
   )
 
   val headerLinkList: CssStyle = style(
     MediaQueries.tabletPortrait(
       CommonStyleUtils.center,
-      position.absolute
+      position.absolute,
     )
   )
 
@@ -42,15 +42,15 @@ trait HeaderNavStyles extends CssBase {
     position.relative,
     display.inlineBlock,
     verticalAlign.middle,
-    paddingLeft(1.125 rem),
-    paddingRight(1.125 rem),
+    paddingLeft(1.125.rem),
+    paddingRight(1.125.rem),
 
-    &.firstChild (
-      paddingLeft(0 px)
+    &.firstChild(
+      paddingLeft(0.px)
     ),
 
-    &.lastChild (
-      paddingRight(0 px)
+    &.lastChild(
+      paddingRight(0.px)
     ),
 
     &.before.not(_.firstChild)(
@@ -64,14 +64,14 @@ trait HeaderNavStyles extends CssBase {
 
       MediaQueries.tabletPortrait(
         content.string("")
-      )
+      ),
     ),
 
     MediaQueries.tabletPortrait(
       display.block,
-      padding(.625 rem, `0`),
-      textAlign.center
-    )
+      padding(.625.rem, `0`),
+      textAlign.center,
+    ),
   )
 
   val headerLink: CssStyle = style(
@@ -87,10 +87,10 @@ trait HeaderNavStyles extends CssBase {
       content.string(" "),
       width(100 %%),
       borderBottomColor.white,
-      borderBottomWidth(1 px),
+      borderBottomWidth(1.px),
       borderBottomStyle.solid,
       transform := "scaleX(0)",
-      transformOrigin := "100% 50%"
+      transformOrigin := "100% 50%",
     ),
 
     &.hover(
@@ -102,11 +102,11 @@ trait HeaderNavStyles extends CssBase {
         color.white,
         cursor.pointer,
 
-        &.after (
+        &.after(
           transformOrigin := "0 50%",
-          transform := "scaleX(1)"
-        )
+          transform := "scaleX(1)",
+        ),
       )
-    )
+    ),
   )
 }

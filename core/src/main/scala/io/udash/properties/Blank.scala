@@ -35,5 +35,7 @@ object Blank {
   implicit def option[A]: Blank[Option[A]] = Simple(None)
   implicit def opt[A]: Blank[Opt[A]] = Simple(Opt.Empty)
   implicit def map[K, V]: Blank[Map[K, V]] = Simple(Map.empty)
-  implicit def traversable[T, A[_] <: Iterable[_]](implicit fac: CFactory[T, A[T]]): Blank[A[T]] = Simple(CrossCollections.createArray[T].to(fac))
+  implicit def traversable[T, A[_] <: Iterable[_]](implicit fac: CFactory[T, A[T]]): Blank[A[T]] = Simple(
+    CrossCollections.createArray[T].to(fac)
+  )
 }

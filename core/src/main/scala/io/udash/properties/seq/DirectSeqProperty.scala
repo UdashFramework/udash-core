@@ -8,8 +8,10 @@ import io.udash.utils.CrossCollections
 import scala.collection.Factory
 
 private[properties] final class DirectSeqProperty[A: PropertyCreator, SeqTpe[T] <: BSeq[T]](
-  override protected val parent: ReadableProperty[_])(implicit fac: Factory[A, SeqTpe[A]])
-  extends AbstractSeqProperty[A, CastableProperty[A]] with CastableProperty[BSeq[A]] {
+  override protected val parent: ReadableProperty[_]
+)(implicit fac: Factory[A, SeqTpe[A]]
+) extends AbstractSeqProperty[A, CastableProperty[A]]
+    with CastableProperty[BSeq[A]] {
 
   private val properties = CrossCollections.createArray[CastableProperty[A]]
 
@@ -31,9 +33,7 @@ private[properties] final class DirectSeqProperty[A: PropertyCreator, SeqTpe[T] 
     }
 
   override def setInitValue(t: BSeq[A]): Unit = {
-    val newProperties = Option(t)
-      .getOrElse(Seq.empty)
-      .map(value => PropertyCreator[A].newProperty(value, this))
+    val newProperties = Option(t).getOrElse(Seq.empty).map(value => PropertyCreator[A].newProperty(value, this))
     properties.insertAll(0, newProperties)
   }
 

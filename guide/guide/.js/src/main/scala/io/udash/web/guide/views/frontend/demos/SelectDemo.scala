@@ -29,10 +29,11 @@ object SelectDemo extends AutoDemo {
       UdashInputGroup.prependText("Fruits:"),
       UdashInputGroup.select(
         Select(
-          favoriteFruitString, Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty
+          favoriteFruitString,
+          Seq(Apple, Orange, Banana).map(_.toString).toSeqProperty,
         )(Select.defaultLabel, Form.control).render
       ),
-      UdashInputGroup.appendText(span(cls := "select-demo-fruits")(bind(favoriteFruit)))
+      UdashInputGroup.appendText(span(cls := "select-demo-fruits")(bind(favoriteFruit))),
     )
 
     select.render
@@ -46,10 +47,10 @@ object SelectDemo extends AutoDemo {
       div(id := "select-demo", GuideStyles.frame, GuideStyles.useBootstrap)(
         form(containerFluid)(
           div(Grid.row)(firstSelect),
-          div(Grid.row)(secondSelect)
+          div(Grid.row)(secondSelect),
         )
       ),
-      source.dropFinalLine
+      source.dropFinalLine,
     )
   }
 }

@@ -22,14 +22,19 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
     implicit val ecr: ExceptionCodecRegistry = exceptionsRegistry
 
     val inv = RpcInvocation("r{p[c\"]}Name", List(JsonStr(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}"""")))
-    val getter1 = RpcInvocation("g{}[]\",\"etter1",
-      List(JsonStr("\",a\""), JsonStr("\"B,,\""), JsonStr("\"v\""), JsonStr("\"xy,z\"")))
+    val getter1 =
+      RpcInvocation("g{}[]\",\"etter1", List(JsonStr("\",a\""), JsonStr("\"B,,\""), JsonStr("\"v\""), JsonStr("\"xy,z\"")))
     val getter2 = RpcInvocation("ge{[[\"a,sd\"]][]}t,ter2", Nil)
     val req = RpcCall(inv, getter1 :: getter2 :: Nil, "\"call1\"")
     val success = RpcResponseSuccess(JsonStr(s""""${EscapeUtils.escape("val{lu} [e1\"2]3")}""""), "\"ca{[]}ll1\"")
     val failure = RpcResponseFailure("\\ca{}[]\"\"use\\\\", "[{msg}: \"abc\"]", "\"ca{[]}ll1\"")
-    val exception = RpcResponseException(CustomException("test", 5).getClass.getName, CustomException("test", 5), "\"ca{[]}ll1\"")
-    val runtimeException = RpcResponseException(new NullPointerException("test").getClass.getName, new NullPointerException(null), "\"ca{[]}ll1\"")
+    val exception =
+      RpcResponseException(CustomException("test", 5).getClass.getName, CustomException("test", 5), "\"ca{[]}ll1\"")
+    val runtimeException = RpcResponseException(
+      new NullPointerException("test").getClass.getName,
+      new NullPointerException(null),
+      "\"ca{[]}ll1\"",
+    )
     val sealedException = RpcResponseException(classOf[SealedExceptions].getName, SealedExceptionsA(2), "\"ca{[]}ll1\"")
     val rpcFail = RpcFailure("ca{,}[]\"\"use", "[{msg}: \"abc\"]")
 
@@ -178,7 +183,6 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
           TwoItems(null, i2)
         }
 
-
         override def write(output: Output, value: TwoItems): Unit = {
           val obj = output.writeObject()
           GenCodec.write[CompleteItem](obj.writeField("i1"), value.i1)
@@ -212,7 +216,14 @@ trait RpcMessagesTestScenarios extends UdashSharedTest with Utils {
 
   def hugeTests(): Unit = {
     "serialize and deserialize huge case classes" in {
-      def cc() = TestCC(Random.nextInt(), Random.nextLong(), Random.nextInt(), Random.nextBoolean(), Random.nextString(Random.nextInt(300)), List.fill(Random.nextInt(300))('a'))
+      def cc() = TestCC(
+        Random.nextInt(),
+        Random.nextLong(),
+        Random.nextInt(),
+        Random.nextBoolean(),
+        Random.nextString(Random.nextInt(300)),
+        List.fill(Random.nextInt(300))('a'),
+      )
       def ncc() = NestedTestCC(Random.nextInt(), cc(), cc())
       def dncc(counter: Int = 0): DeepNestedTestCC =
         if (counter < 500) DeepNestedTestCC(ncc(), dncc(counter + 1))

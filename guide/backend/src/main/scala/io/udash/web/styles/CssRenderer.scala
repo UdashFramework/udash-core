@@ -9,7 +9,7 @@ import io.udash.web.guide.styles.demo.{ExampleKeyframes, ExampleStyles}
 import io.udash.web.guide.styles.partials.{GuideStyles, HeaderStyles => GuideHeaderStyles, MenuStyles => GuideMenuStyles}
 import io.udash.web.guide.styles.utils.GuideStyleUtils
 import io.udash.web.homepage.styles.HomepageDefaultStyles
-import io.udash.web.homepage.styles.partials.{HomepageStyles, ButtonsStyle => HomeButtonsStyle, DemoStyles => HomeDemoStyles, HeaderStyles => HomeHeaderStyles}
+import io.udash.web.homepage.styles.partials.{ButtonsStyle => HomeButtonsStyle, DemoStyles => HomeDemoStyles, HeaderStyles => HomeHeaderStyles, HomepageStyles}
 import scalacss.internal.{Renderer, StringRenderer}
 
 class CssRenderer(renderPretty: Boolean) {
@@ -18,7 +18,8 @@ class CssRenderer(renderPretty: Boolean) {
     else StringRenderer.formatTiny
 
   def renderHomepage(path: String): Unit = {
-    new CssFileRenderer(path,
+    new CssFileRenderer(
+      path,
       Seq(
         GlobalStyles,
         FooterStyles,
@@ -28,13 +29,15 @@ class CssRenderer(renderPretty: Boolean) {
         HomeButtonsStyle,
         HomeDemoStyles,
         HomeHeaderStyles,
-        HomepageStyles
-      ), createMain = true
+        HomepageStyles,
+      ),
+      createMain = true,
     ).render()(renderer)
   }
 
   def renderGuide(path: String): Unit = {
-    new CssFileRenderer(path,
+    new CssFileRenderer(
+      path,
       Seq(
         CommonStyleUtils,
         GlobalStyles,
@@ -47,8 +50,9 @@ class CssRenderer(renderPretty: Boolean) {
         GuideStyles,
         ExampleKeyframes,
         ExampleStyles,
-        MarkdownStyles
-      ), createMain = true
+        MarkdownStyles,
+      ),
+      createMain = true,
     ).render()(renderer)
   }
 }

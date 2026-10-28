@@ -1,6 +1,5 @@
 package io.udash.web.guide.demos.ext
 
-
 import com.avsystem.commons.jiop.JavaInterop._
 import io.udash.web.SeleniumTest
 import org.openqa.selenium.By.{ByCssSelector, ById}
@@ -12,15 +11,17 @@ class I18nDemosTest extends SeleniumTest {
     "contain working frontend translations demo" in {
       driver.navigate().refresh()
 
-      //runDemo("frontend-translations-demo")()
+      // runDemo("frontend-translations-demo")()
       def demo = findElementById("frontend-translations-demo")
 
       eventually {
         val elements = demo.findElements(new ByCssSelector("li"))
-        val translations: Map[String, String] = elements.asScala.map(item => {
-          val parts = item.getText.split(":")
-          (parts(0).trim, parts(1).trim)
-        }).toMap[String, String]
+        val translations: Map[String, String] = elements.asScala
+          .map { item =>
+            val parts = item.getText.split(":")
+            (parts(0).trim, parts(1).trim)
+          }
+          .toMap[String, String]
 
         verifyEnTranslations(translations)
       }
@@ -29,16 +30,18 @@ class I18nDemosTest extends SeleniumTest {
     "contain working remote translations demo" in {
       driver.navigate().refresh()
 
-      //val translations = runDemo("rpc-translations-demo")()
-      //verifyPlTranslations(translations)
+      // val translations = runDemo("rpc-translations-demo")()
+      // verifyPlTranslations(translations)
       def demo = findElementById("rpc-translations-demo")
 
       eventually {
         val elements = demo.findElements(new ByCssSelector("li"))
-        val translations: Map[String, String] = elements.asScala.map(item => {
-          val parts = item.getText.split(":")
-          (parts(0).trim, parts(1).trim)
-        }).toMap[String, String]
+        val translations: Map[String, String] = elements.asScala
+          .map { item =>
+            val parts = item.getText.split(":")
+            (parts(0).trim, parts(1).trim)
+          }
+          .toMap[String, String]
 
         verifyPlTranslations(translations)
       }
@@ -55,10 +58,12 @@ class I18nDemosTest extends SeleniumTest {
 
       def elements = demo.findElements(new ByCssSelector("li"))
 
-      def translations: Map[String, String] = elements.asScala.map(item => {
-        val parts = item.getText.split(":")
-        (parts(0).trim, parts(1).trim)
-      }).toMap[String, String]
+      def translations: Map[String, String] = elements.asScala
+        .map { item =>
+          val parts = item.getText.split(":")
+          (parts(0).trim, parts(1).trim)
+        }
+        .toMap[String, String]
 
       for (_ <- 1 to 5) {
         enButton.click()

@@ -33,12 +33,10 @@ class RestValidationTest extends AnyFunSuite with DefaultRestImplicits {
     val failure = intercept[InvalidRestApiException] {
       RestMetadata.materialize[Api1].ensureValid()
     }
-    assert(failure.getMessage ==
-      """REST API has ambiguous paths:
+    assert(failure.getMessage == """REST API has ambiguous paths:
         |GET /p may result from multiple calls:
         |  g1
-        |  g2""".stripMargin
-    )
+        |  g2""".stripMargin)
   }
 
   trait PrefixApi1 {
@@ -55,8 +53,10 @@ class RestValidationTest extends AnyFunSuite with DefaultRestImplicits {
     val failure = intercept[InvalidRestApiException] {
       RestMetadata.materialize[PrefixApi1].ensureValid()
     }
-    assert(failure.getMessage ==
-      "Header parameter x-lol of post collides with header parameter of the same (case insensitive) name in prefix prefix")
+    assert(
+      failure.getMessage ==
+        "Header parameter x-lol of post collides with header parameter of the same (case insensitive) name in prefix prefix"
+    )
   }
 
   trait PrefixApi2 {
@@ -73,8 +73,10 @@ class RestValidationTest extends AnyFunSuite with DefaultRestImplicits {
     val failure = intercept[InvalidRestApiException] {
       RestMetadata.materialize[PrefixApi2].ensureValid()
     }
-    assert(failure.getMessage ==
-      "Query parameter lol of post collides with query parameter of the same name in prefix prefix")
+    assert(
+      failure.getMessage ==
+        "Query parameter lol of post collides with query parameter of the same name in prefix prefix"
+    )
   }
 
   trait TimeoutApi {

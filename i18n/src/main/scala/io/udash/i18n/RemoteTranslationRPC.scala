@@ -6,6 +6,7 @@ import scala.concurrent.Future
 
 /** RPC interface for Udash i18n handling on server-side. */
 trait RemoteTranslationRPC {
+
   /** Returns text to replace translation key. */
   def loadTemplate(key: String)(implicit lang: Lang): Future[String] =
     loadTemplateForLang(lang, key)

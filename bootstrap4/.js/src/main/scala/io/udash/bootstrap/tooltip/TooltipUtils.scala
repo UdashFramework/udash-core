@@ -23,8 +23,9 @@ trait Tooltip extends Listenable {
   /** Toggles tooltip visibility. */
   def toggle(): Unit
 
-  /** Hides and destroys an element's popover.
-    * Check <a href="http://getbootstrap.com/docs/4.1/components/popovers/#methods">Bootstrap Docs</a> for more details. */
+  /** Hides and destroys an element's popover. Check <a
+    * href="http://getbootstrap.com/docs/4.1/components/popovers/#methods">Bootstrap Docs</a> for more details.
+    */
   def destroy(): Unit
 
   private[tooltip] def on(selector: JQuery, event: EventName, callback: JQueryCallback): Unit = {
@@ -78,37 +79,50 @@ abstract class TooltipUtils[TooltipType <: Tooltip] {
     final val Manual: Value = new Trigger("manual")
   }
 
-  /**
-    * Adds tooltip/popover to provided element.
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/tooltips/">Bootstrap Docs (Tooltip)</a>.
-    * More: <a href="http://getbootstrap.com/docs/4.1/components/popovers/">Bootstrap Docs (Popover)</a>.
+  /** Adds tooltip/popover to provided element. More: <a
+    * href="http://getbootstrap.com/docs/4.1/components/tooltips/">Bootstrap Docs (Tooltip)</a>. More: <a
+    * href="http://getbootstrap.com/docs/4.1/components/popovers/">Bootstrap Docs (Popover)</a>.
     *
-    * @param animation Apply a CSS fade transition to the popover.
-    * @param boundary  Keeps the popover within the bounds of this element.
-    * @param container Appends the popover to a specific element.
-    * @param content   Popover content.
-    * @param delay     Show/hide delay.
-    * @param html      Treat content and title as HTML.
-    * @param offset    Offset of the popover relative to its target.
-    * @param placement Tooltip/popover placement.
-    * @param template  Tooltip/popover template.
-    * @param title     Component title.
-    * @param trigger   Triggers to show/hide tooltip.
-    * @param el        Node which will own the created tooltip/popover.
+    * @param animation
+    *   Apply a CSS fade transition to the popover.
+    * @param boundary
+    *   Keeps the popover within the bounds of this element.
+    * @param container
+    *   Appends the popover to a specific element.
+    * @param content
+    *   Popover content.
+    * @param delay
+    *   Show/hide delay.
+    * @param html
+    *   Treat content and title as HTML.
+    * @param offset
+    *   Offset of the popover relative to its target.
+    * @param placement
+    *   Tooltip/popover placement.
+    * @param template
+    *   Tooltip/popover template.
+    * @param title
+    *   Component title.
+    * @param trigger
+    *   Triggers to show/hide tooltip.
+    * @param el
+    *   Node which will own the created tooltip/popover.
     */
   def apply(
     animation: Boolean = true,
     boundary: String | dom.Node = "scrollParent",
     container: Option[String | dom.Node] = None,
     content: js.Function1[dom.Node, String] | dom.Node = io.udash.emptyStringNode(),
-    delay: Delay | Long = Delay(0 millis, 0 millis),
+    delay: Delay | Long = Delay(0.millis, 0.millis),
     html: Boolean = false,
     offset: Int | String = "0",
     placement: Placement = defaultPlacement,
     template: Option[String] = None,
     title: String | js.Function1[dom.Node, String] | dom.Node = "",
-    trigger: Seq[Trigger] = defaultTrigger
-  )(el: dom.Node): TooltipType =
+    trigger: Seq[Trigger] = defaultTrigger,
+  )(
+    el: dom.Node
+  ): TooltipType =
     initTooltip(
       js.Dictionary(
         "animation" -> animation,
@@ -121,7 +135,7 @@ abstract class TooltipUtils[TooltipType <: Tooltip] {
         "placement" -> placement.jsValue,
         "template" -> template.getOrElse(defaultTemplate),
         "title" -> title,
-        "trigger" -> trigger.map(_.jsValue).mkString(" ")
+        "trigger" -> trigger.map(_.jsValue).mkString(" "),
       )
     )(el)
 

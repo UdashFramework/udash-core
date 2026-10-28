@@ -35,7 +35,8 @@ class RestServletLifecycleTest extends UdashSharedTest {
       val handler = new ServletContextHandler()
       handler.addServlet(new ServletHolder(servlet), "/*")
       server.setHandler(handler)
-      def ping(): Int = client.send(request(server, "ping").GET().build(), HttpResponse.BodyHandlers.discarding()).statusCode()
+      def ping(): Int =
+        client.send(request(server, "ping").GET().build(), HttpResponse.BodyHandlers.discarding()).statusCode()
       try {
         server.start()
         assert(ping() == 204)
@@ -56,8 +57,10 @@ class RestServletLifecycleTest extends UdashSharedTest {
       server.setHandler(handler)
       try {
         server.start()
-        val answer = client.sendAsync(request(server, "hang").POST(HttpRequest.BodyPublishers.noBody()).build(),
-          HttpResponse.BodyHandlers.discarding())
+        val answer = client.sendAsync(
+          request(server, "hang").POST(HttpRequest.BodyPublishers.noBody()).build(),
+          HttpResponse.BodyHandlers.discarding(),
+        )
         assert(started.await(2, TimeUnit.SECONDS), "the call never started")
         servlet.destroy()
         assert(answer.get(8, TimeUnit.SECONDS).statusCode() == 500)

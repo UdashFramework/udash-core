@@ -18,16 +18,15 @@ object AccordionDemo extends AutoDemo {
 
     val accordion = UdashAccordion(news)(
       (news, _) => span(news.get).render,
-      (_, _) => div(
-        Card.card, Card.body, Background.color(Color.Light)
-      )(ul(repeat(events)(event =>
-        li(event.get.toString).render
-      ))).render
+      (_, _) =>
+        div(
+          Card.card,
+          Card.body,
+          Background.color(Color.Light),
+        )(ul(repeat(events)(event => li(event.get.toString).render))).render,
     )
 
-    news.elemProperties.map(accordion.collapseOf)
-      .filter(_.isDefined)
-      .foreach(_.get.listen { case ev => events.append(ev) })
+    news.elemProperties.map(accordion.collapseOf).filter(_.isDefined).foreach(_.get.listen { case ev => events.append(ev) })
 
     div(accordion.render).render
   }.withSourceCode
@@ -37,4 +36,3 @@ object AccordionDemo extends AutoDemo {
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
   }
 }
-

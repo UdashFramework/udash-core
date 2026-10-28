@@ -25,18 +25,17 @@ object InputGroupDemo extends AutoDemo with CssView {
       UdashInputGroup(Some(BootstrapStyles.Size.Large).toProperty)(
         UdashInputGroup.prependText(
           "https://example.com/users/",
-          bind(vanityUrl)
+          bind(vanityUrl),
         ),
         UdashInputGroup.input(TextInput(vanityUrl)().render),
         UdashInputGroup.append(
           UdashButton(disabled = buttonDisabled)("Go!").render,
-          button.render
-        )
-      )
+          button.render,
+        ),
+      ),
     ).render
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, String) =
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
 }
-

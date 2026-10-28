@@ -7,12 +7,14 @@ class AuthPresenterTest extends UdashFrontendTest with AuthTestUtils with AuthFr
 
   "AuthPresenter" should {
     "throw an exception if user is not authenticated" in {
-      class SomePresenter extends AuthPresenter[SomeState.type](AllowAll, requireAuthenticated = false)(UnauthenticatedUser)
+      class SomePresenter
+        extends AuthPresenter[SomeState.type](AllowAll, requireAuthenticated = false)(UnauthenticatedUser)
 
       val p = new SomePresenter
       p.handleState(SomeState)
 
-      class SomePresenter2 extends AuthPresenter[SomeState.type](AllowAll, requireAuthenticated = true)(UnauthenticatedUser)
+      class SomePresenter2
+        extends AuthPresenter[SomeState.type](AllowAll, requireAuthenticated = true)(UnauthenticatedUser)
 
       val p2 = new SomePresenter2
       intercept[UnauthenticatedException] {

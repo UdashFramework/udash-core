@@ -18,31 +18,31 @@ object CarouselDemo extends AutoDemo with CssView {
     import scala.concurrent.duration._
     import scala.util.Random
 
-    def randomString(): String = {
+    def randomString(): String =
       Random.nextLong().toString
-    }
 
-    def newSlide(): UdashCarouselSlide = {
+    def newSlide(): UdashCarouselSlide =
       UdashCarouselSlide(
         Url("/assets/images/ext/bootstrap/carousel.jpg")
       )(
         h3(randomString()),
-        p(randomString())
+        p(randomString()),
       )
-    }
 
     val slides = SeqProperty((1 to 5).map(_ => newSlide()))
     val active = Property(false)
-    val animationOptions = active.transform(a => AnimationOptions(
-      interval = 2.seconds,
-      keyboard = false,
-      active = a
-    ))
+    val animationOptions = active.transform(a =>
+      AnimationOptions(
+        interval = 2.seconds,
+        keyboard = false,
+        active = a,
+      )
+    )
 
     val carousel = UdashCarousel(
       slides = slides,
       activeSlide = Property(1),
-      animationOptions = animationOptions
+      animationOptions = animationOptions,
     ) { case (slide, nested) => nested(produce(slide)(_.render)) }
 
     val prevButton = UdashButton()("Prev")
@@ -58,24 +58,25 @@ object CarouselDemo extends AutoDemo with CssView {
     div(
       div(
         UdashButtonToolbar()(
-          UdashButton.toggle(active = active)(
-            "Run animation"
-          ).render,
+          UdashButton
+            .toggle(active = active)(
+              "Run animation"
+            )
+            .render,
           UdashButtonGroup()(
             prevButton.render,
-            nextButton.render
+            nextButton.render,
           ).render,
           UdashButtonGroup()(
             prependButton.render,
-            appendButton.render
-          ).render
+            appendButton.render,
+          ).render,
         )
       ),
-      div(carousel.render)
+      div(carousel.render),
     ).render
   }.withSourceCode
 
   override protected def demoWithSource(): (Modifier, String) =
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
 }
-

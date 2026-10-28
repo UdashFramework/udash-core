@@ -231,7 +231,10 @@ trait BootstrapStyles {
     def wrapReverse(breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
       CssStyleName(s"flex${breakpoint.classMarker}-wrap-reverse")
 
-    def justifyContent(justification: FlexContentJustification, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
+    def justifyContent(
+      justification: FlexContentJustification,
+      breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All,
+    ) =
       CssStyleName(s"justify-content${breakpoint.classMarker}${justification.classMarker}")
 
     def alignItems(align: FlexAlign, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All) =
@@ -500,10 +503,18 @@ trait BootstrapStyles {
   }
 
   object Spacing {
-    def margin(side: Side = Side.All, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: SpacingSize = SpacingSize.Normal) =
+    def margin(
+      side: Side = Side.All,
+      breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All,
+      size: SpacingSize = SpacingSize.Normal,
+    ) =
       CssStyleName(s"m${side.classMarker}${breakpoint.classMarker}${size.classMarker}")
 
-    def padding(side: Side = Side.All, breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All, size: SpacingSize = SpacingSize.Normal) =
+    def padding(
+      side: Side = Side.All,
+      breakpoint: ResponsiveBreakpoint = ResponsiveBreakpoint.All,
+      size: SpacingSize = SpacingSize.Normal,
+    ) =
       CssStyleName(s"p${side.classMarker}${breakpoint.classMarker}${size.classMarker}")
   }
 
@@ -619,25 +630,24 @@ object BootstrapStyles extends BootstrapStyles {
     final val Print: Value = new ResponsiveBreakpoint("-print")
   }
 
-  final class Side(val classMarker: String, val longClassMarker: String)(implicit enumCtx: EnumCtx) extends AbstractValueEnum
+  final class Side(val classMarker: String, val longClassMarker: String)(implicit enumCtx: EnumCtx)
+    extends AbstractValueEnum
   object Side extends AbstractValueEnumCompanion[Side] {
     final val All: Value = new Side("", "")
     final val Top: Value = new Side("t", "-top")
     final val Bottom: Value = new Side("b", "-bottom")
     final val Left: Value = new Side("l", "-left")
     final val Right: Value = new Side("r", "-right")
-    /**
-      * This value is not always supported by Bootstrap.
-      * It works with spacing, but you cannot use it with borders methods. <br/>
-      * More: <a href="https://getbootstrap.com/docs/4.1/utilities/spacing/">Spacing Docs</a> and
-      * <a href="https://getbootstrap.com/docs/4.1/utilities/borders/">Borders Docs</a>
+
+    /** This value is not always supported by Bootstrap. It works with spacing, but you cannot use it with borders
+      * methods. <br/> More: <a href="https://getbootstrap.com/docs/4.1/utilities/spacing/">Spacing Docs</a> and <a
+      * href="https://getbootstrap.com/docs/4.1/utilities/borders/">Borders Docs</a>
       */
     final val X: Value = new Side("x", "")
-    /**
-      * This value is not always supported by Bootstrap.
-      * It works with spacing, but you cannot use it with borders methods. <br/>
-      * More: <a href="https://getbootstrap.com/docs/4.1/utilities/spacing/">Spacing Docs</a> and
-      * <a href="https://getbootstrap.com/docs/4.1/utilities/borders/">Borders Docs</a>
+
+    /** This value is not always supported by Bootstrap. It works with spacing, but you cannot use it with borders
+      * methods. <br/> More: <a href="https://getbootstrap.com/docs/4.1/utilities/spacing/">Spacing Docs</a> and <a
+      * href="https://getbootstrap.com/docs/4.1/utilities/borders/">Borders Docs</a>
       */
     final val Y: Value = new Side("y", "")
   }
@@ -660,6 +670,7 @@ object BootstrapStyles extends BootstrapStyles {
     final val Light: Value = new Color("-light")
     final val Dark: Value = new Color("-dark")
     final val White: Value = new Color("-white")
+
     /** This value is only supported in buttons. */
     final val Link: Value = new Color("-link")
   }

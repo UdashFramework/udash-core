@@ -6,11 +6,12 @@ import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 /** Template of a servlet handling files download. */
 abstract class FileDownloadServlet extends HttpServlet {
+
   /** Resolves a file basing on the request parameters. */
   protected def resolveFile(request: HttpServletRequest): File
 
-  /** Returned value will be send to the client as a file name.
-    * By default returns the original file name. */
+  /** Returned value will be send to the client as a file name. By default returns the original file name.
+    */
   protected def presentedFileName(name: String): String = name
 
   /** Returns MIME type of the file as string. */

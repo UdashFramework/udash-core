@@ -11,12 +11,12 @@ import scalatags.JsDom.all._
 class UdashDropdownTest extends UdashCoreFrontendTest {
   import UdashDropdown._
 
-  private val elements: Seq[DefaultDropdownItem] =Seq(
+  private val elements: Seq[DefaultDropdownItem] = Seq(
     DefaultDropdownItem.Header("Header"),
     DefaultDropdownItem.Link("Link 1", Url("#")),
     DefaultDropdownItem.Link("Link 2", Url("#")),
     DefaultDropdownItem.Divider,
-    DefaultDropdownItem.Disabled(DefaultDropdownItem.Link("Link 3", Url("#")))
+    DefaultDropdownItem.Disabled(DefaultDropdownItem.Link("Link 3", Url("#"))),
   )
 
   "UdashDropdown component" should {
@@ -42,8 +42,8 @@ class UdashDropdownTest extends UdashCoreFrontendTest {
         el.childNodes(0).asInstanceOf[Button].click()
         showCounter should be(i)
         shownCounter should be(i)
-        hideCounter should be(i-1)
-        hiddenCounter should be(i-1)
+        hideCounter should be(i - 1)
+        hiddenCounter should be(i - 1)
         el.childNodes(0).asInstanceOf[Button].click()
         showCounter should be(i)
         shownCounter should be(i)
@@ -58,7 +58,6 @@ class UdashDropdownTest extends UdashCoreFrontendTest {
       val dropdown = UdashDropdown.default(SeqProperty(elements), buttonToggle = false.toProperty)("Test")
       val el = dropdown.render
       jQ("body").append(el)
-
 
       var showCounter = 0
       var shownCounter = 0
@@ -75,8 +74,8 @@ class UdashDropdownTest extends UdashCoreFrontendTest {
         dropdown.toggle()
         showCounter should be(i)
         shownCounter should be(i)
-        hideCounter should be(i-1)
-        hiddenCounter should be(i-1)
+        hideCounter should be(i - 1)
+        hiddenCounter should be(i - 1)
         dropdown.toggle()
         showCounter should be(i)
         shownCounter should be(i)
@@ -91,7 +90,6 @@ class UdashDropdownTest extends UdashCoreFrontendTest {
       val el = dropdown.render
       jQ("body").append(el)
 
-
       var elClickCounter = 0
       var selectedItem: DefaultDropdownItem = DefaultDropdownItem.Divider
       dropdown.listen { case ev: SelectionEvent[_, _] =>
@@ -100,7 +98,7 @@ class UdashDropdownTest extends UdashCoreFrontendTest {
       }
 
       for (i <- 1 to 5) {
-        el.childNodes(1).childNodes(i-1).asInstanceOf[Button].click()
+        el.childNodes(1).childNodes(i - 1).asInstanceOf[Button].click()
         elClickCounter should be(i)
         els.get should contain(selectedItem)
       }
@@ -108,7 +106,7 @@ class UdashDropdownTest extends UdashCoreFrontendTest {
       els.elemProperties(1).set(DefaultDropdownItem.Header("Test Header 123"))
 
       for (i <- 1 to 5) {
-        el.childNodes(1).childNodes(i-1).asInstanceOf[Button].click()
+        el.childNodes(1).childNodes(i - 1).asInstanceOf[Button].click()
         elClickCounter should be(i + 5)
         els.get should contain(selectedItem)
       }
@@ -119,7 +117,6 @@ class UdashDropdownTest extends UdashCoreFrontendTest {
       val dropdown = UdashDropdown.default(els)("Test")
       val el = dropdown.render
       jQ("body").append(el)
-
 
       el.childNodes(1).childNodes.length should be(els.get.length)
 
@@ -150,7 +147,9 @@ class UdashDropdownTest extends UdashCoreFrontendTest {
       val direction = Property[Direction](Direction.Up)
       val rightAlign = Property[Boolean](true)
       val dropdown = UdashDropdown.default(
-        els, direction, rightAlign
+        els,
+        direction,
+        rightAlign,
       )(nested => Seq[Modifier]("Test", nested(bind(direction))))
       val el = dropdown.render
       jQ("body").append(el)

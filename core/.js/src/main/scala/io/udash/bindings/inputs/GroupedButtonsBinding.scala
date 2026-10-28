@@ -8,12 +8,14 @@ import scalatags.JsDom.all._
 import scala.util.Random
 
 private[inputs] class GroupedButtonsBinding[T](
-  options: ReadableSeqProperty[T], decorator: Seq[(JSInput, T)] => Seq[Node], inputModifiers: Modifier*
+  options: ReadableSeqProperty[T],
+  decorator: Seq[(JSInput, T)] => Seq[Node],
+  inputModifiers: Modifier*
 )(
   inputTpe: String,
   checkedIf: T => ReadableProperty[Boolean],
   refreshSelection: Seq[T] => Unit,
-  onChange: (JSInput, T) => Event => Unit
+  onChange: (JSInput, T) => Event => Unit,
 ) extends InputBinding[Div] {
   private val groupIdPrefix: Long = Random.nextLong()
 
@@ -26,7 +28,9 @@ private[inputs] class GroupedButtonsBinding[T](
         opts.zipWithIndex.map { case (opt, idx) =>
           val in = input(
             id := s"$groupIdPrefix-$idx", // default id, can be replaced by `inputModifiers`
-            inputModifiers, tpe := inputTpe, value := idx.toString
+            inputModifiers,
+            tpe := inputTpe,
+            value := idx.toString,
           ).render
 
           val selected = checkedIf(opt)

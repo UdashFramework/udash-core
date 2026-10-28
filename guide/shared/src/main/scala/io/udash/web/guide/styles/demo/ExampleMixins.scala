@@ -8,12 +8,15 @@ import scala.concurrent.duration.FiniteDuration
 object ExampleMixins extends CssBase {
   import dsl._
 
-  def animation(keyframes: CssStyle, duration: FiniteDuration,
-                iterationCount: AV = animationIterationCount.infinite,
-                easing: AV = animationTimingFunction.easeInOut): CssStyle = mixin(
+  def animation(
+    keyframes: CssStyle,
+    duration: FiniteDuration,
+    iterationCount: AV = animationIterationCount.infinite,
+    easing: AV = animationTimingFunction.easeInOut,
+  ): CssStyle = mixin(
     animationName(keyframes),
     iterationCount,
     animationDuration(duration),
-    easing
+    easing,
   )
 }

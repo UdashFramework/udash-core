@@ -8,17 +8,17 @@ object ExampleKeyframes extends CssBase {
   val colorPulse: CssStyle = keyframes(
     0d -> keyframe(
       color(c"#000000"),
-      backgroundColor(c"#FFFFFF")
+      backgroundColor(c"#FFFFFF"),
     ),
 
     50d -> keyframe(
       color(c"#FFFFFF"),
-      backgroundColor(c"#D9534F")
+      backgroundColor(c"#D9534F"),
     ),
 
     100d -> keyframe(
       color(c"#000000"),
-      backgroundColor(c"#FFFFFF")
-    )
+      backgroundColor(c"#FFFFFF"),
+    ),
   )
 }

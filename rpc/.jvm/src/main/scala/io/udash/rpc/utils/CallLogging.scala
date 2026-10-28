@@ -4,8 +4,7 @@ import io.udash.rpc._
 
 import scala.concurrent.Future
 
-/**
-  * ExposesServerRPC mixin simplifying RPC calls logging.
+/** ExposesServerRPC mixin simplifying RPC calls logging.
   */
 trait CallLogging[ServerRPCType] extends ExposesServerRPC[ServerRPCType] {
 
@@ -17,8 +16,8 @@ trait CallLogging[ServerRPCType] extends ExposesServerRPC[ServerRPCType] {
 
   private def handleRpcRequest(msg: RpcRequest): Unit = {
     val classMetadata =
-      msg.gettersChain.reverseIterator.foldLeft[ServerRpcMetadata[_]](metadata) {
-        (metadata, invocation) => metadata.getters(invocation.rpcName).resultMetadata.value
+      msg.gettersChain.reverseIterator.foldLeft[ServerRpcMetadata[_]](metadata) { (metadata, invocation) =>
+        metadata.getters(invocation.rpcName).resultMetadata.value
       }
 
     val methodMetadata = classMetadata.methods(msg.invocation.rpcName)

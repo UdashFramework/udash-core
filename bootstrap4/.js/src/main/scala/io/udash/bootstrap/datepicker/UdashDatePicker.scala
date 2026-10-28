@@ -10,18 +10,20 @@ import io.udash.bootstrap.utils.{BootstrapStyles, BootstrapTags, UdashBootstrapC
 import io.udash.css.{CssStyle, CssStyleName}
 import io.udash.logging.CrossLogging
 import io.udash.wrappers.jquery.*
-import org.scalajs.dom.{Element, document}
+import org.scalajs.dom.{document, Element}
 
 import scala.scalajs.js
 import scala.scalajs.js.|
 import scala.util.Try
 
 /** Wrapper for the <a href="https://github.com/tempusdominus/bootstrap-4/">Bootstrap 4 Datepicker</a>. */
-final class UdashDatePicker private[datepicker](
+final class UdashDatePicker private[datepicker] (
   val date: Property[Option[ju.Date]],
   options: ReadableProperty[UdashDatePicker.DatePickerOptions],
-  override val componentId: ComponentId
-) extends UdashBootstrapComponent with Listenable with CrossLogging {
+  override val componentId: ComponentId,
+) extends UdashBootstrapComponent
+    with Listenable
+    with CrossLogging {
 
   import UdashDatePicker.*
   import scalatags.JsDom.all.*
@@ -29,16 +31,18 @@ final class UdashDatePicker private[datepicker](
   override type EventType = UdashDatePicker.DatePickerEvent
 
   private val inp = input(
-    componentId, tpe := "text",
-    BootstrapStyles.Form.control, CssStyleName("datetimepicker-input"),
-    BootstrapTags.dataToggle := "datetimepicker", BootstrapTags.dataTarget := s"#$componentId"
+    componentId,
+    tpe := "text",
+    BootstrapStyles.Form.control,
+    CssStyleName("datetimepicker-input"),
+    BootstrapTags.dataToggle := "datetimepicker",
+    BootstrapTags.dataTarget := s"#$componentId",
   ).render
   private val jQInput = jQ(inp).asInstanceOf[UdashDatePickerJQuery]
 
   private val changeCallback = (_: Element, event: JQueryEvent) => {
-    val dateOption = event.asInstanceOf[DatePickerChangeJQEvent].option
-      .flatMap(ev => sanitizeDate(ev.date))
-      .map(momentToDate)
+    val dateOption =
+      event.asInstanceOf[DatePickerChangeJQEvent].option.flatMap(ev => sanitizeDate(ev.date)).map(momentToDate)
     val oldDateOption = date.get
     if (dateOption != oldDateOption) {
       dateOption match {
@@ -82,7 +86,8 @@ final class UdashDatePicker private[datepicker](
     propertyListeners += options.listen(opts =>
       optionsToJsDict(opts).foreach { case (optionKey, optionValue) => jQInput.datetimepicker(optionKey, optionValue) }
     )
-    propertyListeners += date.listen(optionalDate => optionalDate.foreach(date => jQInput.datetimepicker("date", dateToMoment(date))))
+    propertyListeners +=
+      date.listen(optionalDate => optionalDate.foreach(date => jQInput.datetimepicker("date", dateToMoment(date))))
     inp
   }
 
@@ -116,7 +121,7 @@ final class UdashDatePicker private[datepicker](
         jQInput.off(HideEvent, hideCallback)
         jQInput.off(ShowEvent, showCallback)
         jQInput.off(ErrorEvent, errorCallback)
-      }
+      },
     )
   }
 
@@ -133,12 +138,14 @@ final class UdashDatePicker private[datepicker](
       "stepping" -> options.stepping,
       "useCurrent" -> options.useCurrent,
       "collapse" -> options.collapse,
-      "disabledDates" -> (if (options.disabledDates.nonEmpty) options.disabledDates.map(dateToMoment).toJSArray else false),
+      "disabledDates" ->
+        (if (options.disabledDates.nonEmpty) options.disabledDates.map(dateToMoment).toJSArray else false),
       "enabledDates" -> (if (options.enabledDates.nonEmpty) options.enabledDates.map(dateToMoment).toJSArray else false),
       "icons" -> options.icons.jsDictionary,
       "useStrict" -> options.useStrict,
       "sideBySide" -> options.sideBySide,
-      "daysOfWeekDisabled" -> (if (options.daysOfWeekDisabled.nonEmpty) options.daysOfWeekDisabled.map(_.id).toJSArray else false),
+      "daysOfWeekDisabled" ->
+        (if (options.daysOfWeekDisabled.nonEmpty) options.daysOfWeekDisabled.map(_.id).toJSArray else false),
       "calendarWeeks" -> options.calendarWeeks,
       "viewMode" -> options.viewMode.id,
       "keepOpen" -> options.keepOpen,
@@ -156,19 +163,25 @@ final class UdashDatePicker private[datepicker](
       "minDate" -> (if (options.minDate.nonEmpty) dateToMoment(options.minDate.get) else false),
       "maxDate" -> (if (options.maxDate.nonEmpty) dateToMoment(options.maxDate.get) else false),
       "defaultDate" -> (if (options.defaultDate.nonEmpty) dateToMoment(options.defaultDate.get) else false),
-      "toolbarPlacement" -> (if (options.toolbarPlacement.nonEmpty) options.toolbarPlacement.get.name else Placement.DefaultPlacement.name),
-      "widgetPositioning" -> options.widgetPositioning.map {
-        case (horizontal, vertical) => js.Dictionary("horizontal" -> horizontal.name, "vertical" -> vertical.name)
-      }.getOrElse(js.Dictionary("horizontal" -> Placement.AutoPlacement.name, "vertical" -> Placement.AutoPlacement.name)),
+      "toolbarPlacement" ->
+        (if (options.toolbarPlacement.nonEmpty) options.toolbarPlacement.get.name else Placement.DefaultPlacement.name),
+      "widgetPositioning" ->
+        options.widgetPositioning
+          .map { case (horizontal, vertical) =>
+            js.Dictionary("horizontal" -> horizontal.name, "vertical" -> vertical.name)
+          }
+          .getOrElse(
+            js.Dictionary("horizontal" -> Placement.AutoPlacement.name, "vertical" -> Placement.AutoPlacement.name)
+          ),
       "buttons" -> js.Dictionary(
         "showToday" -> options.showToday,
         "showClear" -> options.showClear,
-        "showClose" -> options.showClose
-      )
+        "showClose" -> options.showClose,
+      ),
     )
   }
 
-  private def tooltipsOptionToJSDict(tooltips: DatePickerTooltips): js.Dictionary[js.Any] = {
+  private def tooltipsOptionToJSDict(tooltips: DatePickerTooltips): js.Dictionary[js.Any] =
     js.Dictionary[js.Any](
       "today" -> tooltips.today,
       "clear" -> tooltips.clear,
@@ -183,20 +196,18 @@ final class UdashDatePicker private[datepicker](
       "prevDecade" -> tooltips.prevDecade,
       "nextDecade" -> tooltips.nextDecade,
       "prevCentury" -> tooltips.prevCentury,
-      "nextCentury" -> tooltips.nextCentury
+      "nextCentury" -> tooltips.nextCentury,
     )
-  }
 
   private def internalFormat = options.get.format
   private def internalLocale = options.get.locale.getOrElse("en")
 
-  private def dateToMoment(date: ju.Date): MomentFormatWrapper = {
+  private def dateToMoment(date: ju.Date): MomentFormatWrapper =
     Try {
       val fullDate = moment(internalLocale, date.getTime.toDouble, "x")
       // removes date part which is not present in format string; it prevents multiple updates of date from one user interaction
       moment(internalLocale, fullDate.format(internalFormat), internalFormat)
     }.getOrElse(null)
-  }
 
   private def momentToDate(date: MomentFormatWrapper): ju.Date =
     Try {
@@ -215,31 +226,41 @@ object UdashDatePicker {
   private val ShowEvent = "show.datetimepicker"
   private val ErrorEvent = "error.datetimepicker"
 
-  /** Creates a date picker component.
-   * More: <a href="https://tempusdominus.github.io/bootstrap-4/">Bootstrap 4 Datepicker Docs</a>.
-   *
-   * @param date        A date selected in the input.
-   * @param options     A date picker's behaviour options.
-   * @param componentId The DOM element id.
-   * @return A `UdashDatePicker` component, call `render` to create a DOM element representing this button.
-   */
+  /** Creates a date picker component. More: <a href="https://tempusdominus.github.io/bootstrap-4/">Bootstrap 4
+    * Datepicker Docs</a>.
+    *
+    * @param date
+    *   A date selected in the input.
+    * @param options
+    *   A date picker's behaviour options.
+    * @param componentId
+    *   The DOM element id.
+    * @return
+    *   A `UdashDatePicker` component, call `render` to create a DOM element representing this button.
+    */
   def apply(
     date: Property[Option[ju.Date]],
     options: ReadableProperty[DatePickerOptions],
-    componentId: ComponentId = ComponentId.generate()
+    componentId: ComponentId = ComponentId.generate(),
   ): UdashDatePicker =
     new UdashDatePicker(date, options, componentId)
 
-  /** Combines two date pickers into a date range selector.
-    * More: <a href="https://tempusdominus.github.io/bootstrap-4/">Bootstrap 4 Datepicker Docs</a>.
+  /** Combines two date pickers into a date range selector. More: <a
+    * href="https://tempusdominus.github.io/bootstrap-4/">Bootstrap 4 Datepicker Docs</a>.
     *
-    * @param fromOptions   Options of the `from` picker.
-    * @param toOptions     Options of the `to` picker.
-    * @return Registration cancelling the range selector.
+    * @param fromOptions
+    *   Options of the `from` picker.
+    * @param toOptions
+    *   Options of the `to` picker.
+    * @return
+    *   Registration cancelling the range selector.
     */
-  def dateRange(from: UdashDatePicker, to: UdashDatePicker)(
+  def dateRange(
+    from: UdashDatePicker,
+    to: UdashDatePicker,
+  )(
     fromOptions: Property[DatePickerOptions],
-    toOptions: Property[DatePickerOptions]
+    toOptions: Property[DatePickerOptions],
   ): Registration = {
     val r1 = from.date.streamTo(toOptions)(d => toOptions.get.copy(minDate = d))
     val r2 = to.date.streamTo(fromOptions)(d => fromOptions.get.copy(maxDate = d))
@@ -261,56 +282,95 @@ object UdashDatePicker {
 
   /** Loads Bootstrap Date Picker styles. */
   def loadBootstrapDatePickerStyles(): Element =
-    link(rel := "stylesheet", href := "https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css").render
+    link(
+      rel := "stylesheet",
+      href :=
+        "https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css",
+    ).render
 
   sealed trait DatePickerEvent extends AbstractCase with ListenableEvent
   object DatePickerEvent {
     final case class Show(source: UdashDatePicker) extends DatePickerEvent
     final case class Hide(source: UdashDatePicker, date: Option[ju.Date]) extends DatePickerEvent
-    final case class Change(source: UdashDatePicker, date: Option[ju.Date], oldDate: Option[ju.Date]) extends DatePickerEvent
+    final case class Change(source: UdashDatePicker, date: Option[ju.Date], oldDate: Option[ju.Date])
+      extends DatePickerEvent
     final case class Error(source: UdashDatePicker, date: Option[ju.Date]) extends DatePickerEvent
   }
 
-  /**
-    * Full docs: <a href="http://eonasdan.github.io/bootstrap-datetimepicker/Options/">here</a>.
+  /** Full docs: <a href="http://eonasdan.github.io/bootstrap-datetimepicker/Options/">here</a>.
     *
-    * @param format              See <a href="http://momentjs.com/docs/#/displaying/format/">momentjs'</a> docs for valid formats.
-    *                            Format also dictates what components are shown, e.g. MM/dd/YYYY will not display the time picker.
-    * @param dayViewHeaderFormat Changes the heading of the datepicker when in "days" view.
-    * @param extraFormats        Allows for several input formats to be valid.
-    * @param stepping            Number of minutes the up/down arrow's will move the minutes value in the time picker.
-    * @param minDate             Prevents date/time selections before this date.
-    * @param maxDate             Prevents date/time selections after this date.
-    * @param useCurrent          On show, will set the picker to the current date/time.
-    * @param collapse            Using a Bootstraps collapse to switch between date/time pickers.
-    * @param locale             See <a href="http://momentjs.com/docs/#/i18n/">momentjs'</a> docs for valid locales.
-    * @param defaultDate        Sets the picker default date/time. Overrides `useCurrent`.
-    * @param disabledDates      Disables selection of dates in the array, e.g. holidays.
-    * @param enabledDates       Disables selection of dates NOT in the array, e.g. holidays.
-    * @param icons              Change the default icons for the pickers functions.
-    * @param useStrict          Defines if moment should use strict date parsing when considering a date to be valid.
-    * @param sideBySide         Shows the picker side by side when using the time and date together.
-    * @param daysOfWeekDisabled Disables the section of days of the week, e.g. weekends.
-    * @param calendarWeeks      Shows the week of the year to the left of first day of the week.
-    * @param viewMode           The default view to display when the picker is shown.
-    *                           Note: To limit the picker to selecting, for instance the year and month, use format: `MM/YYYY`
-    * @param toolbarPlacement   Changes the placement of the icon toolbar.
-    * @param showToday          Show the "Today" button in the icon toolbar.
-    * @param showClear          Show the "Clear" button in the icon toolbar.
-    * @param showClose          Show the "Close" button in the icon toolbar.
-    * @param widgetPositioning  Position of datepicker widget.
-    * @param widgetParent       On picker show, places the widget at the identifier object if the element has css position: 'relative'.
-    * @param keepOpen           Will cause the date picker to stay open after selecting a date if no time components are being used.
-   * @param inline              Will display the picker inline without the need of a input field. This will also hide borders and shadows.
-   * @param keepInvalid         Will cause the date picker to not revert or overwrite invalid dates.
-   * @param ignoreReadonly      Allow date picker show event to fire even when the associated input element has the `readonly="readonly"` property.
-   * @param allowInputToggle    If `true`, the picker will show on textbox focus and icon click when used in a button group.
-   * @param focusOnShow         If `false`, the textbox will not be given focus when the picker is shown
-   * @param enabledHours        Will allow or disallow hour selections.
-   * @param disabledHours       Will allow or disallow hour selections.
-   * @param viewDate            This will change the viewDate without changing or setting the selected date.
-   * @param tooltips            This will change the tooltips over each icon to a custom string.
-   */
+    * @param format
+    *   See <a href="http://momentjs.com/docs/#/displaying/format/">momentjs'</a> docs for valid formats. Format also
+    *   dictates what components are shown, e.g. MM/dd/YYYY will not display the time picker.
+    * @param dayViewHeaderFormat
+    *   Changes the heading of the datepicker when in "days" view.
+    * @param extraFormats
+    *   Allows for several input formats to be valid.
+    * @param stepping
+    *   Number of minutes the up/down arrow's will move the minutes value in the time picker.
+    * @param minDate
+    *   Prevents date/time selections before this date.
+    * @param maxDate
+    *   Prevents date/time selections after this date.
+    * @param useCurrent
+    *   On show, will set the picker to the current date/time.
+    * @param collapse
+    *   Using a Bootstraps collapse to switch between date/time pickers.
+    * @param locale
+    *   See <a href="http://momentjs.com/docs/#/i18n/">momentjs'</a> docs for valid locales.
+    * @param defaultDate
+    *   Sets the picker default date/time. Overrides `useCurrent`.
+    * @param disabledDates
+    *   Disables selection of dates in the array, e.g. holidays.
+    * @param enabledDates
+    *   Disables selection of dates NOT in the array, e.g. holidays.
+    * @param icons
+    *   Change the default icons for the pickers functions.
+    * @param useStrict
+    *   Defines if moment should use strict date parsing when considering a date to be valid.
+    * @param sideBySide
+    *   Shows the picker side by side when using the time and date together.
+    * @param daysOfWeekDisabled
+    *   Disables the section of days of the week, e.g. weekends.
+    * @param calendarWeeks
+    *   Shows the week of the year to the left of first day of the week.
+    * @param viewMode
+    *   The default view to display when the picker is shown. Note: To limit the picker to selecting, for instance the
+    *   year and month, use format: `MM/YYYY`
+    * @param toolbarPlacement
+    *   Changes the placement of the icon toolbar.
+    * @param showToday
+    *   Show the "Today" button in the icon toolbar.
+    * @param showClear
+    *   Show the "Clear" button in the icon toolbar.
+    * @param showClose
+    *   Show the "Close" button in the icon toolbar.
+    * @param widgetPositioning
+    *   Position of datepicker widget.
+    * @param widgetParent
+    *   On picker show, places the widget at the identifier object if the element has css position: 'relative'.
+    * @param keepOpen
+    *   Will cause the date picker to stay open after selecting a date if no time components are being used.
+    * @param inline
+    *   Will display the picker inline without the need of a input field. This will also hide borders and shadows.
+    * @param keepInvalid
+    *   Will cause the date picker to not revert or overwrite invalid dates.
+    * @param ignoreReadonly
+    *   Allow date picker show event to fire even when the associated input element has the `readonly="readonly"`
+    *   property.
+    * @param allowInputToggle
+    *   If `true`, the picker will show on textbox focus and icon click when used in a button group.
+    * @param focusOnShow
+    *   If `false`, the textbox will not be given focus when the picker is shown
+    * @param enabledHours
+    *   Will allow or disallow hour selections.
+    * @param disabledHours
+    *   Will allow or disallow hour selections.
+    * @param viewDate
+    *   This will change the viewDate without changing or setting the selected date.
+    * @param tooltips
+    *   This will change the tooltips over each icon to a custom string.
+    */
   final case class DatePickerOptions(
     format: String,
     dayViewHeaderFormat: String = "MMMM YYYY",
@@ -334,7 +394,9 @@ object UdashDatePicker {
     showToday: Boolean = false,
     showClear: Boolean = false,
     showClose: Boolean = false,
-    widgetPositioning: Option[(UdashDatePicker.Placement.HorizontalPlacement, UdashDatePicker.Placement.VerticalPlacement)] = None,
+    widgetPositioning: Option[
+      (UdashDatePicker.Placement.HorizontalPlacement, UdashDatePicker.Placement.VerticalPlacement)
+    ] = None,
     widgetParent: Option[String] = None,
     keepOpen: Boolean = false,
     inline: Boolean = false,
@@ -359,8 +421,8 @@ object UdashDatePicker {
       prevDecade = "Previous decade",
       nextDecade = "Next decade",
       prevCentury = "Previous century",
-      nextCentury = "Next century"
-    )
+      nextCentury = "Next century",
+    ),
   ) extends AbstractCase
 
   object DatePickerOptions extends HasModelPropertyCreator[DatePickerOptions]
@@ -370,20 +432,21 @@ object UdashDatePicker {
   }
 
   final class CustomDatePickerIcons(
-      val time: Option[CssStyle] = Option.empty,
-      val date: Option[CssStyle] = Option.empty,
-      val up: Option[CssStyle] = Option.empty,
-      val down: Option[CssStyle] = Option.empty,
-      val previous: Option[CssStyle] = Option.empty,
-      val next: Option[CssStyle] = Option.empty,
-      val today: Option[CssStyle] = Option.empty,
-      val clear: Option[CssStyle] = Option.empty,
-      val close: Option[CssStyle] = Option.empty
+    val time: Option[CssStyle] = Option.empty,
+    val date: Option[CssStyle] = Option.empty,
+    val up: Option[CssStyle] = Option.empty,
+    val down: Option[CssStyle] = Option.empty,
+    val previous: Option[CssStyle] = Option.empty,
+    val next: Option[CssStyle] = Option.empty,
+    val today: Option[CssStyle] = Option.empty,
+    val clear: Option[CssStyle] = Option.empty,
+    val close: Option[CssStyle] = Option.empty,
   ) extends DatePickerIcons {
     import scala.scalajs.js.JSConverters._
 
     override val jsDictionary: js.Dictionary[js.Any] = js.Dictionary(
-      DefaultDatePickerIcon.values.iterator.map(_.name.toLowerCase())
+      DefaultDatePickerIcon.values.iterator
+        .map(_.name.toLowerCase())
         .zip(Iterator(time, date, up, down, previous, next, today, clear, close))
         .flatMap { case (key, valueOpt) => valueOpt.map(key -> _.classNames.toJSArray) }
         .toSeq: _*
@@ -391,7 +454,8 @@ object UdashDatePicker {
   }
 
   object DefaultDatePickerIcons extends DatePickerIcons {
-    override val jsDictionary: js.Dictionary[js.Any] = js.Dictionary(DefaultDatePickerIcon.values.map(_.jsDictionaryItem): _*)
+    override val jsDictionary: js.Dictionary[js.Any] =
+      js.Dictionary(DefaultDatePickerIcon.values.map(_.jsDictionaryItem): _*)
   }
 
   final class DefaultDatePickerIcon(style: CssStyle)(implicit enumCtx: EnumCtx) extends AbstractValueEnum {
@@ -425,7 +489,7 @@ object UdashDatePicker {
     prevDecade: String,
     nextDecade: String,
     prevCentury: String,
-    nextCentury: String
+    nextCentury: String,
   ) extends AbstractCase
 
   final class DayOfWeek(val id: Int)
@@ -511,26 +575,25 @@ object UdashDatePicker {
   //
   // This mutation observer is turned on just before the first callback registration and off when there are no components
   // registered to be watched.
-  private val datePickerMutationObserver = {
+  private val datePickerMutationObserver =
     new MutationObserver((records: js.Array[MutationRecord], _: MutationObserver) => {
       def mutationHandler(nodesExtractor: MutationRecord => NodeList[Node], callbacks: Map[Node, () => Unit]): Unit = {
         records
-          .flatMap(nodesExtractor(_) |> (recordNodes => for {i <- 0 until recordNodes.length} yield recordNodes(i)))
+          .flatMap(nodesExtractor(_) |> (recordNodes => for { i <- 0 until recordNodes.length } yield recordNodes(i)))
           .foreach(node =>
-            callbacks.iterator
-              .filter { case (pickerNode, _) => node.contains(pickerNode) }
-              .foreach { case (_, callback) => callback() }
+            callbacks.iterator.filter { case (pickerNode, _) => node.contains(pickerNode) }.foreach {
+              case (_, callback) => callback()
+            }
           )
       }
 
       mutationHandler(_.removedNodes, datePickerDetachCallbacks)
       mutationHandler(_.addedNodes, datePickerSetupCallbacks)
     })
-  }
 
   def registerMutationCallbacks(pickerNode: Node, setupCallback: () => Unit, detachCallback: () => Unit): Unit = {
     if (datePickerSetupCallbacks.isEmpty && datePickerDetachCallbacks.isEmpty)
-      datePickerMutationObserver.observe(document.body, new MutationObserverInit { childList = true; subtree = true } )
+      datePickerMutationObserver.observe(document.body, new MutationObserverInit { childList = true; subtree = true })
     datePickerSetupCallbacks += (pickerNode -> setupCallback)
     datePickerDetachCallbacks += (pickerNode -> detachCallback)
   }

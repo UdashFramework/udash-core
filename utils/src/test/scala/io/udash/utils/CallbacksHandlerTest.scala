@@ -9,11 +9,10 @@ class CallbacksHandlerTest extends UdashSharedTest {
     "fire all callbacks and swallow exceptions" in {
       val orderCheck = mutable.ArrayBuffer.empty[Int]
       var counter = 0
-      def callback(idx: Int): PartialFunction[Int, Any] = {
-        case v: Int =>
-          counter += v
-          orderCheck += idx
-          throw new NullPointerException
+      def callback(idx: Int): PartialFunction[Int, Any] = { case v: Int =>
+        counter += v
+        orderCheck += idx
+        throw new NullPointerException
       }
 
       val handler = new CallbacksHandler[Int]
@@ -38,10 +37,9 @@ class CallbacksHandlerTest extends UdashSharedTest {
       val handler = new CallbacksHandler[Int]
 
       val orderCheck = mutable.ArrayBuffer.empty[Int]
-      def callback(idx: Int): PartialFunction[Int, Any] = {
-        case _: Int =>
-          orderCheck += idx
-          handler.register(callback(idx + 1))
+      def callback(idx: Int): PartialFunction[Int, Any] = { case _: Int =>
+        orderCheck += idx
+        handler.register(callback(idx + 1))
       }
 
       handler.register(callback(1))

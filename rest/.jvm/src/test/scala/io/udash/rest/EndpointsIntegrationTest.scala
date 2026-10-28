@@ -16,7 +16,8 @@ import sttp.client3.SttpClientException.ConnectException
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, Future}
 
-class EndpointsIntegrationTest extends UdashSharedTest with UsesHttpServer with BeforeAndAfterAll with Eventually with ScalaFutures {
+class EndpointsIntegrationTest
+  extends UdashSharedTest with UsesHttpServer with BeforeAndAfterAll with Eventually with ScalaFutures {
   implicit def scheduler: Scheduler = Scheduler.global
 
   private val contextPrefix = "/rest_api"
@@ -41,7 +42,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with UsesHttpServer with 
     method: HttpMethod,
     queryArguments: Map[String, String],
     headers: Map[String, String],
-    body: String
+    body: String,
   ): RestRequest = RestRequest(
     method,
     RestParameters(
@@ -49,7 +50,7 @@ class EndpointsIntegrationTest extends UdashSharedTest with UsesHttpServer with 
       IMapping(headers.iterator.map { case (k, v) => (k, PlainValue(v)) }.toList),
       Mapping(queryArguments.iterator.map { case (k, v) => (k, PlainValue(v)) }.toList),
     ),
-    HttpBody.json(JsonValue(body))
+    HttpBody.json(JsonValue(body)),
   )
 
   implicit val backend: SttpBackend[Future, Any] = SttpRestClient.defaultBackend()
@@ -59,16 +60,14 @@ class EndpointsIntegrationTest extends UdashSharedTest with UsesHttpServer with 
   def badRawHandler = futureHandle(SttpRestClient.asHandleRequest[Future](s"http://127.0.0.1:69$contextPrefix"))
 
   def await[T](f: Future[T]): T =
-    Await.result(f, 3 seconds)
+    Await.result(f, 3.seconds)
 
   "REST endpoint" should {
     "work with Udash REST client (1)" in {
-      await(proxy.serviceOne().deeper().load(5)) should
-        be(TestRESTRecord(Some(5), "one/deeper"))
+      await(proxy.serviceOne().deeper().load(5)) should be(TestRESTRecord(Some(5), "one/deeper"))
     }
     "work with Udash REST client (2)" in {
-      await(proxy.serviceThree("qwe/asd").deeper().load(321)) should
-        be(TestRESTRecord(Some(321), "three/qwe/asd/deeper"))
+      await(proxy.serviceThree("qwe/asd").deeper().load(321)) should be(TestRESTRecord(Some(321), "three/qwe/asd/deeper"))
     }
     "work with Udash REST client (3)" in {
       await(proxy.serviceOne().load()).size should be(3)
@@ -94,27 +93,22 @@ class EndpointsIntegrationTest extends UdashSharedTest with UsesHttpServer with 
         be(TestRESTRecord(Some(222), "two/token123/en_GB/delete"))
     }
     "report valid HTTP codes (1)" in {
-      val eventualResponse = rawHandler(mkRequest("/non/existing/path",
-        HttpMethod.POST, Map.empty, Map.empty, ""))
+      val eventualResponse = rawHandler(mkRequest("/non/existing/path", HttpMethod.POST, Map.empty, Map.empty, ""))
       await(eventualResponse).code should be(404)
     }
     "report valid HTTP codes (2)" in {
-      val eventualResponse = rawHandler(mkRequest("/serviceOne/loadAll",
-        HttpMethod.POST, Map.empty, Map.empty, ""))
+      val eventualResponse = rawHandler(mkRequest("/serviceOne/loadAll", HttpMethod.POST, Map.empty, Map.empty, ""))
       await(eventualResponse).code should be(405)
     }
     "report valid HTTP codes (3)" in {
-      val eventualResponse = rawHandler(mkRequest("/serviceTwo/loadAll",
-        HttpMethod.GET, Map.empty, Map.empty, ""))
+      val eventualResponse = rawHandler(mkRequest("/serviceTwo/loadAll", HttpMethod.GET, Map.empty, Map.empty, ""))
       await(eventualResponse).code should be(400)
     }
     "report valid HTTP codes (4)" in {
-      val eventualResponse = rawHandler(mkRequest("/serviceThree/loadAll",
-        HttpMethod.GET, Map.empty, Map.empty, ""))
+      val eventualResponse = rawHandler(mkRequest("/serviceThree/loadAll", HttpMethod.GET, Map.empty, Map.empty, ""))
       await(eventualResponse).code should be(404)
 
-      val eventualResponse2 = rawHandler(mkRequest("/service_three/loadAll",
-        HttpMethod.GET, Map.empty, Map.empty, ""))
+      val eventualResponse2 = rawHandler(mkRequest("/service_three/loadAll", HttpMethod.GET, Map.empty, Map.empty, ""))
       // "loadAll" is interpreted as URL argument from `serviceThree` getter
       await(eventualResponse2).code should be(404)
     }
@@ -129,13 +123,11 @@ class EndpointsIntegrationTest extends UdashSharedTest with UsesHttpServer with 
       implicit val patienceConfig = PatienceConfig(scaled(Span(10, Seconds)), scaled(Span(100, Millis)))
 
       val eventualResponse =
-        badRawHandler(mkRequest("/non/existing/path",
-          HttpMethod.POST, Map.empty, Map.empty, ""))
+        badRawHandler(mkRequest("/non/existing/path", HttpMethod.POST, Map.empty, Map.empty, ""))
       eventualResponse.failed.futureValue shouldBe a[ConnectException]
 
       val eventualResponse2 =
-        badRawHandler(mkRequest("/non/existing/path",
-          HttpMethod.POST, Map.empty, Map.empty, "lol"))
+        badRawHandler(mkRequest("/non/existing/path", HttpMethod.POST, Map.empty, Map.empty, "lol"))
       eventualResponse2.failed.futureValue shouldBe a[ConnectException]
     }
   }
@@ -157,11 +149,13 @@ class EndpointsIntegrationTest extends UdashSharedTest with UsesHttpServer with 
 
   private class TestServerRESTInternalInterfaceImpl(data: String) extends TestServerRESTInternalInterface {
     override def load(): Future[Seq[TestRESTRecord]] =
-      Future.successful(Seq(
-        TestRESTRecord(Some(1), s"$data/load"),
-        TestRESTRecord(Some(2), s"$data/load"),
-        TestRESTRecord(Some(3), s"$data/load")
-      ))
+      Future.successful(
+        Seq(
+          TestRESTRecord(Some(1), s"$data/load"),
+          TestRESTRecord(Some(2), s"$data/load"),
+          TestRESTRecord(Some(3), s"$data/load"),
+        )
+      )
 
     override def load(id: Int, trash: String, trash2: String): Future[TestRESTRecord] =
       Future.successful(TestRESTRecord(Some(id), s"$data/load/$trash/$trash2"))

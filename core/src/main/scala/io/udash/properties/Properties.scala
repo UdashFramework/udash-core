@@ -26,28 +26,35 @@ trait Properties {
   import Properties._
   implicit def any2Property[A](value: A): Any2Property[A] = new Any2Property(value)
   implicit def any2SeqProperty[A](value: Seq[A]): Any2SeqProperty[A] = new Any2SeqProperty(value)
-  implicit def propertySeq2SeqProperty[A](value: ISeq[ReadableProperty[A]]): PropertySeq2SeqProperty[A] = new PropertySeq2SeqProperty(value)
-  implicit def booleanProp2BooleanOpsProperty(value: Property[Boolean]): BooleanPropertyOps = new BooleanPropertyOps(value)
+  implicit def propertySeq2SeqProperty[A](value: ISeq[ReadableProperty[A]]): PropertySeq2SeqProperty[A] =
+    new PropertySeq2SeqProperty(value)
+  implicit def booleanProp2BooleanOpsProperty(value: Property[Boolean]): BooleanPropertyOps = new BooleanPropertyOps(
+    value
+  )
 }
 
 object Properties extends Properties {
-  final class Any2Property[A] private[properties](private val value: A) extends AnyVal {
-    def toProperty[B >: A : PropertyCreator]: ReadableProperty[B] = PropertyCreator[B].newImmutableProperty(value)
-    def toModelProperty[B >: A : ModelPropertyCreator]: ReadableModelProperty[B] = ModelPropertyCreator[B].newImmutableProperty(value)
+  final class Any2Property[A] private[properties] (private val value: A) extends AnyVal {
+    def toProperty[B >: A: PropertyCreator]: ReadableProperty[B] = PropertyCreator[B].newImmutableProperty(value)
+    def toModelProperty[B >: A: ModelPropertyCreator]: ReadableModelProperty[B] =
+      ModelPropertyCreator[B].newImmutableProperty(value)
   }
 
-  final class Any2SeqProperty[A] private[properties](private val value: Seq[A]) extends AnyVal {
+  final class Any2SeqProperty[A] private[properties] (private val value: Seq[A]) extends AnyVal {
     def toSeqProperty: ReadableSeqProperty[A] = new ImmutableSeqProperty[A, Seq](value)
   }
 
-  final class PropertySeq2SeqProperty[A] private[properties](private val value: ISeq[ReadableProperty[A]]) extends AnyVal {
+  final class PropertySeq2SeqProperty[A] private[properties] (private val value: ISeq[ReadableProperty[A]])
+    extends AnyVal {
     def combineToSeqProperty: ReadableSeqProperty[A] = new PropertySeqCombinedReadableSeqProperty[A](value)
   }
 
-  final class BooleanPropertyOps private[properties](private val underlying: Property[Boolean]) extends AnyVal {
+  final class BooleanPropertyOps private[properties] (private val underlying: Property[Boolean]) extends AnyVal {
+
     /** Toggles the value of the underlying boolean-backed property.
-      * @param force If true, the value change listeners will be fired even if value didn't change.
-      * */
+      * @param force
+      *   If true, the value change listeners will be fired even if value didn't change.
+      */
     def toggle(force: Boolean = true): Unit = underlying.set(!underlying.get, force)
   }
 }

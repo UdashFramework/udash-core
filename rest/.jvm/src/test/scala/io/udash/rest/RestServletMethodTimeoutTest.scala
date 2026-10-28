@@ -24,7 +24,9 @@ trait MethodTimeoutApi {
   @timeout(300.millis) def shortHang: Task[Unit]
   @timeout(10.seconds) def longSleep: Task[String]
   def defaultHang: Task[Unit]
-  @GET @timeout(10.seconds) @streamingResponseBatchSize(1) def progress: Observable[Int]
+  @GET
+  @timeout(10.seconds)
+  @streamingResponseBatchSize(1) def progress: Observable[Int]
   @timeout(300.millis) def shortPrefix: MethodTimeoutSubApi
 }
 object MethodTimeoutApi extends DefaultRestApiCompanion[MethodTimeoutApi]
@@ -70,8 +72,10 @@ class RestServletMethodTimeoutTest extends UdashSharedTest with UsesHttpServer {
     mount("plain-api", new RestServlet(RawRest.asHandleRequest[MethodTimeoutApi](impl), HandleTimeout))
     mount("wrapped-api", new RestServlet(RawRest.wrapHandleRequest(streaming)((_, task) => task), HandleTimeout))
     mount("lambda-api", new RestServlet(request => streaming(request), HandleTimeout))
-    mount("lambda-timeouts-api",
-      new RestServlet(RawRest.withTimeouts(MethodTimeoutApi.restMetadata)(request => streaming(request)), HandleTimeout))
+    mount(
+      "lambda-timeouts-api",
+      new RestServlet(RawRest.withTimeouts(MethodTimeoutApi.restMetadata)(request => streaming(request)), HandleTimeout),
+    )
     mount("zero-timeout-api", new RestServlet(zeroTimeoutHandler, HandleTimeout))
     server.setHandler(handler)
   }
@@ -119,11 +123,13 @@ class RestServletMethodTimeoutTest extends UdashSharedTest with UsesHttpServer {
       assertTimedOut(post("api/shortPrefix/overriddenHang"), 500.millis)
     }
 
-    for ((mount, handler) <- List(
-      "plain-api" -> "RawRest.asHandleRequest",
-      "wrapped-api" -> "RawRest.wrapHandleRequest",
-      "lambda-timeouts-api" -> "RawRest.withTimeouts over a plain function",
-    )) {
+    for (
+      (mount, handler) <- List(
+        "plain-api" -> "RawRest.asHandleRequest",
+        "wrapped-api" -> "RawRest.wrapHandleRequest",
+        "lambda-timeouts-api" -> "RawRest.withTimeouts over a plain function",
+      )
+    ) {
       s"honour @timeout for a servlet whose handler comes from $handler" in {
         assertTimedOut(post(s"$mount/shortHang"), 300.millis)
       }
@@ -145,10 +151,14 @@ class RestServletMethodTimeoutTest extends UdashSharedTest with UsesHttpServer {
         new RestServlet(handler, customLogger = new SubstituteLogger(classOf[RestServlet].getName, events, false))
         events.asScala.map(e => (e.getLevel, e.getMessage)).toList
       }
-      assert(creationLog(request => streaming(request)) == List(Level.DEBUG ->
-        ("RestServlet's handler does not resolve calls, so @timeout does not apply to them. " +
-          "Apply RawRest.withTimeouts to it, or wrap the RawRest.asHandleRequest* handler itself with " +
-          "RawRest.wrapHandleRequest instead of a function, for @timeout to apply.")))
+      assert(
+        creationLog(request => streaming(request)) == List(
+          Level.DEBUG ->
+            ("RestServlet's handler does not resolve calls, so @timeout does not apply to them. " +
+              "Apply RawRest.withTimeouts to it, or wrap the RawRest.asHandleRequest* handler itself with " +
+              "RawRest.wrapHandleRequest instead of a function, for @timeout to apply.")
+        )
+      )
       assert(creationLog(RawRest.wrapHandleRequest(streaming)((_, task) => task)).isEmpty)
       assert(creationLog(RawRest.withTimeouts(MethodTimeoutApi.restMetadata)(request => streaming(request))).isEmpty)
     }

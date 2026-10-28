@@ -37,13 +37,13 @@ object NavbarDemo extends AutoDemo {
       override val title: String,
       override val content: String
     ) extends NavbarPanel
-    */
+     */
 
     val panels = SeqProperty[NavbarPanel](
       DefaultNavbarPanel("Title 1", "Content of panel 1..."),
       DefaultNavbarPanel("Title 2", "Content of panel 2..."),
       DefaultNavbarPanel("Title 3", "Content of panel 3..."),
-      DefaultNavbarPanel("Title 4", "Content of panel 4...")
+      DefaultNavbarPanel("Title 4", "Content of panel 4..."),
     )
     panels.append(
       DefaultNavbarPanel("Title 5", "Content of panel 5...")
@@ -51,17 +51,19 @@ object NavbarDemo extends AutoDemo {
 
     div(
       UdashNavbar()(
-        _ => UdashNav(panels)(
-          elemFactory = (panel, nested) => a(
-            Navigation.link,
-            href := "",
-            onclick :+= ((_: Event) => true)
-          )(
-            nested(bind(panel.asModel.subProp(_.title)))
-          ).render,
-          isActive = el => el.transform(_.title.endsWith("1")),
-          isDisabled = el => el.transform(_.title.endsWith("5"))
-        ),
+        _ =>
+          UdashNav(panels)(
+            elemFactory = (panel, nested) =>
+              a(
+                Navigation.link,
+                href := "",
+                onclick :+= ((_: Event) => true),
+              )(
+                nested(bind(panel.asModel.subProp(_.title)))
+              ).render,
+            isActive = el => el.transform(_.title.endsWith("1")),
+            isDisabled = el => el.transform(_.title.endsWith("5")),
+          ),
         span("Udash"),
       )
     ).render
@@ -72,4 +74,3 @@ object NavbarDemo extends AutoDemo {
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
   }
 }
-

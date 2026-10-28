@@ -12,13 +12,17 @@ class UdashAccordionTest extends AsyncUdashCoreFrontendTest {
 
   "UdashAccordion component" should {
     "grant access to created UdashCollapse instances" in {
-      val news = SeqProperty[String](Seq(
-        "Title 1", "Title 2", "Title 3"
-      ))
+      val news = SeqProperty[String](
+        Seq(
+          "Title 1",
+          "Title 2",
+          "Title 3",
+        )
+      )
 
       val accordion = UdashAccordion(news)(
         (news, nested) => span(">>", nested(bind(news))).render,
-        (news, nested) => span(nested(bind(news))).render
+        (news, nested) => span(nested(bind(news))).render,
       )
 
       val accordionElement = accordion.render
@@ -42,13 +46,17 @@ class UdashAccordionTest extends AsyncUdashCoreFrontendTest {
     }
 
     "expose collapse events" in {
-      val news = SeqProperty[String](Seq(
-        "Title 1", "Title 2", "Title 3"
-      ))
+      val news = SeqProperty[String](
+        Seq(
+          "Title 1",
+          "Title 2",
+          "Title 3",
+        )
+      )
 
       val accordion = UdashAccordion(news)(
         (news, nested) => i(">>", nested(bind(news))).render,
-        (news, nested) => span(nested(bind(news))).render
+        (news, nested) => span(nested(bind(news))).render,
       )
 
       val events = mutable.ArrayBuffer.empty[UdashAccordion.AccordionEvent[String, _]]

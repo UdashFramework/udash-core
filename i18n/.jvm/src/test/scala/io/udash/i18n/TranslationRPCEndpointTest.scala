@@ -11,7 +11,7 @@ class TranslationRPCEndpointTest extends UdashRpcBackendTest {
     private def templates(implicit lang: Lang) = Map(
       "tk1" -> ("template 1" + lang.lang),
       "tk2" -> ("template 2 {}" + lang.lang),
-      "tk3" -> ("template {1} 3 {0}" + lang.lang)
+      "tk3" -> ("template {1} 3 {0}" + lang.lang),
     )
 
     override def allTemplates(implicit lang: Lang): Map[String, String] =

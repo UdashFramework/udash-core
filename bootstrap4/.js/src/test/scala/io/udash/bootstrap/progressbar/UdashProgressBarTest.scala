@@ -17,7 +17,14 @@ class UdashProgressBarTest extends UdashCoreFrontendTest {
       val maxValue = Property(50)
       val minWidth = Property(1)
       val progressbar = UdashProgressBar(
-        progress, showPercentage, barStyle, stripped, animated, minValue, maxValue, minWidth
+        progress,
+        showPercentage,
+        barStyle,
+        stripped,
+        animated,
+        minValue,
+        maxValue,
+        minWidth,
       )()
       val el = progressbar.render
       el.textContent should be("50%")

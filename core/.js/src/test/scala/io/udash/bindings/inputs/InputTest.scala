@@ -3,7 +3,7 @@ package io.udash.bindings.inputs
 import io.udash._
 import io.udash.testing.AsyncUdashFrontendTest
 import org.scalactic.source.Position
-import org.scalajs.dom.{ClipboardEvent, Event, KeyboardEvent, html}
+import org.scalajs.dom.{html, ClipboardEvent, Event, KeyboardEvent}
 import org.scalatest.Assertion
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.time.{Millis, Span}
@@ -26,15 +26,17 @@ class InputTest extends AsyncUdashFrontendTest {
     "should ignore Attributes: `tpe`, `value`, `onkeyup`, `onchange`, `onpaste`, `oninput` from inputModifiers" in {
       val p = Property[String]("")
 
-      val input = TextInput(p, 0 millis)(inputModifiers = Seq[Modifier](
-        tpe :+= null,
-        scalatags.JsDom.all.value :+= null,
-        onkeyup :+= { (_: Event) => throw new TestFailedException(Option.empty, Option.empty, 0) },
-        onchange :+= { (_: Event) => throw new TestFailedException(Option.empty, Option.empty, 0) },
-        onpaste :+= { (_: Event) => throw new TestFailedException(Option.empty, Option.empty, 0) },
-        oninput :+= { (_: Event) => throw new TestFailedException(Option.empty, Option.empty, 0) },
-        attr("sth") := "sth2"
-      ))
+      val input = TextInput(p, 0.millis)(inputModifiers =
+        Seq[Modifier](
+          tpe :+= null,
+          scalatags.JsDom.all.value :+= null,
+          onkeyup :+= { (_: Event) => throw new TestFailedException(Option.empty, Option.empty, 0) },
+          onchange :+= { (_: Event) => throw new TestFailedException(Option.empty, Option.empty, 0) },
+          onpaste :+= { (_: Event) => throw new TestFailedException(Option.empty, Option.empty, 0) },
+          oninput :+= { (_: Event) => throw new TestFailedException(Option.empty, Option.empty, 0) },
+          attr("sth") := "sth2",
+        )
+      )
 
       val inputEl = input.render
       inputEl.value = "ABCD"
@@ -58,7 +60,7 @@ class InputTest extends AsyncUdashFrontendTest {
 
     "update state on KeyUp, Change, Paste and Input events" in {
       val p = Property[String]("")
-      val input = TextInput(p, 0 millis)()
+      val input = TextInput(p, 0.millis)()
       val inputEl = input.render
 
       inputEl.value = "ABCD"
@@ -80,7 +82,7 @@ class InputTest extends AsyncUdashFrontendTest {
 
     "synchronise state with property changes" in {
       val p = Property[String]("ABC")
-      val input = TextInput(p, 0 millis)()
+      val input = TextInput(p, 0.millis)()
       val inputEl = input.render
 
       inputEl.value should be("ABC")
@@ -110,7 +112,7 @@ class InputTest extends AsyncUdashFrontendTest {
 
     "synchronise property with state changes" in {
       val p = Property[String]("ABC")
-      val input = TextInput(p, 0 millis)()
+      val input = TextInput(p, 0.millis)()
       val inputEl = input.render
 
       inputEl.changeValue("ABCD")
@@ -135,14 +137,13 @@ class InputTest extends AsyncUdashFrontendTest {
 
     "synchronise property with state changes with debouncing" in {
       val p = Property[String]("ABC")
-      val input = TextInput(p, 0 millis)()
+      val input = TextInput(p, 0.millis)()
       val inputEl = input.render
 
       inputEl.changeValue("ABCD")
       inputEl.changeValue("12345")
       inputEl.changeValue("54321")
       inputEl.changeValue("ABCD")
-
 
       retrying {
         p.get should be("ABCD")
@@ -175,8 +176,8 @@ class InputTest extends AsyncUdashFrontendTest {
 
     "synchronise with two inputs bound to a single property" in {
       val p = Property[String]("ABC")
-      val input = TextInput(p, 0 millis)()
-      val input2 = TextInput(p, 0 millis)()
+      val input = TextInput(p, 0.millis)()
+      val input2 = TextInput(p, 0.millis)()
 
       val r = input.render
       val r2 = input2.render
@@ -217,7 +218,7 @@ class InputTest extends AsyncUdashFrontendTest {
   "run callback on state changes" in {
     val p = Property[String]("ABC")
     var result = ""
-    val input = TextInput(p, 0 millis, result = _)()
+    val input = TextInput(p, 0.millis, result = _)()
     val inputEl = input.render
 
     inputEl.changeValue("ABCD")
@@ -243,7 +244,7 @@ class InputTest extends AsyncUdashFrontendTest {
   "run callback on state changes with debouncing" in {
     val p = Property[String]("ABC")
     var result = ""
-    val input = TextInput(p, 20 millis, result = _)()
+    val input = TextInput(p, 20.millis, result = _)()
     val inputEl = input.render
 
     inputEl.changeValue("ABCD")
@@ -276,7 +277,7 @@ class InputTest extends AsyncUdashFrontendTest {
   "not run callback when value is the same with debouncing" in {
     val p = Property[String]("ABC")
     var callbackValues = Seq.empty[String]
-    val input = TextInput(p, 1 seconds, newValue => callbackValues :+= newValue)()
+    val input = TextInput(p, 1.seconds, newValue => callbackValues :+= newValue)()
     val inputEl = input.render
 
     callbackValues should be(empty)
@@ -289,9 +290,13 @@ class InputTest extends AsyncUdashFrontendTest {
     )(PatienceConfig(scaled(Span(2000, Millis)), scaled(Span(500, Millis))), Position.here).transform {
       case Failure(_: RetryingTimeout | _: TestFailedException) => Success(succeed)
       case fail: Failure[Assertion] => fail
-      case Success(_) => Failure(fail(s"Callback shouldn't be executed with this debounce setup but it was executed ${callbackValues.length}" +
-        s" times with following values: ${callbackValues.mkString(",")}"
-      ))
+      case Success(_) =>
+        Failure(
+          fail(
+            s"Callback shouldn't be executed with this debounce setup but it was executed ${callbackValues.length}" +
+              s" times with following values: ${callbackValues.mkString(",")}"
+          )
+        )
     }
 
   }

@@ -3,13 +3,12 @@ package rest.raw
 
 import io.udash.utils.URLEncoder
 
-/**
- * Value used as encoding of [[io.udash.rest.Path Path]], [[io.udash.rest.Header Header]] and
- * [[io.udash.rest.Query Query]] parameters as well as [[io.udash.rest.Body Body]] parameters of
- * [[io.udash.rest.FormBody FormBody]] methods.
- *
- * Wrapped string MUST NOT be URL-encoded.
- */
+/** Value used as encoding of [[io.udash.rest.Path Path]], [[io.udash.rest.Header Header]] and
+  * [[io.udash.rest.Query Query]] parameters as well as [[io.udash.rest.Body Body]] parameters of
+  * [[io.udash.rest.FormBody FormBody]] methods.
+  *
+  * Wrapped string MUST NOT be URL-encoded.
+  */
 final case class PlainValue(value: String) extends AnyVal
 object PlainValue extends (String => PlainValue) {
   def decodePath(path: String): List[PlainValue] =
@@ -26,30 +25,34 @@ object PlainValue extends (String => PlainValue) {
   final val CookieKVPairSep = ";"
 
   def encodeQuery(query: Mapping[PlainValue]): String =
-    query.entries.iterator.map { case (name, PlainValue(value)) =>
-      s"${URLEncoder.encode(name, spaceAsPlus = true)}$KVSep${URLEncoder.encode(value, spaceAsPlus = true)}"
-    }.mkString(FormKVPairSep)
+    query.entries.iterator
+      .map { case (name, PlainValue(value)) =>
+        s"${URLEncoder.encode(name, spaceAsPlus = true)}$KVSep${URLEncoder.encode(value, spaceAsPlus = true)}"
+      }
+      .mkString(FormKVPairSep)
 
   def decodeQuery(queryString: String): Mapping[PlainValue] = {
     val builder = Mapping.newBuilder[PlainValue]
     queryString.split(FormKVPairSep).iterator.filter(_.nonEmpty).map(_.split(KVSep, 2)).foreach {
-      case Array(name, value) => builder +=
-        URLEncoder.decode(name, plusAsSpace = true) -> PlainValue(URLEncoder.decode(value, plusAsSpace = true))
+      case Array(name, value) =>
+        builder += URLEncoder.decode(name, plusAsSpace = true) -> PlainValue(URLEncoder.decode(value, plusAsSpace = true))
       case _ => throw new IllegalArgumentException(s"invalid query string $queryString")
     }
     builder.result()
   }
 
   def encodeCookies(cookies: Mapping[PlainValue]): String =
-    cookies.iterator.map { case (n, PlainValue(v)) =>
-      s"${URLEncoder.encode(n, spaceAsPlus = true)}$KVSep${URLEncoder.encode(v, spaceAsPlus = true)}"
-    }.mkString(CookieKVPairSep)
+    cookies.iterator
+      .map { case (n, PlainValue(v)) =>
+        s"${URLEncoder.encode(n, spaceAsPlus = true)}$KVSep${URLEncoder.encode(v, spaceAsPlus = true)}"
+      }
+      .mkString(CookieKVPairSep)
 
   def decodeCookies(cookieHeaderValue: String): Mapping[PlainValue] = {
     val builder = Mapping.newBuilder[PlainValue]
     cookieHeaderValue.split(CookieKVPairSep).iterator.map(_.trim.split(KVSep, 2)).foreach {
-      case Array(name, value) => builder +=
-        URLEncoder.decode(name, plusAsSpace = true) -> PlainValue(URLEncoder.decode(value, plusAsSpace = true))
+      case Array(name, value) =>
+        builder += URLEncoder.decode(name, plusAsSpace = true) -> PlainValue(URLEncoder.decode(value, plusAsSpace = true))
       case _ => throw new IllegalArgumentException(s"invalid cookie header value $cookieHeaderValue")
     }
     builder.result()

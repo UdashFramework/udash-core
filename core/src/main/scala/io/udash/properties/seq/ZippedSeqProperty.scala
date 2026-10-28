@@ -4,16 +4,15 @@ import com.avsystem.commons._
 import io.udash.properties.single.{CombinedProperty, ReadableProperty}
 import io.udash.utils.{CrossCollections, Registration}
 
-/**
- *
- * @param sources SeqProperties required for updating this property.
- *                When empty, the origin listeners will be reinitialized on all new registrations
- */
+/** @param sources
+  *   SeqProperties required for updating this property. When empty, the origin listeners will be reinitialized on all
+  *   new registrations
+  */
 private[properties] abstract class ZippedSeqPropertyUtils[O](
   sources: ISeq[ReadableSeqProperty[_, _ <: ReadableProperty[_]]]
 ) extends AbstractReadableSeqProperty[O, ReadableProperty[O]] {
 
-  override final protected[properties] def parent: ReadableProperty[_] = null
+  override protected[properties] final def parent: ReadableProperty[_] = null
 
   private final val children = CrossCollections.createArray[ReadableProperty[O]]
   private final val sourceRegistrations = CrossCollections.createArray[Registration]
@@ -52,13 +51,11 @@ private[properties] abstract class ZippedSeqPropertyUtils[O](
     }
   }
 
-  override def get: BSeq[O] = {
+  override def get: BSeq[O] =
     (if (children.nonEmpty) children else updatedPart(0)).map(_.get)
-  }
 
-  override def elemProperties: BSeq[ReadableProperty[O]] = {
+  override def elemProperties: BSeq[ReadableProperty[O]] =
     (if (children.nonEmpty) children else updatedPart(0)).toVector
-  }
 
   override def listenStructure(structureListener: Patch[ReadableProperty[O]] => Any): Registration = {
     initOriginListeners()
@@ -95,19 +92,21 @@ private[properties] abstract class ZippedSeqPropertyUtils[O](
 private[properties] final class ZippedReadableSeqProperty[A, B, O](
   s: ReadableSeqProperty[A, ReadableProperty[A]],
   p: ReadableSeqProperty[B, ReadableProperty[B]],
-  combiner: (A, B) => O, defaults: Opt[(ReadableProperty[A], ReadableProperty[B])]
+  combiner: (A, B) => O,
+  defaults: Opt[(ReadableProperty[A], ReadableProperty[B])],
 ) extends ZippedSeqPropertyUtils[O](ISeq(s, p)) {
 
   override protected def updatedPart(fromIdx: Int): Seq[ReadableProperty[O]] = {
-    val zip: (Iterator[ReadableProperty[A]], Iterator[ReadableProperty[B]]) => Iterator[(ReadableProperty[A], ReadableProperty[B])] = {
+    val zip: (Iterator[ReadableProperty[A]], Iterator[ReadableProperty[B]]) => Iterator[
+      (ReadableProperty[A], ReadableProperty[B])
+    ] =
       defaults match {
         case Opt((defaultA, defaultB)) => _.zipAll(_, defaultA, defaultB)
         case Opt.Empty => _.zip(_)
       }
-    }
-    zip(s.elemProperties.iterator.drop(fromIdx), p.elemProperties.iterator.drop(fromIdx))
-      .map { case (x, y) => x.combine(y)(combiner) }
-      .toSeq
+    zip(s.elemProperties.iterator.drop(fromIdx), p.elemProperties.iterator.drop(fromIdx)).map { case (x, y) =>
+      x.combine(y)(combiner)
+    }.toSeq
   }
 }
 

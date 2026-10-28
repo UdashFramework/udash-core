@@ -8,8 +8,8 @@ trait GenCodecAndModelPropertyCreator[T] {
   def modelPropertyCreator: ModelPropertyCreator[T]
 }
 
-abstract class HasGenCodecAndModelPropertyCreator[T](implicit
-  instances: MacroInstances[Unit, GenCodecAndModelPropertyCreator[T]]
+abstract class HasGenCodecAndModelPropertyCreator[T](
+  implicit instances: MacroInstances[Unit, GenCodecAndModelPropertyCreator[T]]
 ) {
   implicit final lazy val modelPropertyCreator: ModelPropertyCreator[T] = instances((), this).modelPropertyCreator
   implicit final lazy val codec: GenCodec[T] = instances((), this).codec

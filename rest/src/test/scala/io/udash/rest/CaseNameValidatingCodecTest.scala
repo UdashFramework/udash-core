@@ -3,7 +3,7 @@ package rest
 
 import com.avsystem.commons.serialization.GenCodec.ReadFailure
 import com.avsystem.commons.serialization.json.{JsonStringInput, JsonStringOutput}
-import com.avsystem.commons.serialization.{GenCodec, flatten}
+import com.avsystem.commons.serialization.{flatten, GenCodec}
 import io.udash.rest.openapi.{InliningResolver, RestFlattenedStructure, RestSchema, RestStructure}
 import io.udash.rest.util.CaseNameValidatingCodec
 import org.scalatest.funsuite.AnyFunSuite

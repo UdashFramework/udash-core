@@ -10,7 +10,7 @@ object WriteOpenApi {
   def main(args: Array[String]): Unit = {
     val openapi = RestTestApi.openapiMetadata.openapi(
       Info("Test API", "0.1", description = "Some test REST API"),
-      servers = List(Server("http://localhost"))
+      servers = List(Server("http://localhost")),
     )
     val fw = new FileWriter("/home/ghik/api.js")
     fw.write("apiSpec = ")

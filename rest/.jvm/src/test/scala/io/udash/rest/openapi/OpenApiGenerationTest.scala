@@ -12,7 +12,7 @@ class OpenApiGenerationTest extends AnyFunSuite {
   test("openapi for RestTestApi") {
     val openapi = RestTestApi.openapiMetadata.openapi(
       Info("Test API", "0.1", description = "Some test REST API"),
-      servers = List(Server("http://localhost"))
+      servers = List(Server("http://localhost")),
     )
     val expected = Source.fromInputStream(getClass.getResourceAsStream("/RestTestApi.json")).getLines().mkString("\n")
     val actual = JsonStringOutput.writePretty(openapi)
@@ -22,9 +22,10 @@ class OpenApiGenerationTest extends AnyFunSuite {
   test("openapi for StreamingRestTestApi") {
     val openapi = StreamingRestTestApi.openapiMetadata.openapi(
       Info("Streaming Test API", "0.1", description = "Some test REST API"),
-      servers = List(Server("http://localhost"))
+      servers = List(Server("http://localhost")),
     )
-    val expected = Source.fromInputStream(getClass.getResourceAsStream("/StreamingRestTestApi.json")).getLines().mkString("\n")
+    val expected =
+      Source.fromInputStream(getClass.getResourceAsStream("/StreamingRestTestApi.json")).getLines().mkString("\n")
     val actual = JsonStringOutput.writePretty(openapi)
     assert(actual == expected)
   }

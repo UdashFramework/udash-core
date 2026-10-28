@@ -7,21 +7,19 @@ import io.udash.rest.openapi.OpenApiMetadata
 import io.udash.rest.raw.{RawRest, RestMetadata}
 import monix.eval.Task
 
-/**
- * Provides companion base classes for **server-only, contextual** REST APIs - APIs whose method
- * implementations receive a request-scoped context of type `Ctx` (e.g. an authenticated user) via
- * [[WithCtx]], while the wire protocol stays context-free. Methods typically return the [[CtxTask]]
- * alias, i.e. `WithCtx[Ctx, Task[T]]`.
- *
- * This is a `trait` (rather than only the ready-to-use [[ContextualServerRestApis]] abstract class) so
- * that applications may mix it into their own base and layer additional custom companions on top of the
- * ones defined here.
- *
- * The `Implicits` type parameter is a bundle of implicits (typically extending [[DefaultRestImplicits]])
- * injected into macro materialization - it is how custom serialization for your own types is picked up.
- *
- * @see [[ContextualServerAndClientRestApis]] for APIs shared between server and client.
- */
+/** Provides companion base classes for **server-only, contextual** REST APIs - APIs whose method implementations
+  * receive a request-scoped context of type `Ctx` (e.g. an authenticated user) via [[WithCtx]], while the wire protocol
+  * stays context-free. Methods typically return the [[CtxTask]] alias, i.e. `WithCtx[Ctx, Task[T]]`.
+  *
+  * This is a `trait` (rather than only the ready-to-use [[ContextualServerRestApis]] abstract class) so that
+  * applications may mix it into their own base and layer additional custom companions on top of the ones defined here.
+  *
+  * The `Implicits` type parameter is a bundle of implicits (typically extending [[DefaultRestImplicits]]) injected into
+  * macro materialization - it is how custom serialization for your own types is picked up.
+  *
+  * @see
+  *   [[ContextualServerAndClientRestApis]] for APIs shared between server and client.
+  */
 trait AbstractContextualServerRestApis[Implicits, Ctx] extends AbstractApiDataWithCustomImplicits[Implicits] {
 
   /** Result type of contextual server method: a [[monix.eval.Task Task]] awaiting the context `Ctx`. */
@@ -30,12 +28,10 @@ trait AbstractContextualServerRestApis[Implicits, Ctx] extends AbstractApiDataWi
   /** Factory for [[CtxTask]] values for this API's context type. */
   def CtxTask: CtxTaskCompanion[Ctx] = CtxTaskCompanion[Ctx]
 
-  /**
-   * Base class for companion objects of contextual REST API *traits* (with a separate implementation
-   * class). Provides [[RestMetadata]], [[OpenApiMetadata]] and a
-   * context-parameterized `AsRaw[RawRest, Real]` (available once a `Ctx` is in implicit scope), plus
-   * `restAsContextualRaw` which defers the context so a handler can be built per request.
-   */
+  /** Base class for companion objects of contextual REST API *traits* (with a separate implementation class). Provides
+    * [[RestMetadata]], [[OpenApiMetadata]] and a context-parameterized `AsRaw[RawRest, Real]` (available once a `Ctx`
+    * is in implicit scope), plus `restAsContextualRaw` which defers the context so a handler can be built per request.
+    */
   abstract class ServerApiCompanion[Real](
     implicit inst: MacroInstances[Implicits, CtxServerOpenApiInstances[Ctx, Real]]
   ) {
@@ -60,10 +56,9 @@ trait AbstractContextualServerRestApis[Implicits, Ctx] extends AbstractApiDataWi
       real => WithCtx(implicit ctx => restAsRaw.asRaw(real))
   }
 
-  /**
-   * Like [[ServerApiCompanion]], but for contextual REST API *implementation classes* that have their
-   * methods already implemented (no separate API trait). Fewer macro-generated implicits are required.
-   */
+  /** Like [[ServerApiCompanion]], but for contextual REST API *implementation classes* that have their methods already
+    * implemented (no separate API trait). Fewer macro-generated implicits are required.
+    */
   abstract class ServerApiImplCompanion[Real](
     implicit inst: MacroInstances[Implicits, CtxOpenApiServerImplInstances[Ctx, Real]]
   ) {
@@ -77,15 +72,14 @@ trait AbstractContextualServerRestApis[Implicits, Ctx] extends AbstractApiDataWi
   }
 }
 
-/**
- * Ready-to-use entry point for [[AbstractContextualServerRestApis]]. Extend it with an `object`, fixing
- * the implicits bundle and context type, e.g.
- * {{{
- *   object MyImplicits extends DefaultRestImplicits
- *   case class UserContext(userId: String)
- *   object MyCtxApis extends ContextualServerRestApis[MyImplicits.type, UserContext](MyImplicits)
- * }}}
- */
+/** Ready-to-use entry point for [[AbstractContextualServerRestApis]]. Extend it with an `object`, fixing the implicits
+  * bundle and context type, e.g.
+  * {{{
+  *   object MyImplicits extends DefaultRestImplicits
+  *   case class UserContext(userId: String)
+  *   object MyCtxApis extends ContextualServerRestApis[MyImplicits.type, UserContext](MyImplicits)
+  * }}}
+  */
 abstract class ContextualServerRestApis[Implicits, Ctx](override protected val implicits: Implicits)
   extends AbstractContextualServerRestApis[Implicits, Ctx]
 
@@ -95,10 +89,9 @@ trait CtxServerApiInstances[Ctx, Real] {
   def metadata: RestMetadata[Real]
 }
 
-/**
- * [[CtxServerApiInstances]] extended with OpenAPI metadata, required by
- * [[AbstractContextualServerRestApis.ServerApiCompanion]].
- */
+/** [[CtxServerApiInstances]] extended with OpenAPI metadata, required by
+  * [[AbstractContextualServerRestApis.ServerApiCompanion]].
+  */
 trait CtxServerOpenApiInstances[Ctx, Real] extends CtxServerApiInstances[Ctx, Real] with OpenApiInstances[Real]
 
 /** Like [[CtxServerApiInstances]] but for an already-implemented class (materialized via `@materializeWith`). */
@@ -109,8 +102,7 @@ trait CtxServerImplInstances[Ctx, Real] {
   def metadata: RestMetadata[Real]
 }
 
-/**
- * [[CtxServerImplInstances]] extended with OpenAPI metadata for an already-implemented class, required by
- * [[AbstractContextualServerRestApis.ServerApiImplCompanion]].
- */
+/** [[CtxServerImplInstances]] extended with OpenAPI metadata for an already-implemented class, required by
+  * [[AbstractContextualServerRestApis.ServerApiImplCompanion]].
+  */
 trait CtxOpenApiServerImplInstances[Ctx, Real] extends CtxServerImplInstances[Ctx, Real] with OpenApiImplInstances[Real]

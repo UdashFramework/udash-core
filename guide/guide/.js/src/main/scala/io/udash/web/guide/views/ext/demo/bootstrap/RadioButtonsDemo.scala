@@ -20,7 +20,7 @@ object RadioButtonsDemo extends AutoDemo {
       div(
         Spacing.margin(
           side = Side.Bottom,
-          size = SpacingSize.Normal
+          size = SpacingSize.Normal,
         )
       )(UdashButtonGroup.radio(selected, options)()),
       h4("Is active: "),
@@ -28,11 +28,12 @@ object RadioButtonsDemo extends AutoDemo {
         repeatWithNested(options) { (option, nested) =>
           val checked = selected.transform(_ == option.get)
           div(
-            nested(bind(option)), ": ",
-            nested(bind(checked))
+            nested(bind(option)),
+            ": ",
+            nested(bind(checked)),
           ).render
         }
-      )
+      ),
     ).render
   }.withSourceCode
 
@@ -41,4 +42,3 @@ object RadioButtonsDemo extends AutoDemo {
     (rendered.setup(_.applyTags(GuideStyles.frame)), source)
   }
 }
-
