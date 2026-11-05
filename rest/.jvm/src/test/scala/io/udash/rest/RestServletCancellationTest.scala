@@ -1,7 +1,7 @@
 package io.udash
 package rest
 
-import io.udash.rest.raw.{IMapping, JsonValue, RawRest, StreamedBody, StreamedRestResponse}
+import io.udash.rest.raw.{AbstractRestResponse, HttpBody, IMapping, JsonValue, RawRest, RestResponse, StreamedBody, StreamedRestResponse}
 import io.udash.testing.UdashSharedTest
 import monix.eval.Task
 import monix.execution.Cancelable
@@ -50,8 +50,8 @@ class RestServletCancellationTest extends UdashSharedTest {
     * `unreportedReset`, writes fail as for a reset stream that the container never reports. Closing the response fails
     * either way. Asserts that nothing reached the uncaught failure reporter and returns what the servlet logged.
     */
-  private def serveStreamed(
-    body: StreamedBody.NonEmpty,
+  private def serve(
+    restResponse: AbstractRestResponse,
     disconnect: Boolean = true,
     failFirstWrite: Boolean = true,
     lateDisconnect: Boolean = false,
@@ -97,7 +97,7 @@ class RestServletCancellationTest extends UdashSharedTest {
         else new IOException("broken pipe")
     }
 
-    val handleRequest: RawRest.HandleRequestWithStreaming = _ => Task.now(StreamedRestResponse(200, IMapping.empty, body))
+    val handleRequest: RawRest.HandleRequestWithStreaming = _ => Task.now(restResponse)
     new RestServlet(handleRequest, handleTimeout, customLogger = logger, cancelOnDisconnect = true)
       .service(request, response)
     if (lateDisconnect) {
@@ -124,18 +124,28 @@ class RestServletCancellationTest extends UdashSharedTest {
   private def describe(events: Seq[SubstituteLoggingEvent]): String =
     events.map(e => s"${e.getLevel} ${e.getMessage}: ${e.getThrowable}").mkString(", ")
 
-  private def binary(content: Observable[Array[Byte]]): StreamedBody.NonEmpty =
-    StreamedBody.RawBinary(content, "application/octet-stream")
+  private def binary(content: Observable[Array[Byte]]): StreamedRestResponse =
+    streamed(StreamedBody.RawBinary(content, "application/octet-stream"))
+
+  private def streamed(body: StreamedBody.NonEmpty): StreamedRestResponse =
+    StreamedRestResponse(200, IMapping.empty, body)
 
   "RestServlet" should {
+    "log a response write failing on a reset stream at debug level" in {
+      val events =
+        serve(RestResponse(200, IMapping.empty, HttpBody.plain("ok")), disconnect = false, unreportedReset = true)
+      assertLogged(events, Level.DEBUG, "cancelled by the client during REST response", "reset")
+      assert(!events.exists(_.getLevel == Level.WARN), describe(events))
+    }
+
     "log a binary chunk write failing after a disconnect cancelled the handler instead of reporting it as uncaught" in {
-      val events = serveStreamed(binary(Observable.repeat(Array[Byte](1))))
-      assertLogged(events, Level.WARN, "cancelled by the client", "reset")
+      val events = serve(binary(Observable.repeat(Array[Byte](1))))
+      assertLogged(events, Level.DEBUG, "cancelled by the client", "reset")
     }
 
     "log a JSON list batch write failing after a disconnect cancelled the handler instead of reporting it as uncaught" in {
-      val events = serveStreamed(StreamedBody.JsonList(Observable.repeat(JsonValue("1"))))
-      assertLogged(events, Level.WARN, "cancelled by the client", "reset")
+      val events = serve(streamed(StreamedBody.JsonList(Observable.repeat(JsonValue("1")))))
+      assertLogged(events, Level.DEBUG, "cancelled by the client", "reset")
     }
 
     Seq(RestServlet.DefaultHandleTimeout, 0.seconds).foreach { handleTimeout =>
@@ -143,7 +153,7 @@ class RestServletCancellationTest extends UdashSharedTest {
         // waits for its next element after its first, and fails when the disconnect during the first write cancels it,
         // as a source blocked on a read does when the cancellation closes it
         var sourceClosed = false
-        val events = serveStreamed(
+        val events = serve(
           binary(Observable(Array[Byte](1)) ++ Observable.unsafeCreate[Array[Byte]] { subscriber =>
             Cancelable { () =>
               sourceClosed = true
@@ -160,27 +170,30 @@ class RestServletCancellationTest extends UdashSharedTest {
     }
 
     "log a binary chunk write failing before its disconnect is reported once, without reporting it as uncaught" in {
-      val events = serveStreamed(binary(Observable.repeat(Array[Byte](1))), disconnect = false, lateDisconnect = true)
-      assertLogged(events, Level.WARN, "cancelled by the client", "reset")
-      assert(events.count(_.getLevel == Level.WARN) == 1, describe(events))
+      val events = serve(binary(Observable.repeat(Array[Byte](1))), disconnect = false, lateDisconnect = true)
+      assertLogged(events, Level.DEBUG, "cancelled by the client", "reset")
+      assert(events.count(_.getMessage.contains("cancelled by the client")) == 1, describe(events))
+      assert(!events.exists(_.getLevel == Level.WARN), describe(events))
     }
 
     "log a JSON list batch write failing before its disconnect is reported once, without writing its end" in {
       val events =
-        serveStreamed(StreamedBody.JsonList(Observable(JsonValue("1"))), disconnect = false, lateDisconnect = true)
-      assertLogged(events, Level.WARN, "cancelled by the client", "reset")
-      assert(events.count(_.getLevel == Level.WARN) == 1, describe(events))
+        serve(streamed(StreamedBody.JsonList(Observable(JsonValue("1")))), disconnect = false, lateDisconnect = true)
+      assertLogged(events, Level.DEBUG, "cancelled by the client", "reset")
+      assert(events.count(_.getMessage.contains("cancelled by the client")) == 1, describe(events))
+      assert(!events.exists(_.getLevel == Level.WARN), describe(events))
     }
 
     "log a JSON list batch write failing on a reset stream that is never reported once, without writing its end" in {
       val events =
-        serveStreamed(StreamedBody.JsonList(Observable(JsonValue("1"))), disconnect = false, unreportedReset = true)
-      assertLogged(events, Level.WARN, "cancelled by the client", "reset")
-      assert(events.count(_.getLevel == Level.WARN) == 1, describe(events))
+        serve(streamed(StreamedBody.JsonList(Observable(JsonValue("1")))), disconnect = false, unreportedReset = true)
+      assertLogged(events, Level.DEBUG, "cancelled by the client", "reset")
+      assert(events.count(_.getMessage.contains("cancelled by the client")) == 1, describe(events))
+      assert(!events.exists(_.getLevel == Level.WARN), describe(events))
     }
 
     "log a write failing on a broken connection once, without reporting it as uncaught, when closing fails too" in {
-      val events = serveStreamed(binary(Observable.repeat(Array[Byte](1))), disconnect = false)
+      val events = serve(binary(Observable.repeat(Array[Byte](1))), disconnect = false)
       assertLogged(events, Level.ERROR, "Failure during streaming REST response", "broken pipe")
       assert(events.count(_.getLevel == Level.ERROR) == 1, describe(events))
     }

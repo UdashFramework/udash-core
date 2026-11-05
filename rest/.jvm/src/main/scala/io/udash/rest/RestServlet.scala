@@ -473,8 +473,9 @@ class RestServlet(
             completeWith(())
           case Left(e: HttpErrorException) =>
             completeWith(writeResponse(response, e.toResponse))
+          // A client leaving is routine, e.g. one that drops a request its user no longer needs
           case Left(e: ClientGoneException) =>
-            logger.warn("Request was cancelled by the client during REST response", e.getCause)
+            logger.debug("Request was cancelled by the client during REST response", e.getCause)
             completeWith(())
           case Left(e: IdleTimeoutException) =>
             if (completeWith(writeFailure(response, e.getMessage.opt)))
@@ -513,7 +514,7 @@ class RestServlet(
 
   private def logAbandonedStream(e: Throwable): Unit = e match {
     case e: ClientGoneException =>
-      logger.warn("Request was cancelled by the client during streaming REST response", e.getCause)
+      logger.debug("Request was cancelled by the client during streaming REST response", e.getCause)
     case e: IdleTimeoutException => logger.debug("Streaming REST response went idle while being drained", e)
     case _ => logger.warn("Streaming REST response failed after the request had already been completed", e)
   }
