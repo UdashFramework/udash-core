@@ -137,8 +137,8 @@ its closing `]`, so prefer a JSON list when the client must notice. A JSON list 
 
 The limit applies to servlets created with `RestServlet[Api](...)` or from handlers made by `RawRest.asHandleRequest*`.
 Wrap such a handler (e.g. for authentication) with `RawRest.wrapHandleRequest`. Any other handler, such as one wrapped
-in a plain function, gets `handleTimeout` for every call unless `RawRest.withTimeouts(RestMetadata[Api])(handler)`
-looks the limit up for it. Apply `withTimeouts` outside any wrapper that rewrites the request, so that the limit is
+in a plain function, gets `handleTimeout` for every call unless `RawRest.withCallSettings(RestMetadata[Api])(handler)`
+looks the limit up for it. Apply `withCallSettings` outside any wrapper that rewrites the request, so that the limit is
 that of the call actually handled.
 
 The timeouts run on the servlet's `Scheduler`, so a call that times out while all of its threads are busy gets its
@@ -166,6 +166,33 @@ val servlet = RestServlet[ReportApi](new ReportApiImpl, timer = Scheduler(execut
 Only the server enforces `@timeout`. `JettyRestClient` bounds the whole exchange by its own `timeout` (10 seconds by
 default, `Duration.Inf` allowed), so raise it for long calls and streams. It also reads a JSON list whole before
 emitting its elements.
+
+#### Cancelling abandoned calls
+
+A call whose client goes away keeps running until it completes or times out. `RestServlet`'s `cancelOnDisconnect`
+cancels every such call instead. A method can choose for itself: `@cancelOnDisconnect` cancels it even when the servlet
+does not, and `@cancelOnDisconnect(false)` keeps it running even when the servlet cancels. On a prefix method, the
+choice applies to every method under it that does not set its own:
+
+```scala
+import io.udash.rest._
+import scala.concurrent.Future
+
+trait SearchApi {
+  // a client re-issues it whenever its user changes a filter, so finishing an abandoned one is wasted work
+  @GET
+  @cancelOnDisconnect def search(query: String): Future[List[Result]]
+  @DELETE def remove(id: String): Future[Unit]
+}
+object SearchApi extends DefaultRestApiCompanion[SearchApi]
+```
+
+Cancel only calls that are safe to interrupt. A call that is not cancelled on a disconnect is still cancelled at its
+timeout, so one that must never be interrupted needs `uncancelable`. The server notices a client leaving only where the
+abort reaches it, e.g. as an HTTP/2 stream reset. An aborted HTTP/1.1 request, such as one from a proxy that speaks
+HTTP/1.1 to the server, runs until its timeout.
+
+`@cancelOnDisconnect` applies to the same servlets and handlers as `@timeout`.
 
 ### Client
 
@@ -1076,10 +1103,11 @@ val handle: RawRest.HandleRequestWithStreaming = request => {
   implicit val ctx: UserContext = extractUser(request.parameters.headers)
   RawRest.asHandleRequestWithStreaming[UserApi](impl).apply(request)
 }
-val servlet = new RestServlet(RawRest.withTimeouts(RestMetadata[UserApi])(handle))
+val servlet = new RestServlet(RawRest.withCallSettings(RestMetadata[UserApi])(handle))
 ```
 
-`RawRest.withTimeouts` keeps the [timeouts](#timeouts) of the methods, which a plain function would lose.
+`RawRest.withCallSettings` keeps the [timeouts](#timeouts) and [`@cancelOnDisconnect`](#cancelling-abandoned-calls) of
+the methods, which a plain function would lose.
 
 Don't write `RestServlet[UserApi](impl)` with an implicit context in scope at startup: it compiles, but the
 handler is then built only once and **every** request runs with that one context.

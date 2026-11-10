@@ -325,6 +325,7 @@ final case class PrefixMetadata[T](
   @multi @reifyAnnot streamedResponseAdjusters: List[StreamedResponseAdjuster],
   @infer @checked result: RestMetadata.Lazy[T],
   @optional @reifyAnnot timeout: Opt[timeout],
+  @optional @reifyAnnot cancelOnDisconnect: Opt[cancelOnDisconnect],
 ) extends RestMethodMetadata[T] {
 
   @bincompat private[rest] def this(
@@ -344,6 +345,7 @@ final case class PrefixMetadata[T](
     streamedResponseAdjusters,
     result,
     Opt.Empty,
+    Opt.Empty,
   )
 
   @bincompat private[rest] def this(
@@ -353,7 +355,7 @@ final case class PrefixMetadata[T](
     requestAdjusters: List[RequestAdjuster],
     responseAdjusters: List[ResponseAdjuster],
     result: RestMetadata.Lazy[T],
-  ) = this(name, methodTag, parametersMetadata, requestAdjusters, responseAdjusters, Nil, result, Opt.Empty)
+  ) = this(name, methodTag, parametersMetadata, requestAdjusters, responseAdjusters, Nil, result, Opt.Empty, Opt.Empty)
 
   def methodPath: List[PlainValue] = PlainValue.decodePath(methodTag.path)
 }
@@ -370,6 +372,7 @@ final case class HttpMethodMetadata[T](
   @multi @reifyAnnot streamedResponseAdjusters: List[StreamedResponseAdjuster],
   @infer @checked responseType: HttpResponseType[T],
   @optional @reifyAnnot timeout: Opt[timeout],
+  @optional @reifyAnnot cancelOnDisconnect: Opt[cancelOnDisconnect],
 ) extends RestMethodMetadata[T] {
 
   @bincompat private[rest] def this(
@@ -394,6 +397,7 @@ final case class HttpMethodMetadata[T](
     responseAdjusters,
     streamedResponseAdjusters,
     responseType,
+    Opt.Empty,
     Opt.Empty,
   )
 
@@ -418,6 +422,7 @@ final case class HttpMethodMetadata[T](
     responseAdjusters,
     Nil,
     responseType,
+    Opt.Empty,
     Opt.Empty,
   )
 

@@ -29,6 +29,21 @@ import javax.servlet.{DispatcherType, Filter, FilterChain, ServletOutputStream, 
 import scala.concurrent.duration.*
 import scala.jdk.CollectionConverters.*
 
+// Sets cancelOnDisconnect per method on paths that RestServletDisconnectTest's handler dispatches on
+trait DisconnectApi {
+  @GET
+  @cancelOnDisconnect def hanging(@Path scenario: String): Task[Unit]
+  @GET
+  @cancelOnDisconnect(false) def finishing(@Path scenario: String): Task[Unit]
+  @cancelOnDisconnect def heavy: DisconnectSubApi
+}
+object DisconnectApi extends DefaultRestApiCompanion[DisconnectApi]
+
+trait DisconnectSubApi {
+  @GET def hanging(@Path scenario: String): Task[Unit]
+}
+object DisconnectSubApi extends DefaultRestApiCompanion[DisconnectSubApi]
+
 /** Covers cancellation of the handler `Task` when the client abandons a request, and how the servlet bounds a call by
   * its timeout.
   *
@@ -147,10 +162,14 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
     val httpConfig = connector.getConnectionFactory(classOf[HttpConnectionFactory]).getHttpConfiguration
     connector.addConnectionFactory(new HTTP2CServerConnectionFactory(httpConfig))
 
-    def servlet(handleTimeout: FiniteDuration, cancelOnDisconnect: Boolean): ServletHolder =
+    def servlet(
+      handleTimeout: FiniteDuration,
+      cancelOnDisconnect: Boolean,
+      handle: RawRest.HandleRequestWithStreaming = handleRequest,
+    ): ServletHolder =
       new ServletHolder(
         new RestServlet(
-          handleRequest,
+          handle,
           handleTimeout,
           customLogger = servletLogger,
           cancelOnDisconnect = cancelOnDisconnect,
@@ -173,6 +192,9 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
     handler.addServlet(servlet(HandleTimeout, cancelOnDisconnect = false), "/no-cancel-api/*")
     handler.addServlet(servlet(ShortHandleTimeout, cancelOnDisconnect = true), "/short-timeout-api/*")
     handler.addServlet(servlet(ShortHandleTimeout, cancelOnDisconnect = false), "/short-no-cancel-api/*")
+    val perMethod = RawRest.withCallSettings(DisconnectApi.restMetadata)(handleRequest)
+    handler.addServlet(servlet(HandleTimeout, cancelOnDisconnect = false, perMethod), "/opt-in-api/*")
+    handler.addServlet(servlet(HandleTimeout, cancelOnDisconnect = true, perMethod), "/opt-out-api/*")
     handler.addFilter(
       new FilterHolder(new Filter {
         def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain): Unit = {
@@ -438,6 +460,25 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
       abortHttp2Request("no-cancel-api/finishing/h2-abort-disabled")
       assert(latch(finished, "h2-abort-disabled").await(4, TimeUnit.SECONDS), "handler never finished")
       assert(!latch(cancelled, "h2-abort-disabled").await(0, TimeUnit.SECONDS), "handler was cancelled")
+      settle()
+      assertNoFailures()
+    }
+
+    "cancel a call whose method enables cancelOnDisconnect on a servlet that does not cancel" in {
+      abortHttp2Request("opt-in-api/hanging/h2-method-opt-in")
+      assert(latch(cancelled, "h2-method-opt-in").await(4, TimeUnit.SECONDS), "handler was never cancelled")
+    }
+
+    "cancel a call under a prefix method that enables cancelOnDisconnect" in {
+      abortHttp2Request("opt-in-api/heavy/hanging/h2-prefix-opt-in")
+      assert(latch(cancelled, "h2-prefix-opt-in").await(4, TimeUnit.SECONDS), "handler was never cancelled")
+    }
+
+    "let a call whose method disables cancelOnDisconnect finish on a servlet that cancels" in {
+      resetFailures()
+      abortHttp2Request("opt-out-api/finishing/h2-method-opt-out")
+      assert(latch(finished, "h2-method-opt-out").await(4, TimeUnit.SECONDS), "handler never finished")
+      assert(!latch(cancelled, "h2-method-opt-out").await(0, TimeUnit.SECONDS), "handler was cancelled")
       settle()
       assertNoFailures()
     }

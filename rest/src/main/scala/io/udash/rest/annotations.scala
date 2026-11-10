@@ -363,3 +363,14 @@ class streamingResponseBatchSize(size: Int) extends StreamedResponseAdjuster {
   * is shorter than a millisecond.
   */
 class timeout(val duration: FiniteDuration) extends RealSymAnnotation
+
+/** Overrides the server's `cancelOnDisconnect` for an HTTP or prefix method: whether a call is cancelled when its
+  * client goes away. On a prefix method it applies to every method reached through it, and the innermost annotation
+  * wins.
+  *
+  * Enable it on calls that are safe to interrupt and wasteful to finish for nobody, e.g. a heavy query that a client
+  * re-issues whenever its user changes a filter. Disable it on calls that must not stop mid-flight, e.g. ones with side
+  * effects; such a call is still cancelled at its [[timeout]], so one that must never be interrupted needs
+  * `uncancelable`. Whether a disconnect is noticed at all depends on the transport, see `RestServlet`.
+  */
+class cancelOnDisconnect(val enabled: Boolean = true) extends RealSymAnnotation
