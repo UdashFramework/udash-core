@@ -643,9 +643,9 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
   test("resolving a request gives the call's timeout and a task that has not started") {
     val impl = new TimeoutApiImpl
     val handler = RawRest.asHandleRequestWithStreaming[TimeoutRootApi](impl)
-    val RawRest.ResolvedRequest(timeout, _, task) =
-      resolve(handler, timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
-    timeout shouldBe Opt(3.seconds)
+    val resolved = resolve(handler, timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
+    val task = resolved.response
+    resolved.timeout shouldBe Opt(3.seconds)
     impl.invoked shouldBe Nil
     whenReady(task.runToFuture)(_ => impl.invoked shouldBe List("outer", "inner", "annotated"))
   }
@@ -660,9 +660,9 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
   test("a handler without streaming resolves the call's timeout and a task that has not started") {
     val impl = new TimeoutApiImpl
     val handler = RawRest.asHandleRequest[TimeoutRootApi](impl)
-    val RawRest.ResolvedRequest(timeout, _, task) =
-      resolve(handler, timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
-    timeout shouldBe Opt(3.seconds)
+    val resolved = resolve(handler, timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
+    val task = resolved.response
+    resolved.timeout shouldBe Opt(3.seconds)
     impl.invoked shouldBe Nil
     whenReady(task.runToFuture)(_ => impl.invoked shouldBe List("outer", "inner", "annotated"))
   }
@@ -686,8 +686,7 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
       )
     ) {
       val impl = new TimeoutApiImpl
-      val RawRest.ResolvedRequest(_, _, task) =
-        resolve(handler(impl), timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
+      val task = resolve(handler(impl), timeoutRequest(HttpMethod.POST, "outer/inner/annotated")).response
       whenReady(task.flatMap(_ => task).runToFuture)(_ => impl.invoked shouldBe List("outer", "inner", "annotated"))
     }
   }
@@ -700,9 +699,9 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
       }
     val handler = RawRest.asHandleRequestWithStreaming[TimeoutRootApi](new TimeoutApiImpl)
     val wrapped = RawRest.wrapHandleRequest(handler)(wrapper)
-    val RawRest.ResolvedRequest(timeout, _, task) =
-      resolve(wrapped, timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
-    timeout shouldBe Opt(3.seconds)
+    val resolved = resolve(wrapped, timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
+    val task = resolved.response
+    resolved.timeout shouldBe Opt(3.seconds)
     whenReady(task.runToFuture)(_.headers.lift("X-Wrapped") shouldBe Some(PlainValue("yes")))
 
     val opaque = RawRest.wrapHandleRequest(_ => Task.now(RestResponse(204, IMapping.empty, HttpBody.Empty)))(wrapper)
@@ -719,7 +718,7 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
       task
     }
     val handler = RawRest.asHandleRequestWithStreaming[TimeoutRootApi](new TimeoutApiImpl)
-    val RawRest.ResolvedRequest(_, _, task) = resolve(wrap(handler), timeoutRequest(HttpMethod.POST, "untimed"))
+    val task = resolve(wrap(handler), timeoutRequest(HttpMethod.POST, "untimed")).response
     wrapperRuns.get shouldBe 0
     whenReady(task.runToFuture)(_ => wrapperRuns.get shouldBe 1)
 
@@ -770,7 +769,7 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
     timeoutOf(HttpMethod.GET, "bare/plain") shouldBe Opt.Empty
     timeoutOf(HttpMethod.OPTIONS, "bare/fetch") shouldBe Opt.Empty
     invocations.get shouldBe 0
-    val RawRest.ResolvedRequest(_, _, task) = resolve(handler, timeoutRequest(HttpMethod.POST, "untimed"))
+    val task = resolve(handler, timeoutRequest(HttpMethod.POST, "untimed")).response
     whenReady(task.flatMap(_ => task).runToFuture)(_ => invocations.get shouldBe 1)
   }
 

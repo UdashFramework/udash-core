@@ -370,7 +370,8 @@ class timeout(val duration: FiniteDuration) extends RealSymAnnotation
   *
   * Enable it on calls that are safe to interrupt and wasteful to finish for nobody, e.g. a heavy query that a client
   * re-issues whenever its user changes a filter. Disable it on calls that must not stop mid-flight, e.g. ones with side
-  * effects; such a call is still cancelled at its [[timeout]], so one that must never be interrupted needs
-  * `uncancelable`. Whether a disconnect is noticed at all depends on the transport, see `RestServlet`.
+  * effects. That keeps only the handler `Task` running: it is still cancelled at its [[timeout]], so one that must
+  * never be interrupted needs `uncancelable`, and a streamed response stops at its next chunk once the client is gone,
+  * whatever this says. Whether a disconnect is noticed at all depends on the transport, see `RestServlet`.
   */
 class cancelOnDisconnect(val enabled: Boolean = true) extends RealSymAnnotation

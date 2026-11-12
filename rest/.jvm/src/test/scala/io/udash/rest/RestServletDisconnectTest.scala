@@ -477,6 +477,9 @@ class RestServletDisconnectTest extends UdashSharedTest with UsesHttpServer {
     "let a call whose method disables cancelOnDisconnect finish on a servlet that cancels" in {
       resetFailures()
       abortHttp2Request("opt-out-api/finishing/h2-method-opt-out")
+      awaitUntil("the abort never reached the servlet")(
+        logEvents.asScala.exists(_.getMessage == "REST request was aborted by the client")
+      )
       assert(latch(finished, "h2-method-opt-out").await(4, TimeUnit.SECONDS), "handler never finished")
       assert(!latch(cancelled, "h2-method-opt-out").await(0, TimeUnit.SECONDS), "handler was cancelled")
       settle()

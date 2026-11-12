@@ -188,9 +188,10 @@ object SearchApi extends DefaultRestApiCompanion[SearchApi]
 ```
 
 Cancel only calls that are safe to interrupt. A call that is not cancelled on a disconnect is still cancelled at its
-timeout, so one that must never be interrupted needs `uncancelable`. The server notices a client leaving only where the
-abort reaches it, e.g. as an HTTP/2 stream reset. An aborted HTTP/1.1 request, such as one from a proxy that speaks
-HTTP/1.1 to the server, runs until its timeout.
+timeout, so one that must never be interrupted needs `uncancelable`. Not cancelling keeps only the handler running: a
+streamed response stops at its next chunk once its client is gone, as nothing more can be written. The server notices a
+client leaving only where the abort reaches it, e.g. as an HTTP/2 stream reset. An aborted HTTP/1.1 request, such as
+one from a proxy that speaks HTTP/1.1 to the server, runs until its timeout.
 
 `@cancelOnDisconnect` applies to the same servlets and handlers as `@timeout`.
 

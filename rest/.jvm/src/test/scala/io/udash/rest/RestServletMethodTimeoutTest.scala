@@ -61,11 +61,9 @@ class RestServletMethodTimeoutTest extends UdashSharedTest with UsesHttpServer {
   // Resolves every call to a timeout under a millisecond, and answers only after handleTimeout
   private val zeroTimeoutHandler = new RawRest.ResolvingHandleRequest[AbstractRestResponse] {
     def resolve(request: RestRequest): RawRest.ResolvedRequest[AbstractRestResponse] =
-      RawRest.ResolvedRequest(
-        Opt(Duration.Zero),
-        Opt.Empty,
-        Task.sleep(HandleTimeout + 500.millis).as(RestResponse.plain(200, "late")),
-      )
+      RawRest
+        .ResolvedRequest(Task.sleep(HandleTimeout + 500.millis).as(RestResponse.plain(200, "late")))
+        .withTimeout(Opt(Duration.Zero))
     def apply(request: RestRequest): Task[AbstractRestResponse] = resolve(request).response
   }
 

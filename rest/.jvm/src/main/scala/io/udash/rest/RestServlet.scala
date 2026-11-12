@@ -343,7 +343,7 @@ class RestServlet(
           "Apply RawRest.withCallSettings to it, or wrap the RawRest.asHandleRequest* handler itself with " +
           "RawRest.wrapHandleRequest instead of a function, for @timeout and @cancelOnDisconnect to apply."
       )
-      request => RawRest.ResolvedRequest(Opt.Empty, Opt.Empty, Task.defer(handleRequest(request)))
+      request => RawRest.ResolvedRequest(Task.defer(handleRequest(request)))
   }
 
   private val timeoutScheduler: Scheduler = timer.getOrElse(scheduler)
@@ -390,13 +390,8 @@ class RestServlet(
 
     // The call is bounded by the timer below, so the container must not time it out
     asyncContext.setTimeout(0)
-
-    // readRequest must execute in Jetty thread but we want exceptions to be handled uniformly, hence the Try
-    val resolved = Try(resolve(readRequest(request)))
-      .fold(e => RawRest.ResolvedRequest(Opt.Empty, Opt.Empty, Task.raiseError(e)), identity)
-    val timeout = resolved.timeout.fold(defaultTimeout)(handleTimeoutBound)
-    val cancelsOnDisconnect = resolved.cancelOnDisconnect.getOrElse(cancelOnDisconnect)
-
+    // The call's setting once resolved; until then the servlet's, as the listener is registered before the body is read
+    val cancelsOnDisconnect = new AtomicBoolean(cancelOnDisconnect)
     // Registered before the handler starts: a fast handler could otherwise complete the cycle first, and a
     // disconnect arriving before registration would reach no listener.
     asyncContext.addListener(new AsyncListener {
@@ -412,7 +407,7 @@ class RestServlet(
           // (a 500 through the error handler) for what is not an application failure.
           logger.debug("REST request was aborted by the client", failure)
           completeWith(response.setStatus(ClientClosedRequestStatus))
-          if (cancelsOnDisconnect) cancelable.cancel()
+          if (cancelsOnDisconnect.get) cancelable.cancel()
         } else {
           // Any other async failure is left to the container's error dispatch; only stop writing here.
           logger.warn("REST request failed asynchronously", failure)
@@ -421,6 +416,11 @@ class RestServlet(
       }
       def onStartAsync(event: AsyncEvent): Unit = ()
     })
+
+    // readRequest must execute in Jetty thread but we want exceptions to be handled uniformly, hence the Try
+    val resolved = Try(resolve(readRequest(request))).fold(e => RawRest.ResolvedRequest(Task.raiseError(e)), identity)
+    val timeout = resolved.timeout.fold(defaultTimeout)(handleTimeoutBound)
+    resolved.cancelOnDisconnect.foreach(cancelsOnDisconnect.set)
 
     def timeOut(timeout: FiniteDuration): Runnable = () =>
       try {

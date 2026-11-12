@@ -267,6 +267,8 @@ sealed abstract class RestMethodMetadata[T] extends TypedMetadata[T] {
   def requestAdjusters: List[RequestAdjuster]
   def responseAdjusters: List[ResponseAdjuster]
   def streamedResponseAdjusters: List[StreamedResponseAdjuster]
+  def timeout: Opt[timeout]
+  def cancelOnDisconnect: Opt[cancelOnDisconnect]
 
   val pathPattern: List[PathPatternElement] = methodPath.map(PathName.apply) ++
     parametersMetadata.pathParams.flatMap(pp => PathParam(pp) :: pp.pathSuffix.map(PathName.apply))
