@@ -274,6 +274,7 @@ object RawRest extends RawRpcCompanion[RawRest] {
       new ResolvedRequest(response, timeout, cancelOnDisconnect)
     def withCancelOnDisconnect(cancelOnDisconnect: Opt[Boolean]): ResolvedRequest[R] =
       new ResolvedRequest(response, timeout, cancelOnDisconnect)
+    override def toString: String = s"ResolvedRequest(timeout=$timeout, cancelOnDisconnect=$cancelOnDisconnect)"
   }
   object ResolvedRequest {
 
