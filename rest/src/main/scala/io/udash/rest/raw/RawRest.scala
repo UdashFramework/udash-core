@@ -38,9 +38,16 @@ final case class ResolvedCall(root: RestMetadata[_], prefixes: List[PrefixCall],
       .foldRight(finalCall.metadata.adjustResponseWithStreaming(response))(_.metadata.adjustResponseWithStreaming(_))
 
   /** The [[io.udash.rest.timeout timeout]] of the final call, or else of the innermost prefix that has one. */
-  def timeout: Opt[FiniteDuration] =
-    (finalCall.metadata.timeout.iterator ++ prefixes.reverseIterator.flatMap(_.metadata.timeout.iterator)).nextOpt
-      .map(_.duration)
+  def timeout: Opt[FiniteDuration] = innermost(_.timeout).map(_.duration)
+
+  /** The [[io.udash.rest.cancelOnDisconnect cancelOnDisconnect]] of the final call, or else of the innermost prefix
+    * that has one.
+    */
+  def cancelOnDisconnect: Opt[Boolean] = innermost(_.cancelOnDisconnect).map(_.enabled)
+
+  private def innermost[A](setting: RestMethodMetadata[_] => Opt[A]): Opt[A] =
+    (setting(finalCall.metadata).iterator ++
+      prefixes.reverseIterator.flatMap(p => setting(p.metadata).iterator)).nextOpt
 }
 
 @methodTag[RestMethodTag]
@@ -152,9 +159,9 @@ trait RawRest {
   def asHandleRequest(metadata: RestMetadata[_]): HandleRequest = {
     val handler = RawRest.resolving(metadata)(handleResolved)
     new RawRest.ResolvingHandleRequest[RestResponse] {
-      def resolve(request: RestRequest): (Opt[FiniteDuration], Task[RestResponse]) = {
-        val (timeout, response) = handler.resolve(request)
-        (timeout, StreamedRestResponse.fallbackToRestResponse(response))
+      def resolve(request: RestRequest): RawRest.ResolvedRequest[RestResponse] = {
+        val resolved = handler.resolve(request)
+        resolved.withResponse(StreamedRestResponse.fallbackToRestResponse(resolved.response))
       }
       def apply(request: RestRequest): Task[RestResponse] =
         StreamedRestResponse.fallbackToRestResponse(handler(request))
@@ -235,22 +242,50 @@ object RawRest extends RawRpcCompanion[RawRest] {
   type HandleResolvedRequest = (RestRequest, ResolvedCall) => Task[RestResponse]
   type HandleResolvedRequestWithStreaming = (RestRequest, ResolvedCall) => Task[AbstractRestResponse]
 
-  /** A request handler that resolves a call before running it, so that the server can bound the call by its
-    * [[io.udash.rest.timeout timeout]]. The handlers made by `asHandleRequest*` and [[withTimeouts]] are such, and so
-    * is [[wrapHandleRequest]] applied to one of them. Applied as a function, such a handler invokes the API methods at
-    * once; [[resolve]] defers them to its task.
+  /** A request handler that resolves a call before running it, so that the server can apply the call's
+    * [[io.udash.rest.timeout timeout]] and [[io.udash.rest.cancelOnDisconnect cancelOnDisconnect]]. The handlers made
+    * by `asHandleRequest*` and [[withCallSettings]] are such, and so is [[wrapHandleRequest]] applied to one of them.
+    * Applied as a function, such a handler invokes the API methods at once; [[resolve]] defers them to its task.
     */
   trait ResolvingHandleRequest[+R <: AbstractRestResponse] extends (RestRequest => Task[R]) {
+    def resolve(request: RestRequest): ResolvedRequest[R]
+  }
 
-    /** The call's timeout, if it has one, and the task that handles the request, which invokes no API method until it
-      * first runs, and none again when it runs again. A timeout under a millisecond sets no bound, as for
-      * `RestServlet`'s `handleTimeout`.
-      */
-    def resolve(request: RestRequest): (Opt[FiniteDuration], Task[R])
+  // Not a case class, so that a further setting breaks neither binary compatibility nor pattern matches
+  /** A request as resolved by a [[ResolvingHandleRequest]].
+    *
+    * @param response
+    *   the task that handles the request, which invokes no API method until it first runs, and none again when it runs
+    *   again
+    * @param timeout
+    *   the call's [[io.udash.rest.timeout timeout]], if it has one. One under a millisecond sets no bound, as for
+    *   `RestServlet`'s `handleTimeout`.
+    * @param cancelOnDisconnect
+    *   the call's [[io.udash.rest.cancelOnDisconnect cancelOnDisconnect]], if it has one
+    */
+  final class ResolvedRequest[+R <: AbstractRestResponse] private (
+    val response: Task[R],
+    val timeout: Opt[FiniteDuration],
+    val cancelOnDisconnect: Opt[Boolean],
+  ) {
+    def withResponse[R2 <: AbstractRestResponse](response: Task[R2]): ResolvedRequest[R2] =
+      new ResolvedRequest(response, timeout, cancelOnDisconnect)
+    def withTimeout(timeout: Opt[FiniteDuration]): ResolvedRequest[R] =
+      new ResolvedRequest(response, timeout, cancelOnDisconnect)
+    def withCancelOnDisconnect(cancelOnDisconnect: Opt[Boolean]): ResolvedRequest[R] =
+      new ResolvedRequest(response, timeout, cancelOnDisconnect)
+    override def toString: String = s"ResolvedRequest(timeout=$timeout, cancelOnDisconnect=$cancelOnDisconnect)"
+  }
+  object ResolvedRequest {
+
+    /** A request whose call sets nothing, so the server's own settings apply. */
+    def apply[R <: AbstractRestResponse](response: Task[R]): ResolvedRequest[R] =
+      new ResolvedRequest(response, Opt.Empty, Opt.Empty)
   }
 
   /** Wraps a server-side request handler, e.g. for authentication or logging. Unlike a plain function wrapping it, the
-    * result still resolves calls when `handler` does, so that their [[io.udash.rest.timeout timeout]] still applies.
+    * result still resolves calls when `handler` does, so that their [[io.udash.rest.timeout timeout]] and
+    * [[io.udash.rest.cancelOnDisconnect cancelOnDisconnect]] still apply.
     *
     * @param wrapper
     *   receives the request and the task that handles it, and runs when the task it returns does
@@ -262,9 +297,9 @@ object RawRest extends RawRpcCompanion[RawRest] {
   ): HandleRequestWithStreaming = handler match {
     case resolving: ResolvingHandleRequest[AbstractRestResponse] =>
       new ResolvingHandleRequest[AbstractRestResponse] {
-        def resolve(request: RestRequest): (Opt[FiniteDuration], Task[AbstractRestResponse]) = {
-          val (timeout, response) = resolving.resolve(request)
-          (timeout, Task.defer(wrapper(request, response)))
+        def resolve(request: RestRequest): ResolvedRequest[AbstractRestResponse] = {
+          val resolved = resolving.resolve(request)
+          resolved.withResponse(Task.defer(wrapper(request, resolved.response)))
         }
         def apply(request: RestRequest): Task[AbstractRestResponse] = {
           val response = resolving(request)
@@ -364,13 +399,13 @@ object RawRest extends RawRpcCompanion[RawRest] {
   ): ResolvingHandleRequest[AbstractRestResponse] = {
     metadata.ensureValid()
 
-    // the call's timeout, and what invokes its handler
-    def resolveCall(request: RestRequest): (Opt[FiniteDuration], () => Task[AbstractRestResponse]) =
+    // the call, and what invokes its handler
+    def resolveCall(request: RestRequest): (Opt[ResolvedCall], () => Task[AbstractRestResponse]) =
       callOf(metadata, request) match {
         case Left(answer) => (Opt.Empty, () => Task.now(answer))
         case Right((req, call)) =>
           (
-            call.timeout,
+            Opt(call),
             () => {
               val resp = handleResolved(req, call)
               if (request.method == HttpMethod.HEAD)
@@ -385,13 +420,19 @@ object RawRest extends RawRpcCompanion[RawRest] {
       }
 
     new ResolvingHandleRequest[AbstractRestResponse] {
-      def resolve(request: RestRequest): (Opt[FiniteDuration], Task[AbstractRestResponse]) = {
-        val (timeout, handle) = resolveCall(request)
-        (timeout, invokedOnFirstRun(handle()))
+      def resolve(request: RestRequest): ResolvedRequest[AbstractRestResponse] = {
+        val (call, handle) = resolveCall(request)
+        resolvedRequest(call, invokedOnFirstRun(handle()))
       }
       def apply(request: RestRequest): Task[AbstractRestResponse] = resolveCall(request)._2()
     }
   }
+
+  private def resolvedRequest(call: Opt[ResolvedCall], response: Task[AbstractRestResponse])
+    : ResolvedRequest[AbstractRestResponse] =
+    ResolvedRequest(response)
+      .withTimeout(call.flatMap(_.timeout))
+      .withCancelOnDisconnect(call.flatMap(_.cancelOnDisconnect))
 
   // The call that handles the request, with the request as the call takes it, or the answer when no call does
   private def callOf(metadata: RestMetadata[_], request: RestRequest)
@@ -418,15 +459,18 @@ object RawRest extends RawRpcCompanion[RawRest] {
     }
   }
 
-  /** Makes `handler` resolve calls, so that the server bounds them by their [[io.udash.rest.timeout timeout]], which it
-    * looks up in `metadata` by the request's path and method. Apply it outside any wrapper that rewrites requests, so
-    * that the timeout is that of the call `handler` gets.
+  /** Makes `handler` resolve calls, so that the server applies their [[io.udash.rest.timeout timeout]] and
+    * [[io.udash.rest.cancelOnDisconnect cancelOnDisconnect]], which it looks up in `metadata` by the request's path and
+    * method. Apply it outside any wrapper that rewrites requests, so that these are of the call `handler` gets.
     */
-  def withTimeouts(metadata: RestMetadata[_])(handler: HandleRequestWithStreaming): HandleRequestWithStreaming = {
+  def withCallSettings(metadata: RestMetadata[_])(handler: HandleRequestWithStreaming): HandleRequestWithStreaming = {
     metadata.ensureValid()
     new ResolvingHandleRequest[AbstractRestResponse] {
-      def resolve(request: RestRequest): (Opt[FiniteDuration], Task[AbstractRestResponse]) =
-        (callOf(metadata, request).fold(_ => Opt.Empty, _._2.timeout), invokedOnFirstRun(handler(request)))
+      def resolve(request: RestRequest): ResolvedRequest[AbstractRestResponse] =
+        resolvedRequest(
+          callOf(metadata, request).fold(_ => Opt.Empty, r => Opt(r._2)),
+          invokedOnFirstRun(handler(request)),
+        )
       def apply(request: RestRequest): Task[AbstractRestResponse] = handler(request)
     }
   }
