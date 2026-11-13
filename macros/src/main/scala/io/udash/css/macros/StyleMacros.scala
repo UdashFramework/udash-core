@@ -36,13 +36,23 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
       """,
     )
 
+  /** Class name derived from the definition the style is assigned to. A style created as a statement in a class body
+    * (not assigned to anything) is owned by the compiler's local dummy symbol, named `<local ClassName>`, which is not
+    * a valid CSS identifier - such styles are named after the enclosing class instead.
+    */
+  private def generatedClassName: String = {
+    val owner = c.internal.enclosingOwner
+    val namedOwner = if (owner.name.decodedName.toString.startsWith("<local ")) owner.owner else owner
+    namedOwner.fullName.replace('.', '-')
+  }
+
   def mixin(impl: Tree*): Tree = {
-    val fullName = c.internal.enclosingOwner.fullName.replace('.', '-')
+    val fullName = generatedClassName
     handleScalaJs(q"$fullName", q"""new $StyleImplCls($fullName, $Dsl.style(..$impl)($Compose.trust))""")
   }
 
   def style(impl: Tree*): Tree = {
-    val fullName = c.internal.enclosingOwner.fullName.replace('.', '-')
+    val fullName = generatedClassName
     style(q"$fullName", impl: _*)
   }
 
@@ -66,7 +76,7 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
     )
 
   def keyframes(impl: Tree*): Tree = {
-    val fullName = c.internal.enclosingOwner.fullName.replace('.', '-')
+    val fullName = generatedClassName
     keyframes(q"$fullName", impl: _*)
   }
 
@@ -86,7 +96,7 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
     )
 
   def fontFace(font: Tree): Tree = {
-    val fullName = c.internal.enclosingOwner.fullName.replace('.', '-')
+    val fullName = generatedClassName
     fontFace(q"$fullName", font)
   }
 

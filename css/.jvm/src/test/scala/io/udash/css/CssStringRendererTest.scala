@@ -63,9 +63,6 @@ class CssStringRendererTest extends UdashSharedTest {
           |}
           |
           |.io-udash-css-StylesheetExample-test1:hover {
-          |  cursor: -moz-zoom-in;
-          |  cursor: -o-zoom-in;
-          |  cursor: -webkit-zoom-in;
           |  cursor: zoom-in;
           |}
           |
@@ -100,9 +97,6 @@ class CssStringRendererTest extends UdashSharedTest {
           |}
           |
           |.io-udash-css-StylesheetExample-test2:hover {
-          |  cursor: -moz-zoom-in;
-          |  cursor: -o-zoom-in;
-          |  cursor: -webkit-zoom-in;
           |  cursor: zoom-in;
           |}
           |
@@ -138,9 +132,6 @@ class CssStringRendererTest extends UdashSharedTest {
           |}
           |
           |.io-udash-css-SecondStylesheetExample-test:hover {
-          |  cursor: -moz-zoom-in;
-          |  cursor: -o-zoom-in;
-          |  cursor: -webkit-zoom-in;
           |  cursor: zoom-in;
           |}
           |

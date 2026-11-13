@@ -106,20 +106,21 @@ trait CssBase {
         renderer.apply(
           Css.styleA(
             StyleA(
-              new ClassName(className),
+              CssBase.renderedClassName(className),
               Vector.empty,
               impl,
             )
           )(Env.empty)
         )
       case CssKeyframes(className, steps) =>
+        val name = CssBase.renderedClassName(className)
         val kfs = Keyframes(
-          new ClassName(className),
+          name,
           steps.map { case (p, impl) =>
             (
               Percentage(p): KeyframeSelector,
               StyleA(
-                new ClassName(className),
+                name,
                 Vector.empty,
                 impl,
               ),
@@ -156,6 +157,15 @@ trait CssBase {
 }
 
 object CssBase {
+  private val LocalDummySuffix = "-<local [^>]*>$".r
+
+  /** Udash macros up to 0.26.0 named styles created as class body statements after the compiler's local dummy symbol
+    * (`...-<local ClassName>`). Such names are still compiled into libraries built against these versions, but scalacss
+    * rejects class names containing whitespace, so the suffix is dropped at render time.
+    */
+  private def renderedClassName(className: String): ClassName =
+    ClassName(LocalDummySuffix.replaceFirstIn(className, ""))
+
   final class AnimationNameExt(private val n: Attrs.animationName.type) extends AnyVal {
     def apply(s: CssStyle): AV =
       AV(n.attr, s.classNames.mkString(" "))
