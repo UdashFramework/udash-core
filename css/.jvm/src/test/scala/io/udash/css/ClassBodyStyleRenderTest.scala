@@ -1,6 +1,7 @@
 package io.udash.css
 
 import io.udash.testing.UdashSharedTest
+import scalacss.internal.FontFace.FontSrcSelector
 import scalacss.internal.{Compose, Dsl}
 
 /** Mirrors what udash macros up to 0.26.0 compiled into libraries for stylesheet body statements: class names ending
@@ -9,7 +10,8 @@ import scalacss.internal.{Compose, Dsl}
 object PrecompiledClassBodyStylesheetExample extends CssBase {
   import dsl._
 
-  private final val LocalDummyName = "io-udash-css-PrecompiledClassBodyStylesheetExample-<local PrecompiledClassBodyStylesheetExample>"
+  private final val LocalDummyName =
+    "io-udash-css-PrecompiledClassBodyStylesheetExample-<local PrecompiledClassBodyStylesheetExample>"
 
   dsl.elementsBuffer += CssStyleImpl(
     LocalDummyName,
@@ -22,6 +24,11 @@ object PrecompiledClassBodyStylesheetExample extends CssBase {
       0d -> Dsl.style(height(10.px))(Compose.trust),
       100d -> Dsl.style(height(20.px))(Compose.trust),
     ),
+  )
+
+  dsl.elementsBuffer += CssFontFace(
+    LocalDummyName,
+    new FontSrcSelector(None).src("url(font.woff)"),
   )
 }
 
@@ -39,7 +46,8 @@ class ClassBodyStyleRenderTest extends UdashSharedTest {
       val rendered = PrecompiledClassBodyStylesheetExample.render
       rendered should include(".io-udash-css-PrecompiledClassBodyStylesheetExample button {")
       rendered should include("@keyframes io-udash-css-PrecompiledClassBodyStylesheetExample {")
-      rendered should not include "<local"
+      rendered should include("font-family: io-udash-css-PrecompiledClassBodyStylesheetExample;")
+      (rendered should not).include("<local")
     }
   }
 }

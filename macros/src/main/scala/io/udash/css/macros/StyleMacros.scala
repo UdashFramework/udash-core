@@ -40,24 +40,37 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
     * (not assigned to anything) is owned by the compiler's local dummy symbol, named `<local ClassName>`, which is not
     * a valid CSS identifier - such styles are named after the enclosing class instead.
     */
-  private def generatedClassName: String = {
+  private def generatedClassName: Tree = {
     val owner = c.internal.enclosingOwner
     val namedOwner = if (owner.name.decodedName.toString.startsWith("<local ")) owner.owner else owner
-    namedOwner.fullName.replace('.', '-')
+    q"${namedOwner.fullName.replace('.', '-')}"
   }
+
+  /** scalacss rejects empty class names and ones containing whitespace when rendering, and the browser rejects them
+    * when adding the class to an element, so a literal name is checked at compile time.
+    */
+  private def validateClassName(className: Tree): Unit =
+    className match {
+      case Literal(Constant(name: String)) if name.isEmpty || name.exists(_.isWhitespace) =>
+        c.abort(
+          className.pos,
+          s"""Invalid CSS class name "$name": it must be non-empty and must not contain whitespace""",
+        )
+      case _ =>
+    }
 
   def mixin(impl: Tree*): Tree = {
-    val fullName = generatedClassName
-    handleScalaJs(q"$fullName", q"""new $StyleImplCls($fullName, $Dsl.style(..$impl)($Compose.trust))""")
+    val name = generatedClassName
+    handleScalaJs(name, q"""new $StyleImplCls($name, $Dsl.style(..$impl)($Compose.trust))""")
   }
 
-  def style(impl: Tree*): Tree = {
-    val fullName = generatedClassName
-    style(q"$fullName", impl: _*)
-  }
+  def style(impl: Tree*): Tree =
+    style(generatedClassName, impl: _*)
 
-  def namedStyle(className: Tree, impl: Tree*): Tree =
+  def namedStyle(className: Tree, impl: Tree*): Tree = {
+    validateClassName(className)
     style(className, impl: _*)
+  }
 
   private def keyframes(name: Tree, impl: Tree*): Tree =
     handleScalaJs(
@@ -75,13 +88,13 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
       """,
     )
 
-  def keyframes(impl: Tree*): Tree = {
-    val fullName = generatedClassName
-    keyframes(q"$fullName", impl: _*)
-  }
+  def keyframes(impl: Tree*): Tree =
+    keyframes(generatedClassName, impl: _*)
 
-  def namedKeyframes(className: Tree, impl: Tree*): Tree =
+  def namedKeyframes(className: Tree, impl: Tree*): Tree = {
+    validateClassName(className)
     keyframes(className, impl: _*)
+  }
 
   private def fontFace(name: Tree, font: Tree): Tree =
     handleScalaJs(
@@ -95,10 +108,8 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
       """,
     )
 
-  def fontFace(font: Tree): Tree = {
-    val fullName = generatedClassName
-    fontFace(q"$fullName", font)
-  }
+  def fontFace(font: Tree): Tree =
+    fontFace(generatedClassName, font)
 
   def nameFontFace(className: Tree, font: Tree): Tree =
     fontFace(className, font)
