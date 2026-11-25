@@ -178,8 +178,8 @@ object RestServlet {
     * @param defaultStreamingBatchSize
     *   default batch when streaming [[StreamedBody.JsonList]]
     * @param cancelOnDisconnect
-    *   whether to cancel the handler `Task` when the container reports that the client went away; see
-    *   [[RestServlet.cancelOnDisconnect]]
+    *   whether to cancel the handler `Task` of calls without [[io.udash.rest.cancelOnDisconnect cancelOnDisconnect]]
+    *   when the container reports that the client went away; see [[RestServlet.cancelOnDisconnect]]
     * @param timer
     *   runs the timeouts of calls, see [[RestServlet]]
     */
@@ -251,18 +251,20 @@ object RestServlet {
 
 /** @param handleRequest
   *   the handler of REST requests. Only a handler that resolves calls, i.e. one made by `RawRest.asHandleRequest*` or
-  *   `RawRest.withTimeouts`, or one of these wrapped with `RawRest.wrapHandleRequest`, has its calls bound by their
-  *   [[io.udash.rest.timeout timeout]]; any other gets `handleTimeout` for all of them.
+  *   `RawRest.withCallSettings`, or one of these wrapped with `RawRest.wrapHandleRequest`, applies the
+  *   [[io.udash.rest.timeout timeout]] and [[io.udash.rest.cancelOnDisconnect cancelOnDisconnect]] of its calls; any
+  *   other gets `handleTimeout` and `cancelOnDisconnect` for all of them.
   * @param handleTimeout
   *   bound for calls without [[io.udash.rest.timeout timeout]]: a call that has not answered within it gets a 500 and
   *   is cancelled, and a streamed response ends once it has emitted nothing for that long. `timer` runs the former,
   *   `scheduler` the latter. Neither counts time spent writing to the client, which the container bounds, e.g. by
   *   Jetty's connector idle timeout. One under a millisecond sets no bound, as for the container's own async timeout.
   * @param cancelOnDisconnect
-  *   cancel the handler `Task` when the container reports that the client went away, instead of letting it run until it
-  *   completes or times out. Other asynchronous failures never cancel it. Off by default: an ordinary client abort
-  *   (browser navigation, a client-side timeout, a load balancer reset) would otherwise interrupt a side-effecting
-  *   handler mid-flight, so enable it once handlers are known to be cancellation-safe. Note that detection is transport
+  *   for calls without [[io.udash.rest.cancelOnDisconnect cancelOnDisconnect]]: cancel the handler `Task` when the
+  *   container reports that the client went away, instead of letting it run until it completes or times out. Other
+  *   asynchronous failures never cancel it. Off by default: an ordinary client abort (browser navigation, a client-side
+  *   timeout, a load balancer reset) would otherwise interrupt a side-effecting handler mid-flight, so enable it once
+  *   handlers are known to be cancellation-safe, or per method on those that are. Note that detection is transport
   *   dependent: `AsyncListener.onError` is only raised for protocols where the client's abort reaches the server on a
   *   connection it is already reading, e.g. HTTP/2 `RST_STREAM`. An aborted HTTP/1.1 request is not reported while the
   *   async cycle is idle, so it is still bounded by the call's timeout. Neither is an abort arriving before the
@@ -332,16 +334,16 @@ class RestServlet(
 
   private val defaultTimeout: Opt[FiniteDuration] = handleTimeoutBound(handleTimeout)
 
-  private val resolve: RestRequest => (Opt[FiniteDuration], Task[AbstractRestResponse]) = handleRequest match {
+  private val resolve: RestRequest => RawRest.ResolvedRequest[AbstractRestResponse] = handleRequest match {
     case resolving: RawRest.ResolvingHandleRequest[AbstractRestResponse] => resolving.resolve
     case _ =>
       // debug, as a servlet built per request would log it for each
       logger.debug(
-        "RestServlet's handler does not resolve calls, so @timeout does not apply to them. " +
-          "Apply RawRest.withTimeouts to it, or wrap the RawRest.asHandleRequest* handler itself with " +
-          "RawRest.wrapHandleRequest instead of a function, for @timeout to apply."
+        "RestServlet's handler does not resolve calls, so @timeout and @cancelOnDisconnect do not apply to them. " +
+          "Apply RawRest.withCallSettings to it, or wrap the RawRest.asHandleRequest* handler itself with " +
+          "RawRest.wrapHandleRequest instead of a function, for @timeout and @cancelOnDisconnect to apply."
       )
-      request => (Opt.Empty, Task.defer(handleRequest(request)))
+      request => RawRest.ResolvedRequest(Task.defer(handleRequest(request)))
   }
 
   private val timeoutScheduler: Scheduler = timer.getOrElse(scheduler)
@@ -388,6 +390,8 @@ class RestServlet(
 
     // The call is bounded by the timer below, so the container must not time it out
     asyncContext.setTimeout(0)
+    // The call's setting once resolved; until then the servlet's, as the listener is registered before the body is read
+    val cancelsOnDisconnect = new AtomicBoolean(cancelOnDisconnect)
     // Registered before the handler starts: a fast handler could otherwise complete the cycle first, and a
     // disconnect arriving before registration would reach no listener.
     asyncContext.addListener(new AsyncListener {
@@ -403,7 +407,7 @@ class RestServlet(
           // (a 500 through the error handler) for what is not an application failure.
           logger.debug("REST request was aborted by the client", failure)
           completeWith(response.setStatus(ClientClosedRequestStatus))
-          if (cancelOnDisconnect) cancelable.cancel()
+          if (cancelsOnDisconnect.get) cancelable.cancel()
         } else {
           // Any other async failure is left to the container's error dispatch; only stop writing here.
           logger.warn("REST request failed asynchronously", failure)
@@ -414,10 +418,9 @@ class RestServlet(
     })
 
     // readRequest must execute in Jetty thread but we want exceptions to be handled uniformly, hence the Try
-    val (timeout, handle) = Try {
-      val (callTimeout, response) = resolve(readRequest(request))
-      (callTimeout.fold(defaultTimeout)(handleTimeoutBound), response)
-    }.fold(e => (defaultTimeout, Task.raiseError(e)), identity)
+    val resolved = Try(resolve(readRequest(request))).fold(e => RawRest.ResolvedRequest(Task.raiseError(e)), identity)
+    val timeout = resolved.timeout.fold(defaultTimeout)(handleTimeoutBound)
+    resolved.cancelOnDisconnect.foreach(cancelsOnDisconnect.set)
 
     def timeOut(timeout: FiniteDuration): Runnable = () =>
       try {
@@ -453,7 +456,7 @@ class RestServlet(
 
     cancelable :=
       (for {
-        restResponse <- handle
+        restResponse <- resolved.response
         claimed <- Task(claimHead())
         _ <- Task.when(claimed)(
           unlessCompleted(completed)(setResponseHeaders(response, restResponse.code, restResponse.headers))

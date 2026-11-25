@@ -111,6 +111,20 @@ trait TimeoutRootApi {
 }
 object TimeoutRootApi extends DefaultRestApiCompanion[TimeoutRootApi]
 
+trait CancelLeafApi {
+  @cancelOnDisconnect(false) def kept: Future[Unit]
+  def plain: Future[Unit]
+}
+object CancelLeafApi extends DefaultRestApiCompanion[CancelLeafApi]
+
+trait CancelRootApi {
+  @cancelOnDisconnect def cancelled: CancelLeafApi
+  def bare: CancelLeafApi
+  @cancelOnDisconnect def heavy: Future[Unit]
+  def plainRoot: Future[Unit]
+}
+object CancelRootApi extends DefaultRestApiCompanion[CancelRootApi]
+
 class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
   implicit def scheduler: Scheduler = Scheduler.global
 
@@ -604,7 +618,7 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
       .timeout
 
   private def resolve(handler: RawRest.HandleRequestWithStreaming, request: RestRequest)
-    : (Opt[FiniteDuration], Task[AbstractRestResponse]) = handler match {
+    : RawRest.ResolvedRequest[AbstractRestResponse] = handler match {
     case h: RawRest.ResolvingHandleRequest[AbstractRestResponse @unchecked] => h.resolve(request)
     case _ => fail("the handler does not resolve calls")
   }
@@ -629,24 +643,26 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
   test("resolving a request gives the call's timeout and a task that has not started") {
     val impl = new TimeoutApiImpl
     val handler = RawRest.asHandleRequestWithStreaming[TimeoutRootApi](impl)
-    val (timeout, task) = resolve(handler, timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
-    timeout shouldBe Opt(3.seconds)
+    val resolved = resolve(handler, timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
+    val task = resolved.response
+    resolved.timeout shouldBe Opt(3.seconds)
     impl.invoked shouldBe Nil
     whenReady(task.runToFuture)(_ => impl.invoked shouldBe List("outer", "inner", "annotated"))
   }
 
   test("a HEAD request resolves to the GET method's timeout") {
     val handler = RawRest.asHandleRequestWithStreaming[TimeoutRootApi](new TimeoutApiImpl)
-    resolve(handler, timeoutRequest(HttpMethod.HEAD, "bare/fetch"))._1 shouldBe Opt(4.seconds)
-    resolve(handler, timeoutRequest(HttpMethod.GET, "bare/missing"))._1 shouldBe Opt.Empty
-    resolve(handler, timeoutRequest(HttpMethod.OPTIONS, "bare/fetch"))._1 shouldBe Opt.Empty
+    resolve(handler, timeoutRequest(HttpMethod.HEAD, "bare/fetch")).timeout shouldBe Opt(4.seconds)
+    resolve(handler, timeoutRequest(HttpMethod.GET, "bare/missing")).timeout shouldBe Opt.Empty
+    resolve(handler, timeoutRequest(HttpMethod.OPTIONS, "bare/fetch")).timeout shouldBe Opt.Empty
   }
 
   test("a handler without streaming resolves the call's timeout and a task that has not started") {
     val impl = new TimeoutApiImpl
     val handler = RawRest.asHandleRequest[TimeoutRootApi](impl)
-    val (timeout, task) = resolve(handler, timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
-    timeout shouldBe Opt(3.seconds)
+    val resolved = resolve(handler, timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
+    val task = resolved.response
+    resolved.timeout shouldBe Opt(3.seconds)
     impl.invoked shouldBe Nil
     whenReady(task.runToFuture)(_ => impl.invoked shouldBe List("outer", "inner", "annotated"))
   }
@@ -670,7 +686,7 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
       )
     ) {
       val impl = new TimeoutApiImpl
-      val (_, task) = resolve(handler(impl), timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
+      val task = resolve(handler(impl), timeoutRequest(HttpMethod.POST, "outer/inner/annotated")).response
       whenReady(task.flatMap(_ => task).runToFuture)(_ => impl.invoked shouldBe List("outer", "inner", "annotated"))
     }
   }
@@ -683,8 +699,9 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
       }
     val handler = RawRest.asHandleRequestWithStreaming[TimeoutRootApi](new TimeoutApiImpl)
     val wrapped = RawRest.wrapHandleRequest(handler)(wrapper)
-    val (timeout, task) = resolve(wrapped, timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
-    timeout shouldBe Opt(3.seconds)
+    val resolved = resolve(wrapped, timeoutRequest(HttpMethod.POST, "outer/inner/annotated"))
+    val task = resolved.response
+    resolved.timeout shouldBe Opt(3.seconds)
     whenReady(task.runToFuture)(_.headers.lift("X-Wrapped") shouldBe Some(PlainValue("yes")))
 
     val opaque = RawRest.wrapHandleRequest(_ => Task.now(RestResponse(204, IMapping.empty, HttpBody.Empty)))(wrapper)
@@ -701,7 +718,7 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
       task
     }
     val handler = RawRest.asHandleRequestWithStreaming[TimeoutRootApi](new TimeoutApiImpl)
-    val (_, task) = resolve(wrap(handler), timeoutRequest(HttpMethod.POST, "untimed"))
+    val task = resolve(wrap(handler), timeoutRequest(HttpMethod.POST, "untimed")).response
     wrapperRuns.get shouldBe 0
     whenReady(task.runToFuture)(_ => wrapperRuns.get shouldBe 1)
 
@@ -737,14 +754,14 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
     whenReady(wrapped(timeoutRequest(HttpMethod.GET, "any")).runToFuture)(_ => invocations.get shouldBe 1)
   }
 
-  test("withTimeouts resolves the timeout of the call a handler that does not resolve calls handles") {
+  test("withCallSettings resolves the timeout of the call a handler that does not resolve calls handles") {
     val invocations = new java.util.concurrent.atomic.AtomicInteger
     val opaque: RawRest.HandleRequestWithStreaming = _ => {
       invocations.incrementAndGet()
       Task.now(RestResponse(204, IMapping.empty, HttpBody.Empty))
     }
-    val handler = RawRest.withTimeouts(TimeoutRootApi.restMetadata)(opaque)
-    def timeoutOf(method: HttpMethod, path: String) = resolve(handler, timeoutRequest(method, path))._1
+    val handler = RawRest.withCallSettings(TimeoutRootApi.restMetadata)(opaque)
+    def timeoutOf(method: HttpMethod, path: String) = resolve(handler, timeoutRequest(method, path)).timeout
     timeoutOf(HttpMethod.POST, "outer/inner/annotated") shouldBe Opt(3.seconds)
     timeoutOf(HttpMethod.POST, "outer/innerBare/plain") shouldBe Opt(1.second)
     timeoutOf(HttpMethod.HEAD, "bare/fetch") shouldBe Opt(4.seconds)
@@ -752,7 +769,57 @@ class RawRestTest extends AnyFunSuite with ScalaFutures with Matchers {
     timeoutOf(HttpMethod.GET, "bare/plain") shouldBe Opt.Empty
     timeoutOf(HttpMethod.OPTIONS, "bare/fetch") shouldBe Opt.Empty
     invocations.get shouldBe 0
-    val (_, task) = resolve(handler, timeoutRequest(HttpMethod.POST, "untimed"))
+    val task = resolve(handler, timeoutRequest(HttpMethod.POST, "untimed")).response
     whenReady(task.flatMap(_ => task).runToFuture)(_ => invocations.get shouldBe 1)
+  }
+
+  test("@cancelOnDisconnect is reified on HTTP and prefix methods") {
+    val metadata = CancelRootApi.restMetadata
+    metadata.httpMethodsByName("heavy").cancelOnDisconnect.map(_.enabled) shouldBe Opt(true)
+    metadata.httpMethodsByName("plainRoot").cancelOnDisconnect shouldBe Opt.Empty
+    metadata.prefixesByName("cancelled").cancelOnDisconnect.map(_.enabled) shouldBe Opt(true)
+    metadata.prefixesByName("bare").cancelOnDisconnect shouldBe Opt.Empty
+    CancelLeafApi.restMetadata.httpMethodsByName("kept").cancelOnDisconnect.map(_.enabled) shouldBe Opt(false)
+  }
+
+  test("a call's cancelOnDisconnect comes from the method, else the innermost prefix that has one") {
+    def cancelOf(path: String): Opt[Boolean] =
+      CancelRootApi.restMetadata
+        .resolvePath(PlainValue.decodePath(path))
+        .headOpt
+        .getOrElse(fail(s"$path not resolved"))
+        .cancelOnDisconnect
+    cancelOf("cancelled/kept") shouldBe Opt(false)
+    cancelOf("cancelled/plain") shouldBe Opt(true)
+    cancelOf("bare/kept") shouldBe Opt(false)
+    cancelOf("bare/plain") shouldBe Opt.Empty
+    cancelOf("heavy") shouldBe Opt(true)
+    cancelOf("plainRoot") shouldBe Opt.Empty
+  }
+
+  test("every resolving handler gives the call's cancelOnDisconnect") {
+    val impl = new CancelRootApi with CancelLeafApi {
+      def cancelled: CancelLeafApi = this
+      def bare: CancelLeafApi = this
+      def heavy: Future[Unit] = Future.unit
+      def plainRoot: Future[Unit] = Future.unit
+      def kept: Future[Unit] = Future.unit
+      def plain: Future[Unit] = Future.unit
+    }
+    val streaming = RawRest.asHandleRequestWithStreaming[CancelRootApi](impl)
+    for (
+      handler <- List[RawRest.HandleRequestWithStreaming](
+        streaming,
+        RawRest.asHandleRequest[CancelRootApi](impl),
+        RawRest.wrapHandleRequest(streaming)((_, task) => task),
+        RawRest.withCallSettings(CancelRootApi.restMetadata)(request => streaming(request)),
+      )
+    ) {
+      def cancelOf(path: String) = resolve(handler, timeoutRequest(HttpMethod.POST, path)).cancelOnDisconnect
+      cancelOf("cancelled/kept") shouldBe Opt(false)
+      cancelOf("cancelled/plain") shouldBe Opt(true)
+      cancelOf("bare/plain") shouldBe Opt.Empty
+      cancelOf("missing") shouldBe Opt.Empty
+    }
   }
 }
