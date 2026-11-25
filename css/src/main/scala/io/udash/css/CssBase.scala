@@ -2,7 +2,7 @@ package io.udash.css
 
 import scalacss.internal.Css.styleA
 import scalacss.internal.DslBase.ToStyle
-import scalacss.internal.{AV, Attrs, ClassName, Compose, Cond, Css, CssEntry, Dsl, DslBase, Env, FontFace, KeyframeSelector, Keyframes, Macros, Percentage, Renderer, StyleA, StyleStream}
+import scalacss.internal.{AV, Attrs, ClassName, Compose, Cond, Css, CssEntry, Dsl, DslBase, Env, FontFace, FontFamily, KeyframeSelector, Keyframes, Macros, Percentage, Renderer, StyleA, StyleStream}
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
@@ -65,11 +65,11 @@ trait CssBase {
       * Example: <pre> val ff = fontFace( _.src("url(font.woff)") .fontStretch.expanded .fontStyle.italic
       * .unicodeRange(0, 5) ) </pre>
       */
-    def fontFace(font: FontFace.FontSrcSelector => FontFace[Option[String]]): CssStyle =
+    def fontFace(font: FontFace.FontSrcSelector => FontFace[Option[FontFamily]]): CssStyle =
       macro io.udash.css.macros.StyleMacros.fontFace
 
     /** Creates CSS fontface with provided name. */
-    def namedFontFace(className: String, font: FontFace.FontSrcSelector => FontFace[Option[String]]): CssStyle =
+    def namedFontFace(className: String, font: FontFace.FontSrcSelector => FontFace[Option[FontFamily]]): CssStyle =
       macro io.udash.css.macros.StyleMacros.nameFontFace
 
     override def unsafeChild(n: String)(t: ToStyle*)(implicit c: Compose): Style.UnsafeExt =
@@ -141,14 +141,7 @@ trait CssBase {
         renderer.apply(
           Vector(
             Css.fontFaces(
-              FontFace[String](
-                CssBase.renderedName(className),
-                src = font.src,
-                fontStretchValue = font.fontStretchValue,
-                fontStyleValue = font.fontStyleValue,
-                fontWeightValue = font.fontWeightValue,
-                unicodeRangeValue = font.unicodeRangeValue,
-              )
+              font.copy(fontFamily = FontFamily(CssBase.renderedName(className)))
             )
           )
         )

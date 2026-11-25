@@ -1,6 +1,6 @@
 package io.udash.css
 
-import scalacss.internal.{FontFace, StyleS}
+import scalacss.internal.{FontFace, FontFamily, StyleS}
 
 /** Representation of stylesheet elements. In JS it's always `CssStyleName`. */
 sealed trait CssStyle {
@@ -25,4 +25,4 @@ final case class CssStyleNameWithSharedCompanion(companionClass: String, commonP
 
 final case class CssStyleImpl(className: String, impl: StyleS) extends CssStyle
 final case class CssKeyframes(className: String, steps: Seq[(Double, StyleS)]) extends CssStyle
-final case class CssFontFace(className: String, font: FontFace[Option[String]]) extends CssStyle
+final case class CssFontFace(className: String, font: FontFace[Option[FontFamily]]) extends CssStyle
