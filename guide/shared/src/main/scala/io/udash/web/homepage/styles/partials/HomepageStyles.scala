@@ -106,7 +106,7 @@ object HomepageStyles extends CssBase with CodeBlockStyles {
     marginRight(.625.rem),
 
     unsafeChild("svg")(
-      svgFill := c"#fff"
+      svgFill(c"#fff")
     ),
   )
 

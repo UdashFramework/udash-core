@@ -2,7 +2,7 @@ package io.udash.web.commons.styles.utils
 
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx, ValueEnumCompanion}
 import io.udash.css.{CssBase, CssStyle}
-import scalacss.internal.{AV, FontFace, NonEmptyVector}
+import scalacss.internal.{AV, FontFace, FontFamily => CssFontFamily, NonEmptyVector}
 
 import scala.collection.immutable
 
@@ -80,7 +80,7 @@ object UdashFonts extends CssBase {
         FontFamily.Roboto,
         _ => {
           new FontFace(
-            fontFamily = Some(FontFamily.Roboto),
+            fontFamily = Some(CssFontFamily(FontFamily.Roboto)),
             src = NonEmptyVector(
               fontSrc(fontFile.path, FontFileType.TruetypeFont.extension, FontFileType.TruetypeFont.format)
             ),
