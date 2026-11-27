@@ -4,7 +4,7 @@ import io.udash.testing.UdashSharedTest
 import scalacss.internal.FontFace.FontSrcSelector
 import scalacss.internal.{Compose, Dsl}
 
-/** Mirrors what udash macros up to 0.26.0 compiled into libraries for stylesheet body statements: class names ending
+/** Mirrors what udash macros up to 0.27.0 compiled into libraries for stylesheet body statements: class names ending
   * with the compiler's local dummy symbol name, which contains whitespace.
   */
 object PrecompiledClassBodyStylesheetExample extends CssBase {
@@ -46,8 +46,10 @@ class ClassBodyStyleRenderTest extends UdashSharedTest {
       val rendered = PrecompiledClassBodyStylesheetExample.render
       rendered should include(".io-udash-css-PrecompiledClassBodyStylesheetExample button {")
       rendered should include("@keyframes io-udash-css-PrecompiledClassBodyStylesheetExample {")
-      rendered should include("font-family: io-udash-css-PrecompiledClassBodyStylesheetExample;")
-      (rendered should not).include("<local")
+      // A font family is not a class name: scalacss quotes it, so the precompiled name is kept as is.
+      rendered should include(
+        "font-family: 'io-udash-css-PrecompiledClassBodyStylesheetExample-<local PrecompiledClassBodyStylesheetExample>';"
+      )
     }
   }
 }

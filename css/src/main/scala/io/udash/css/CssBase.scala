@@ -141,7 +141,7 @@ trait CssBase {
         renderer.apply(
           Vector(
             Css.fontFaces(
-              font.copy(fontFamily = FontFamily(CssBase.renderedName(className)))
+              font.copy(fontFamily = FontFamily(className))
             )
           )
         )
@@ -152,10 +152,10 @@ trait CssBase {
 object CssBase {
   private val LocalDummySuffix = "-<local [^>]*>$".r
 
-  /** Udash macros up to 0.26.0 named styles, keyframes and font faces created as class body statements after the
-    * compiler's local dummy symbol (`...-<local ClassName>`). Such names are still compiled into libraries built
-    * against these versions, but scalacss rejects class names containing whitespace and an unquoted font family with
-    * `<` is invalid CSS, so the suffix is dropped at render time.
+  /** Udash macros up to 0.27.0 named styles and keyframes created as class body statements after the compiler's local
+    * dummy symbol (`...-<local ClassName>`). Such names are still compiled into libraries built against these versions,
+    * but scalacss rejects class names containing whitespace, so the suffix is dropped at render time. Font faces don't
+    * need this: scalacss quotes a font family containing whitespace.
     */
   private def renderedName(className: String): String =
     if (className.endsWith(">")) LocalDummySuffix.replaceFirstIn(className, "") else className

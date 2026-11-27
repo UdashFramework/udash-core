@@ -10,6 +10,12 @@ class NamedStyleValidationTest extends UdashSharedTest with CompilationErrorAsse
       ) should include("""Invalid CSS class name "fa fa-adjust": it must be non-empty and must not contain whitespace""")
     }
 
+    "point to CssPrefixedStyleName when the name looks like several classes" in {
+      typeErrorFor(
+        """object S extends io.udash.css.CssBase { import dsl._; namedStyle("fa fa-adjust", display.block) }"""
+      ) should include("use CssPrefixedStyleName")
+    }
+
     "reject an empty literal class name" in {
       typeErrorFor(
         """object S extends io.udash.css.CssBase { import dsl._; namedStyle("", display.block) }"""

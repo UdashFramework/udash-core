@@ -52,9 +52,13 @@ class StyleMacros(override val c: blackbox.Context) extends AbstractMacroCommons
   private def validateClassName(className: Tree): Unit =
     className match {
       case Literal(Constant(name: String)) if name.isEmpty || name.exists(_.isWhitespace) =>
+        // A name with whitespace is most likely meant as several classes, e.g. FontAwesome's "fa fa-adjust".
+        val hint =
+          if (name.exists(_.isWhitespace)) ". To apply several classes with a common prefix, use CssPrefixedStyleName"
+          else ""
         c.abort(
           className.pos,
-          s"""Invalid CSS class name "$name": it must be non-empty and must not contain whitespace""",
+          s"""Invalid CSS class name "$name": it must be non-empty and must not contain whitespace$hint""",
         )
       case _ =>
     }

@@ -2,7 +2,7 @@ package io.udash.web.commons.styles.utils
 
 import com.avsystem.commons.misc.{AbstractValueEnum, AbstractValueEnumCompanion, EnumCtx, ValueEnumCompanion}
 import io.udash.css.{CssBase, CssStyle}
-import scalacss.internal.{AV, FontFace, FontFamily => CssFontFamily, NonEmptyVector}
+import scalacss.internal.{AV, FontFace, NonEmptyVector}
 
 import scala.collection.immutable
 
@@ -47,7 +47,8 @@ final case class FontVariation(
 )
 
 object FontFamily {
-  val Roboto = "'Roboto', sans-serif"
+  final val RobotoName = "Roboto"
+  val Roboto = s"'$RobotoName', sans-serif"
 }
 
 object UdashFonts extends CssBase {
@@ -77,10 +78,10 @@ object UdashFonts extends CssBase {
   val font: immutable.Map[FontVariation, CssStyle] = fontFiles
     .map(fontFile =>
       fontFile -> namedFontFace(
-        FontFamily.Roboto,
+        FontFamily.RobotoName,
         _ => {
           new FontFace(
-            fontFamily = Some(CssFontFamily(FontFamily.Roboto)),
+            fontFamily = None, // CssBase renders the namedFontFace name
             src = NonEmptyVector(
               fontSrc(fontFile.path, FontFileType.TruetypeFont.extension, FontFileType.TruetypeFont.format)
             ),
