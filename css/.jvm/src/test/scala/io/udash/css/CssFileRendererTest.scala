@@ -39,27 +39,27 @@ class CssFileRendererTest extends UdashSharedTest {
           |}
           |
           |@keyframes io-udash-css-StylesheetExample-animation {
-          |  0.0% {
+          |  0% {
           |    height: 100px;
           |    width: 30px;
           |  }
           |
-          |  25.0% {
+          |  25% {
           |    height: 150px;
           |    width: 30px;
           |  }
           |
-          |  50.0% {
+          |  50% {
           |    height: 150px;
           |    width: 30px;
           |  }
           |
-          |  75.0% {
+          |  75% {
           |    height: 100px;
           |    width: 30px;
           |  }
           |
-          |  100.0% {
+          |  100% {
           |    height: 200px;
           |    width: 60px;
           |  }
@@ -74,8 +74,6 @@ class CssFileRendererTest extends UdashSharedTest {
           |}
           |
           |.io-udash-css-StylesheetExample-test1:hover {
-          |  cursor: -moz-zoom-in;
-          |  cursor: -o-zoom-in;
           |  cursor: -webkit-zoom-in;
           |  cursor: zoom-in;
           |}
@@ -111,8 +109,6 @@ class CssFileRendererTest extends UdashSharedTest {
           |}
           |
           |.io-udash-css-StylesheetExample-test2:hover {
-          |  cursor: -moz-zoom-in;
-          |  cursor: -o-zoom-in;
           |  cursor: -webkit-zoom-in;
           |  cursor: zoom-in;
           |}
@@ -152,8 +148,6 @@ class CssFileRendererTest extends UdashSharedTest {
           |}
           |
           |.io-udash-css-SecondStylesheetExample-test:hover {
-          |  cursor: -moz-zoom-in;
-          |  cursor: -o-zoom-in;
           |  cursor: -webkit-zoom-in;
           |  cursor: zoom-in;
           |}

@@ -2,7 +2,7 @@ package io.udash.css
 
 import scalacss.internal.Css.styleA
 import scalacss.internal.DslBase.ToStyle
-import scalacss.internal.{AV, Attrs, ClassName, Compose, Cond, Css, CssEntry, Dsl, DslBase, Env, FontFace, KeyframeSelector, Keyframes, Macros, Percentage, Renderer, StyleA, StyleStream}
+import scalacss.internal.{AV, Attrs, ClassName, Compose, Cond, Css, CssEntry, Dsl, DslBase, Env, FontFace, FontFamily, KeyframeSelector, Keyframes, Macros, Percentage, Renderer, StyleA, StyleStream}
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
@@ -65,11 +65,11 @@ trait CssBase {
       * Example: <pre> val ff = fontFace( _.src("url(font.woff)") .fontStretch.expanded .fontStyle.italic
       * .unicodeRange(0, 5) ) </pre>
       */
-    def fontFace(font: FontFace.FontSrcSelector => FontFace[Option[String]]): CssStyle =
+    def fontFace(font: FontFace.FontSrcSelector => FontFace[Option[FontFamily]]): CssStyle =
       macro io.udash.css.macros.StyleMacros.fontFace
 
     /** Creates CSS fontface with provided name. */
-    def namedFontFace(className: String, font: FontFace.FontSrcSelector => FontFace[Option[String]]): CssStyle =
+    def namedFontFace(className: String, font: FontFace.FontSrcSelector => FontFace[Option[FontFamily]]): CssStyle =
       macro io.udash.css.macros.StyleMacros.nameFontFace
 
     override def unsafeChild(n: String)(t: ToStyle*)(implicit c: Compose): Style.UnsafeExt =
@@ -106,20 +106,21 @@ trait CssBase {
         renderer.apply(
           Css.styleA(
             StyleA(
-              new ClassName(className),
+              ClassName(CssBase.renderedName(className)),
               Vector.empty,
               impl,
             )
           )(Env.empty)
         )
       case CssKeyframes(className, steps) =>
+        val name = ClassName(CssBase.renderedName(className))
         val kfs = Keyframes(
-          new ClassName(className),
+          name,
           steps.map { case (p, impl) =>
             (
               Percentage(p): KeyframeSelector,
               StyleA(
-                new ClassName(className),
+                name,
                 Vector.empty,
                 impl,
               ),
@@ -140,14 +141,7 @@ trait CssBase {
         renderer.apply(
           Vector(
             Css.fontFaces(
-              FontFace[String](
-                className,
-                src = font.src,
-                fontStretchValue = font.fontStretchValue,
-                fontStyleValue = font.fontStyleValue,
-                fontWeightValue = font.fontWeightValue,
-                unicodeRangeValue = font.unicodeRangeValue,
-              )
+              font.copy(fontFamily = FontFamily(className))
             )
           )
         )
@@ -156,6 +150,16 @@ trait CssBase {
 }
 
 object CssBase {
+  private val LocalDummySuffix = "-<local [^>]*>$".r
+
+  /** Udash macros up to 0.27.0 named styles and keyframes created as class body statements after the compiler's local
+    * dummy symbol (`...-<local ClassName>`). Such names are still compiled into libraries built against these versions,
+    * but scalacss rejects class names containing whitespace, so the suffix is dropped at render time. Font faces don't
+    * need this: scalacss quotes a font family containing whitespace.
+    */
+  private def renderedName(className: String): String =
+    if (className.endsWith(">")) LocalDummySuffix.replaceFirstIn(className, "") else className
+
   final class AnimationNameExt(private val n: Attrs.animationName.type) extends AnyVal {
     def apply(s: CssStyle): AV =
       AV(n.attr, s.classNames.mkString(" "))

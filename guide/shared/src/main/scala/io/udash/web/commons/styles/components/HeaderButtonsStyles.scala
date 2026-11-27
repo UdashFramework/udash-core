@@ -107,13 +107,13 @@ trait HeaderButtonsStyles extends CssBase {
     socialLink,
 
     unsafeChild("svg")(
-      svgFill := c"#fff"
+      svgFill(c"#fff")
     ),
 
     MediaQueries.desktop(
       &.hover(
         unsafeChild("svg")(
-          svgFill := StyleConstants.Colors.Red
+          svgFill(StyleConstants.Colors.Red)
         )
       )
     ),
@@ -123,7 +123,7 @@ trait HeaderButtonsStyles extends CssBase {
     socialLink,
 
     unsafeChild("svg")(
-      svgFill := StyleConstants.Colors.Yellow
+      svgFill(StyleConstants.Colors.Yellow)
     ),
 
     MediaQueries.desktop(

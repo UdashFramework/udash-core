@@ -47,7 +47,8 @@ final case class FontVariation(
 )
 
 object FontFamily {
-  val Roboto = "'Roboto', sans-serif"
+  final val RobotoName = "Roboto"
+  val Roboto = s"'$RobotoName', sans-serif"
 }
 
 object UdashFonts extends CssBase {
@@ -77,10 +78,10 @@ object UdashFonts extends CssBase {
   val font: immutable.Map[FontVariation, CssStyle] = fontFiles
     .map(fontFile =>
       fontFile -> namedFontFace(
-        FontFamily.Roboto,
+        FontFamily.RobotoName,
         _ => {
           new FontFace(
-            fontFamily = Some(FontFamily.Roboto),
+            fontFamily = None, // CssBase renders the namedFontFace name
             src = NonEmptyVector(
               fontSrc(fontFile.path, FontFileType.TruetypeFont.extension, FontFileType.TruetypeFont.format)
             ),
